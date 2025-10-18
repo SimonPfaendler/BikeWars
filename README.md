@@ -5,7 +5,7 @@
 
 ## Gruppe
 
-Simon Genovese, NAME2, NAME3,...
+Simon Genovese, Fabian Gauß, NAME3,...
 
 Gruppentreffen: DATE_TIME_PLACE
 
