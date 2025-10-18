@@ -5,7 +5,7 @@
 
 ## Gruppe
 
-NAME1, NAME2, NAME3,...
+Simon Genovese, NAME2, NAME3,...
 
 Gruppentreffen: DATE_TIME_PLACE
 
