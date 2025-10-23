@@ -5,7 +5,7 @@
 
 ## Gruppe
 
-Simon Genovese, Fabian Gauß, Simon Pfändler, Veronica Woinaroski,...
+Simon Genovese, Fabian Gauß, Simon Pfändler, Veronica Woinaroski, Johannes Leppert, ...
 
 Gruppentreffen: DATE_TIME_PLACE
 
