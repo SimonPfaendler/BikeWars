@@ -5,11 +5,11 @@
 
 ## Gruppe
 
-Simon Genovese, Fabian Gauß, Simon Pfändler,...
+Simon Genovese, Fabian Gauß, Simon Pfändler, Veronica Woinaroski, Johannes Leppert, ...
 
-Gruppentreffen: DATE_TIME_PLACE
+Gruppentreffen: **Montags von 09:00 - 11:00 Uhr.** **Dieses Mal noch in TF 076 2.Stock. ORT WIRD ABER NOCH NEUZUGIEWESEN**
 
-* Product Owner: NAME_HIER
+* Product Owner: Fabian Gauß
 * Architektur: NAME_HIER
 * Qualitätssicherung: NAME_HIER
 
