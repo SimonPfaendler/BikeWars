@@ -31,7 +31,8 @@ public class Game1 : Game
     private Vector2 directionToCenter;
     private float angle;
     private int radius;
-    private const int ROTATION_SPEED = 5;
+    private const int ROTATION_SPEED = 2;
+    private const int SCALE_LOGO = 7;
     
     private Rectangle logoRectCollision;
     
@@ -55,7 +56,7 @@ public class Game1 : Game
     protected override void Initialize()
     {
         centerPoint = new Vector2(_graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight / 2);
-        radius = 150;
+        radius = 350;
         angle = 0;
         is_pressing = false;
         base.Initialize();
@@ -80,8 +81,8 @@ public class Game1 : Game
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         angle += ROTATION_SPEED * deltaTime;
         
-        int logoWidth = _graphics.PreferredBackBufferWidth / 5;
-        int logoHeight = _graphics.PreferredBackBufferHeight / 5;
+        int logoWidth = _graphics.PreferredBackBufferWidth / SCALE_LOGO;
+        int logoHeight = _graphics.PreferredBackBufferHeight / SCALE_LOGO;
         
         // start the logo left to center point
         logoPos.X = centerPoint.X + (float)Math.Cos(angle) * radius - logoWidth / 2f;
@@ -116,7 +117,7 @@ public class Game1 : Game
         _spriteBatch.End();
     
         _spriteBatch.Begin(blendState: BlendState.AlphaBlend);
-        _spriteBatch.Draw(logo, destinationRectangle: new Rectangle((int)logoPos.X, (int)logoPos.Y, _graphics.PreferredBackBufferWidth / 5, _graphics.PreferredBackBufferHeight / 5), Color.White);
+        _spriteBatch.Draw(logo, destinationRectangle: new Rectangle((int)logoPos.X, (int)logoPos.Y, _graphics.PreferredBackBufferWidth / SCALE_LOGO, _graphics.PreferredBackBufferHeight / SCALE_LOGO), Color.White);
         _spriteBatch.End();
 
         base.Draw(gameTime);
