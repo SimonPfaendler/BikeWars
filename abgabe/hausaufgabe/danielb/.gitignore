@@ -1,5 +1,4 @@
-.idea/
-*.sln.iml
+ln.iml
 *.DotSettings.user
 .vscode/
 bin/

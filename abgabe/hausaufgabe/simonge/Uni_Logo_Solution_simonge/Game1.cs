@@ -17,6 +17,7 @@ public class Game1 : Game
     private double _changingAngle;
     private Vector2 _rotatingPosition;
     private float _logoScale = 0.25f;
+    private MouseState _lastMouseState;
 
     public Game1()
     {
@@ -29,10 +30,7 @@ public class Game1 : Game
     {
 
         base.Initialize();
-        // Setting the size of the background (= size of the window)
-        _graphics.PreferredBackBufferWidth = _background.Width;
-        _graphics.PreferredBackBufferHeight = _background.Height;
-        _graphics.ApplyChanges();
+        
     }
 
     protected override void LoadContent()
@@ -44,6 +42,11 @@ public class Game1 : Game
         
         _hitSound = Content.Load<SoundEffect>("Soundeffekte/Logo_hit");
         _missSound =  Content.Load<SoundEffect>("Soundeffekte/Logo_miss");
+        
+        // Setting the size of the background (= size of the window)
+        _graphics.PreferredBackBufferWidth = _background.Width;
+        _graphics.PreferredBackBufferHeight = _background.Height;
+        _graphics.ApplyChanges();
         
     }
 
@@ -67,7 +70,8 @@ public class Game1 : Game
         // Logic for hit/miss sound effects
         float maximumAcceptableDistance = _logo.Width * _logoScale / 2f;
         MouseState mousePosition = Mouse.GetState();
-        if (mousePosition.LeftButton == ButtonState.Pressed)
+        // sound only plays, when mouse is clicked, but only if it was released between two clicks
+        if (mousePosition.LeftButton == ButtonState.Pressed && _lastMouseState.LeftButton == ButtonState.Released)
         {
             float distanceX = mousePosition.X - _rotatingPosition.X;
             float distanceY = mousePosition.Y - _rotatingPosition.Y;
@@ -80,8 +84,10 @@ public class Game1 : Game
             {
                 _missSound.Play();
             }
-            
+
         }
+        
+        _lastMouseState = mousePosition;
         
         
         base.Update(gameTime);
