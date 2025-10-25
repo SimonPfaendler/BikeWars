@@ -1,0 +1,6 @@
+.idea/
+*.sln.iml
+*.DotSettings.user
+.vscode/
+bin/
+obj/

@@ -1,0 +1,7 @@
+﻿<Project>
+  <ItemGroup>
+    <Content Include="Content\**\*.xnb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+</Project>
