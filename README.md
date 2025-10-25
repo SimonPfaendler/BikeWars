@@ -5,7 +5,7 @@
 
 ## Gruppe
 
-Simon Genovese, Fabian Gauß, Simon Pfändler, Veronica Woinaroski, Johannes Leppert, Daniel Bürgel, ...
+Simon Genovese, Fabian Gauß, Simon Pfändler, Veronica Woinaroski, Johannes Leppert, Daniel Bürgel, Jannik Friedrich, ...
 
 Gruppentreffen: **Montags von 09:00 - 11:00 Uhr.** **Dieses Mal noch in TF 076 2.Stock. ORT WIRD ABER NOCH NEUZUGIEWESEN**
 
