@@ -1,0 +1,45 @@
+
+#----------------------------- Global Properties ----------------------------#
+
+/outputDir:bin/$(Platform)
+/intermediateDir:obj/$(Platform)
+/platform:DesktopGL
+/config:
+/profile:Reach
+/compress:False
+
+#-------------------------------- References --------------------------------#
+
+
+#---------------------------------- Content ---------------------------------#
+
+#begin BackgroundImage.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:BackgroundImage.jpg
+
+#begin Unilogo.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyEnabled=True
+#White gets Enabled
+/processorParam:ColorKeyColor=255,255,255,255
+/processorParam:PremultiplyAlpha=True
+/build:Unilogo.png
+
+#begin Logo_hit.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/build:Logo_hit.wav
+
+#begin Logo_miss.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/build:Logo_miss.wav
