@@ -7,7 +7,8 @@
 
 Simon Genovese, Fabian Gauß, Simon Pfändler, Veronica Woinaroski, Johannes Leppert, Daniel Bürgel, Jannik Friedrich, ...
 
-Gruppentreffen: **Montags von 09:00 - 11:00 Uhr.** **Dieses Mal noch in TF 076 2.Stock. ORT WIRD ABER NOCH NEUZUGIEWESEN**
+Gruppentreffen: **Montags von 09:00 - 11:00 Uhr.** **Raum: SR 02-017, Geb: 052** 
+Der Raum wurde bis 12:00 Uhr reserviert.
 
 * Product Owner: Fabian Gauß
 * Architektur: NAME_HIER
