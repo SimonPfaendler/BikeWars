@@ -1,4 +1,5 @@
 ﻿using System;
+using BikeWars.Content;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -11,6 +12,12 @@ public class Game1 : Game
     private SpriteBatch _spriteBatch;
     private Texture2D _texture;
 
+    private Collider c1;
+    private Collider c2;
+
+    private int playerPosX = 1;
+    private int playerPosY = 1;
+
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -20,6 +27,8 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
+        c1 = new Collider(new Vector2(playerPosX, playerPosY), 10, 10);
+        c2 = new Collider(new Vector2(30, 30), 10, 10);
         base.Initialize();
     }
 
@@ -33,6 +42,11 @@ public class Game1 : Game
     {
         if (Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
+        if (Keyboard.GetState().IsKeyDown(Keys.A))
+        {
+            Vector2 crtPos = c1.Position;
+            c1.Position = new Vector2(crtPos.X + 1, crtPos.Y);
+        }
 
         base.Update(gameTime);
     }
