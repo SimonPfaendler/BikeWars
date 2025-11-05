@@ -8,7 +8,6 @@ using Microsoft.Xna.Framework.Input;
 using BikeWars.Components;
 using BikeWars.Content.entities.items;
 using BikeWars.Entities.Characters;
-using BikeWars.Systems;
 
 namespace BikeWars;
 
@@ -26,7 +25,7 @@ public class Game1 : Game
     private int playerPosY = 30;
     Player player;
     private TestItem tItem;
-    MovementSystem movement;
+    
 
     public Game1()
     {
@@ -59,7 +58,7 @@ public class Game1 : Game
 
         // Spawn player in center of screen
         player = new Player(new Vector2(width / 2, height / 2), new Point(32, 32));
-        movement = new MovementSystem(player);
+        
     }
 
     protected override void Update(GameTime gameTime)
@@ -67,7 +66,7 @@ public class Game1 : Game
         if (Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
         
-        movement.Update(gameTime);
+        player.Update(gameTime);
         if (player.Intersects(tItem.Collider))
         {
             Console.WriteLine("player.Transform.Position");
