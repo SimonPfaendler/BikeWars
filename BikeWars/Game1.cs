@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using BikeWars.Components;
+using BikeWars.Content.entities.items;
 using BikeWars.Entities.Characters;
 using BikeWars.Systems;
 
@@ -24,6 +25,7 @@ public class Game1 : Game
     private int playerPosX = 1;
     private int playerPosY = 30;
     Player player;
+    private TestItem tItem;
     MovementSystem movement;
 
     public Game1()
@@ -43,7 +45,7 @@ public class Game1 : Game
         c2 = new BoxCollider(new Vector2(30, 30), 10, 10);
         cm = new CollisionManager();
         base.Initialize();
-        player = new Player(new Vector2(_graphics.PreferredBackBufferWidth / 2 + 20, _graphics.PreferredBackBufferHeight / 2), new Point(32, 32));
+        tItem = new TestItem(new Vector2(_graphics.PreferredBackBufferWidth / 2 + 50, _graphics.PreferredBackBufferHeight / 2 + 50), new Point(32, 32));
     }
 
     protected override void LoadContent()
@@ -64,15 +66,17 @@ public class Game1 : Game
     {
         if (Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
-        if (Keyboard.GetState().IsKeyDown(Keys.A))
-        {
-            Vector2 crtPos = c1.Position;
-            c1.Position = new Vector2(crtPos.X + 1, crtPos.Y);
-        }
-        Console.WriteLine(cm.isColliding(c1, c2));
-        Console.WriteLine(c1.Position);
         
         movement.Update(gameTime);
+        if (player.Intersects(tItem.Collider))
+        {
+            Console.WriteLine("player.Transform.Position");
+            Console.WriteLine(player.Transform.Position);
+            Console.WriteLine("player.lastTransform.Position");
+            Console.WriteLine(player.lastTransform.Position);
+            player.Transform = new Transform(new Vector2(player.lastTransform.Position.X, player.lastTransform.Position.Y), player.lastTransform.Size);
+            player.UpdateCollider();
+        }
         base.Update(gameTime);
     }
 
@@ -83,6 +87,7 @@ public class Game1 : Game
         _spriteBatch.Begin();
         // spriteBatch.Draw(texture, new Vector2(100, 100), Color.White);
         player.Draw(_spriteBatch);
+        tItem.Draw(_spriteBatch);
         _spriteBatch.End();
 
         base.Draw(gameTime);

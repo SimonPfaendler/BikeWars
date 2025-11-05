@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Components;
+using BikeWars.Content.engine;
 
 namespace BikeWars.Content.entities.items;
 public class TestItem
@@ -9,10 +10,16 @@ public class TestItem
     public Color Tint = Color.Red;
 
     public static Texture2D pixel;
-
+    private BoxCollider _collider { get; set; }
+    public BoxCollider Collider
+    {
+        get { return _collider; }
+    }
+    
     public TestItem(Vector2 start, Point size)
     {
         Transform = new Transform(start, size);
+        _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y);
     }
 
     public void Draw(SpriteBatch spriteBatch)

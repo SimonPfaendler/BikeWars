@@ -1,3 +1,5 @@
+using BikeWars.Components;
+using BikeWars.Content.engine;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using BikeWars.Entities.Characters;
@@ -7,7 +9,6 @@ namespace BikeWars.Systems
     public class MovementSystem
     {
         public Player player;
-
 
         public MovementSystem(Player player)
         {
@@ -29,11 +30,13 @@ namespace BikeWars.Systems
             if (keyboardState.IsKeyDown(Keys.D))
                 direction.X += 1;
 
+            player.lastTransform = new Transform(new Vector2(player.Transform.Position.X, player.Transform.Position.Y), player.Transform.Size);
             if (direction != Vector2.Zero)
             {
                 direction.Normalize();
                 player.Transform.Position += direction * player.Speed * delta;
             }
+            player.UpdateCollider(); // TODOJL refactor
         }
     }
 }
