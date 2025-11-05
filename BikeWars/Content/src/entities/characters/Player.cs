@@ -50,11 +50,11 @@ namespace BikeWars.Entities.Characters
             if (keyboardState.IsKeyDown(Keys.D))
                 direction.X += 1;
 
-            lastTransform = new Transform(new Vector2(player.Transform.Position.X, player.Transform.Position.Y), player.Transform.Size);
+            lastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
             if (direction != Vector2.Zero)
             {
                 direction.Normalize();
-                player.Transform.Position += direction * player.Speed * delta;
+                Transform.Position += direction * Speed * delta;
             }
             UpdateCollider();
         }
