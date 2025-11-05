@@ -1,5 +1,7 @@
 ﻿using System;
 using BikeWars.Content;
+using BikeWars.Content.engine;
+using BikeWars.Content.managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -12,11 +14,12 @@ public class Game1 : Game
     private SpriteBatch _spriteBatch;
     private Texture2D _texture;
 
-    private Collider c1;
-    private Collider c2;
+    private BoxCollider c1;
+    private BoxCollider c2;
+    private CollisionManager cm;
 
     private int playerPosX = 1;
-    private int playerPosY = 1;
+    private int playerPosY = 30;
 
     public Game1()
     {
@@ -27,8 +30,9 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
-        c1 = new Collider(new Vector2(playerPosX, playerPosY), 10, 10);
-        c2 = new Collider(new Vector2(30, 30), 10, 10);
+        c1 = new BoxCollider(new Vector2(playerPosX, playerPosY), 10, 10);
+        c2 = new BoxCollider(new Vector2(30, 30), 10, 10);
+        cm = new CollisionManager();
         base.Initialize();
     }
 
@@ -47,7 +51,10 @@ public class Game1 : Game
             Vector2 crtPos = c1.Position;
             c1.Position = new Vector2(crtPos.X + 1, crtPos.Y);
         }
-
+        Console.WriteLine(cm.isColliding(c1, c2));
+        Console.WriteLine(c1.Position);
+        
+        
         base.Update(gameTime);
     }
 
