@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 
 namespace BikeWars.Content.components;
+///  Circle is not in the standard library we had to implement that on our own.
 public readonly struct Circle : IEquatable<Circle> 
 {
     private static readonly Circle s_empty = new Circle();
