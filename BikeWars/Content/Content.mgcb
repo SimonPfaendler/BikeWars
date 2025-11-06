@@ -25,3 +25,14 @@
 /processorParam:TextureFormat=Color
 /build:assets/images/Startbildschirm.png
 
+#begin assets/sounds/.gitkeep
+/importer:
+/processor:
+/build:assets/sounds/.gitkeep
+
+#begin assets/sounds/Bike_Driving.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/Bike_Driving.wav
+
