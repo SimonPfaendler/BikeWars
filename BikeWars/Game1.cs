@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Input;
 using BikeWars.Components;
 using BikeWars.Content.entities.items;
 using BikeWars.Entities.Characters;
+using BikeWars.Utilities;
 
 namespace BikeWars;
 
@@ -25,7 +26,10 @@ public class Game1 : Game
     private int playerPosY = 30;
     Player player;
     private TestItem tItem;
-    
+
+    private SpriteFont _debugFont;
+    private Debugger _debugger;
+
 
     public Game1()
     {
@@ -52,13 +56,17 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         //texture = Content.Load<Texture2D>("myimage");
 
+        _debugFont = Content.Load<SpriteFont>("assets/fonts/Arial");
+
         // Get screen dimensions
         int width = _graphics.PreferredBackBufferWidth;
         int height = _graphics.PreferredBackBufferHeight;
 
         // Spawn player in center of screen
         player = new Player(new Vector2(width / 2, height / 2), new Point(32, 32));
-        
+
+        _debugger = new Debugger(_debugFont, player);
+
     }
 
     protected override void Update(GameTime gameTime)
@@ -76,6 +84,8 @@ public class Game1 : Game
             player.Transform = new Transform(new Vector2(player.lastTransform.Position.X, player.lastTransform.Position.Y), player.lastTransform.Size);
             player.UpdateCollider();
         }
+        _debugger.Update(gameTime);
+
         base.Update(gameTime);
     }
 
@@ -87,6 +97,7 @@ public class Game1 : Game
         // spriteBatch.Draw(texture, new Vector2(100, 100), Color.White);
         player.Draw(_spriteBatch);
         tItem.Draw(_spriteBatch);
+        _debugger.Draw(_spriteBatch);
         _spriteBatch.End();
 
         base.Draw(gameTime);

@@ -13,6 +13,13 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin assets/fonts/Arial.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:assets/fonts/Arial.spritefont;assets/fonts/Arial
+
 #begin assets/images/Startbildschirm.png
 /importer:TextureImporter
 /processor:TextureProcessor
