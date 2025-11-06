@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Input;
 using BikeWars.Components;
 using BikeWars.Content.entities.items;
 using BikeWars.Entities.Characters;
+using Microsoft.Xna.Framework.Audio;
 
 namespace BikeWars;
 
@@ -25,6 +26,8 @@ public class Game1 : Game
     private int playerPosY = 30;
     Player player;
     private TestItem tItem;
+    
+    private SoundEffect walkingSound;
     
 
     public Game1()
@@ -58,6 +61,11 @@ public class Game1 : Game
 
         // Spawn player in center of screen
         player = new Player(new Vector2(width / 2, height / 2), new Point(32, 32));
+        
+        // Load Soundeffects
+        walkingSound = Content.Load<SoundEffect>("assets/sounds/Walking");
+        
+        player.LoadContent(walkingSound);
         
     }
 
