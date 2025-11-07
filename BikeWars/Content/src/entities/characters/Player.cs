@@ -51,7 +51,6 @@ namespace BikeWars.Entities.Characters
             // If the camera moves freely the player can not move
             if (freezeMovement) return;
 
-            
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
             var keyboardState = Keyboard.GetState();
 

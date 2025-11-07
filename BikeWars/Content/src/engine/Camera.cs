@@ -1,4 +1,3 @@
-// using System.Numerics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
@@ -63,7 +62,6 @@ namespace BikeWars.Content.engine
 
             ClampToWorld();
         }
-
 
         // === Spieler-Folgemodus ===
         private void SmoothFollow(Vector2 target)

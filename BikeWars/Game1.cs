@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -9,7 +8,6 @@ using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
 using BikeWars.Utilities;
 using Microsoft.Xna.Framework.Audio;
-using System.Runtime.CompilerServices;
 
 namespace BikeWars;
 
@@ -25,6 +23,9 @@ public class Game1 : Game
     private int playerPosY = 30;
     Player player;
 
+    private bool _freeCamera = false;
+    private bool _leftShiftPressed = false;
+    
     private SpriteFont _debugFont;
     private Debugger _debugger;
     private SoundEffect walkingSound;
@@ -45,11 +46,12 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
-        _testItems = new List<TestItem>();
-        _testItems.Add(new TestItem(new Vector2(_graphics.PreferredBackBufferWidth / 2 + 50, _graphics.PreferredBackBufferHeight / 2 + 50), new Point(32, 32)));
-        _testItems.Add(new TestItem(new Vector2(_graphics.PreferredBackBufferWidth / 2 - 50, _graphics.PreferredBackBufferHeight / 2 + 50), new Point(32, 32)));
-
         worldBounds = new Rectangle(0, 0, 4000, 2000); // Beispielgröße der Welt
+        _testItems = new List<TestItem>();
+        _testItems.Add(new TestItem(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
+        _testItems.Add(new TestItem(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
+
+        
         camera = new Camera2D(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, worldBounds);
 
         base.Initialize();
@@ -82,10 +84,21 @@ public class Game1 : Game
     {
         if (Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
+
+        if (Keyboard.GetState().IsKeyDown(Keys.LeftShift))
+        {
+            _leftShiftPressed = true;
+        }
+
+        if (_leftShiftPressed && Keyboard.GetState().IsKeyUp(Keys.LeftShift))
+        {
+            _freeCamera = !_freeCamera;
+            _leftShiftPressed = false;
+        }
         
-        bool freeCamera = Keyboard.GetState().IsKeyDown(Keys.LeftShift);
+        
         // freeze player if camera moves free
-        player.Update(gameTime, freeCamera);
+        player.Update(gameTime, _freeCamera);
         
         if (player.Intersects(_testItems[0].Collider))
         {
@@ -103,7 +116,7 @@ public class Game1 : Game
 
         _debugger.Update(gameTime);
 
-        camera.Update(gameTime, player.Transform.Position, freeCamera);
+        camera.Update(gameTime, player.Transform.Position, _freeCamera);
         
         base.Update(gameTime);
     }
