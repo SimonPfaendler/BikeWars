@@ -9,6 +9,7 @@ using BikeWars.Components;
 using BikeWars.Content.entities.items;
 using BikeWars.Entities.Characters;
 using BikeWars.Utilities;
+using Microsoft.Xna.Framework.Audio;
 
 namespace BikeWars;
 
@@ -29,8 +30,8 @@ public class Game1 : Game
 
     private SpriteFont _debugFont;
     private Debugger _debugger;
-
-
+    private SoundEffect walkingSound;
+    
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -66,7 +67,11 @@ public class Game1 : Game
         player = new Player(new Vector2(width / 2, height / 2), new Point(32, 32));
 
         _debugger = new Debugger(_debugFont, player);
-
+        
+        // Load Soundeffects
+        walkingSound = Content.Load<SoundEffect>("assets/sounds/Walking");
+        player.LoadContent(walkingSound);
+        
     }
 
     protected override void Update(GameTime gameTime)

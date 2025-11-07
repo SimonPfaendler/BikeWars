@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using BikeWars.Components;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
+using Microsoft.Xna.Framework.Audio;
 
 namespace BikeWars.Entities.Characters
 {
@@ -14,6 +15,17 @@ namespace BikeWars.Entities.Characters
         public float Speed = 200f;
         public Color Tint = Color.Black;
         private BoxCollider _collider { get; set; }
+        
+        public SoundEffect WalkingSound { get; private set; }
+        public SoundEffectInstance WalkingSoundInstance { get; private set; }
+        private bool wasMoving = false;
+        
+        public void LoadContent(SoundEffect walkingSoundEffect)
+        {
+            WalkingSound = walkingSoundEffect;
+            WalkingSoundInstance = WalkingSound.CreateInstance();
+            WalkingSoundInstance.IsLooped = true;
+        }
 
         public void UpdateCollider()
         {
@@ -49,6 +61,25 @@ namespace BikeWars.Entities.Characters
                 direction.X -= 1;
             if (keyboardState.IsKeyDown(Keys.D))
                 direction.X += 1;
+            
+            // Sound-Control
+            bool isMoving = direction != Vector2.Zero;
+            
+            if (WalkingSoundInstance != null)
+            {
+                // Start Playing Walking Sound if Player starts moving around
+                if (isMoving && !wasMoving)
+                {
+                    WalkingSoundInstance.Play();
+                }
+                // Stop Playing Walking Sound if Player stops moving around
+                else if (!isMoving && wasMoving)
+                {
+                    WalkingSoundInstance.Stop();
+                }
+            }
+            
+            wasMoving = isMoving;
 
             lastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
             if (direction != Vector2.Zero)
