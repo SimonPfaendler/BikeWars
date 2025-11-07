@@ -8,7 +8,6 @@ public class TestItem
 {
     public Transform Transform;
     public Color Tint = Color.Red;
-
     public static Texture2D pixel;
     private BoxCollider _collider { get; set; }
     public BoxCollider Collider

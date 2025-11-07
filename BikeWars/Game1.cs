@@ -1,7 +1,5 @@
 ﻿using System;
-using BikeWars.Content;
-using BikeWars.Content.engine;
-using BikeWars.Content.managers;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -19,14 +17,11 @@ public class Game1 : Game
     private SpriteBatch _spriteBatch;
     private Texture2D _texture;
 
-    private BoxCollider c1;
-    private BoxCollider c2;
-    private CollisionManager cm;
-
+    private List<TestItem> _testItems;
+    
     private int playerPosX = 1;
     private int playerPosY = 30;
     Player player;
-    private TestItem tItem;
 
     private SpriteFont _debugFont;
     private Debugger _debugger;
@@ -45,18 +40,15 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
-        c1 = new BoxCollider(new Vector2(playerPosX, playerPosY), 10, 10);
-        c2 = new BoxCollider(new Vector2(30, 30), 10, 10);
-        cm = new CollisionManager();
+        _testItems = new List<TestItem>();
+        _testItems.Add(new TestItem(new Vector2(_graphics.PreferredBackBufferWidth / 2 + 50, _graphics.PreferredBackBufferHeight / 2 + 50), new Point(32, 32)));
+        _testItems.Add(new TestItem(new Vector2(_graphics.PreferredBackBufferWidth / 2 - 50, _graphics.PreferredBackBufferHeight / 2 + 50), new Point(32, 32)));
         base.Initialize();
-        tItem = new TestItem(new Vector2(_graphics.PreferredBackBufferWidth / 2 + 50, _graphics.PreferredBackBufferHeight / 2 + 50), new Point(32, 32));
     }
 
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-        //texture = Content.Load<Texture2D>("myimage");
-
         _debugFont = Content.Load<SpriteFont>("assets/fonts/Arial");
 
         // Get screen dimensions
@@ -80,17 +72,22 @@ public class Game1 : Game
             Exit();
         
         player.Update(gameTime);
-        if (player.Intersects(tItem.Collider))
+        
+        if (player.Intersects(_testItems[0].Collider))
         {
-            Console.WriteLine("player.Transform.Position");
-            Console.WriteLine(player.Transform.Position);
-            Console.WriteLine("player.lastTransform.Position");
-            Console.WriteLine(player.lastTransform.Position);
             player.Transform = new Transform(new Vector2(player.lastTransform.Position.X, player.lastTransform.Position.Y), player.lastTransform.Size);
             player.UpdateCollider();
         }
-        _debugger.Update(gameTime);
 
+        if (_testItems.Count > 1)
+        {
+            if (player.Intersects(_testItems[1].Collider))
+            {
+                _testItems.RemoveAt(1);
+            }    
+        }
+        
+        _debugger.Update(gameTime);
         base.Update(gameTime);
     }
 
@@ -99,12 +96,13 @@ public class Game1 : Game
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
         _spriteBatch.Begin();
-        // spriteBatch.Draw(texture, new Vector2(100, 100), Color.White);
         player.Draw(_spriteBatch);
-        tItem.Draw(_spriteBatch);
+        foreach (var item in _testItems)
+        {
+            item.Draw(_spriteBatch);
+        }
         _debugger.Draw(_spriteBatch);
         _spriteBatch.End();
-
         base.Draw(gameTime);
     }
 }
