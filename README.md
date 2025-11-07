@@ -7,7 +7,7 @@
 
 Simon Genovese, Fabian Gauß, Simon Pfändler, Veronica Woinaroski, Johannes Leppert, Daniel Bürgel, Jannik Friedrich, ...
 
-Gruppentreffen:Am 11.10.25 findet Das meeting um 9.45 im TF-Pool Statt, sonst **Montags von 09:00 - 11:00 Uhr.** **Raum: SR 02-017, Geb: 052**  
+Gruppentreffen:Am 11.11.25 findet Das meeting um 9.45 im TF-Pool Statt, sonst **Montags von 09:00 - 11:00 Uhr.** **Raum: SR 02-017, Geb: 052**  
 Der Raum wurde bis 12:00 Uhr reserviert.
 
 * Product Owner: Fabian Gauß
