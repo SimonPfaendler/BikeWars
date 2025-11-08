@@ -24,13 +24,15 @@ public class Game1 : Game
     Player player;
 
     private bool _freeCamera = false;
-    private bool _leftShiftPressed = false;
+    private bool _cKeyPressed = false;
     
     private SpriteFont _debugFont;
     private Debugger _debugger;
     private SoundEffect walkingSound;
 
     private Camera2D camera;
+
+    //Defines border of visble game world
     private Rectangle worldBounds;
     
     public Game1()
@@ -46,7 +48,7 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
-        worldBounds = new Rectangle(0, 0, 4000, 2000); // Beispielgröße der Welt
+        worldBounds = new Rectangle(0, 0, 4000, 2000); // Example values for game world size
         _testItems = new List<TestItem>();
         _testItems.Add(new TestItem(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
         _testItems.Add(new TestItem(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
@@ -85,19 +87,20 @@ public class Game1 : Game
         if (Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
-        if (Keyboard.GetState().IsKeyDown(Keys.LeftShift))
+        if (Keyboard.GetState().IsKeyDown(Keys.C))
         {
-            _leftShiftPressed = true;
+            _cKeyPressed = true;
         }
 
-        if (_leftShiftPressed && Keyboard.GetState().IsKeyUp(Keys.LeftShift))
+        // Switch between camera Playerlock and FreeLook
+        if (_cKeyPressed && Keyboard.GetState().IsKeyUp(Keys.C))
         {
             _freeCamera = !_freeCamera;
-            _leftShiftPressed = false;
+            _cKeyPressed = false;
         }
         
         
-        // freeze player if camera moves free
+        // If camera is in FreeLook mode dont update player movement
         player.Update(gameTime, _freeCamera);
         
         if (player.Intersects(_testItems[0].Collider))
@@ -116,6 +119,7 @@ public class Game1 : Game
 
         _debugger.Update(gameTime);
 
+        // Frist update all objects and last update camera view
         camera.Update(gameTime, player.Transform.Position, _freeCamera);
         
         base.Update(gameTime);

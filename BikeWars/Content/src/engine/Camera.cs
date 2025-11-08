@@ -11,23 +11,24 @@ namespace BikeWars.Content.engine
 
     public class Camera2D
     {
-        // === Felder & Eigenschaften ===
         public Vector2 Position { get; set; } = Vector2.Zero; // Where the camera points to
         public float Zoom { get; set; } = 1f;
-        public float Rotation { get; set; } = 0f;
 
         public CameraMode Mode { get; set; } = CameraMode.PlayerLock;
 
+        // Defines the visible screen window size
         private readonly int _viewportWidth;
         private readonly int _viewportHeight;
+
+        // Defines the border of the game world so the camera doesnt leave the visible game
         private readonly Rectangle _worldBounds;
 
+        // Parameters to manage camera movement speed
         private int _prevScrollValue;
         private const float ZoomSpeed = 0.001f;
         private const float MoveSpeed = 8f;
         private const float LerpFactor = 0.1f;
 
-        // === Konstruktor ===
         public Camera2D(int viewportWidth, int viewportHeight, Rectangle worldBounds)
         {
             _viewportWidth = viewportWidth;
@@ -36,61 +37,60 @@ namespace BikeWars.Content.engine
             _prevScrollValue = Mouse.GetState().ScrollWheelValue;
         }
 
-        // === Hauptmethoden ===
 
         public void Update(GameTime gameTime, Vector2 playerPosition, bool freeCamera)
         {
             KeyboardState keyboard = Keyboard.GetState();
             MouseState mouse = Mouse.GetState();
 
-            // Umschalten zwischen FreeLook & PlayerLock
+            // switch between FreeLook & PlayerLock
             if (freeCamera) 
                 Mode = CameraMode.FreeLook;
             else
                 Mode = CameraMode.PlayerLock;
 
-            // Zoom per Mausrad
+            // Zoom via Mousewheel
             int scrollDelta = mouse.ScrollWheelValue - _prevScrollValue;
             _prevScrollValue = mouse.ScrollWheelValue;
             AdjustZoom(scrollDelta * ZoomSpeed);
 
-            // Kamera steuern
+            // Select camera mode
             if (Mode == CameraMode.PlayerLock)
                 SmoothFollow(playerPosition);
             else
                 HandleFreeLookInput(keyboard);
 
+            // Make sure camera does not leave gameworld
             ClampToWorld();
         }
 
-        // === Spieler-Folgemodus ===
+        // Camera position follows target with small delay to make smooth camera movements (lerp)
         private void SmoothFollow(Vector2 target)
         {
             Position = Vector2.Lerp(Position, target, LerpFactor);
         }
 
-        // === Freies Bewegen ===
+        // Move camera separately from player
         private void HandleFreeLookInput(KeyboardState keyboard)
         {
             float adjustedSpeed = MoveSpeed / Zoom;
             Vector2 pos = Position;
 
-            if (keyboard.IsKeyDown(Keys.Left))  pos.X -= adjustedSpeed;
-            if (keyboard.IsKeyDown(Keys.Right)) pos.X += adjustedSpeed;
-            if (keyboard.IsKeyDown(Keys.Up))    pos.Y -= adjustedSpeed;
-            if (keyboard.IsKeyDown(Keys.Down)) pos.Y += adjustedSpeed;
+            if (keyboard.IsKeyDown(Keys.A))  pos.X -= adjustedSpeed;
+            if (keyboard.IsKeyDown(Keys.D)) pos.X += adjustedSpeed;
+            if (keyboard.IsKeyDown(Keys.W))    pos.Y -= adjustedSpeed;
+            if (keyboard.IsKeyDown(Keys.S)) pos.Y += adjustedSpeed;
 
             Position = pos;
         }
 
-        // === Zoom-Steuerung ===
         private void AdjustZoom(float amount)
         {
             Zoom += amount;
             Zoom = MathHelper.Clamp(Zoom, 0.5f, 3f);
         }
 
-        // === Begrenzung auf Welt ===
+        // Defines borders for camera movement in gameworld
         private void ClampToWorld()
         {
             float halfWidth = (_viewportWidth / 2f) / Zoom;
@@ -107,7 +107,7 @@ namespace BikeWars.Content.engine
             Position = pos;
         }
 
-        // === Transformationsmatrix für SpriteBatch ===
+        // Calculates new size and position of all objects on screen
         public Matrix GetTransform()
         {
 
