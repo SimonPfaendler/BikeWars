@@ -1,20 +1,20 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using BikeWars.Components;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework.Audio;
+using BikeWars.Content.entities.interfaces;
 
 namespace BikeWars.Entities.Characters
 {
-    public class Player
+    public class Player: CharacterBase
     {
-        public Transform Transform;
-        public Transform lastTransform;
-        public float Speed = 200f;
+        private bool canMove;
+        private InputHandler _ip;
         public Color Tint = Color.Black;
         private BoxCollider _collider { get; set; }
+
+        private Movement movement { get; set;}
         
         public SoundEffect WalkingSound { get; private set; }
         public SoundEffectInstance WalkingSoundInstance { get; private set; }
@@ -38,32 +38,24 @@ namespace BikeWars.Entities.Characters
         public Player(Vector2 start, Point size)
         {
             Transform = new Transform(start, size);
-            lastTransform = new Transform(start, size);
+            LastTransform = new Transform(start, size);
+            Speed = 200f;
+            canMove = true;
+            movement = new Movement();
+            _ip = new InputHandler();
             UpdateCollider();
         }
-        public bool Intersects(ICollider collider)
+        public override bool Intersects(ICollider collider)
         {
             return _collider.Intersects(collider);
         }
 
-        public void Update(GameTime gameTime, bool freezeMovement = false)
+        public override void Update(GameTime gameTime)
         {
-            // If the camera moves freely the player can not move
-            if (freezeMovement) return;
+            if (!canMove) return;
 
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            var keyboardState = Keyboard.GetState();
-
-            Vector2 direction = Vector2.Zero;
-
-            if (keyboardState.IsKeyDown(Keys.W))
-                direction.Y -= 1;
-            if (keyboardState.IsKeyDown(Keys.S))
-                direction.Y += 1;
-            if (keyboardState.IsKeyDown(Keys.A))
-                direction.X -= 1;
-            if (keyboardState.IsKeyDown(Keys.D))
-                direction.X += 1;
+            Vector2 direction = MakeDirection();
             
             // Sound-Control
             bool isMoving = direction != Vector2.Zero;
@@ -84,13 +76,35 @@ namespace BikeWars.Entities.Characters
             
             wasMoving = isMoving;
 
-            lastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
+            LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
             if (direction != Vector2.Zero)
             {
                 direction.Normalize();
                 Transform.Position += direction * Speed * delta;
             }
             UpdateCollider();
+        }
+
+        private Vector2 MakeDirection()
+        {
+            Vector2 direction = Vector2.Zero;
+            if (_ip.PressingAction(Action.MOVE_UP))
+            {
+                direction.Y -= 1;
+            }
+            if (_ip.PressingAction(Action.MOVE_DOWN))
+            {
+                direction.Y += 1;
+            }
+            if (_ip.PressingAction(Action.MOVE_LEFT))
+            {
+                direction.X -= 1;
+            }
+            if (_ip.PressingAction(Action.MOVE_RIGHT))
+            {
+                direction.X += 1;    
+            }
+            return direction;
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -102,7 +116,19 @@ namespace BikeWars.Entities.Characters
                 pixel.SetData(new[] { Microsoft.Xna.Framework.Color.White });
             }
             // Draw the player as a colored rectangle
-            spriteBatch.Draw(pixel,Transform.Bounds, Tint);
+            spriteBatch.Draw(pixel, Transform.Bounds, Tint);
+        }
+
+        // Is Helpful for example with colliders to set the original position back.
+        public void SetLastTransform()
+        {
+            Transform = new Transform(new Vector2(LastTransform.Position.X, LastTransform.Position.Y), LastTransform.Size);
+        }
+
+        // Use this if the there is a reason the character isn't allowed to move
+        public void SetCanMove(bool v)
+        {
+            canMove = v;
         }
     }
 }

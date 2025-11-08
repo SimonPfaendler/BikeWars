@@ -101,11 +101,20 @@ public class Game1 : Game
         
         
         // If camera is in FreeLook mode dont update player movement
-        player.Update(gameTime, _freeCamera);
+        //player.Update(gameTime, _freeCamera);
+        if (camera.Mode == CameraMode.FreeLook)
+        {
+            player.SetCanMove(false);
+        } else
+        {
+            player.SetCanMove(true);
+        }
+        player.Update(gameTime);
         
         if (player.Intersects(_testItems[0].Collider))
         {
-            player.Transform = new Transform(new Vector2(player.lastTransform.Position.X, player.lastTransform.Position.Y), player.lastTransform.Size);
+            player.SetLastTransform();
+            //player.Transform = new Transform(new Vector2(player.LastTransform.Position.X, player.LastTransform.Position.Y), player.LastTransform.Size);
             player.UpdateCollider();
         }
 
@@ -144,5 +153,10 @@ public class Game1 : Game
         _spriteBatch.End();
 
         base.Draw(gameTime);
+    }
+
+    private void HandleCameraMode()
+    {
+        
     }
 }
