@@ -62,7 +62,7 @@ public class Game1 : Game
         
         // Load Soundeffects
         walkingSound = Content.Load<SoundEffect>("assets/sounds/Walking");
-        player.LoadContent(walkingSound);
+        player.LoadContent(Content, walkingSound);
         
     }
 
@@ -95,7 +95,7 @@ public class Game1 : Game
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
-        _spriteBatch.Begin();
+        _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
         player.Draw(_spriteBatch);
         foreach (var item in _testItems)
         {
