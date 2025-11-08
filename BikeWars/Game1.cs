@@ -8,6 +8,7 @@ using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
 using BikeWars.Utilities;
 using Microsoft.Xna.Framework.Audio;
+using System;
 
 namespace BikeWars;
 
@@ -19,22 +20,23 @@ public class Game1 : Game
 
     private List<TestItem> _testItems;
     
-    private int playerPosX = 1;
-    private int playerPosY = 30;
     Player player;
 
     private bool _freeCamera = false;
     private bool _cKeyPressed = false;
-    
+
+    private SoundHandler soundHandler { get; set; }
     private SpriteFont _debugFont;
     private Debugger _debugger;
-    private SoundEffect walkingSound;
 
     private Camera2D camera;
 
     //Defines border of visble game world
     private Rectangle worldBounds;
-    
+
+    // Paths
+    private const String ArialFont = "assets/fonts/Arial";
+
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -53,33 +55,25 @@ public class Game1 : Game
         _testItems.Add(new TestItem(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
         _testItems.Add(new TestItem(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
 
-        
         camera = new Camera2D(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, worldBounds);
-
+        
+        // Spawn player in center of screen
+        player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(32, 32));
+        
+        soundHandler = new SoundHandler();
+        // Center camera on player from game start
+        camera.Position = player.Transform.Position;
         base.Initialize();
     }
 
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-        _debugFont = Content.Load<SpriteFont>("assets/fonts/Arial");
-
-        // Get screen dimensions
-        int width = _graphics.PreferredBackBufferWidth;
-        int height = _graphics.PreferredBackBufferHeight;
-
-        // Spawn player in center of screen
-        player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(32, 32));
-
-        // Center camera on player from game start
-        camera.Position = player.Transform.Position;
-        
+        _debugFont = Content.Load<SpriteFont>(ArialFont);
         _debugger = new Debugger(_debugFont, player);
-        
+
         // Load Soundeffects
-        walkingSound = Content.Load<SoundEffect>("assets/sounds/Walking");
-        player.LoadContent(walkingSound);
-        
+        player.LoadContent(Content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
     }
 
     protected override void Update(GameTime gameTime)

@@ -14,17 +14,17 @@ namespace BikeWars.Entities.Characters
         public Color Tint = Color.Black;
         private BoxCollider _collider { get; set; }
 
-        private Movement movement { get; set;}
+        private Movement movement { get; set; }
+        public SoundHandler SoundHandler { get; }
         
-        public SoundEffect WalkingSound { get; private set; }
-        public SoundEffectInstance WalkingSoundInstance { get; private set; }
-        private bool wasMoving = false;
+        // public SoundEffect WalkingSound { get; private set; }
+        // public SoundEffectInstance WalkingSoundInstance { get; private set; }
+        private bool isMoving { get; set; }
         
         public void LoadContent(SoundEffect walkingSoundEffect)
         {
-            WalkingSound = walkingSoundEffect;
-            WalkingSoundInstance = WalkingSound.CreateInstance();
-            WalkingSoundInstance.IsLooped = true;
+            SoundHandler.WalkingSoundInstance = walkingSoundEffect.CreateInstance();
+            SoundHandler.WalkingSoundInstance.IsLooped = true;
         }
 
         public void UpdateCollider()
@@ -43,6 +43,8 @@ namespace BikeWars.Entities.Characters
             canMove = true;
             movement = new Movement();
             _ip = new InputHandler();
+            SoundHandler = new SoundHandler();
+            isMoving = false;
             UpdateCollider();
         }
         public override bool Intersects(ICollider collider)
@@ -52,30 +54,32 @@ namespace BikeWars.Entities.Characters
 
         public override void Update(GameTime gameTime)
         {
-            if (!canMove) return;
+            if (!canMove)
+            {
+                isMoving = false;
+                SoundHandler.WalkingSoundInstance.Stop();
+                return;    
+            }
 
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
             Vector2 direction = MakeDirection();
             
             // Sound-Control
-            bool isMoving = direction != Vector2.Zero;
+            isMoving = direction != Vector2.Zero;
             
-            if (WalkingSoundInstance != null)
+            if (SoundHandler.WalkingSoundInstance != null)
             {
                 // Start Playing Walking Sound if Player starts moving around
-                if (isMoving && !wasMoving)
+                if (isMoving)
                 {
-                    WalkingSoundInstance.Play();
+                    SoundHandler.WalkingSoundInstance.Play();
                 }
                 // Stop Playing Walking Sound if Player stops moving around
-                else if (!isMoving && wasMoving)
+                else
                 {
-                    WalkingSoundInstance.Stop();
+                    SoundHandler.WalkingSoundInstance.Stop();
                 }
             }
-            
-            wasMoving = isMoving;
-
             LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
             if (direction != Vector2.Zero)
             {
