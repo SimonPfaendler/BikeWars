@@ -46,8 +46,11 @@ namespace BikeWars.Entities.Characters
             return _collider.Intersects(collider);
         }
 
-        public void Update(GameTime gameTime)
+        public void Update(GameTime gameTime, bool freezeMovement = false)
         {
+            // If the camera moves freely the player can not move
+            if (freezeMovement) return;
+
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
             var keyboardState = Keyboard.GetState();
 
