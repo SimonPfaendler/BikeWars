@@ -6,6 +6,7 @@ using BikeWars.Components;
 using BikeWars.Content.entities.items;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
+using BikeWars.Content.src.utils.SaveLoadExample;
 using BikeWars.Utilities;
 using Microsoft.Xna.Framework.Audio;
 using System;
@@ -36,6 +37,11 @@ public class Game1 : Game
 
     // Paths
     private const String ArialFont = "assets/fonts/Arial";
+    
+    // counter for SaveLoadExample
+    private int _counter = 0;
+    private float _counterTimer = 0;
+    private KeyboardState _prevKbState;
 
     public Game1()
     {
@@ -63,6 +69,10 @@ public class Game1 : Game
         soundHandler = new SoundHandler();
         // Center camera on player from game start
         camera.Position = player.Transform.Position;
+        
+        // Create SaveLoad and load saved data (if there is any)
+        SaveLoad.LoadGame(out _counter);
+        
         base.Initialize();
     }
 
@@ -125,6 +135,39 @@ public class Game1 : Game
         // Frist update all objects and last update camera view
         camera.Update(gameTime, player.Transform.Position, _freeCamera);
         
+        // update counter every second
+        _counterTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+        if (_counterTimer >= 1)
+        {
+            _counter++; 
+            _counterTimer = 0;
+        }
+
+        
+        KeyboardState KbState = Keyboard.GetState();
+        
+        // press T to save the counter
+        if (KbState.IsKeyDown(Keys.T) && !_prevKbState.IsKeyDown(Keys.T))
+        {
+            SaveLoad.SaveGame(_counter);
+        }
+        
+        // press L to load the last saved number
+        if (KbState.IsKeyDown(Keys.L) && !_prevKbState.IsKeyDown(Keys.L))
+        {
+            SaveLoad.LoadGame(out _counter);
+        }
+        
+        // press R to reset the counter
+        if (KbState.IsKeyDown(Keys.R) && !_prevKbState.IsKeyDown(Keys.R))
+        {
+            _counter = 0;
+            _counterTimer = 0;
+            Console.WriteLine("Counter Reset. Counter=" + 0);
+        }
+
+        _prevKbState = KbState;
+        
         base.Update(gameTime);
     }
 
@@ -145,7 +188,12 @@ public class Game1 : Game
         _spriteBatch.Begin();
         _debugger.Draw(_spriteBatch);
         _spriteBatch.End();
-
+        
+        //draw the counter
+        _spriteBatch.Begin();
+        _spriteBatch.DrawString(_debugFont, $"Counter: {_counter}", new Vector2(20, 100), Color.Black);
+        _spriteBatch.DrawString(_debugFont, "T=Save  L=Load  R=Reset counter", new Vector2(20, 125), Color.Black);
+        _spriteBatch.End();
         base.Draw(gameTime);
     }
 
