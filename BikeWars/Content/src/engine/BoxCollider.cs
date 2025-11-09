@@ -8,16 +8,6 @@ public class BoxCollider : ColliderBase
     private int width { get; set; }
     private int height { get; set; }
 
-    private Vector2 _position;
-    public Vector2 Position
-    {
-        get { return _position; }
-        set
-        {
-            _position = value;
-            Update();
-        }
-    }
     private EnhancedRectangle _collisionShape { get; set; }
     public EnhancedRectangle CollisionShape
     {
@@ -39,7 +29,7 @@ public class BoxCollider : ColliderBase
     
     protected override void Update()
     {
-        _collisionShape = new EnhancedRectangle(new Rectangle((int)_position.X, (int)_position.Y, width, height));
+        _collisionShape = new EnhancedRectangle(new Rectangle((int)Position.X, (int)Position.Y, width, height));
     }
     public override bool Intersects(ICollider other)
     {

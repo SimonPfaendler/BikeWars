@@ -36,17 +36,14 @@ namespace BikeWars.Utilities
         {
             if (!_isVisible) return;
 
-
             // Display player position, velocity and bounds
             // You can add more debug information as needed e.g. collider info, Bounds, FPS, etc.
-
             string debugInfo = $"Player Position: {_player.Transform.Position}\n" +
                                $"Player Velocity: {_player.Speed}\n" + 
                                $"Player Bounds: {_player.Transform.Size}\n";
 
             
             spriteBatch.DrawString(_font, debugInfo, new Vector2(10, 10), Color.White);
-            
         }
     }
 }

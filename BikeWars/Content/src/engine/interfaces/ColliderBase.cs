@@ -3,7 +3,7 @@
 namespace BikeWars.Content.engine.interfaces;
 public abstract class ColliderBase : ICollider
 {
-    private Vector2 _position;
+    private Vector2 _position { get; set; }
     public Vector2 Position
     {
         get => _position;
