@@ -35,7 +35,7 @@ public class Game1 : Game
     private Rectangle worldBounds;
 
     // Paths
-    private const String ArialFont = "assets/fonts/Arial";
+    private const String ARIAL_FONT = "assets/fonts/Arial";
 
     public Game1()
     {
@@ -69,7 +69,7 @@ public class Game1 : Game
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-        _debugFont = Content.Load<SpriteFont>(ArialFont);
+        _debugFont = Content.Load<SpriteFont>(ARIAL_FONT);
         _debugger = new Debugger(_debugFont, player);
 
         // Load Soundeffects
