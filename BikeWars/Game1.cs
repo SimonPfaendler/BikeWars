@@ -10,6 +10,7 @@ using BikeWars.Content.src.utils.SaveLoadExample;
 using BikeWars.Utilities;
 using Microsoft.Xna.Framework.Audio;
 using System;
+using InputAction = BikeWars.Content.engine.Action;
 
 namespace BikeWars;
 
@@ -71,7 +72,8 @@ public class Game1 : Game
         camera.Position = player.Transform.Position;
         
         // Create SaveLoad and load saved data (if there is any)
-        SaveLoad.LoadGame(out _counter);
+        _counter = SaveLoad.LoadGame();
+
         
         base.Initialize();
     }
@@ -135,40 +137,54 @@ public class Game1 : Game
         // Frist update all objects and last update camera view
         camera.Update(gameTime, player.Transform.Position, _freeCamera);
         
-        // update counter every second
+        HandleCounter(gameTime);
+        HandleSaveLoadInput();
+        
+        
+        base.Update(gameTime);
+    }
+    
+    // Handles the counter increment logic once per second
+    private void HandleCounter(GameTime gameTime)
+    {
         _counterTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
         if (_counterTimer >= 1)
         {
-            _counter++; 
+            _counter++;
             _counterTimer = 0;
         }
-
-        
+    }
+    
+    // handels the key inputs for save and load
+    private void HandleSaveLoadInput()
+    {
         KeyboardState KbState = Keyboard.GetState();
         
-        // press T to save the counter
-        if (KbState.IsKeyDown(Keys.T) && !_prevKbState.IsKeyDown(Keys.T))
-        {
+        // use the central mapping instead of hardcoding keys
+        Keys saveKey  = InputHandler.KeyMapping[InputAction.SAVE];
+        Keys loadKey  = InputHandler.KeyMapping[InputAction.LOAD];
+        Keys resetKey = InputHandler.KeyMapping[InputAction.RESET];
+
+        
+        // edge-triggered: pressed this frame, not last frame
+        if (KbState.IsKeyDown(saveKey) && !_prevKbState.IsKeyDown(saveKey))
             SaveLoad.SaveGame(_counter);
-        }
-        
-        // press L to load the last saved number
-        if (KbState.IsKeyDown(Keys.L) && !_prevKbState.IsKeyDown(Keys.L))
+
+        if (KbState.IsKeyDown(loadKey) && !_prevKbState.IsKeyDown(loadKey))
         {
-            SaveLoad.LoadGame(out _counter);
+            _counter = SaveLoad.LoadGame(); 
+            _counterTimer = 0;    
         }
-        
-        // press R to reset the counter
-        if (KbState.IsKeyDown(Keys.R) && !_prevKbState.IsKeyDown(Keys.R))
+
+        if (KbState.IsKeyDown(resetKey) && !_prevKbState.IsKeyDown(resetKey))
         {
             _counter = 0;
             _counterTimer = 0;
-            Console.WriteLine("Counter Reset. Counter=" + 0);
+            Console.WriteLine("Counter Reset. Counter=0");
         }
 
         _prevKbState = KbState;
-        
-        base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)

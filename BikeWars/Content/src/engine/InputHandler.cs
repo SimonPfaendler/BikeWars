@@ -7,7 +7,7 @@ namespace BikeWars.Content.engine
 {
     public enum Action
     {
-        MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN
+        MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN, SAVE, RESET, LOAD
     }
 
     public class InputHandler
@@ -19,6 +19,9 @@ namespace BikeWars.Content.engine
             {Action.MOVE_RIGHT, Keys.D},
             {Action.MOVE_UP, Keys.W},
             {Action.MOVE_DOWN, Keys.S},
+            {Action.SAVE, Keys.T},
+            {Action.LOAD, Keys.L},
+            {Action.RESET, Keys.R},
         };
 
         public InputHandler()
