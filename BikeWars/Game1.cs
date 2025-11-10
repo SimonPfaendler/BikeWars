@@ -11,6 +11,8 @@ using BikeWars.Utilities;
 using Microsoft.Xna.Framework.Audio;
 using System;
 using InputAction = BikeWars.Content.engine.GameAction;
+using MonoGame.Extended.Tiled;
+using MonoGame.Extended.Tiled.Renderers;
 
 namespace BikeWars;
 
@@ -43,6 +45,9 @@ public class Game1 : Game
     private int _counter = 0;
     private float _counterTimer = 0;
     private KeyboardState _prevKbState;
+    
+    private TiledMap _tiledMap;
+    private TiledMapRenderer _tiledMapRenderer;
 
     public Game1()
     {
@@ -73,7 +78,7 @@ public class Game1 : Game
         
         // Create SaveLoad and load saved data (if there is any)
         _counter = SaveLoad.LoadGame();
-
+        
         
         base.Initialize();
     }
@@ -83,6 +88,9 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _debugFont = Content.Load<SpriteFont>(ARIAL_FONT);
         _debugger = new Debugger(_debugFont, player);
+        
+        _tiledMap = Content.Load<TiledMap>("assets/Map/Bikewars_Tilemap");
+        _tiledMapRenderer = new TiledMapRenderer(GraphicsDevice, _tiledMap);
 
         // Load Soundeffects
         // walkingSound = Content.Load<SoundEffect>("assets/sounds/Walking");
@@ -142,6 +150,7 @@ public class Game1 : Game
         HandleCounter(gameTime);
         HandleSaveLoadInput();
         
+        _tiledMapRenderer.Update(gameTime);
         
         base.Update(gameTime);
     }
@@ -192,6 +201,8 @@ public class Game1 : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
+        
+        _tiledMapRenderer.Draw(camera.GetTransform());
 
         // Everything within the first spriteBatch will be transformed by the camera
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.GetTransform());
