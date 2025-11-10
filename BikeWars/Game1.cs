@@ -11,6 +11,7 @@ using BikeWars.Utilities;
 using Microsoft.Xna.Framework.Audio;
 using System;
 using InputAction = BikeWars.Content.engine.GameAction;
+using BikeWars.Content.src.screens.Overlay;
 
 namespace BikeWars;
 
@@ -43,6 +44,9 @@ public class Game1 : Game
     private int _counter = 0;
     private float _counterTimer = 0;
     private KeyboardState _prevKbState;
+    
+    // overlay
+    private Overlay _overlay;
 
     public Game1()
     {
@@ -88,6 +92,8 @@ public class Game1 : Game
         // walkingSound = Content.Load<SoundEffect>("assets/sounds/Walking");
         // player.LoadContent(Content, walkingSound);
         player.LoadContent(Content, Content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
+        
+        _overlay = new Overlay(_debugFont, GraphicsDevice);
     }
 
     protected override void Update(GameTime gameTime)
@@ -200,6 +206,9 @@ public class Game1 : Game
         {
             item.Draw(_spriteBatch);
         }
+        
+        // lifelines under the player (world-space)
+        _overlay.DrawOnWorld(_spriteBatch, player);
         _spriteBatch.End();
 
         // Render debugger on top and serparately from camera transformation to stay fixed 
@@ -213,6 +222,11 @@ public class Game1 : Game
         _spriteBatch.DrawString(_debugFont, "T=Save  L=Load  R=Reset counter", new Vector2(20, 125), Color.Black);
         _spriteBatch.End();
         base.Draw(gameTime);
+        
+        // draw the invetory and timer
+        _spriteBatch.Begin();
+        _overlay.DrawOnScreen(_spriteBatch, gameTime);              
+        _spriteBatch.End();        
     }
 
     private void HandleCameraMode()
