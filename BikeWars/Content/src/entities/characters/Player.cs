@@ -1,4 +1,6 @@
 using Microsoft.Xna.Framework;
+using System;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
@@ -13,16 +15,31 @@ namespace BikeWars.Entities.Characters
         private InputHandler _ip;
         public Color Tint = Color.Black;
         private BoxCollider _collider { get; set; }
-
         private Movement movement { get; set; }
         public SoundHandler SoundHandler { get; }
         
-        // public SoundEffect WalkingSound { get; private set; }
-        // public SoundEffectInstance WalkingSoundInstance { get; private set; }
+        private Texture2D texUp, texDown, texLeft, texRight;
+        private Texture2D currentTex;
+        
+        // Animation
+        private const int FrameCount = 2;          // frames per sprite 
+        private const float SecondsPerFrame = 0.16f;
+        private float _frameTimer = 0f;
+        private int _frameIndex = 0;
         private bool isMoving { get; set; }
         
-        public void LoadContent(SoundEffect walkingSoundEffect)
+        public void LoadContent(ContentManager content, SoundEffect walkingSoundEffect)
         {
+            // sprites 
+            texRight = content.Load<Texture2D>("assets/sprites/character1/c1_move_right_1x2");
+            texLeft  = content.Load<Texture2D>("assets/sprites/character1/c1_move_left_1x2");
+            texUp    = content.Load<Texture2D>("assets/sprites/character1/c1_move_up_1x2");
+            texDown  = content.Load<Texture2D>("assets/sprites/character1/c1_move_down_1x2");
+
+            // spawn sprite
+            currentTex = texRight;
+
+            // sounds
             SoundHandler.WalkingSoundInstance = walkingSoundEffect.CreateInstance();
             SoundHandler.WalkingSoundInstance.IsLooped = true;
         }
@@ -66,7 +83,7 @@ namespace BikeWars.Entities.Characters
             
             // Sound-Control
             isMoving = direction != Vector2.Zero;
-            
+
             if (SoundHandler.WalkingSoundInstance != null)
             {
                 // Start Playing Walking Sound if Player starts moving around
@@ -80,31 +97,53 @@ namespace BikeWars.Entities.Characters
                     SoundHandler.WalkingSoundInstance.Stop();
                 }
             }
+            
             LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
             if (direction != Vector2.Zero)
             {
                 direction.Normalize();
                 Transform.Position += direction * Speed * delta;
+
+                // choose sprite 
+                if (MathF.Abs(direction.X) > MathF.Abs(direction.Y))
+                    currentTex = (direction.X > 0) ? texRight : texLeft;
+                else
+                    currentTex = (direction.Y > 0) ? texDown : texUp;
+
+                // Animation 
+                _frameTimer += delta;
+                if (_frameTimer >= SecondsPerFrame)
+                {
+                    _frameTimer -= SecondsPerFrame;
+                    _frameIndex = (_frameIndex + 1) % FrameCount;
+                }
             }
+            else
+            {
+                // show first frane
+                _frameIndex = 0;
+                _frameTimer = 0f;
+            }
+            
             UpdateCollider();
         }
 
         private Vector2 MakeDirection()
         {
             Vector2 direction = Vector2.Zero;
-            if (_ip.PressingAction(Action.MOVE_UP))
+            if (_ip.PressingAction(GameAction.MOVE_UP))
             {
                 direction.Y -= 1;
             }
-            if (_ip.PressingAction(Action.MOVE_DOWN))
+            if (_ip.PressingAction(GameAction.MOVE_DOWN))
             {
                 direction.Y += 1;
             }
-            if (_ip.PressingAction(Action.MOVE_LEFT))
+            if (_ip.PressingAction(GameAction.MOVE_LEFT))
             {
                 direction.X -= 1;
             }
-            if (_ip.PressingAction(Action.MOVE_RIGHT))
+            if (_ip.PressingAction(GameAction.MOVE_RIGHT))
             {
                 direction.X += 1;    
             }
@@ -113,14 +152,32 @@ namespace BikeWars.Entities.Characters
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            if (pixel == null)
-            {
-                // Create a 1x1 white texture if it doesn't exist
-                pixel = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
-                pixel.SetData(new[] { Microsoft.Xna.Framework.Color.White });
-            }
-            // Draw the player as a colored rectangle
-            spriteBatch.Draw(pixel, Transform.Bounds, Tint);
+                if (currentTex == null) return;
+
+                // 1 Spalte, 2 Zeilen -> volle Breite, halbe Höhe
+                int frameWidth  = currentTex.Width;
+                int frameHeight = currentTex.Height / FrameCount;
+
+                // saubere Ganzzahl-Position, sonst „zittert“ Pixelart
+                var dest = new Rectangle(
+                    (int)MathF.Round(Transform.Position.X),
+                    (int)MathF.Round(Transform.Position.Y),
+                    Transform.Size.X,
+                    Transform.Size.Y
+                );
+
+                // VERTIKAL zuschneiden: x=0, y=frameIndex * frameHeight
+                var source = new Rectangle(0, _frameIndex * frameHeight, frameWidth, frameHeight);
+
+                spriteBatch.Draw(currentTex, destinationRectangle: dest, sourceRectangle: source, color: Color.White);
+            // if (pixel == null)
+            // {
+            //     // Create a 1x1 white texture if it doesn't exist
+            //     pixel = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
+            //     pixel.SetData(new[] { Microsoft.Xna.Framework.Color.White });
+            // }
+            // // Draw the player as a colored rectangle
+            // spriteBatch.Draw(pixel, Transform.Bounds, Tint);
         }
 
         // Is Helpful for example with colliders to set the original position back.

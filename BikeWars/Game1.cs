@@ -10,7 +10,7 @@ using BikeWars.Content.src.utils.SaveLoadExample;
 using BikeWars.Utilities;
 using Microsoft.Xna.Framework.Audio;
 using System;
-using InputAction = BikeWars.Content.engine.Action;
+using InputAction = BikeWars.Content.engine.GameAction;
 
 namespace BikeWars;
 
@@ -37,7 +37,7 @@ public class Game1 : Game
     private Rectangle worldBounds;
 
     // Paths
-    private const String ArialFont = "assets/fonts/Arial";
+    private const String ARIAL_FONT = "assets/fonts/Arial";
     
     // counter for SaveLoadExample
     private int _counter = 0;
@@ -81,11 +81,13 @@ public class Game1 : Game
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-        _debugFont = Content.Load<SpriteFont>(ArialFont);
+        _debugFont = Content.Load<SpriteFont>(ARIAL_FONT);
         _debugger = new Debugger(_debugFont, player);
 
         // Load Soundeffects
-        player.LoadContent(Content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
+        // walkingSound = Content.Load<SoundEffect>("assets/sounds/Walking");
+        // player.LoadContent(Content, walkingSound);
+        player.LoadContent(Content, Content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
     }
 
     protected override void Update(GameTime gameTime)
@@ -192,7 +194,7 @@ public class Game1 : Game
         GraphicsDevice.Clear(Color.CornflowerBlue);
 
         // Everything within the first spriteBatch will be transformed by the camera
-        _spriteBatch.Begin(transformMatrix: camera.GetTransform());
+        _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.GetTransform());
         player.Draw(_spriteBatch);
         foreach (var item in _testItems)
         {

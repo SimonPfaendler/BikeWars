@@ -5,23 +5,23 @@ using Microsoft.Xna.Framework.Input;
 // I think we need to improve this one. Because that is not enough imo. But ok first. Maybe we make it static. To use it everywhere we need it.
 namespace BikeWars.Content.engine
 {
-    public enum Action
+    public enum GameAction
     {
-        MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN, SAVE, RESET, LOAD
+        MOVE_LEFT, MOVE_RIGHT, MOVE_UP, MOVE_DOWN, SAVE, LOAD, RESET
     }
 
     public class InputHandler
     {
         // private KeyboardState _keyboardState { get; set; }
-        public static readonly Dictionary<Action, Keys> KeyMapping = new()
+        public static readonly Dictionary<GameAction, Keys> KeyMapping = new()
         {
-            {Action.MOVE_LEFT, Keys.A},
-            {Action.MOVE_RIGHT, Keys.D},
-            {Action.MOVE_UP, Keys.W},
-            {Action.MOVE_DOWN, Keys.S},
-            {Action.SAVE, Keys.T},
-            {Action.LOAD, Keys.L},
-            {Action.RESET, Keys.R},
+            {GameAction.MOVE_LEFT, Keys.A},
+            {GameAction.MOVE_RIGHT, Keys.D},
+            {GameAction.MOVE_UP, Keys.W},
+            {GameAction.MOVE_DOWN, Keys.S},
+            {GameAction.SAVE, Keys.T},
+            {GameAction.LOAD, Keys.L},
+            {GameAction.RESET, Keys.R},
         };
 
         public InputHandler()
@@ -30,7 +30,7 @@ namespace BikeWars.Content.engine
         }
 
         // public KeyboardState KeyboardState { get => _keyboardState; }
-        public bool PressingAction(Action action)
+        public bool PressingAction(GameAction action)
         {
             return Keyboard.GetState().IsKeyDown(KeyMapping[action]);
         }
