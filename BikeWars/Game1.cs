@@ -85,16 +85,15 @@ public class Game1 : Game
 
     protected override void LoadContent()
     {
-        _spriteBatch = new SpriteBatch(GraphicsDevice);
+        
         _debugFont = Content.Load<SpriteFont>(ARIAL_FONT);
         _debugger = new Debugger(_debugFont, player);
-        
+
         _tiledMap = Content.Load<TiledMap>("assets/Map/Bikewars_Tilemap");
         _tiledMapRenderer = new TiledMapRenderer(GraphicsDevice, _tiledMap);
+        _spriteBatch = new SpriteBatch(GraphicsDevice);
 
         // Load Soundeffects
-        // walkingSound = Content.Load<SoundEffect>("assets/sounds/Walking");
-        // player.LoadContent(Content, walkingSound);
         player.LoadContent(Content, Content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
     }
 
@@ -201,7 +200,6 @@ public class Game1 : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
-        
         _tiledMapRenderer.Draw(camera.GetTransform());
 
         // Everything within the first spriteBatch will be transformed by the camera
