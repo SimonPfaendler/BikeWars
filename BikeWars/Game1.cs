@@ -108,6 +108,10 @@ public class Game1 : Game
         if (Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
+
+
+        InputHandler.Update();
+
         if (Keyboard.GetState().IsKeyDown(Keys.C))
         {
             _cKeyPressed = true;
@@ -175,32 +179,26 @@ public class Game1 : Game
     // handels the key inputs for save and load
     private void HandleSaveLoadInput()
     {
-        KeyboardState KbState = Keyboard.GetState();
-        
-        // use the central mapping instead of hardcoding keys
-        Keys saveKey  = InputHandler.KeyMapping[InputAction.SAVE];
-        Keys loadKey  = InputHandler.KeyMapping[InputAction.LOAD];
-        Keys resetKey = InputHandler.KeyMapping[InputAction.RESET];
 
-        
+
         // edge-triggered: pressed this frame, not last frame
-        if (KbState.IsKeyDown(saveKey) && !_prevKbState.IsKeyDown(saveKey))
+        if (InputHandler.IsPressed(GameAction.SAVE))
             SaveLoad.SaveGame(_counter);
 
-        if (KbState.IsKeyDown(loadKey) && !_prevKbState.IsKeyDown(loadKey))
+        if (InputHandler.IsPressed(GameAction.LOAD))
         {
             _counter = SaveLoad.LoadGame(); 
             _counterTimer = 0;    
         }
 
-        if (KbState.IsKeyDown(resetKey) && !_prevKbState.IsKeyDown(resetKey))
+        if (InputHandler.IsPressed(GameAction.RESET))
         {
             _counter = 0;
             _counterTimer = 0;
             Console.WriteLine("Counter Reset. Counter=0");
         }
 
-        _prevKbState = KbState;
+        
     }
 
     protected override void Draw(GameTime gameTime)

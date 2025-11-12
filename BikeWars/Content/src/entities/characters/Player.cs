@@ -12,7 +12,7 @@ namespace BikeWars.Entities.Characters
     public class Player: CharacterBase
     {
         private bool canMove;
-        private InputHandler _ip;
+        
         public Color Tint = Color.Black;
         private BoxCollider _collider { get; set; }
         private Movement movement { get; set; }
@@ -59,7 +59,7 @@ namespace BikeWars.Entities.Characters
             Speed = 200f;
             canMove = true;
             movement = new Movement();
-            _ip = new InputHandler();
+            
             SoundHandler = new SoundHandler();
             isMoving = false;
             UpdateCollider();
@@ -129,21 +129,22 @@ namespace BikeWars.Entities.Characters
         }
 
         private Vector2 MakeDirection()
-        {
+        {   
+            
             Vector2 direction = Vector2.Zero;
-            if (_ip.PressingAction(GameAction.MOVE_UP))
+            if (InputHandler.IsHeld(GameAction.MOVE_UP))
             {
                 direction.Y -= 1;
             }
-            if (_ip.PressingAction(GameAction.MOVE_DOWN))
+            if (InputHandler.IsHeld(GameAction.MOVE_DOWN))
             {
                 direction.Y += 1;
             }
-            if (_ip.PressingAction(GameAction.MOVE_LEFT))
+            if (InputHandler.IsHeld(GameAction.MOVE_LEFT))
             {
                 direction.X -= 1;
             }
-            if (_ip.PressingAction(GameAction.MOVE_RIGHT))
+            if (InputHandler.IsHeld(GameAction.MOVE_RIGHT))
             {
                 direction.X += 1;    
             }

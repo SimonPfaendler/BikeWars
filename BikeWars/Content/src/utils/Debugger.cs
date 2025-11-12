@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using BikeWars.Entities.Characters;
+using BikeWars.Content.engine;
 
 namespace BikeWars.Utilities
 {
@@ -24,13 +25,12 @@ namespace BikeWars.Utilities
 
         public void Update(GameTime gameTime)
         {
-            var kb = Keyboard.GetState();
 
-            if (kb.IsKeyDown(Keys.P) && !_prevKb.IsKeyDown(Keys.P))
+            if (InputHandler.IsPressed(GameAction.DEBUG_TOGGLE))
             {
                 _isVisible = !_isVisible;
             }
-            _prevKb = kb;
+            
         }
         public void Draw(SpriteBatch spriteBatch)
         {
