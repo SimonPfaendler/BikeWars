@@ -152,32 +152,24 @@ namespace BikeWars.Entities.Characters
 
         public void Draw(SpriteBatch spriteBatch)
         {
-                if (currentTex == null) return;
+            if (currentTex == null) return;
 
-                // 1 Spalte, 2 Zeilen -> volle Breite, halbe Höhe
-                int frameWidth  = currentTex.Width;
-                int frameHeight = currentTex.Height / FrameCount;
+            // 1 Spalte, 2 Zeilen -> volle Breite, halbe Höhe
+            int frameWidth  = currentTex.Width;
+            int frameHeight = currentTex.Height / FrameCount;
 
-                // saubere Ganzzahl-Position, sonst „zittert“ Pixelart
-                var dest = new Rectangle(
-                    (int)MathF.Round(Transform.Position.X),
-                    (int)MathF.Round(Transform.Position.Y),
-                    Transform.Size.X,
-                    Transform.Size.Y
-                );
+            // saubere Ganzzahl-Position, sonst „zittert“ Pixelart
+            var dest = new Rectangle(
+                (int)MathF.Round(Transform.Position.X),
+                (int)MathF.Round(Transform.Position.Y),
+                Transform.Size.X,
+                Transform.Size.Y
+            );
 
-                // VERTIKAL zuschneiden: x=0, y=frameIndex * frameHeight
-                var source = new Rectangle(0, _frameIndex * frameHeight, frameWidth, frameHeight);
+            // VERTIKAL zuschneiden: x=0, y=frameIndex * frameHeight
+            var source = new Rectangle(0, _frameIndex * frameHeight, frameWidth, frameHeight);
 
-                spriteBatch.Draw(currentTex, destinationRectangle: dest, sourceRectangle: source, color: Color.White);
-            // if (pixel == null)
-            // {
-            //     // Create a 1x1 white texture if it doesn't exist
-            //     pixel = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
-            //     pixel.SetData(new[] { Microsoft.Xna.Framework.Color.White });
-            // }
-            // // Draw the player as a colored rectangle
-            // spriteBatch.Draw(pixel, Transform.Bounds, Tint);
+            spriteBatch.Draw(currentTex, destinationRectangle: dest, sourceRectangle: source, color: Color.White);
         }
 
         // Is Helpful for example with colliders to set the original position back.

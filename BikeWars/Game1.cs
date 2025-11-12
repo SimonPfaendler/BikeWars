@@ -2,8 +2,8 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using BikeWars.Components;
 using BikeWars.Content.entities.items;
+using BikeWars.Content.entities.interfaces;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
 using BikeWars.Content.src.utils.SaveLoadExample;
@@ -23,7 +23,7 @@ public class Game1 : Game
     private SpriteBatch _spriteBatch;
     private Texture2D _texture;
 
-    private List<TestItem> _testItems;
+    private List<ItemBase> _testItems;
     
     Player player;
 
@@ -66,10 +66,9 @@ public class Game1 : Game
     protected override void Initialize()
     {
         worldBounds = new Rectangle(0, 0, 4000, 2000); // Example values for game world size
-        _testItems = new List<TestItem>();
-        _testItems.Add(new TestItem(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
-        _testItems.Add(new TestItem(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
-
+        _testItems = new List<ItemBase>();
+        _testItems.Add(new Item(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
+        _testItems.Add(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
         camera = new Camera2D(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, worldBounds);
         
         // Spawn player in center of screen
@@ -81,7 +80,6 @@ public class Game1 : Game
         
         // Create SaveLoad and load saved data (if there is any)
         _counter = SaveLoad.LoadGame();
-        
         
         base.Initialize();
     }
@@ -98,7 +96,10 @@ public class Game1 : Game
 
         // Load Soundeffects
         player.LoadContent(Content, Content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
-        
+        if (_testItems.Count > 1)
+        {
+            _testItems[1].LoadContent(Content);
+        }
         _overlay = new Overlay(_debugFont, GraphicsDevice);
     }
 
@@ -214,7 +215,7 @@ public class Game1 : Game
         {
             item.Draw(_spriteBatch);
         }
-        
+
         // lifelines under the player (world-space)
         _overlay.DrawOnWorld(_spriteBatch, player);
         _spriteBatch.End();
