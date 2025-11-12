@@ -2,11 +2,11 @@ namespace BikeWars.Content.engine.interfaces;
 // interface for all screens existing
 public interface IScreen
 {
-    void Update();
+    public void Update();
     
-    void Draw();
+    public void Draw();
 
-    bool UpdateLower { get; }
+    public bool UpdateLower { get; }
 
-    bool DrawLower { get; }
+    public bool DrawLower { get; }
 }
