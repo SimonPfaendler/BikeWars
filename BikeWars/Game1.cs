@@ -21,10 +21,7 @@ public class Game1 : Game
 {
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
-    private Texture2D _texture;
-
     private List<ItemBase> _testItems;
-    
     Player player;
 
     private bool _freeCamera = false;
@@ -95,7 +92,7 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
         // Load Soundeffects
-        player.LoadContent(Content, Content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
+        player.LoadContent(Content, Content.Load<SoundEffect>(soundHandler.DRIVING_SOUND_PATH));
         if (_testItems.Count > 1)
         {
             _testItems[1].LoadContent(Content);
@@ -120,22 +117,19 @@ public class Game1 : Game
             _cKeyPressed = false;
         }
         
-        
         // If camera is in FreeLook mode dont update player movement
-        //player.Update(gameTime, _freeCamera);
         if (camera.Mode == CameraMode.FreeLook)
         {
-            player.SetCanMove(false);
+            player.Immobalize(true);
         } else
         {
-            player.SetCanMove(true);
+            player.Immobalize(false);
         }
         player.Update(gameTime);
         
         if (player.Intersects(_testItems[0].Collider))
         {
             player.SetLastTransform();
-            //player.Transform = new Transform(new Vector2(player.LastTransform.Position.X, player.LastTransform.Position.Y), player.LastTransform.Size);
             player.UpdateCollider();
         }
 

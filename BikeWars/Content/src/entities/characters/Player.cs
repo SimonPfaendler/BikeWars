@@ -11,11 +11,10 @@ namespace BikeWars.Entities.Characters
 {
     public class Player: CharacterBase
     {
-        private bool canMove;
         private InputHandler _ip;
         public Color Tint = Color.Black;
         private BoxCollider _collider { get; set; }
-        private Movement movement { get; set; }
+        private PlayerMovement movement { get; set; }
         public SoundHandler SoundHandler { get; }
         
         private Texture2D texUp, texDown, texLeft, texRight;
@@ -26,9 +25,8 @@ namespace BikeWars.Entities.Characters
         private const float SecondsPerFrame = 0.16f;
         private float _frameTimer = 0f;
         private int _frameIndex = 0;
-        private bool isMoving { get; set; }
         
-        public void LoadContent(ContentManager content, SoundEffect walkingSoundEffect)
+        public void LoadContent(ContentManager content, SoundEffect drivingSoundEffect)
         {
             // sprites 
             texRight = content.Load<Texture2D>("assets/sprites/character1/c1_move_right_1x2");
@@ -40,8 +38,8 @@ namespace BikeWars.Entities.Characters
             currentTex = texRight;
 
             // sounds
-            SoundHandler.WalkingSoundInstance = walkingSoundEffect.CreateInstance();
-            SoundHandler.WalkingSoundInstance.IsLooped = true;
+            SoundHandler.DrivingSoundInstance = drivingSoundEffect.CreateInstance();
+            SoundHandler.DrivingSoundInstance.IsLooped = true;
         }
 
         public void UpdateCollider()
@@ -57,11 +55,9 @@ namespace BikeWars.Entities.Characters
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 200f;
-            canMove = true;
-            movement = new Movement();
             _ip = new InputHandler();
+            movement = new PlayerMovement(canMove: true, isMoving: false, _ip);
             SoundHandler = new SoundHandler();
-            isMoving = false;
             UpdateCollider();
         }
         public override bool Intersects(ICollider collider)
@@ -71,35 +67,37 @@ namespace BikeWars.Entities.Characters
 
         public override void Update(GameTime gameTime)
         {
-            if (!canMove)
+            movement.HandleMovement(gameTime);
+            if (!movement.CanMove)
             {
-                isMoving = false;
-                SoundHandler.WalkingSoundInstance.Stop();
+                SoundHandler.DrivingSoundInstance.Stop();
                 return;    
             }
-
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            Vector2 direction = MakeDirection();
-            
             // Sound-Control
-            isMoving = direction != Vector2.Zero;
-
-            if (SoundHandler.WalkingSoundInstance != null)
+            if (SoundHandler.DrivingSoundInstance != null)
             {
                 // Start Playing Walking Sound if Player starts moving around
-                if (isMoving)
+                if (movement.IsMoving)
                 {
-                    SoundHandler.WalkingSoundInstance.Play();
+                    SoundHandler.DrivingSoundInstance.Play();
                 }
                 // Stop Playing Walking Sound if Player stops moving around
                 else
                 {
-                    SoundHandler.WalkingSoundInstance.Stop();
+                    SoundHandler.DrivingSoundInstance.Stop();
                 }
             }
-            
+
             LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
-            if (direction != Vector2.Zero)
+            Vector2 direction = movement.Direction;
+            if (direction == Vector2.Zero)
+            {
+                // show first frane
+                _frameIndex = 0;
+                _frameTimer = 0f;
+            }
+            else
             {
                 direction.Normalize();
                 Transform.Position += direction * Speed * delta;
@@ -118,36 +116,7 @@ namespace BikeWars.Entities.Characters
                     _frameIndex = (_frameIndex + 1) % FrameCount;
                 }
             }
-            else
-            {
-                // show first frane
-                _frameIndex = 0;
-                _frameTimer = 0f;
-            }
-            
             UpdateCollider();
-        }
-
-        private Vector2 MakeDirection()
-        {
-            Vector2 direction = Vector2.Zero;
-            if (_ip.PressingAction(GameAction.MOVE_UP))
-            {
-                direction.Y -= 1;
-            }
-            if (_ip.PressingAction(GameAction.MOVE_DOWN))
-            {
-                direction.Y += 1;
-            }
-            if (_ip.PressingAction(GameAction.MOVE_LEFT))
-            {
-                direction.X -= 1;
-            }
-            if (_ip.PressingAction(GameAction.MOVE_RIGHT))
-            {
-                direction.X += 1;    
-            }
-            return direction;
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -178,10 +147,14 @@ namespace BikeWars.Entities.Characters
             Transform = new Transform(new Vector2(LastTransform.Position.X, LastTransform.Position.Y), LastTransform.Size);
         }
 
-        // Use this if the there is a reason the character isn't allowed to move
-        public void SetCanMove(bool v)
+        public void Immobalize(bool value)
         {
-            canMove = v;
+            if (value) {
+                movement.CanMove = false;    
+            } else
+            {
+                movement.CanMove = true;    
+            }
         }
     }
 }
