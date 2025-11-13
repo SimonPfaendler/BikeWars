@@ -1,245 +1,60 @@
-﻿using System.Collections.Generic;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using BikeWars.Content.entities.items;
-using BikeWars.Content.entities.interfaces;
-using BikeWars.Entities.Characters;
-using BikeWars.Content.engine;
-using BikeWars.Content.src.utils.SaveLoadExample;
-using BikeWars.Utilities;
-using Microsoft.Xna.Framework.Audio;
-using System;
-using InputAction = BikeWars.Content.engine.GameAction;
-using BikeWars.Content.src.screens.Overlay;
-using MonoGame.Extended.Tiled;
-using MonoGame.Extended.Tiled.Renderers;
+using BikeWars.Content.managers;
+using BikeWars.Content.screens;
 
 namespace BikeWars;
 
 public class Game1 : Game
 {
     private GraphicsDeviceManager _graphics;
-    private SpriteBatch _spriteBatch;
-    private Texture2D _texture;
-
-    private List<ItemBase> _testItems;
-    
-    Player player;
-
-    private bool _freeCamera = false;
-    private bool _cKeyPressed = false;
-
-    private SoundHandler soundHandler { get; set; }
-    private SpriteFont _debugFont;
-    private Debugger _debugger;
-
-    private Camera2D camera;
-
-    //Defines border of visble game world
-    private Rectangle worldBounds;
-
-    // Paths
-    private const String ARIAL_FONT = "assets/fonts/Arial";
-    
-    // counter for SaveLoadExample
-    private int _counter = 0;
-    private float _counterTimer = 0;
-    private KeyboardState _prevKbState;
-    
-    // overlay
-    private Overlay _overlay;
-    private TiledMap _tiledMap;
-    private TiledMapRenderer _tiledMapRenderer;
+    public SpriteBatch SpriteBatch { get; private set; }
+    public ScreenManager ScreenManager;
+    public static Game1 Instance { get; private set; }
 
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
+        Instance = this;
 
-        // Just for Testing
         _graphics.PreferredBackBufferWidth = 1280;
         _graphics.PreferredBackBufferHeight = 720;
     }
 
     protected override void Initialize()
     {
-        worldBounds = new Rectangle(0, 0, 4000, 2000); // Example values for game world size
-        _testItems = new List<ItemBase>();
-        _testItems.Add(new Item(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
-        _testItems.Add(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
-        camera = new Camera2D(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, worldBounds);
-        
-        // Spawn player in center of screen
-        player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(32, 32));
-        
-        soundHandler = new SoundHandler();
-        // Center camera on player from game start
-        camera.Position = player.Transform.Position;
-        
-        // Create SaveLoad and load saved data (if there is any)
-        _counter = SaveLoad.LoadGame();
-        
+        ScreenManager = new ScreenManager();
         base.Initialize();
     }
 
     protected override void LoadContent()
     {
+        this.SpriteBatch = new SpriteBatch(GraphicsDevice);
         
-        _debugFont = Content.Load<SpriteFont>(ARIAL_FONT);
-        _debugger = new Debugger(_debugFont, player);
-
-        _tiledMap = Content.Load<TiledMap>("assets/Map/Bikewars_Tilemap");
-        _tiledMapRenderer = new TiledMapRenderer(GraphicsDevice, _tiledMap);
-        _spriteBatch = new SpriteBatch(GraphicsDevice);
-
-        // Load Soundeffects
-        player.LoadContent(Content, Content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
-        if (_testItems.Count > 1)
-        {
-            _testItems[1].LoadContent(Content);
-        }
-        _overlay = new Overlay(_debugFont, GraphicsDevice);
+        // NUR StartScreen laden - GameScreen wird später per Button gestartet
+        Texture2D background = Content.Load<Texture2D>("assets/images/Startbildschirm");
+        Texture2D button = Content.Load<Texture2D>("assets/images/StartButton");
+        StartScreen startScreen = new StartScreen(background, button);
+        ScreenManager.AddScreen(startScreen);
     }
 
     protected override void Update(GameTime gameTime)
     {
+        ScreenManager.Update(gameTime);
+        
         if (Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
-        if (Keyboard.GetState().IsKeyDown(Keys.C))
-        {
-            _cKeyPressed = true;
-        }
-
-        // Switch between camera Playerlock and FreeLook
-        if (_cKeyPressed && Keyboard.GetState().IsKeyUp(Keys.C))
-        {
-            _freeCamera = !_freeCamera;
-            _cKeyPressed = false;
-        }
-        
-        
-        // If camera is in FreeLook mode dont update player movement
-        //player.Update(gameTime, _freeCamera);
-        if (camera.Mode == CameraMode.FreeLook)
-        {
-            player.SetCanMove(false);
-        } else
-        {
-            player.SetCanMove(true);
-        }
-        player.Update(gameTime);
-        
-        if (player.Intersects(_testItems[0].Collider))
-        {
-            player.SetLastTransform();
-            //player.Transform = new Transform(new Vector2(player.LastTransform.Position.X, player.LastTransform.Position.Y), player.LastTransform.Size);
-            player.UpdateCollider();
-        }
-
-        if (_testItems.Count > 1)
-        {
-            if (player.Intersects(_testItems[1].Collider))
-            {
-                _testItems.RemoveAt(1);
-            }    
-        }
-
-        _debugger.Update(gameTime);
-
-        // Frist update all objects and last update camera view
-        camera.Update(gameTime, player.Transform.Position, _freeCamera);
-        
-        HandleCounter(gameTime);
-        HandleSaveLoadInput();
-        
-        _tiledMapRenderer.Update(gameTime);
-        
         base.Update(gameTime);
-    }
-    
-    // Handles the counter increment logic once per second
-    private void HandleCounter(GameTime gameTime)
-    {
-        _counterTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-        if (_counterTimer >= 1)
-        {
-            _counter++;
-            _counterTimer = 0;
-        }
-    }
-    
-    // handels the key inputs for save and load
-    private void HandleSaveLoadInput()
-    {
-        KeyboardState KbState = Keyboard.GetState();
-        
-        // use the central mapping instead of hardcoding keys
-        Keys saveKey  = InputHandler.KeyMapping[InputAction.SAVE];
-        Keys loadKey  = InputHandler.KeyMapping[InputAction.LOAD];
-        Keys resetKey = InputHandler.KeyMapping[InputAction.RESET];
-
-        
-        // edge-triggered: pressed this frame, not last frame
-        if (KbState.IsKeyDown(saveKey) && !_prevKbState.IsKeyDown(saveKey))
-            SaveLoad.SaveGame(_counter);
-
-        if (KbState.IsKeyDown(loadKey) && !_prevKbState.IsKeyDown(loadKey))
-        {
-            _counter = SaveLoad.LoadGame(); 
-            _counterTimer = 0;    
-        }
-
-        if (KbState.IsKeyDown(resetKey) && !_prevKbState.IsKeyDown(resetKey))
-        {
-            _counter = 0;
-            _counterTimer = 0;
-            Console.WriteLine("Counter Reset. Counter=0");
-        }
-
-        _prevKbState = KbState;
     }
 
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
-        _tiledMapRenderer.Draw(camera.GetTransform());
-
-        // Everything within the first spriteBatch will be transformed by the camera
-        _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.GetTransform());
-        player.Draw(_spriteBatch);
-        foreach (var item in _testItems)
-        {
-            item.Draw(_spriteBatch);
-        }
-
-        // lifelines under the player (world-space)
-        _overlay.DrawOnWorld(_spriteBatch, player);
-        _spriteBatch.End();
-
-        // Render debugger on top and serparately from camera transformation to stay fixed 
-        _spriteBatch.Begin();
-        _debugger.Draw(_spriteBatch);
-        _spriteBatch.End();
-        
-        //draw the counter
-        _spriteBatch.Begin();
-        _spriteBatch.DrawString(_debugFont, $"Counter: {_counter}", new Vector2(20, 100), Color.Black);
-        _spriteBatch.DrawString(_debugFont, "T=Save  L=Load  R=Reset counter", new Vector2(20, 125), Color.Black);
-        _spriteBatch.End();
+        ScreenManager.Draw(gameTime);
         base.Draw(gameTime);
-        
-        // draw the invetory and timer
-        _spriteBatch.Begin();
-        _overlay.DrawOnScreen(_spriteBatch, gameTime);              
-        _spriteBatch.End();        
-    }
-
-    private void HandleCameraMode()
-    {
-        
     }
 }

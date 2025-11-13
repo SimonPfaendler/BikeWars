@@ -1,10 +1,12 @@
+using Microsoft.Xna.Framework;
+
 namespace BikeWars.Content.engine.interfaces;
 // interface for all screens existing
 public interface IScreen
 {
-    public void Update();
+    public void Update(GameTime gameTime);
     
-    public void Draw();
+    public void Draw(GameTime gameTime);
 
     public bool UpdateLower { get; }
 

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using BikeWars.Content.engine.interfaces;
+using Microsoft.Xna.Framework;
 
 namespace BikeWars.Content.managers;
 // The screen manager handles all existing screens:
@@ -22,13 +23,13 @@ public class ScreenManager
         _mScreenStack.Remove(screen);
     }
 
-    public void Draw()
+    public void Draw(GameTime gameTime)
     {
         // draw all screens from the stack where DrawLower is true
         for (int i = _mScreenStack.Count - 1; i >= 0; i--)
         {
             IScreen screen = _mScreenStack[i];
-            screen.Draw();
+            screen.Draw(gameTime);
             if (!screen.DrawLower)
             {
                 break;
@@ -36,13 +37,13 @@ public class ScreenManager
         }
     }
 
-    public void Update()
+    public void Update(GameTime gameTime)
     {
         // update all screens from the stack where DrawLower is true
         for (int i = _mScreenStack.Count - 1; i >= 0; i--)
         {
             IScreen screen = _mScreenStack[i];
-            screen.Update();
+            screen.Update(gameTime);
             if (!screen.UpdateLower)
             {
                 break;
