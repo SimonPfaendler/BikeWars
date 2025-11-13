@@ -9,7 +9,6 @@ using Microsoft.Xna.Framework.Input;
 //    Centralized input management for all keyboard and mouse input.
 //    Provides easy-to-use methods for querying game actions, e.g.:
 //
-//        
 //        InputHandler.IsHeld(GameAction.MOVE_LEFT)
 //        InputHandler.IsPressed(GameAction.SAVE)
 //
@@ -28,7 +27,9 @@ namespace BikeWars.Content.engine
         SAVE,
         LOAD,
         RESET,
-        DEBUG_TOGGLE
+        DEBUG_TOGGLE,
+        TOGGLE_CAMERA,
+        ESC
     }
 
     public class KeyboardInfo
@@ -48,7 +49,7 @@ namespace BikeWars.Content.engine
         }
 
         public bool IsKeyPressed(Keys key)
-        { 
+        {
             return _current.IsKeyDown(key) && !_previous.IsKeyDown(key);
         }
 
@@ -74,7 +75,9 @@ namespace BikeWars.Content.engine
             { GameAction.SAVE, Keys.T },
             { GameAction.LOAD, Keys.L },
             { GameAction.RESET, Keys.R },
-            { GameAction.DEBUG_TOGGLE, Keys.P }
+            { GameAction.DEBUG_TOGGLE, Keys.P },
+            { GameAction.TOGGLE_CAMERA, Keys.C },
+            { GameAction.ESC, Keys.Escape }
         };
 
         public static void Update()
@@ -89,7 +92,7 @@ namespace BikeWars.Content.engine
         }
 
         public static bool IsPressed(GameAction action)
-        {     
+        {
             return Keyboard.IsKeyPressed(KeyMapping[action]);
         }
 

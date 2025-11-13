@@ -9,11 +9,10 @@ using BikeWars.Content.entities.interfaces;
 
 namespace BikeWars.Entities.Characters
 {
-    public class Player: CharacterBase
+    public class Hobo: CharacterBase
     {
-        public Color Tint = Color.Black;
         private BoxCollider _collider { get; set; }
-        private PlayerMovement movement { get; set; }
+        private EnemyMovement movement { get; set; }
         public SoundHandler SoundHandler { get; }
 
         private Texture2D texUp, texDown, texLeft, texRight;
@@ -25,10 +24,10 @@ namespace BikeWars.Entities.Characters
         private float _frameTimer = 0f;
         private int _frameIndex = 0;
 
-        public void LoadContent(ContentManager content, SoundEffect drivingSoundEffect)
+        public void LoadContent(ContentManager content, SoundEffect walkingSoundEffect)
         {
             // sprites
-            texRight = content.Load<Texture2D>("assets/sprites/character1/c1_move_right_1x2");
+            texRight = content.Load<Texture2D>("assets/sprites/character1/c1_move_right_1x2"); // TODO Replace with correct texture
             texLeft  = content.Load<Texture2D>("assets/sprites/character1/c1_move_left_1x2");
             texUp    = content.Load<Texture2D>("assets/sprites/character1/c1_move_up_1x2");
             texDown  = content.Load<Texture2D>("assets/sprites/character1/c1_move_down_1x2");
@@ -37,8 +36,8 @@ namespace BikeWars.Entities.Characters
             currentTex = texRight;
 
             // sounds
-            SoundHandler.DrivingSoundInstance = drivingSoundEffect.CreateInstance();
-            SoundHandler.DrivingSoundInstance.IsLooped = true;
+            SoundHandler.WalkingSoundInstance = walkingSoundEffect.CreateInstance();
+            SoundHandler.WalkingSoundInstance.IsLooped = true;
         }
 
         public void UpdateCollider()
@@ -46,15 +45,15 @@ namespace BikeWars.Entities.Characters
             _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y);
         }
 
-        // 1x1 Texture to represent the player
+        // 1x1 Texture to represent the enemy
         public static Texture2D pixel;
 
-        public Player(Vector2 start, Point size)
+        public Hobo(Vector2 start, Point size)
         {
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
-            Speed = 200f;
-            movement = new PlayerMovement(canMove: true, isMoving: false);
+            Speed = 100f;
+            movement = new EnemyMovement(canMove: true, isMoving: false);
             SoundHandler = new SoundHandler();
             UpdateCollider();
         }
@@ -68,22 +67,22 @@ namespace BikeWars.Entities.Characters
             movement.HandleMovement(gameTime);
             if (!movement.CanMove)
             {
-                SoundHandler.DrivingSoundInstance.Stop();
+                SoundHandler.WalkingSoundInstance.Stop();
                 return;
             }
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
             // Sound-Control
-            if (SoundHandler.DrivingSoundInstance != null)
+            if (SoundHandler.WalkingSoundInstance != null)
             {
                 // Start Playing Walking Sound if Player starts moving around
                 if (movement.IsMoving)
                 {
-                    SoundHandler.DrivingSoundInstance.Play();
+                    SoundHandler.WalkingSoundInstance.Play();
                 }
                 // Stop Playing Walking Sound if Player stops moving around
                 else
                 {
-                    SoundHandler.DrivingSoundInstance.Stop();
+                    SoundHandler.WalkingSoundInstance.Stop();
                 }
             }
 
@@ -116,6 +115,7 @@ namespace BikeWars.Entities.Characters
             }
             UpdateCollider();
         }
+
         public void Draw(SpriteBatch spriteBatch)
         {
             if (currentTex == null) return;

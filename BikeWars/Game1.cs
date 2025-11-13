@@ -21,11 +21,9 @@ public class Game1 : Game
 {
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
-    private Texture2D _texture;
-
     private List<ItemBase> _testItems;
-    
     Player player;
+    private Hobo hobo;
 
     private bool _freeCamera = false;
     private bool _cKeyPressed = false;
@@ -41,12 +39,12 @@ public class Game1 : Game
 
     // Paths
     private const String ARIAL_FONT = "assets/fonts/Arial";
-    
+
     // counter for SaveLoadExample
     private int _counter = 0;
     private float _counterTimer = 0;
     private KeyboardState _prevKbState;
-    
+
     // overlay
     private Overlay _overlay;
     private TiledMap _tiledMap;
@@ -70,23 +68,24 @@ public class Game1 : Game
         _testItems.Add(new Item(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
         _testItems.Add(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
         camera = new Camera2D(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, worldBounds);
-        
+
         // Spawn player in center of screen
         player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(32, 32));
-        
+        hobo = new Hobo(new Vector2(worldBounds.Width / 2 + 10, worldBounds.Height / 2), new Point(32, 32));
+
         soundHandler = new SoundHandler();
         // Center camera on player from game start
         camera.Position = player.Transform.Position;
-        
+
         // Create SaveLoad and load saved data (if there is any)
         _counter = SaveLoad.LoadGame();
-        
+
         base.Initialize();
     }
 
     protected override void LoadContent()
     {
-        
+
         _debugFont = Content.Load<SpriteFont>(ARIAL_FONT);
         _debugger = new Debugger(_debugFont, player);
 
@@ -95,7 +94,8 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
         // Load Soundeffects
-        player.LoadContent(Content, Content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
+        player.LoadContent(Content, Content.Load<SoundEffect>(soundHandler.DRIVING_SOUND_PATH));
+        hobo.LoadContent(Content, Content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
         if (_testItems.Count > 1)
         {
             _testItems[1].LoadContent(Content);
@@ -105,41 +105,35 @@ public class Game1 : Game
 
     protected override void Update(GameTime gameTime)
     {
-        if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+        InputHandler.Update();
+        if (InputHandler.IsPressed(GameAction.ESC))
             Exit();
 
-
-
-        InputHandler.Update();
-
-        if (Keyboard.GetState().IsKeyDown(Keys.C))
+        if (InputHandler.IsPressed(GameAction.TOGGLE_CAMERA))
         {
             _cKeyPressed = true;
         }
 
         // Switch between camera Playerlock and FreeLook
-        if (_cKeyPressed && Keyboard.GetState().IsKeyUp(Keys.C))
+        if (_cKeyPressed)
         {
             _freeCamera = !_freeCamera;
             _cKeyPressed = false;
         }
-        
-        
+
         // If camera is in FreeLook mode dont update player movement
-        //player.Update(gameTime, _freeCamera);
         if (camera.Mode == CameraMode.FreeLook)
         {
-            player.SetCanMove(false);
+            player.Immobalize(true);
         } else
         {
-            player.SetCanMove(true);
+            player.Immobalize(false);
         }
         player.Update(gameTime);
-        
+
         if (player.Intersects(_testItems[0].Collider))
         {
             player.SetLastTransform();
-            //player.Transform = new Transform(new Vector2(player.LastTransform.Position.X, player.LastTransform.Position.Y), player.LastTransform.Size);
             player.UpdateCollider();
         }
 
@@ -148,22 +142,22 @@ public class Game1 : Game
             if (player.Intersects(_testItems[1].Collider))
             {
                 _testItems.RemoveAt(1);
-            }    
+            }
         }
-
         _debugger.Update(gameTime);
 
         // Frist update all objects and last update camera view
         camera.Update(gameTime, player.Transform.Position, _freeCamera);
-        
+
         HandleCounter(gameTime);
         HandleSaveLoadInput();
-        
+
         _tiledMapRenderer.Update(gameTime);
-        
+
+        hobo.Update(gameTime);
         base.Update(gameTime);
     }
-    
+
     // Handles the counter increment logic once per second
     private void HandleCounter(GameTime gameTime)
     {
@@ -175,20 +169,18 @@ public class Game1 : Game
             _counterTimer = 0;
         }
     }
-    
+
     // handels the key inputs for save and load
     private void HandleSaveLoadInput()
     {
-
-
         // edge-triggered: pressed this frame, not last frame
         if (InputHandler.IsPressed(GameAction.SAVE))
             SaveLoad.SaveGame(_counter);
 
         if (InputHandler.IsPressed(GameAction.LOAD))
         {
-            _counter = SaveLoad.LoadGame(); 
-            _counterTimer = 0;    
+            _counter = SaveLoad.LoadGame();
+            _counterTimer = 0;
         }
 
         if (InputHandler.IsPressed(GameAction.RESET))
@@ -197,8 +189,6 @@ public class Game1 : Game
             _counterTimer = 0;
             Console.WriteLine("Counter Reset. Counter=0");
         }
-
-        
     }
 
     protected override void Draw(GameTime gameTime)
@@ -209,6 +199,7 @@ public class Game1 : Game
         // Everything within the first spriteBatch will be transformed by the camera
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.GetTransform());
         player.Draw(_spriteBatch);
+        hobo.Draw(_spriteBatch);
         foreach (var item in _testItems)
         {
             item.Draw(_spriteBatch);
@@ -218,26 +209,26 @@ public class Game1 : Game
         _overlay.DrawOnWorld(_spriteBatch, player);
         _spriteBatch.End();
 
-        // Render debugger on top and serparately from camera transformation to stay fixed 
+        // Render debugger on top and serparately from camera transformation to stay fixed
         _spriteBatch.Begin();
         _debugger.Draw(_spriteBatch);
         _spriteBatch.End();
-        
+
         //draw the counter
         _spriteBatch.Begin();
         _spriteBatch.DrawString(_debugFont, $"Counter: {_counter}", new Vector2(20, 100), Color.Black);
         _spriteBatch.DrawString(_debugFont, "T=Save  L=Load  R=Reset counter", new Vector2(20, 125), Color.Black);
         _spriteBatch.End();
         base.Draw(gameTime);
-        
+
         // draw the invetory and timer
         _spriteBatch.Begin();
-        _overlay.DrawOnScreen(_spriteBatch, gameTime);              
-        _spriteBatch.End();        
+        _overlay.DrawOnScreen(_spriteBatch, gameTime);
+        _spriteBatch.End();
     }
 
     private void HandleCameraMode()
     {
-        
+
     }
 }

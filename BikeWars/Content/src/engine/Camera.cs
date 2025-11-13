@@ -44,7 +44,7 @@ namespace BikeWars.Content.engine
             MouseState mouse = Mouse.GetState();
 
             // switch between FreeLook & PlayerLock
-            if (freeCamera) 
+            if (freeCamera)
                 Mode = CameraMode.FreeLook;
             else
                 Mode = CameraMode.PlayerLock;
@@ -75,12 +75,10 @@ namespace BikeWars.Content.engine
         {
             float adjustedSpeed = MoveSpeed / Zoom;
             Vector2 pos = Position;
-
-            if (keyboard.IsKeyDown(Keys.A))  pos.X -= adjustedSpeed;
-            if (keyboard.IsKeyDown(Keys.D)) pos.X += adjustedSpeed;
-            if (keyboard.IsKeyDown(Keys.W))    pos.Y -= adjustedSpeed;
-            if (keyboard.IsKeyDown(Keys.S)) pos.Y += adjustedSpeed;
-
+            if (InputHandler.IsHeld(GameAction.MOVE_LEFT))  pos.X -= adjustedSpeed;
+            if (InputHandler.IsHeld(GameAction.MOVE_RIGHT)) pos.X += adjustedSpeed;
+            if (InputHandler.IsHeld(GameAction.MOVE_UP))    pos.Y -= adjustedSpeed;
+            if (InputHandler.IsHeld(GameAction.MOVE_DOWN))    pos.Y += adjustedSpeed;
             Position = pos;
         }
 
