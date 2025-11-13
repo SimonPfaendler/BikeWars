@@ -1,18 +1,18 @@
+using System;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework;
 using static DirectionHelper;
 
 namespace BikeWars.Content.engine;
-public class PlayerMovement: MovementBase
+public class EnemyMovement: MovementBase
 {
-    private readonly InputHandler _input;
-
-    public PlayerMovement(bool canMove, bool isMoving, InputHandler inputHandler)
+    private double _walkTimer {set; get;}
+    public EnemyMovement(bool canMove, bool isMoving)
     {
         Direction = Vector2.Zero;
         CanMove = canMove;
         IsMoving = isMoving;
-        _input = inputHandler;
+        _walkTimer = 0;
     }
 
     public override void HandleMovement(GameTime gameTime)
@@ -21,6 +21,7 @@ public class PlayerMovement: MovementBase
         {
             return;
         }
+        _walkTimer += gameTime.ElapsedGameTime.TotalSeconds; // This should be just temporary until we implement it correctly.
         Direction = MakeDirection();
         Update(gameTime);
     }
@@ -28,25 +29,19 @@ public class PlayerMovement: MovementBase
     private Vector2 MakeDirection()
     {
         Vector2 direction = Vector2.Zero;
-        if (_input.PressingAction(GameAction.MOVE_UP))
+        if (_walkTimer <= 2) // Needs improvement but it's ok for the start
         {
-            direction += Get(global::Direction.UP);
+            direction = Get(global::Direction.LEFT);
+        } else if (_walkTimer <= 4)
+        {
+            direction = Get(global::Direction.RIGHT);
         }
-        if (_input.PressingAction(GameAction.MOVE_DOWN))
+        else
         {
-            direction += Get(global::Direction.DOWN);
-        }
-        if (_input.PressingAction(GameAction.MOVE_LEFT))
-        {
-            direction += Get(global::Direction.LEFT);
-        }
-        if (_input.PressingAction(GameAction.MOVE_RIGHT))
-        {
-            direction += Get(global::Direction.RIGHT);
+            _walkTimer = 0;
         }
         return direction;
     }
-
     private bool UpdateMoving()
     {
         return Direction != Vector2.Zero;
