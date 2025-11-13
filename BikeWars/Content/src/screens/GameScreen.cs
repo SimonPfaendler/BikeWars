@@ -1,3 +1,4 @@
+using System;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -10,15 +11,16 @@ using BikeWars.Utilities;
 using Microsoft.Xna.Framework.Audio;
 using System.Collections.Generic;
 using BikeWars.Content.src.screens.Overlay;
+using BikeWars.Content.src.utils.SaveLoadExample;
 using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
 using MonoGame.Extended.Tiled.Renderers;
+using InputAction = BikeWars.Content.engine.GameAction;
 
 namespace BikeWars.Content.screens
 {
     public class GameScreen : IScreen
     {
-        // Hier kommen später alle Variablen aus Game1
         private List<ItemBase> _testItems;
         private Player player;
         private Camera2D camera;
@@ -28,6 +30,9 @@ namespace BikeWars.Content.screens
         private TiledMapRenderer _tiledMapRenderer;
         private SpriteFont _debugFont;
         private Debugger _debugger;
+        private int _counter = 0;
+        private float _counterTimer = 0;
+        private KeyboardState _prevKbState;
 
         public bool DrawLower => false;
         public bool UpdateLower => false;
@@ -55,6 +60,8 @@ namespace BikeWars.Content.screens
     
             // Camera auf Player zentrieren
             camera.Position = player.Transform.Position;
+            
+            _counter = SaveLoad.LoadGame();
         }
         
         public void LoadContent(ContentManager content)
@@ -105,8 +112,51 @@ namespace BikeWars.Content.screens
 
             // TiledMap Renderer Update
             _tiledMapRenderer.Update(gameTime);  // Richtiges GameTime übergeben
+            
+            HandleCounter(gameTime);
+            HandleSaveLoadInput();
         }
+        
+        private void HandleCounter(GameTime gameTime)
+        {
+            _counterTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+            if (_counterTimer >= 1)
+            {
+                _counter++;
+                _counterTimer = 0;
+            }
+        }
+        
+        private void HandleSaveLoadInput()
+        {
+            KeyboardState KbState = Keyboard.GetState();
+    
+            // use the central mapping instead of hardcoding keys
+            Keys saveKey  = InputHandler.KeyMapping[InputAction.SAVE];
+            Keys loadKey  = InputHandler.KeyMapping[InputAction.LOAD];
+            Keys resetKey = InputHandler.KeyMapping[InputAction.RESET];
+
+    
+            // edge-triggered: pressed this frame, not last frame
+            if (KbState.IsKeyDown(saveKey) && !_prevKbState.IsKeyDown(saveKey))
+                SaveLoad.SaveGame(_counter);
+
+            if (KbState.IsKeyDown(loadKey) && !_prevKbState.IsKeyDown(loadKey))
+            {
+                _counter = SaveLoad.LoadGame(); 
+                _counterTimer = 0;    
+            }
+
+            if (KbState.IsKeyDown(resetKey) && !_prevKbState.IsKeyDown(resetKey))
+            {
+                _counter = 0;
+                _counterTimer = 0;
+                Console.WriteLine("Counter Reset. Counter=0");
+            }
+
+            _prevKbState = KbState;
+        }
         public void Draw(GameTime gameTime)  // <- GameTime parameter verwenden
         {
             Game1 game = Game1.Instance;
@@ -134,6 +184,11 @@ namespace BikeWars.Content.screens
             // Overlay (Timer und Inventory) mit richtigem GameTime
             spriteBatch.Begin();
             _overlay.DrawOnScreen(spriteBatch, gameTime);  // <- Richtiges GameTime übergeben
+            spriteBatch.End();
+            
+            spriteBatch.Begin();
+            spriteBatch.DrawString(_debugFont, $"Counter: {_counter}", new Vector2(20, 100), Color.Black);
+            spriteBatch.DrawString(_debugFont, "T=Save  L=Load  R=Reset counter", new Vector2(20, 125), Color.Black);
             spriteBatch.End();
         }
     }
