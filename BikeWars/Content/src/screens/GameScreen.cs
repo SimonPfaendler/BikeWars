@@ -35,33 +35,35 @@ namespace BikeWars.Content.screens
         private List<BoxCollider> _collisionBoxes;
         private Hobo hobo;
 
+        private bool _freelook; // Has to be optimized
+
         public bool DrawLower => false;
         public bool UpdateLower => false;
-        
+
         public GameScreen()
         {
             worldBounds = new Rectangle(0, 0, 11200, 11200);
-            
+
             _testItems = new List<ItemBase>();
             _testItems.Add(new Item(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
             _testItems.Add(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
-            
+
             player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(32, 32));
-            
+
             hobo = new Hobo(new Vector2(worldBounds.Width / 2 + 10, worldBounds.Height / 2), new Point(32, 32));
-            
+
             Game1 game = Game1.Instance;
             camera = new Camera2D(
-                game.GraphicsDevice.Viewport.Width, 
-                game.GraphicsDevice.Viewport.Height, 
+                game.GraphicsDevice.Viewport.Width,
+                game.GraphicsDevice.Viewport.Height,
                 worldBounds
             );
-            
+            _freelook = false;
             camera.Position = player.Transform.Position;
-            
+
             _counter = SaveLoad.LoadGame();
         }
-        
+
         public void LoadContent(ContentManager content)
         {
             // Font and Debugger
@@ -71,17 +73,17 @@ namespace BikeWars.Content.screens
             // Tiled Map
             _tiledMap = content.Load<TiledMap>("assets/Map/Bike_Wars_Map");
             _tiledMapRenderer = new TiledMapRenderer(Game1.Instance.GraphicsDevice, _tiledMap);
-            
+
             var collisionLayer = _tiledMap.GetLayer<TiledMapTileLayer>("Collision");
             _collisionBoxes = new List<BoxCollider>();
 
-            foreach (var tile in collisionLayer.Tiles)        
+            foreach (var tile in collisionLayer.Tiles)
             {
                 if(tile.GlobalIdentifier == 0) continue;
 
                 int x = tile.X * 16;
                 int y = tile.Y * 16;
-        
+
                 _collisionBoxes.Add(new BoxCollider(new Vector2(x, y), 16, 16));
             }
 
@@ -102,7 +104,7 @@ namespace BikeWars.Content.screens
         public void Update(GameTime gameTime)
         {
             InputHandler.Update();
-            
+
             player.Update(gameTime);
 
             // Collision Handling with player
@@ -116,8 +118,8 @@ namespace BikeWars.Content.screens
             {
                 _testItems.RemoveAt(1);
             }
-            
-            foreach (var box in _collisionBoxes)   
+
+            foreach (var box in _collisionBoxes)
             {
                 if (player.Intersects(box))
                 {
@@ -125,19 +127,26 @@ namespace BikeWars.Content.screens
                     player.UpdateCollider();
                 }
             }
-            
+
             _debugger.Update(gameTime);
-            
-            camera.Update(gameTime, player.Transform.Position, false);
-            
+
+
+            // Needs to be implemented elsewhere.
+            if (InputHandler.IsPressed(GameAction.TOGGLE_CAMERA))
+            {
+                _freelook = !_freelook;
+                player.Immobalize(_freelook);
+            }
+            camera.Update(gameTime, player.Transform.Position, _freelook);
+
             _tiledMapRenderer.Update(gameTime);
-            
+
             hobo.Update(gameTime);
-            
+
             HandleCounter(gameTime);
             HandleSaveLoadInput();
         }
-        
+
         private void HandleCounter(GameTime gameTime)
         {
             _counterTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -148,7 +157,7 @@ namespace BikeWars.Content.screens
                 _counterTimer = 0;
             }
         }
-        
+
         private void HandleSaveLoadInput()
         {
             if (InputHandler.IsPressed(GameAction.SAVE))
@@ -156,8 +165,8 @@ namespace BikeWars.Content.screens
 
             if (InputHandler.IsPressed(GameAction.LOAD))
             {
-                _counter = SaveLoad.LoadGame(); 
-                _counterTimer = 0;    
+                _counter = SaveLoad.LoadGame();
+                _counterTimer = 0;
             }
 
             if (InputHandler.IsPressed(GameAction.RESET))
@@ -173,7 +182,7 @@ namespace BikeWars.Content.screens
             SpriteBatch spriteBatch = game.SpriteBatch;
 
             _tiledMapRenderer.Draw(camera.GetTransform());
-            
+
             spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.GetTransform());
             player.Draw(spriteBatch);
             hobo.Draw(spriteBatch);
@@ -184,15 +193,15 @@ namespace BikeWars.Content.screens
 
             _overlay.DrawOnWorld(spriteBatch, player);
             spriteBatch.End();
-            
+
             spriteBatch.Begin();
             _debugger.Draw(spriteBatch);
             spriteBatch.End();
-            
+
             spriteBatch.Begin();
             _overlay.DrawOnScreen(spriteBatch, gameTime);
             spriteBatch.End();
-            
+
             spriteBatch.Begin();
             spriteBatch.DrawString(_debugFont, $"Counter: {_counter}", new Vector2(20, 100), Color.Black);
             spriteBatch.DrawString(_debugFont, "T=Save  L=Load  R=Reset counter", new Vector2(20, 125), Color.Black);

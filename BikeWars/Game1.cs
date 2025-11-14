@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using BikeWars.Content.managers;
 using BikeWars.Content.screens;
+using BikeWars.Content.engine;
 
 namespace BikeWars;
 
@@ -33,7 +34,7 @@ public class Game1 : Game
     protected override void LoadContent()
     {
         this.SpriteBatch = new SpriteBatch(GraphicsDevice);
-        
+
         Texture2D background = Content.Load<Texture2D>("assets/images/Startbildschirm");
         Texture2D button = Content.Load<Texture2D>("assets/images/StartButton");
         StartScreen startScreen = new StartScreen(background, button);
@@ -43,8 +44,8 @@ public class Game1 : Game
     protected override void Update(GameTime gameTime)
     {
         ScreenManager.Update(gameTime);
-        
-        if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+
+        if (InputHandler.IsPressed(GameAction.ESC))
             Exit();
 
         base.Update(gameTime);
