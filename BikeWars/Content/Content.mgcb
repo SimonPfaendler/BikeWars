@@ -49,7 +49,7 @@
 /processor:TiledMapTilesetProcessor
 /build:assets/Map/Bike_Wars_Tileset.tsx
 
-#begin assets/Map/terrain_atlas.png
+#begin assets/Map/tilemap_1.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -59,9 +59,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:assets/Map/terrain_atlas.png
+/build:assets/Map/tilemap_1.png
 
-#begin assets/Map/tilemap.png
+#begin assets/Map/tilemap_2.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -71,7 +71,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:assets/Map/tilemap.png
+/build:assets/Map/tilemap_2.png
 
 #begin assets/sounds/Bike_Driving.mp3
 /importer:Mp3Importer

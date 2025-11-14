@@ -63,7 +63,7 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
-        worldBounds = new Rectangle(0, 0, 4000, 2000); // Example values for game world size
+        worldBounds = new Rectangle(0, 0, 11200, 11200); // Example values for game world size
         _testItems = new List<ItemBase>();
         _testItems.Add(new Item(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
         _testItems.Add(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
@@ -89,7 +89,7 @@ public class Game1 : Game
         _debugFont = Content.Load<SpriteFont>(ARIAL_FONT);
         _debugger = new Debugger(_debugFont, player);
 
-        _tiledMap = Content.Load<TiledMap>("assets/Map/Bikewars_Tilemap");
+        _tiledMap = Content.Load<TiledMap>("assets/Map/Bike_Wars_Map");
         _tiledMapRenderer = new TiledMapRenderer(GraphicsDevice, _tiledMap);
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
