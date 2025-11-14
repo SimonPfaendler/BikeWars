@@ -34,7 +34,6 @@ public class Game1 : Game
     {
         this.SpriteBatch = new SpriteBatch(GraphicsDevice);
         
-        // NUR StartScreen laden - GameScreen wird später per Button gestartet
         Texture2D background = Content.Load<Texture2D>("assets/images/Startbildschirm");
         Texture2D button = Content.Load<Texture2D>("assets/images/StartButton");
         StartScreen startScreen = new StartScreen(background, button);

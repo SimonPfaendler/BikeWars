@@ -8,6 +8,8 @@ public interface IScreen
     
     public void Draw(GameTime gameTime);
 
+    // Decide whether the Screen below (on the Stack) should be Drawn and/or updated
+
     public bool UpdateLower { get; }
 
     public bool DrawLower { get; }

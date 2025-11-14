@@ -39,26 +39,21 @@ namespace BikeWars.Content.screens
         
         public GameScreen()
         {
-            // Weltgrenzen
             worldBounds = new Rectangle(0, 0, 4000, 2000);
-    
-            // Test-Items
+            
             _testItems = new List<ItemBase>();
             _testItems.Add(new Item(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
             _testItems.Add(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
-    
-            // Player
+            
             player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(32, 32));
-    
-            // Camera mit GraphicsDevice von Game1
+            
             Game1 game = Game1.Instance;
             camera = new Camera2D(
                 game.GraphicsDevice.Viewport.Width, 
                 game.GraphicsDevice.Viewport.Height, 
                 worldBounds
             );
-    
-            // Camera auf Player zentrieren
+            
             camera.Position = player.Transform.Position;
             
             _counter = SaveLoad.LoadGame();
@@ -66,7 +61,7 @@ namespace BikeWars.Content.screens
         
         public void LoadContent(ContentManager content)
         {
-            // Font und Debugger
+            // Font and Debugger
             _debugFont = content.Load<SpriteFont>("assets/fonts/Arial");
             _debugger = new Debugger(_debugFont, player);
 
@@ -77,22 +72,21 @@ namespace BikeWars.Content.screens
             // Overlay
             _overlay = new Overlay(_debugFont, Game1.Instance.GraphicsDevice);
 
-            // Player Soundeffekte laden
+            // Player Soundeffects
             SoundHandler soundHandler = new SoundHandler();
             player.LoadContent(content, content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
 
-            // Items laden
+            // Items
             if (_testItems.Count > 1)
             {
                 _testItems[1].LoadContent(content);
             }
         }
-        public void Update(GameTime gameTime)  // GameTime parameter verwenden
+        public void Update(GameTime gameTime)
         {
-            // Player Update
-            player.Update(gameTime);  // Richtiges GameTime übergeben
+            player.Update(gameTime);
 
-            // Kollisionsprüfung
+            // Collision Handling with player
             if (player.Intersects(_testItems[0].Collider))
             {
                 player.SetLastTransform();
@@ -103,15 +97,12 @@ namespace BikeWars.Content.screens
             {
                 _testItems.RemoveAt(1);
             }
-
-            // Debugger Update
-            _debugger.Update(gameTime);  // Richtiges GameTime übergeben
-
-            // Camera Update - freeCamera vorerst false
+            
+            _debugger.Update(gameTime);
+            
             camera.Update(gameTime, player.Transform.Position, false);
-
-            // TiledMap Renderer Update
-            _tiledMapRenderer.Update(gameTime);  // Richtiges GameTime übergeben
+            
+            _tiledMapRenderer.Update(gameTime);
             
             HandleCounter(gameTime);
             HandleSaveLoadInput();
@@ -157,33 +148,29 @@ namespace BikeWars.Content.screens
 
             _prevKbState = KbState;
         }
-        public void Draw(GameTime gameTime)  // <- GameTime parameter verwenden
+        public void Draw(GameTime gameTime)
         {
             Game1 game = Game1.Instance;
             SpriteBatch spriteBatch = game.SpriteBatch;
 
-            // Tiled Map zeichnen
             _tiledMapRenderer.Draw(camera.GetTransform());
-
-            // Spielobjekte mit Camera-Transformation
+            
             spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.GetTransform());
             player.Draw(spriteBatch);
             foreach (var item in _testItems)
             {
                 item.Draw(spriteBatch);
             }
-            // Lifelines unter dem Player (World-Space)
+
             _overlay.DrawOnWorld(spriteBatch, player);
             spriteBatch.End();
-
-            // Debugger oben fixed
+            
             spriteBatch.Begin();
             _debugger.Draw(spriteBatch);
             spriteBatch.End();
-    
-            // Overlay (Timer und Inventory) mit richtigem GameTime
+            
             spriteBatch.Begin();
-            _overlay.DrawOnScreen(spriteBatch, gameTime);  // <- Richtiges GameTime übergeben
+            _overlay.DrawOnScreen(spriteBatch, gameTime);
             spriteBatch.End();
             
             spriteBatch.Begin();
