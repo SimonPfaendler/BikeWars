@@ -15,7 +15,7 @@ using BikeWars.Content.src.utils.SaveLoadExample;
 using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
 using MonoGame.Extended.Tiled.Renderers;
-using InputAction = BikeWars.Content.engine.GameAction;
+using BikeWars.Content.engine;
 
 namespace BikeWars.Content.screens
 {
@@ -32,7 +32,6 @@ namespace BikeWars.Content.screens
         private Debugger _debugger;
         private int _counter = 0;
         private float _counterTimer = 0;
-        private KeyboardState _prevKbState;
         private List<BoxCollider> _collisionBoxes;
         private Hobo hobo;
 
@@ -91,8 +90,8 @@ namespace BikeWars.Content.screens
 
             // Player and Hobo Soundeffects
             SoundHandler soundHandler = new SoundHandler();
-            player.LoadContent(content, Content.Load<SoundEffect>(soundHandler.DRIVING_SOUND_PATH));
-            hobo.LoadContent(content, Content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
+            player.LoadContent(content, content.Load<SoundEffect>(soundHandler.DRIVING_SOUND_PATH));
+            hobo.LoadContent(content, content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
 
             // Items
             if (_testItems.Count > 1)
@@ -152,32 +151,21 @@ namespace BikeWars.Content.screens
         
         private void HandleSaveLoadInput()
         {
-            KeyboardState KbState = Keyboard.GetState();
-    
-            // use the central mapping instead of hardcoding keys
-            Keys saveKey  = InputHandler.KeyMapping[InputAction.SAVE];
-            Keys loadKey  = InputHandler.KeyMapping[InputAction.LOAD];
-            Keys resetKey = InputHandler.KeyMapping[InputAction.RESET];
-
-    
-            // edge-triggered: pressed this frame, not last frame
-            if (KbState.IsKeyDown(saveKey) && !_prevKbState.IsKeyDown(saveKey))
+            if (InputHandler.IsPressed(GameAction.SAVE))
                 SaveLoad.SaveGame(_counter);
 
-            if (KbState.IsKeyDown(loadKey) && !_prevKbState.IsKeyDown(loadKey))
+            if (InputHandler.IsPressed(GameAction.LOAD))
             {
                 _counter = SaveLoad.LoadGame(); 
                 _counterTimer = 0;    
             }
 
-            if (KbState.IsKeyDown(resetKey) && !_prevKbState.IsKeyDown(resetKey))
+            if (InputHandler.IsPressed(GameAction.RESET))
             {
                 _counter = 0;
                 _counterTimer = 0;
                 Console.WriteLine("Counter Reset. Counter=0");
             }
-
-            _prevKbState = KbState;
         }
         public void Draw(GameTime gameTime)
         {
