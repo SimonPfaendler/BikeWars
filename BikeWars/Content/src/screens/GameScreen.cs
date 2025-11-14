@@ -33,19 +33,23 @@ namespace BikeWars.Content.screens
         private int _counter = 0;
         private float _counterTimer = 0;
         private KeyboardState _prevKbState;
+        private List<BoxCollider> _collisionBoxes;
+        private Hobo hobo;
 
         public bool DrawLower => false;
         public bool UpdateLower => false;
         
         public GameScreen()
         {
-            worldBounds = new Rectangle(0, 0, 4000, 2000);
+            worldBounds = new Rectangle(0, 0, 11200, 11200);
             
             _testItems = new List<ItemBase>();
             _testItems.Add(new Item(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
             _testItems.Add(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
             
             player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(32, 32));
+            
+            hobo = new Hobo(new Vector2(worldBounds.Width / 2 + 10, worldBounds.Height / 2), new Point(32, 32));
             
             Game1 game = Game1.Instance;
             camera = new Camera2D(
@@ -66,15 +70,29 @@ namespace BikeWars.Content.screens
             _debugger = new Debugger(_debugFont, player);
 
             // Tiled Map
-            _tiledMap = content.Load<TiledMap>("assets/Map/Bikewars_Tilemap");
+            _tiledMap = content.Load<TiledMap>("assets/Map/Bike_Wars_Map");
             _tiledMapRenderer = new TiledMapRenderer(Game1.Instance.GraphicsDevice, _tiledMap);
+            
+            var collisionLayer = _tiledMap.GetLayer<TiledMapTileLayer>("Collision");
+            _collisionBoxes = new List<BoxCollider>();
+
+            foreach (var tile in collisionLayer.Tiles)        
+            {
+                if(tile.GlobalIdentifier == 0) continue;
+
+                int x = tile.X * 16;
+                int y = tile.Y * 16;
+        
+                _collisionBoxes.Add(new BoxCollider(new Vector2(x, y), 16, 16));
+            }
 
             // Overlay
             _overlay = new Overlay(_debugFont, Game1.Instance.GraphicsDevice);
 
-            // Player Soundeffects
+            // Player and Hobo Soundeffects
             SoundHandler soundHandler = new SoundHandler();
-            player.LoadContent(content, content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
+            player.LoadContent(content, Content.Load<SoundEffect>(soundHandler.DRIVING_SOUND_PATH));
+            hobo.LoadContent(content, Content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
 
             // Items
             if (_testItems.Count > 1)
@@ -84,6 +102,8 @@ namespace BikeWars.Content.screens
         }
         public void Update(GameTime gameTime)
         {
+            InputHandler.Update();
+            
             player.Update(gameTime);
 
             // Collision Handling with player
@@ -98,11 +118,22 @@ namespace BikeWars.Content.screens
                 _testItems.RemoveAt(1);
             }
             
+            foreach (var box in _collisionBoxes)   
+            {
+                if (player.Intersects(box))
+                {
+                    player.SetLastTransform();
+                    player.UpdateCollider();
+                }
+            }
+            
             _debugger.Update(gameTime);
             
             camera.Update(gameTime, player.Transform.Position, false);
             
             _tiledMapRenderer.Update(gameTime);
+            
+            hobo.Update(gameTime);
             
             HandleCounter(gameTime);
             HandleSaveLoadInput();
@@ -157,6 +188,7 @@ namespace BikeWars.Content.screens
             
             spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.GetTransform());
             player.Draw(spriteBatch);
+            hobo.Draw(spriteBatch);
             foreach (var item in _testItems)
             {
                 item.Draw(spriteBatch);
