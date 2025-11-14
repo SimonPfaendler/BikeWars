@@ -34,39 +34,44 @@
 /processorParam:TextureFormat=Color
 /build:assets/images/Startbildschirm.png
 
-#begin assets/Map/Bikewars_Tilemap.tmx
+#begin assets/Map/Bike_Wars_Map.tmx
 /importer:TiledMapImporter
 /processor:TiledMapProcessor
-/build:assets/Map/Bikewars_Tilemap.tmx
+/build:assets/Map/Bike_Wars_Map.tmx
 
-#begin assets/Map/dark-grass-middle-middle.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:assets/Map/dark-grass-middle-middle.png
-
-#begin assets/Map/pine-tree.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:assets/Map/pine-tree.png
-
-#begin assets/Map/Tileset_Bikewars.tsx
+#begin assets/Map/Bike_Wars_Tileset_2.tsx
 /importer:TiledMapTilesetImporter
 /processor:TiledMapTilesetProcessor
-/build:assets/Map/Tileset_Bikewars.tsx
+/build:assets/Map/Bike_Wars_Tileset_2.tsx
+
+#begin assets/Map/Bike_Wars_Tileset.tsx
+/importer:TiledMapTilesetImporter
+/processor:TiledMapTilesetProcessor
+/build:assets/Map/Bike_Wars_Tileset.tsx
+
+#begin assets/Map/tilemap_1.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/Map/tilemap_1.png
+
+#begin assets/Map/tilemap_2.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/Map/tilemap_2.png
 
 #begin assets/sounds/Bike_Driving.mp3
 /importer:Mp3Importer
