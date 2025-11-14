@@ -9,7 +9,7 @@ public abstract class MovementBase : IMoveable
 
     public bool IsMoving { get => _isMoving; set => _isMoving = value; }
     public bool CanMove {
-        get => _canMove; 
+        get => _canMove;
         set {
             _canMove = value;
             if (!_canMove)
@@ -28,7 +28,7 @@ public abstract class MovementBase : IMoveable
             _direction = value;
             if (_direction.X == 1)
             {
-                
+
             }
             // Update();
         }

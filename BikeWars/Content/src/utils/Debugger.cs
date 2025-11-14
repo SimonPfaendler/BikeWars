@@ -10,7 +10,6 @@ using BikeWars.Content.engine;
 // A simple in-game debugger utility to display debug information such as player position,player velocity, and bounds.
 // It can be toggled on and off with DEBUG_TOGGLE(P) action.
 // ============================================================
-
 namespace BikeWars.Utilities
 {
     public sealed class Debugger

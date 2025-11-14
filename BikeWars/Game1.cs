@@ -14,6 +14,7 @@ public class Game1 : Game
     public ScreenManager ScreenManager;
     public static Game1 Instance { get; private set; }
 
+
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);

@@ -24,7 +24,13 @@ public class Movement: MovementBase
             return;
         }
     }
-
     public override void Update(GameTime gameTime){}
+    public void HandleBasicDirections()
+    {
+        if (!CanMove)
+        {
+            return;
+        }
+    }
 }
 

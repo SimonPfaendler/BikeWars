@@ -1,6 +1,10 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-
+// ============================================================
+// Camera.cs
+// Defines a 2D camera with PlayerLock and FreeLook modes with
+// pressing TOGGLE_CAMERA(C).
+// ============================================================
 namespace BikeWars.Content.engine
 {
     public enum CameraMode
@@ -36,7 +40,6 @@ namespace BikeWars.Content.engine
             _worldBounds = worldBounds;
             _prevScrollValue = Mouse.GetState().ScrollWheelValue;
         }
-
 
         public void Update(GameTime gameTime, Vector2 playerPosition, bool freeCamera)
         {
