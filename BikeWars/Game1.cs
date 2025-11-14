@@ -22,6 +22,7 @@ public class Game1 : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private List<ItemBase> _testItems;
+    private List<BoxCollider> _collisionBoxes;
     Player player;
     private Hobo hobo;
 
@@ -89,8 +90,26 @@ public class Game1 : Game
         _debugFont = Content.Load<SpriteFont>(ARIAL_FONT);
         _debugger = new Debugger(_debugFont, player);
 
+        // Load Map
         _tiledMap = Content.Load<TiledMap>("assets/Map/Bike_Wars_Map");
         _tiledMapRenderer = new TiledMapRenderer(GraphicsDevice, _tiledMap);
+        
+        // Load Map Collisions
+        var collosionLayer = _tiledMap.GetLayer<TiledMapTileLayer>("Collision");
+
+        _collisionBoxes = new List<BoxCollider>();
+
+        foreach (var tile in collosionLayer.Tiles)        
+        {
+            if(tile.GlobalIdentifier == 0)
+            continue;
+
+            int x = tile.X * 16;
+            int y = tile.Y * 16;
+            
+            _collisionBoxes.Add(new BoxCollider(new Vector2(x, y), 16, 16));
+        }
+        
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
         // Load Soundeffects
@@ -144,6 +163,17 @@ public class Game1 : Game
                 _testItems.RemoveAt(1);
             }
         }
+
+        foreach (var Box in _collisionBoxes)   
+        {
+            if (player.Intersects(Box))
+            {
+                player.SetLastTransform();
+                player.UpdateCollider();
+            }
+        }
+
+
         _debugger.Update(gameTime);
 
         // Frist update all objects and last update camera view
