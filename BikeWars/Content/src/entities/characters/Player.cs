@@ -6,7 +6,13 @@ using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework.Audio;
 using BikeWars.Content.entities.interfaces;
-
+// ============================================================
+// Player.cs
+//
+//
+// Description:
+// Represents the player character in the game, handling movement, animation, and sound effects.
+// ============================================================
 namespace BikeWars.Entities.Characters
 {
     public class Player: CharacterBase

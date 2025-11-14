@@ -3,7 +3,13 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
-
+// ============================================================
+// Debugger.cs
+//
+// Description:
+// A simple in-game debugger utility to display debug information such as player position,player velocity, and bounds.
+// It can be toggled on and off with DEBUG_TOGGLE(P) action.
+// ============================================================
 namespace BikeWars.Utilities
 {
     public sealed class Debugger
@@ -12,7 +18,7 @@ namespace BikeWars.Utilities
         private readonly Player _player;
         private bool _isVisible = true;
 
-        private KeyboardState _prevKb;
+        
 
 
 

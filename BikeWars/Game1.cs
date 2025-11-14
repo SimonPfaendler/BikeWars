@@ -26,7 +26,7 @@ public class Game1 : Game
     private Hobo hobo;
 
     private bool _freeCamera = false;
-    private bool _cKeyPressed = false;
+    
 
     private SoundHandler soundHandler { get; set; }
     private SpriteFont _debugFont;
@@ -43,7 +43,6 @@ public class Game1 : Game
     // counter for SaveLoadExample
     private int _counter = 0;
     private float _counterTimer = 0;
-    private KeyboardState _prevKbState;
 
     // overlay
     private Overlay _overlay;
@@ -109,16 +108,15 @@ public class Game1 : Game
         if (InputHandler.IsPressed(GameAction.ESC))
             Exit();
 
+        if (InputHandler.GamePad.Connected)
+        {
+            Console.WriteLine("Gamepad connected");
+        }
+        Console.WriteLine("Gampe not connected");
+
         if (InputHandler.IsPressed(GameAction.TOGGLE_CAMERA))
         {
-            _cKeyPressed = true;
-        }
-
-        // Switch between camera Playerlock and FreeLook
-        if (_cKeyPressed)
-        {
             _freeCamera = !_freeCamera;
-            _cKeyPressed = false;
         }
 
         // If camera is in FreeLook mode dont update player movement

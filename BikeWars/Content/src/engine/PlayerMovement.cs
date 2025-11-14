@@ -41,6 +41,12 @@ public class PlayerMovement: MovementBase
         {
             direction += Get(global::Direction.RIGHT);
         }
+
+        Vector2 stick = InputHandler.GamePad.LeftStick;
+        if (stick != Vector2.Zero)
+        {
+            direction += stick;
+        }
         return direction;
     }
 

@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.Data;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 // ============================================================
@@ -58,47 +58,177 @@ namespace BikeWars.Content.engine
             return !_current.IsKeyDown(key) && _previous.IsKeyDown(key);
         }
     }
-    // TODO: Add MouseInfo class for mouse input handling
-    // public class MouseInfo
 
+
+    public class MouseInfo
+    {
+        private MouseState _current;
+        private MouseState _previous;
+
+        public Point Position => _current.Position;
+        public int X => _current.X;
+        public int Y => _current.Y;
+
+        public Point Delta => _current.Position - _previous.Position;
+
+        public bool LeftHeld => _current.LeftButton == ButtonState.Pressed;
+        public bool LeftPressed => _current.LeftButton == ButtonState.Pressed && _previous.LeftButton == ButtonState.Released;
+
+        public bool RightHeld => _current.RightButton == ButtonState.Pressed;
+        public bool RightPressed => _current.RightButton == ButtonState.Pressed && _previous.RightButton == ButtonState.Released;
+
+        public int ScrollDelta => _current.ScrollWheelValue - _previous.ScrollWheelValue;
+
+
+        public void Update()
+        {
+            _previous = _current;
+            _current = Mouse.GetState();
+        }
+
+
+    }
+    
+    public class GamePadInfo
+    {
+        private GamePadState _current;
+        private GamePadState _previous;
+
+        private PlayerIndex _playerIndex;
+        private const float DeadZone = 0.25f;
+
+        public GamePadInfo(PlayerIndex playerIndex = PlayerIndex.One)
+        {
+            _playerIndex = playerIndex;
+        }
+
+        public void Update()
+        {
+            _previous = _current;
+            _current = GamePad.GetState(_playerIndex);
+        }
+
+        public bool Connected => _current.IsConnected;
+
+        public Vector2 LeftStick
+        {
+            get
+            {
+                var v = _current.ThumbSticks.Left;
+                v.Y *= -1;
+
+                if (v.Length() < DeadZone)
+                    return Vector2.Zero;
+                return v;
+            }
+        }
+        public Vector2 RightStick => _current.ThumbSticks.Right;
+
+        public bool Held(Buttons button) => _current.IsButtonDown(button);
+        public bool Pressed(Buttons button) => _current.IsButtonDown(button) && !_previous.IsButtonDown(button);
+
+
+    }
+    
     public static class InputHandler
     {
         public static readonly KeyboardInfo Keyboard = new();
-        // public static readonly MouseInfo Mouse = new();
+        public static readonly MouseInfo Mouse = new();
+        public static readonly GamePadInfo GamePad = new();
 
-        public static readonly Dictionary<GameAction, Keys> KeyMapping = new()
+
+        // Keyboard Mapping
+        public static readonly Dictionary<GameAction, Keys[]> KeyMapping = new()
         {
-            { GameAction.MOVE_LEFT, Keys.A },
-            { GameAction.MOVE_RIGHT, Keys.D },
-            { GameAction.MOVE_UP, Keys.W },
-            { GameAction.MOVE_DOWN, Keys.S },
-            { GameAction.SAVE, Keys.T },
-            { GameAction.LOAD, Keys.L },
-            { GameAction.RESET, Keys.R },
-            { GameAction.DEBUG_TOGGLE, Keys.P },
-            { GameAction.TOGGLE_CAMERA, Keys.C },
-            { GameAction.ESC, Keys.Escape }
+            { GameAction.MOVE_LEFT,new[] { Keys.A, Keys.Left } },
+            { GameAction.MOVE_RIGHT, new[] { Keys.D, Keys.Right } },
+            { GameAction.MOVE_UP, new[] { Keys.W, Keys.Up } },
+            { GameAction.MOVE_DOWN, new[] { Keys.S, Keys.Down } },
+            { GameAction.SAVE, new[]  { Keys.T } },
+            { GameAction.LOAD, new[] { Keys.L } },
+            { GameAction.RESET, new[] { Keys.R } },
+            { GameAction.DEBUG_TOGGLE, new[] { Keys.P } },
+            { GameAction.TOGGLE_CAMERA,new [] {Keys.C } },
+            { GameAction.ESC, new[] {Keys.Escape } }
         };
 
+        
+        public static readonly Dictionary<GameAction, Buttons[]> GamepadMap = new()
+        {
+            
+            { GameAction.SAVE, new[]  {Buttons.DPadUp} },
+            { GameAction.LOAD, new[] {Buttons.DPadRight} },
+            { GameAction.RESET, new[] {Buttons.DPadLeft} },
+            { GameAction.DEBUG_TOGGLE, new[] {Buttons.DPadDown} },
+            { GameAction.TOGGLE_CAMERA,new [] {Buttons.A} },
+            { GameAction.ESC, new[] { Buttons.B} }
+        };
+        
         public static void Update()
         {
             Keyboard.Update();
-            // Mouse.Update();
+            Mouse.Update();
+            GamePad.Update();
         }
 
         public static bool IsHeld(GameAction action)
         {
-            return Keyboard.IsKeyHeld(KeyMapping[action]);
+
+            if (KeyMapping.TryGetValue(action, out var keys))
+            {
+                foreach (var key in keys)
+                {
+                    if (Keyboard.IsKeyHeld(key))
+                        return true;
+                }
+                
+            }
+            if (GamepadMap.TryGetValue(action, out var buttons))
+            {
+                foreach (var button in buttons)
+                {
+                    if (GamePad.Held(button))
+                        return true;
+                }
+
+            }
+            return false;
         }
 
         public static bool IsPressed(GameAction action)
         {
-            return Keyboard.IsKeyPressed(KeyMapping[action]);
+            if (KeyMapping.TryGetValue(action, out var keys))
+            {
+                foreach (var key in keys)
+                {
+                    if (Keyboard.IsKeyPressed(key))
+                        return true;
+                }
+                
+            }
+            if (GamepadMap.TryGetValue(action, out var buttons))
+            {
+                foreach (var button in buttons)
+                {
+                    if (GamePad.Pressed(button))
+                        return true;
+                }
+            }
+            return false;
         }
 
         public static bool IsReleased(GameAction action)
         {
-            return Keyboard.IsKeyReleased(KeyMapping[action]);
+            if (KeyMapping.TryGetValue(action, out var keys))
+            {
+                foreach (var key in keys)
+                {
+                    if (Keyboard.IsKeyReleased(key))
+                        return true;
+                }
+                
+            }
+            return false;
         }
     }
 }
