@@ -9,6 +9,8 @@ public abstract class CharacterBase : ICharacter
     private Transform _lastTransform { get; set; }
     public Transform LastTransform { get => _lastTransform; set => _lastTransform = value; }
     public float Speed;
+    public float SprintSpeed;
+    public float CurrentSpeed { get; set; }
 
     private ICollider _collider { get; set; }
     public abstract void Update(GameTime gameTime); // Use this to update the logic like where the position is or resize the collision box

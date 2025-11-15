@@ -38,7 +38,7 @@ public class Game1 : Game
 
         Texture2D background = Content.Load<Texture2D>("assets/images/Startbildschirm");
         Texture2D button = Content.Load<Texture2D>("assets/images/StartButton");
-        StartScreen startScreen = new StartScreen(background, button);
+        StartScreen startScreen = new StartScreen(background);
         ScreenManager.AddScreen(startScreen);
     }
 
