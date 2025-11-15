@@ -122,9 +122,14 @@ namespace BikeWars.Content.screens
                 player.UpdateCollider();
             }
 
-            if (_testItems.Count > 1 && player.Intersects(_testItems[1].Collider))
+            for (int i = _testItems.Count - 1; i >= 0; i--)
             {
-                _testItems.RemoveAt(1);
+                var item = _testItems[i];
+
+                if (_testItems.Count > 1 && player.Intersects(item.Collider))
+                {
+                    _testItems.RemoveAt(i);
+                }
             }
             
             foreach (var item in _testItems)
