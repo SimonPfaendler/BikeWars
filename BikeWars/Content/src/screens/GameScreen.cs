@@ -47,6 +47,8 @@ namespace BikeWars.Content.screens
             _testItems = new List<ItemBase>();
             _testItems.Add(new Item(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
             _testItems.Add(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
+            _testItems.Add(new Xp_Beer(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
+            _testItems.Add(new Xp_Money(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
 
             player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(32, 32));
 
@@ -103,6 +105,8 @@ namespace BikeWars.Content.screens
             if (_testItems.Count > 1)
             {
                 _testItems[1].LoadContent(content);
+                _testItems[2].LoadContent(content);
+                _testItems[3].LoadContent(content);
             }
         }
         public void Update(GameTime gameTime)
@@ -121,6 +125,11 @@ namespace BikeWars.Content.screens
             if (_testItems.Count > 1 && player.Intersects(_testItems[1].Collider))
             {
                 _testItems.RemoveAt(1);
+            }
+            
+            foreach (var item in _testItems)
+            {
+                item.Update(gameTime);
             }
 
             foreach (var box in _collisionBoxes)
