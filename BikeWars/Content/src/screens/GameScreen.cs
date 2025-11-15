@@ -60,8 +60,12 @@ namespace BikeWars.Content.screens
             );
             _freelook = false;
             camera.Position = player.Transform.Position;
-
-            _counter = SaveLoad.LoadGame();
+            
+            // Create SaveLoad and load saved data
+            var state = SaveLoad.LoadGame();
+            _counter = state.Counter;
+            player.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
+            Console.WriteLine("Loaded saved position (or default if no file).");
         }
 
         public void LoadContent(ContentManager content)
@@ -161,19 +165,24 @@ namespace BikeWars.Content.screens
         private void HandleSaveLoadInput()
         {
             if (InputHandler.IsPressed(GameAction.SAVE))
-                SaveLoad.SaveGame(_counter);
+                SaveLoad.SaveGame(_counter, player.Transform);
 
             if (InputHandler.IsPressed(GameAction.LOAD))
             {
-                _counter = SaveLoad.LoadGame();
+               var state = SaveLoad.LoadGame();
+               _counter = state.Counter;
                 _counterTimer = 0;
+                player.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
+                Console.WriteLine("Game loaded.");
             }
 
             if (InputHandler.IsPressed(GameAction.RESET))
             {
                 _counter = 0;
                 _counterTimer = 0;
-                Console.WriteLine("Counter Reset. Counter=0");
+                
+                player.Transform.Position = new Vector2(worldBounds.Width / 2, worldBounds.Height / 2);
+                Console.WriteLine("Reset counter and player position.");
             }
         }
         public void Draw(GameTime gameTime)
