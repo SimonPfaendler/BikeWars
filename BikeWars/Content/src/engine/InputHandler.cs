@@ -29,7 +29,8 @@ namespace BikeWars.Content.engine
         RESET,
         DEBUG_TOGGLE,
         TOGGLE_CAMERA,
-        ESC
+        ESC,
+        SPRINT
     }
 
     public class KeyboardInfo
@@ -149,7 +150,8 @@ namespace BikeWars.Content.engine
             { GameAction.RESET, new[] { Keys.R } },
             { GameAction.DEBUG_TOGGLE, new[] { Keys.P } },
             { GameAction.TOGGLE_CAMERA,new [] {Keys.C } },
-            { GameAction.ESC, new[] {Keys.Escape } }
+            { GameAction.ESC, new[] {Keys.Escape } },
+            {GameAction.SPRINT, new[] { Keys.LeftShift, Keys.RightShift } }
         };
 
         
@@ -161,7 +163,8 @@ namespace BikeWars.Content.engine
             { GameAction.RESET, new[] {Buttons.DPadLeft} },
             { GameAction.DEBUG_TOGGLE, new[] {Buttons.DPadDown} },
             { GameAction.TOGGLE_CAMERA,new [] {Buttons.A} },
-            { GameAction.ESC, new[] { Buttons.B} }
+            { GameAction.ESC, new[] { Buttons.B} },
+            {GameAction.SPRINT, new[] { Buttons.LeftTrigger} }
         };
         
         public static void Update()
