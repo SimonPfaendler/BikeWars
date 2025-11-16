@@ -1,0 +1,26 @@
+Ich starte das Spiel:
+-> Game -> LoadContent() -> Draw() -> Update()
+    -> Geht dann zum ScreenManager: --> AddScreen() [Hauptmenü]
+Kann also benutzt werden, wenn wir einen ScreenManager haben, der wie unten bei Engine zu sehen ist ein Controller der Art Menü hat. Dieser besitzt dann Buttons mit denen interagiert werden kann
+Menü muss möglicherweise auch Texturen laden, diese kann man aus dem TextureManager (oder ähnlichem) laden
+Auf Achievements klicken:
+Der zugehörige Button reagiert und sendet an ScreenManager.
+Screenmanager -> Opens(AchievementScreen)
+Nutzt aus Utils -> SaveLoad().Load(Achievements)
+Diese werden durch den ScreenManager (möglicherweise AchievementScreenManager) aufgestellt
+Auf Spiel starten klicken:
+ScreenManager schließt das Menü.
+Möglicherweise öffnet es ein LoadingScreen() (Falls nötig)
+Wenn das Spiel gestartet wird:
+Game besitzt unterschiedliche Manager:
+TileMapManager, CollisionManager, GameObjectManager, SoundManager,
+Diejenigen werden ausgeführt.
+Beispielsweise TileMapManager.Load(tiles) -> Karte wird geladen.
+GameObjectManager -> Setze Wichtige Daten für Spieler und andere Spielfiguren, dass sie miteinander interagieren können [Gehe zur Engine und zu Entity um die Objekte zu erhalten]
+SoundManager -> SpieleSounds und auch Hintergrundmusik ab() [in Engine gibt es Sounds]
+Player wird durch die Entities erstellt, diese Entity erhält ihre Grundlage durch die Engine
+Ich Bewege meine Figur.
+-> Player.Update() -> Movement handled die Direction wohin sich die Figure bewegt.
+-> Sounds -> handlet die benötigten Sounds je nach Interaction.
+-> Sprites je nach Aktion wird die korrekte Sprite ausgeführt
+Player besiztzt beispielsweise BoxCollider, die dann hauptsächlich interagiert mit der Spielwelt
