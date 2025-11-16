@@ -7,6 +7,8 @@ using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework.Audio;
 using BikeWars.Content.entities.interfaces;
 using System.Collections.Generic;
+using BikeWars.Content.managers;
+
 // ============================================================
 // Player.cs
 //
@@ -24,14 +26,14 @@ namespace BikeWars.Entities.Characters
         public SoundHandler SoundHandler { get; }
         private CooldownWithDuration sprint { get; }
 
-        private Texture2D texUp, texDown, texLeft, texRight;
-        private Texture2D currentTex;
+        private Texture2D _characterAtlas;
+        
+        private SpriteAnimation _walkDownAnimation;
+        private SpriteAnimation _walkUpAnimation;
+        private SpriteAnimation _walkLeftAnimation;
+        private SpriteAnimation _walkRightAnimation;
 
-        // Animation
-        private const int FrameCount = 2;          // frames per sprite
-        private const float SecondsPerFrame = 0.16f;
-        private float _frameTimer = 0f;
-        private int _frameIndex = 0;
+        private SpriteAnimation _currentAnimation;
 
         private struct GhostFrame
         {
@@ -49,20 +51,46 @@ namespace BikeWars.Entities.Characters
 
         public void LoadContent(ContentManager content, SoundEffect drivingSoundEffect)
         {
-            // sprites
-            texRight = content.Load<Texture2D>("assets/sprites/character1/c1_move_right_1x2");
-            texLeft = content.Load<Texture2D>("assets/sprites/character1/c1_move_left_1x2");
-            texUp = content.Load<Texture2D>("assets/sprites/character1/c1_move_up_1x2");
-            texDown = content.Load<Texture2D>("assets/sprites/character1/c1_move_down_1x2");
+            _characterAtlas = content.Load<Texture2D>("assets/sprites/characters/character_atlas");
 
-            // spawn sprite
-            currentTex = texRight;
+            // Down – c1_move_down_1x2.png: x=40, y=0, w=64, h=128
+            var downFrames = new List<Rectangle>
+            {
+                new Rectangle(40, 0, 64, 64),
+                new Rectangle(40, 64, 64, 64)
+            };
+            _walkDownAnimation = new SpriteAnimation(_characterAtlas, downFrames, 0.16f);
 
-            // sounds
+            // Left – c1_move_left_1x2.png: x=104, y=0, w=64, h=128
+            var leftFrames = new List<Rectangle>
+            {
+                new Rectangle(104, 0, 64, 64),
+                new Rectangle(104, 64, 64, 64)
+            };
+            _walkLeftAnimation = new SpriteAnimation(_characterAtlas, leftFrames, 0.16f);
+
+            // Right – c1_move_right_1x2.png: x=168, y=0, w=64, h=128
+            var rightFrames = new List<Rectangle>
+            {
+                new Rectangle(168, 0, 64, 64),
+                new Rectangle(168, 64, 64, 64)
+            };
+            _walkRightAnimation = new SpriteAnimation(_characterAtlas, rightFrames, 0.16f);
+
+            // Up – c1_move_up_1x2.png: x=232, y=0, w=64, h=128
+            var upFrames = new List<Rectangle>
+            {
+                new Rectangle(232, 0, 64, 64),
+                new Rectangle(232, 64, 64, 64)
+            };
+            _walkUpAnimation = new SpriteAnimation(_characterAtlas, upFrames, 0.16f);
+
+            _currentAnimation = _walkRightAnimation;
+
             SoundHandler.DrivingSoundInstance = drivingSoundEffect.CreateInstance();
             SoundHandler.DrivingSoundInstance.IsLooped = true;
         }
-
+        
         public void UpdateCollider()
         {
             _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y);
@@ -123,78 +151,69 @@ namespace BikeWars.Entities.Characters
 
 
             LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
+            
             Vector2 direction = movement.Direction;
-            if (direction == Vector2.Zero)
-            {
-                // show first frane
-                _frameIndex = 0;
-                _frameTimer = 0f;
-            }
-            else
+            bool isMoving = direction != Vector2.Zero;
+
+            if (isMoving)
             {
                 direction.Normalize();
                 Transform.Position += direction * CurrentSpeed * delta;
 
-                // choose sprite
+                // choose animation based on main direction
                 if (MathF.Abs(direction.X) > MathF.Abs(direction.Y))
-                    currentTex = (direction.X > 0) ? texRight : texLeft;
+                {
+                    _currentAnimation = (direction.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
+                }
                 else
-                    currentTex = (direction.Y > 0) ? texDown : texUp;
-
-                // Animation
-                _frameTimer += delta;
-                if (_frameTimer >= SecondsPerFrame)
                 {
-                    _frameTimer -= SecondsPerFrame;
-                    _frameIndex = (_frameIndex + 1) % FrameCount;
-                }
-                
-                //Sprint Ghost Trail Animation
-                if (movement.IsMoving && sprint.IsActive)
-                {
-                    _ghostSpawnTimer -= delta;
-                    if (_ghostSpawnTimer <= 0f)
-                    {
-                        _ghostSpawnTimer = GhostSpawnInterval;
-
-                        int frameWidth = currentTex.Width;
-                        int frameHeight = currentTex.Height / FrameCount;
-                        var source = new Rectangle(0, _frameIndex * frameHeight, frameWidth, frameHeight);
-
-                        _ghostTrail.Add(new GhostFrame
-                        {
-                            Texture = currentTex,
-                            Position = Transform.Position,
-                            Source = source,
-                            TimeLeft = GhostLifeTime
-                        });
-                    }
-                }
-                for (int i = _ghostTrail.Count - 1; i >= 0; i--)
-                {
-                    var ghost = _ghostTrail[i];
-                    ghost.TimeLeft -= delta;
-
-                    if (ghost.TimeLeft <= 0f)
-                    {
-                        _ghostTrail.RemoveAt(i);
-                    }
-                    else
-                    {
-                        _ghostTrail[i] = ghost;
-                    }
+                    _currentAnimation = (direction.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
                 }
             }
+            
+
+            
+            _currentAnimation?.Update(gameTime, isMoving);
+            
+            if (movement.IsMoving && sprint.IsActive && _currentAnimation != null)
+            {
+                _ghostSpawnTimer -= delta;
+                if (_ghostSpawnTimer <= 0f)
+                {
+                    _ghostSpawnTimer = GhostSpawnInterval;
+
+                    Rectangle source = _currentAnimation.GetCurrentFrame();
+
+                    _ghostTrail.Add(new GhostFrame
+                    {
+                        Texture = _characterAtlas,
+                        Position = Transform.Position,
+                        Source = source,
+                        TimeLeft = GhostLifeTime
+                    });
+                }
+            }
+
+            
+            for (int i = _ghostTrail.Count - 1; i >= 0; i--)
+            {
+                var ghost = _ghostTrail[i];
+                ghost.TimeLeft -= delta;
+
+                if (ghost.TimeLeft <= 0f)
+                {
+                    _ghostTrail.RemoveAt(i);
+                }
+                else
+                {
+                    _ghostTrail[i] = ghost;
+                }
+            }
+
             UpdateCollider();
         }
         public void Draw(SpriteBatch spriteBatch)
         {
-            if (currentTex == null) return;
-
-            // 1 Spalte, 2 Zeilen -> volle Breite, halbe Höhe
-            int frameWidth = currentTex.Width;
-            int frameHeight = currentTex.Height / FrameCount;
-
             foreach (var ghost in _ghostTrail)
             {
                 float alpha = ghost.TimeLeft / GhostLifeTime;
@@ -221,10 +240,11 @@ namespace BikeWars.Entities.Characters
                 Transform.Size.Y
             );
 
-            // VERTIKAL zuschneiden: x=0, y=frameIndex * frameHeight
-            var source = new Rectangle(0, _frameIndex * frameHeight, frameWidth, frameHeight);
+            // 2) Spieler zeichnen
+            if (_currentAnimation == null)
+            return;
 
-            spriteBatch.Draw(currentTex, destinationRectangle: dest, sourceRectangle: source, color: Color.White);
+            _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size);
         }
 
         // Is Helpful for example with colliders to set the original position back.
