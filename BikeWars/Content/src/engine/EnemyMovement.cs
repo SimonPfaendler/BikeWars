@@ -1,7 +1,9 @@
 using System;
 using BikeWars.Content.engine.interfaces;
+using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
-using static DirectionHelper;
+
+
 
 namespace BikeWars.Content.engine;
 public class EnemyMovement: MovementBase
@@ -31,10 +33,10 @@ public class EnemyMovement: MovementBase
         Vector2 direction = Vector2.Zero;
         if (_walkTimer <= 2) // Needs improvement but it's ok for the start
         {
-            direction = Get(global::Direction.LEFT);
+            direction = DirectionHelper.Get(MoveDirection.LEFT);
         } else if (_walkTimer <= 4)
         {
-            direction = Get(global::Direction.RIGHT);
+            direction = DirectionHelper.Get(MoveDirection.RIGHT);
         }
         else
         {

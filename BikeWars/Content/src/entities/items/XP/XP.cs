@@ -29,7 +29,7 @@ public abstract class Xp: ItemBase, IPickable
         Transform = new Transform(start, size);
         _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X,
             Transform.Size.Y);
-        xp_value = xp_value;
+        this.xp_value = xp_value;
         _currentColor = PulseColorA;
     }
 

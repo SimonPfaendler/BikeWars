@@ -1,6 +1,8 @@
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework;
-using static DirectionHelper;
+using BikeWars.Content.components;
+
+
 
 namespace BikeWars.Content.engine;
 public class PlayerMovement: MovementBase
@@ -27,19 +29,19 @@ public class PlayerMovement: MovementBase
         Vector2 direction = Vector2.Zero;
         if (InputHandler.IsHeld(GameAction.MOVE_UP))
         {
-            direction += Get(global::Direction.UP);
+            direction += DirectionHelper.Get(MoveDirection.UP);
         }
         if (InputHandler.IsHeld(GameAction.MOVE_DOWN))
         {
-            direction += Get(global::Direction.DOWN);
+            direction += DirectionHelper.Get(MoveDirection.DOWN);
         }
         if (InputHandler.IsHeld(GameAction.MOVE_LEFT))
         {
-            direction += Get(global::Direction.LEFT);
+            direction += DirectionHelper.Get(MoveDirection.LEFT);
         }
         if (InputHandler.IsHeld(GameAction.MOVE_RIGHT))
         {
-            direction += Get(global::Direction.RIGHT);
+            direction += DirectionHelper.Get(MoveDirection.RIGHT);
         }
 
         Vector2 stick = InputHandler.GamePad.LeftStick;

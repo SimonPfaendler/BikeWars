@@ -139,7 +139,7 @@ namespace BikeWars.Content.engine
 
 
         // Keyboard Mapping
-        public static readonly Dictionary<GameAction, Keys[]> KeyMapping = new()
+        public static Dictionary<GameAction, Keys[]> KeyMapping = new()
         {
             { GameAction.MOVE_LEFT,new[] { Keys.A, Keys.Left } },
             { GameAction.MOVE_RIGHT, new[] { Keys.D, Keys.Right } },
@@ -155,7 +155,7 @@ namespace BikeWars.Content.engine
         };
 
         
-        public static readonly Dictionary<GameAction, Buttons[]> GamepadMap = new()
+        public static Dictionary<GameAction, Buttons[]> GamepadMap = new()
         {
             
             { GameAction.SAVE, new[]  {Buttons.DPadUp} },

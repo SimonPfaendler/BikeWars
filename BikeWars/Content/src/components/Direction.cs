@@ -1,19 +1,24 @@
 using System.Collections.Generic;
-using System.Numerics;
+using Microsoft.Xna.Framework;
 
-public enum Direction
+
+
+namespace BikeWars.Content.components;
+  
+public enum MoveDirection
 {
     LEFT, RIGHT, UP, DOWN
 }
 
 public static class DirectionHelper
 {
-    public static readonly Dictionary<Direction, Vector2> _directions = new()
+    public static Dictionary<MoveDirection, Vector2> _directions = new()
     {
-        {Direction.LEFT, new Vector2(-1, 0)},
-        {Direction.RIGHT, new Vector2(1, 0)},
-        {Direction.UP, new Vector2(0, -1)},
-        {Direction.DOWN, new Vector2(0, 1)},
+        {MoveDirection.LEFT, new Vector2(-1, 0)},
+        {MoveDirection.RIGHT, new Vector2(1, 0)},
+        {MoveDirection.UP, new Vector2(0, -1)},
+        {MoveDirection.DOWN, new Vector2(0, 1)},
     };
-    public static Vector2 Get(Direction direction) => _directions[direction];
+    public static Vector2 Get(MoveDirection direction) => _directions[direction];
 }
+
