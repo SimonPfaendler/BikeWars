@@ -1,0 +1,60 @@
+{"frames": [
+
+{
+	"filename": "306a3532-c883-4157-98d0-a3405a278528 (1).png",
+	"frame": {"x":0,"y":0,"w":256,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
+	"sourceSize": {"w":256,"h":256}
+},
+{
+	"filename": "c1_move_down_1x2.png",
+	"frame": {"x":0,"y":256,"w":64,"h":128},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":128},
+	"sourceSize": {"w":64,"h":128}
+},
+{
+	"filename": "c1_move_left_1x2.png",
+	"frame": {"x":64,"y":256,"w":64,"h":128},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":128},
+	"sourceSize": {"w":64,"h":128}
+},
+{
+	"filename": "c1_move_right_1x2.png",
+	"frame": {"x":128,"y":256,"w":64,"h":128},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":128},
+	"sourceSize": {"w":64,"h":128}
+},
+{
+	"filename": "c1_move_up_1x2.png",
+	"frame": {"x":192,"y":256,"w":64,"h":128},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":64,"h":128},
+	"sourceSize": {"w":64,"h":128}
+},
+{
+	"filename": "sprite_betruckener_normal darstehend (1).png",
+	"frame": {"x":0,"y":384,"w":40,"h":50},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":50},
+	"sourceSize": {"w":40,"h":50}
+}],
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "character_atlas.png",
+	"format": "RGBA8888",
+	"size": {"w":256,"h":434},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:a33429c96aa3084c8148b4e430a09aaa:34df4c55692beabc91ff690f3a0ed2a1:cf631e789063b820fdf1860396668e56$"
+}
+}

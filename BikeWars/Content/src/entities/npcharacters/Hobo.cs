@@ -1,11 +1,13 @@
 using Microsoft.Xna.Framework;
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework.Audio;
 using BikeWars.Content.entities.interfaces;
+using BikeWars.Content.managers; // SpriteAnimation
 
 namespace BikeWars.Entities.Characters
 {
@@ -14,26 +16,64 @@ namespace BikeWars.Entities.Characters
         private BoxCollider _collider { get; set; }
         private EnemyMovement movement { get; set; }
         public SoundHandler SoundHandler { get; }
+        
+        // Animation mit SpriteManager
+        private Texture2D _characterAtlas;
 
-        private Texture2D texUp, texDown, texLeft, texRight;
-        private Texture2D currentTex;
+        private SpriteAnimation _idleAnimation;
+        private SpriteAnimation _walkLeftAnimation;
+        private SpriteAnimation _walkRightAnimation;
 
-        // Animation
-        private const int FrameCount = 2;          // frames per sprite
-        private const float SecondsPerFrame = 0.16f;
-        private float _frameTimer = 0f;
-        private int _frameIndex = 0;
+        private SpriteAnimation _currentAnimation;
 
         public void LoadContent(ContentManager content, SoundEffect walkingSoundEffect)
         {
-            // sprites
-            texRight = content.Load<Texture2D>("assets/sprites/character1/c1_move_right_1x2"); // TODO Replace with correct texture
-            texLeft  = content.Load<Texture2D>("assets/sprites/character1/c1_move_left_1x2");
-            texUp    = content.Load<Texture2D>("assets/sprites/character1/c1_move_up_1x2");
-            texDown  = content.Load<Texture2D>("assets/sprites/character1/c1_move_down_1x2");
+            // Atlas laden
+            _characterAtlas = content.Load<Texture2D>("assets/sprites/characters/character_atlas");
 
-            // spawn sprite
-            currentTex = texRight;
+            // idle
+            // e1_drunkdude_standing.png "frame": {"x":0,"y":0,"w":40,"h":50}
+            var idleFrames = new List<Rectangle>
+            {
+                new Rectangle(0, 0, 40, 50)
+            };
+            _idleAnimation = new SpriteAnimation(_characterAtlas, idleFrames, 0.4f);
+            
+            // e1_drunkdude_walking_left.png "frame": {"x":376,"y":0,"w":96,"h":127}
+            
+            int leftBaseX = 376;
+            int leftBaseY = 0;
+            int leftW = 96;
+            int leftH = 127;
+            int leftFrameW = leftW / 2;   // 48
+            int leftFrameH = leftH / 2;       // 127
+
+            var leftFrames = new List<Rectangle>
+            {
+                new Rectangle(leftBaseX + 0 * leftFrameW, leftBaseY, leftFrameW, leftFrameH),
+                new Rectangle(leftBaseX + 1 * leftFrameW, leftBaseY, leftFrameW, leftFrameH)
+            };
+            _walkLeftAnimation = new SpriteAnimation(_characterAtlas, leftFrames, 0.15f);
+
+            
+            // e1_drunkdude_walking_right.png  "frame": {"x":296,"y":0,"w":80,"h":108}
+            
+            int rightBaseX = 296;
+            int rightBaseY = 0;
+            int rightW = 80;
+            int rightH = 108;
+            int rightFrameW = rightW / 2; // 40
+            int rightFrameH = rightH / 2;a     // 108
+
+            var rightFrames = new List<Rectangle>
+            {
+                new Rectangle(rightBaseX + 0 * rightFrameW, rightBaseY, rightFrameW, rightFrameH),
+                new Rectangle(rightBaseX + 1 * rightFrameW, rightBaseY, rightFrameW, rightFrameH)
+            };
+            _walkRightAnimation = new SpriteAnimation(_characterAtlas, rightFrames, 0.15f);
+
+            // Startzustand: Idle
+            _currentAnimation = _idleAnimation;
 
             // sounds
             SoundHandler.WalkingSoundInstance = walkingSoundEffect.CreateInstance();
@@ -88,55 +128,50 @@ namespace BikeWars.Entities.Characters
 
             LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
             Vector2 direction = movement.Direction;
-            if (direction == Vector2.Zero)
-            {
-                // show first frane
-                _frameIndex = 0;
-                _frameTimer = 0f;
-            }
-            else
+            bool isMoving = direction != Vector2.Zero;
+
+            if (isMoving)
             {
                 direction.Normalize();
                 Transform.Position += direction * Speed * delta;
 
-                // choose sprite
-                if (MathF.Abs(direction.X) > MathF.Abs(direction.Y))
-                    currentTex = (direction.X > 0) ? texRight : texLeft;
-                else
-                    currentTex = (direction.Y > 0) ? texDown : texUp;
-
-                // Animation
-                _frameTimer += delta;
-                if (_frameTimer >= SecondsPerFrame)
+                // Animation anhand der horizontalen Richtung wählen
+                if (direction.X > 0.1f)
                 {
-                    _frameTimer -= SecondsPerFrame;
-                    _frameIndex = (_frameIndex + 1) % FrameCount;
+                    _currentAnimation = _walkRightAnimation;
+                }
+                else if (direction.X < -0.1f)
+                {
+                    _currentAnimation = _walkLeftAnimation;
+                }
+                else
+                {
+                    // bewegt sich nur hoch/runter → vorerst Idle
+                    _currentAnimation = _idleAnimation;
                 }
             }
+            else
+            {
+                _currentAnimation = _idleAnimation;
+            }
+
+            // SpriteAnimation updaten (setzt intern FrameIndex usw.)
+            if (_currentAnimation != null)
+            {
+                _currentAnimation.Update(gameTime, isMoving);
+            }
+
             UpdateCollider();
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            if (currentTex == null) return;
+            if (_currentAnimation == null)
+                return;
 
-            // 1 Spalte, 2 Zeilen -> volle Breite, halbe Höhe
-            int frameWidth  = currentTex.Width;
-            int frameHeight = currentTex.Height / FrameCount;
-
-            // saubere Ganzzahl-Position, sonst „zittert“ Pixelart
-            var dest = new Rectangle(
-                (int)MathF.Round(Transform.Position.X),
-                (int)MathF.Round(Transform.Position.Y),
-                Transform.Size.X,
-                Transform.Size.Y
-            );
-
-            // VERTIKAL zuschneiden: x=0, y=frameIndex * frameHeight
-            var source = new Rectangle(0, _frameIndex * frameHeight, frameWidth, frameHeight);
-
-            spriteBatch.Draw(currentTex, destinationRectangle: dest, sourceRectangle: source, color: Color.White);
+            _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size);
         }
+
 
         // Is Helpful for example with colliders to set the original position back.
         public void SetLastTransform()
