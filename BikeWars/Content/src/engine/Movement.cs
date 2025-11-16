@@ -1,24 +1,36 @@
+using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework;
 
 namespace BikeWars.Content.engine;
-public class Movement
+public class Movement: MovementBase
 {
-    private Vector2 _direction;
-
-    public Movement()
+    public Movement(bool canMove, bool isMoving)
     {
-        _direction = Vector2.Zero;
+        Direction = Vector2.Zero;
+        CanMove = canMove;
+        IsMoving = isMoving;
     }
+    public void HandleBasicDirections(GameTime gameTime)
+    {
+        if (!CanMove)
+        {
+            return;
+        }
+    }
+    public override void HandleMovement(GameTime gameTime)
+    {
+        if (!CanMove)
+        {
+            return;
+        }
+    }
+    public override void Update(GameTime gameTime){}
     public void HandleBasicDirections()
     {
-        // if (keyboardState.IsKeyDown(Keys.W))
-        //         _direction.Y -= 1;
-        //     if (keyboardState.IsKeyDown(Keys.S))
-        //         _direction.Y += 1;
-        //     if (keyboardState.IsKeyDown(Keys.A))
-        //         _direction.X -= 1;
-        //     if (keyboardState.IsKeyDown(Keys.D))
-        //         _direction.X += 1;   
+        if (!CanMove)
+        {
+            return;
+        }
     }
 }
 
