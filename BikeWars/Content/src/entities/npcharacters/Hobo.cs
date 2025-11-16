@@ -63,7 +63,7 @@ namespace BikeWars.Entities.Characters
             int rightW = 80;
             int rightH = 108;
             int rightFrameW = rightW / 2; // 40
-            int rightFrameH = rightH / 2;a     // 108
+            int rightFrameH = rightH / 2;     // 108
 
             var rightFrames = new List<Rectangle>
             {
