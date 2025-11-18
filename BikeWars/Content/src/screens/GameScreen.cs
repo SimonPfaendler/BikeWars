@@ -34,6 +34,7 @@ namespace BikeWars.Content.screens
         private float _counterTimer = 0;
         private List<BoxCollider> _collisionBoxes;
         private Hobo hobo;
+        private SpriteFont _font;
 
         private bool _freelook; // Has to be optimized
 
@@ -108,6 +109,8 @@ namespace BikeWars.Content.screens
                 _testItems[2].LoadContent(content);
                 _testItems[3].LoadContent(content);
             }
+            
+            _font = content.Load<SpriteFont>("assets/fonts/Arial");
         }
         public void Update(GameTime gameTime)
         {
@@ -163,6 +166,13 @@ namespace BikeWars.Content.screens
 
             HandleCounter(gameTime);
             HandleSaveLoadInput();
+            
+            if (InputHandler.IsPressed(GameAction.PAUSE))
+            {
+                hobo.PauseSounds();
+                PauseMenuScreen pauseMenu = new PauseMenuScreen(_font);
+                Game1.Instance.ScreenManager.AddScreen(pauseMenu);
+            }
         }
 
         private void HandleCounter(GameTime gameTime)

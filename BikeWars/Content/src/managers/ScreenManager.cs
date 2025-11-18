@@ -25,16 +25,27 @@ public class ScreenManager
 
     public void Draw(GameTime gameTime)
     {
-        // draw all screens from the stack where DrawLower is true
+        int lowestScreenToBeDrawn = _mScreenStack.Count - 1;
         for (int i = _mScreenStack.Count - 1; i >= 0; i--)
         {
             IScreen screen = _mScreenStack[i];
-            screen.Draw(gameTime);
-            if (!screen.DrawLower)
+            if (screen.DrawLower)
+            {
+                lowestScreenToBeDrawn = i - 1;
+            }
+            else
             {
                 break;
             }
         }
+        // draw only the screens necessary
+        for (int i = lowestScreenToBeDrawn; i < _mScreenStack.Count; i++)
+        {
+            IScreen screen = _mScreenStack[i];
+            screen.Draw(gameTime);
+        }
+        
+        
     }
 
     public void Update(GameTime gameTime)
