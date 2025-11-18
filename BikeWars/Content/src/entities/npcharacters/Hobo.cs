@@ -16,7 +16,7 @@ namespace BikeWars.Entities.Characters
         private BoxCollider _collider { get; set; }
         private EnemyMovement movement { get; set; }
         public SoundHandler SoundHandler { get; }
-        
+
         // Animation mit SpriteManager
         private Texture2D _characterAtlas;
 
@@ -38,9 +38,9 @@ namespace BikeWars.Entities.Characters
                 new Rectangle(0, 0, 40, 50)
             };
             _idleAnimation = new SpriteAnimation(_characterAtlas, idleFrames, 0.4f);
-            
+
             // e1_drunkdude_walking_left.png "frame": {"x":376,"y":0,"w":96,"h":127}
-            
+
             int leftBaseX = 376;
             int leftBaseY = 0;
             int leftW = 96;
@@ -55,9 +55,9 @@ namespace BikeWars.Entities.Characters
             };
             _walkLeftAnimation = new SpriteAnimation(_characterAtlas, leftFrames, 0.15f);
 
-            
+
             // e1_drunkdude_walking_right.png  "frame": {"x":296,"y":0,"w":80,"h":108}
-            
+
             int rightBaseX = 296;
             int rightBaseY = 0;
             int rightW = 80;
@@ -125,8 +125,6 @@ namespace BikeWars.Entities.Characters
                     SoundHandler.WalkingSoundInstance.Stop();
                 }
             }
-            
-            
 
             LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
             Vector2 direction = movement.Direction;
@@ -173,7 +171,7 @@ namespace BikeWars.Entities.Characters
 
             _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size);
         }
-        
+
         public void PauseSounds()
         {
             if (SoundHandler?.WalkingSoundInstance != null &&

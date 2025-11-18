@@ -20,14 +20,15 @@ namespace BikeWars.Entities.Characters
 {
     public class Player : CharacterBase
     {
-        
+
         private BoxCollider _collider { get; set; }
         private PlayerMovement movement { get; set; }
         public SoundHandler SoundHandler { get; }
         private CooldownWithDuration sprint { get; }
 
+        public event Action ShotBullet;
         private Texture2D _characterAtlas;
-        
+
         private SpriteAnimation _walkDownAnimation;
         private SpriteAnimation _walkUpAnimation;
         private SpriteAnimation _walkLeftAnimation;
@@ -90,7 +91,7 @@ namespace BikeWars.Entities.Characters
             SoundHandler.DrivingSoundInstance = drivingSoundEffect.CreateInstance();
             SoundHandler.DrivingSoundInstance.IsLooped = true;
         }
-        
+
         public void UpdateCollider()
         {
             _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y);
@@ -98,6 +99,11 @@ namespace BikeWars.Entities.Characters
 
         // 1x1 Texture to represent the player
         public static Texture2D pixel;
+
+        private void Shooting()
+        {
+            ShotBullet?.Invoke();
+        }
 
         public Player(Vector2 start, Point size)
         {
@@ -117,6 +123,10 @@ namespace BikeWars.Entities.Characters
 
         public override void Update(GameTime gameTime)
         {
+            if (InputHandler.IsPressed(GameAction.SHOOT))
+            {
+                Shooting();
+            }
             movement.HandleMovement(gameTime);
             if (!movement.CanMove)
             {
@@ -146,12 +156,12 @@ namespace BikeWars.Entities.Characters
                 sprint.Activate();
 
             }
-            
+
             CurrentSpeed = sprint.IsActive ? SprintSpeed : Speed;
 
 
             LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
-            
+
             Vector2 direction = movement.Direction;
             bool isMoving = direction != Vector2.Zero;
 
@@ -170,11 +180,9 @@ namespace BikeWars.Entities.Characters
                     _currentAnimation = (direction.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
                 }
             }
-            
 
-            
             _currentAnimation?.Update(gameTime, isMoving);
-            
+
             if (movement.IsMoving && sprint.IsActive && _currentAnimation != null)
             {
                 _ghostSpawnTimer -= delta;
@@ -194,7 +202,7 @@ namespace BikeWars.Entities.Characters
                 }
             }
 
-            
+
             for (int i = _ghostTrail.Count - 1; i >= 0; i--)
             {
                 var ghost = _ghostTrail[i];

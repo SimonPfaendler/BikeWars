@@ -31,7 +31,8 @@ namespace BikeWars.Content.engine
         TOGGLE_CAMERA,
         ESC,
         SPRINT,
-        PAUSE
+        PAUSE,
+        SHOOT
     }
 
     public class KeyboardInfo
@@ -90,7 +91,7 @@ namespace BikeWars.Content.engine
 
 
     }
-    
+
     public class GamePadInfo
     {
         private GamePadState _current;
@@ -131,7 +132,7 @@ namespace BikeWars.Content.engine
 
 
     }
-    
+
     public static class InputHandler
     {
         public static readonly KeyboardInfo Keyboard = new();
@@ -153,13 +154,14 @@ namespace BikeWars.Content.engine
             { GameAction.TOGGLE_CAMERA,new [] {Keys.C } },
             { GameAction.ESC, new[] {Keys.Escape } },
             { GameAction.SPRINT, new[] { Keys.LeftShift, Keys.RightShift } },
-            { GameAction.PAUSE, new[] { Keys.Escape, Keys.P } }
+            { GameAction.PAUSE, new[] { Keys.Escape, Keys.P } },
+            {GameAction.SHOOT, new[] { Keys.G } }
         };
 
-        
+
         public static Dictionary<GameAction, Buttons[]> GamepadMap = new()
         {
-            
+
             { GameAction.SAVE, new[]  {Buttons.DPadUp} },
             { GameAction.LOAD, new[] {Buttons.DPadRight} },
             { GameAction.RESET, new[] {Buttons.DPadLeft} },
@@ -167,9 +169,10 @@ namespace BikeWars.Content.engine
             { GameAction.TOGGLE_CAMERA,new [] {Buttons.A} },
             { GameAction.ESC, new[] { Buttons.B} },
             { GameAction.SPRINT, new[] { Buttons.LeftTrigger} },
-            { GameAction.PAUSE, new[] { Buttons.Start} }
+            { GameAction.PAUSE, new[] { Buttons.Start} },
+            {GameAction.SHOOT, new[] { Buttons.X } }
         };
-        
+
         public static void Update()
         {
             Keyboard.Update();
@@ -187,7 +190,7 @@ namespace BikeWars.Content.engine
                     if (Keyboard.IsKeyHeld(key))
                         return true;
                 }
-                
+
             }
             if (GamepadMap.TryGetValue(action, out var buttons))
             {
@@ -210,7 +213,7 @@ namespace BikeWars.Content.engine
                     if (Keyboard.IsKeyPressed(key))
                         return true;
                 }
-                
+
             }
             if (GamepadMap.TryGetValue(action, out var buttons))
             {
@@ -232,7 +235,7 @@ namespace BikeWars.Content.engine
                     if (Keyboard.IsKeyReleased(key))
                         return true;
                 }
-                
+
             }
             return false;
         }
