@@ -161,7 +161,6 @@ namespace BikeWars.Content.screens
                     player.UpdateCollider();
                 }
             }
-
             // This is not a good impelementation! We need now better implementation to check about the collisioncollider
             for (int i = _testProjectiles.Count - 1; i >= 0; i--)
             {
@@ -217,7 +216,7 @@ namespace BikeWars.Content.screens
         private void HandleSaveLoadInput()
         {
             if (InputHandler.IsPressed(GameAction.SAVE))
-                SaveLoad.SaveGame(_counter, player.Transform);
+                SaveLoad.SaveGame(_counter, player.Transform, _testProjectiles);
 
             if (InputHandler.IsPressed(GameAction.LOAD))
             {
@@ -225,6 +224,17 @@ namespace BikeWars.Content.screens
                _counter = state.Counter;
                 _counterTimer = 0;
                 player.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
+                _testProjectiles = [];
+                foreach (var p in state.Projectiles)
+                {
+                    if (p.Type == SaveLoad.TYPES.BULLET)
+                    {
+                        Bullet b = new Bullet(p.Position.ToVector2(), p.Size.ToPoint());
+                        b.LoadContent(_contentManager);
+                        _testProjectiles.Add(b);
+                    }
+
+                }
                 Console.WriteLine("Game loaded.");
             }
 
