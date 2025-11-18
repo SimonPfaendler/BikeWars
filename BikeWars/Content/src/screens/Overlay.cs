@@ -18,6 +18,23 @@ namespace BikeWars.Content.src.screens.Overlay
         // timer position
         private Vector2 _timerPosition;
         
+        private bool _isPaused = false;
+        private TimeSpan _pausedTime = TimeSpan.Zero;
+        private TimeSpan _timeOffset = TimeSpan.Zero;
+        
+        public void SetPaused(bool paused, GameTime gameTime)
+        {
+            if (paused && !_isPaused)
+            {
+                _pausedTime = gameTime.TotalGameTime;
+            }
+            else if (!paused && _isPaused)
+            {
+                _timeOffset += gameTime.TotalGameTime - _pausedTime;
+            }
+            _isPaused = paused;
+        }
+        
         public Overlay(SpriteFont counterFont, GraphicsDevice device)
         {
             _counterFont = counterFont;
@@ -46,9 +63,19 @@ namespace BikeWars.Content.src.screens.Overlay
         // draw the timer
         private void DrawTimer(SpriteBatch spriteBatch, GameTime frameTime)
         {
+            TimeSpan effectiveTime;
+        
+            if (_isPaused)
+            {
+                effectiveTime = _pausedTime - _timeOffset;
+            }
+            else
+            {
+                effectiveTime = frameTime.TotalGameTime - _timeOffset;
+            }
             
             // transform 30 min in seconds
-            int totalSeconds = (int)Math.Max(0, (30 * 60 - frameTime.TotalGameTime.TotalSeconds));
+            int totalSeconds = (int)Math.Max(0, (30 * 60 - effectiveTime.TotalSeconds));
             int minutes = totalSeconds / 60;
             int seconds = totalSeconds % 60;
             

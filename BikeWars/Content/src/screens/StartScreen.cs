@@ -1,4 +1,5 @@
 using BikeWars.Content.engine.interfaces;
+using BikeWars.Content.managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -12,6 +13,8 @@ public class StartScreen : IScreen
     private Rectangle _buttonRectangle;
     private MouseState _previousMouseState;
     private SpriteFont _font;
+    
+    public ScreenManager ScreenManager { get; set; }
     
     public StartScreen(Texture2D background)
     {
@@ -58,8 +61,8 @@ public class StartScreen : IScreen
             {
                 
                 MainMenuScreen mainMenu = new MainMenuScreen(_backgroundTexture, _font);
-                Game1.Instance.ScreenManager.RemoveScreen(this);
-                Game1.Instance.ScreenManager.AddScreen(mainMenu);
+                ScreenManager.RemoveScreen(this);
+                ScreenManager.AddScreen(mainMenu);
             }
         }
     

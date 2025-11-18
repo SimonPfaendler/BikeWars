@@ -29,7 +29,16 @@ public class Game1 : Game
     protected override void Initialize()
     {
         ScreenManager = new ScreenManager();
+        ScreenManager.OnReturnToMainMenu += CreateMainMenu;
         base.Initialize();
+    }
+    
+    private void CreateMainMenu()
+    {
+        Texture2D background = Content.Load<Texture2D>("assets/images/Startbildschirm");
+        SpriteFont font = Content.Load<SpriteFont>("assets/fonts/Arial");
+        MainMenuScreen mainMenu = new MainMenuScreen(background, font);
+        ScreenManager.AddScreen(mainMenu);
     }
 
     protected override void LoadContent()

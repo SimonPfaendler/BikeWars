@@ -4,6 +4,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
+using BikeWars.Content.managers;
+using BikeWars.Content.src.screens.Overlay;
 
 namespace BikeWars.Content.screens
 {
@@ -14,6 +16,9 @@ namespace BikeWars.Content.screens
         private SpriteFont _font;
         private List<MenuButton> _buttons;
         private MouseState _previousMouseState;
+        private Overlay _overlay; 
+        
+        public ScreenManager ScreenManager { get; set; }
         
         public PauseMenuScreen(SpriteFont font)
         {
@@ -28,31 +33,32 @@ namespace BikeWars.Content.screens
             Game1 game = Game1.Instance;
             int screenWidth = game.GraphicsDevice.Viewport.Width;
             int screenHeight = game.GraphicsDevice.Viewport.Height;
-            
-            // Positioning logic for buttons
+    
             int buttonWidth = 300;
             int buttonHeight = 60;
-            
+    
             int startY = screenHeight / 4;
             int verticalSpacing = 20;
-            
+
             _buttonTexture = CreateSimpleTexture(game.GraphicsDevice, buttonWidth, buttonHeight);
             
-            string[] buttonTexts = {
-                "Resume Game",
-                "Save Game", 
-                "Load Game",
-                "Main Menu",
-                "Options",
-                "Quit Game"
+            var buttonDefinitions = new[]
+            {
+                (id: ButtonAction.Resume, text: "Spiel fortsetzen"),
+                (id: ButtonAction.SaveGame, text: "Spiel speichern"),
+                (id: ButtonAction.LoadGame, text: "Spiel laden"),
+                (id: ButtonAction.MainMenu, text: "Hauptmenu"),
+                (id: ButtonAction.Options, text: "Optionen"),
+                (id: ButtonAction.Exit, text: "Spiel beenden")
             };
-            
-            for (int i = 0; i < buttonTexts.Length; i++)
+    
+            for (int i = 0; i < buttonDefinitions.Length; i++)
             {
                 _buttons.Add(new MenuButton(
+                    id: (int)buttonDefinitions[i].id,
                     texture: _buttonTexture,
                     bounds: new Rectangle((screenWidth - buttonWidth) / 2, startY + i * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
-                    text: buttonTexts[i],
+                    text: buttonDefinitions[i].text,
                     font: _font
                 ));
             }
@@ -71,49 +77,45 @@ namespace BikeWars.Content.screens
         
         public void Update(GameTime gameTime)
         {
+            
             MouseState currentMouseState = Mouse.GetState();
             
             foreach (var button in _buttons)
             {
                 if (button.IsClicked(currentMouseState, _previousMouseState))
                 {
-                    HandleButtonClick(button);
+                    HandleButtonClick(button, gameTime);
                 }
             }
             
             _previousMouseState = currentMouseState;
         }
         
-        private void HandleButtonClick(MenuButton button)
+        private void HandleButtonClick(MenuButton button, GameTime gameTime)
         {
-            switch (button.Text)
+            switch ((ButtonAction)button.Id)
             {
-                case "Resume Game":
-                    Game1.Instance.ScreenManager.RemoveScreen(this);
+                case ButtonAction.Resume:
+                    ScreenManager.RemoveScreen(this);
                     break;
-                    
-                case "Save Game":
+            
+                case ButtonAction.SaveGame:
                     // TODO: Save game logic
                     break;
-                    
-                case "Load Game":
+            
+                case ButtonAction.LoadGame:
                     // TODO: Load game logic  
                     break;
-                    
-                case "Main Menu":
-                    Game1.Instance.ScreenManager.RemoveAllScreens();
-    
-                    Texture2D background = Game1.Instance.Content.Load<Texture2D>("assets/images/Startbildschirm");
-                    SpriteFont font = Game1.Instance.Content.Load<SpriteFont>("assets/fonts/Arial");
-                    MainMenuScreen mainMenu = new MainMenuScreen(background, font);
-                    Game1.Instance.ScreenManager.AddScreen(mainMenu);;
+            
+                case ButtonAction.MainMenu:
+                    ScreenManager.ReturnToMainMenu();
                     break;
-                    
-                case "Options":
-                    // TODO: Open Options Menu
+            
+                case ButtonAction.Options:
+                    // TODO: Optionsmenü öffnen
                     break;
-                    
-                case "Quit Game":
+            
+                case ButtonAction.Exit:
                     Game1.Instance.Exit();
                     break;
             }

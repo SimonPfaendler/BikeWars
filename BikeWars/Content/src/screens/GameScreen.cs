@@ -16,6 +16,7 @@ using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
 using MonoGame.Extended.Tiled.Renderers;
 using BikeWars.Content.engine;
+using BikeWars.Content.managers;
 
 namespace BikeWars.Content.screens
 {
@@ -35,6 +36,8 @@ namespace BikeWars.Content.screens
         private List<BoxCollider> _collisionBoxes;
         private Hobo hobo;
         private SpriteFont _font;
+        
+        public ScreenManager ScreenManager { get; set; }
 
         private bool _freelook; // Has to be optimized
 
@@ -114,6 +117,7 @@ namespace BikeWars.Content.screens
         }
         public void Update(GameTime gameTime)
         {
+            _overlay.SetPaused(false, gameTime);
             InputHandler.Update();
 
             player.Update(gameTime);
@@ -170,8 +174,9 @@ namespace BikeWars.Content.screens
             if (InputHandler.IsPressed(GameAction.PAUSE))
             {
                 hobo.PauseSounds();
+                _overlay.SetPaused(true, gameTime);
                 PauseMenuScreen pauseMenu = new PauseMenuScreen(_font);
-                Game1.Instance.ScreenManager.AddScreen(pauseMenu);
+                ScreenManager.AddScreen(pauseMenu);
             }
         }
 

@@ -2,8 +2,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-
-// Basic class for implementing a Menu Button with variable text
 namespace BikeWars.Content.components
 {
     public class MenuButton
@@ -14,9 +12,12 @@ namespace BikeWars.Content.components
         private string _text;
         private SpriteFont _font;
         private Color _textColor;
+        public int Id { get; private set; }
 
-        public MenuButton(Texture2D texture, Rectangle bounds, string text, SpriteFont font, Color? textColor = null)
+        // NUR NOCH EIN KONSTRUKTOR MIT ID
+        public MenuButton(int id, Texture2D texture, Rectangle bounds, string text, SpriteFont font, Color? textColor = null)
         {
+            Id = id;
             _texture = texture;
             _drawBounds = bounds;
             _collisionBounds = bounds;
