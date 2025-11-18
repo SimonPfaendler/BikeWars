@@ -13,8 +13,7 @@ namespace BikeWars.Content.components
         private SpriteFont _font;
         private Color _textColor;
         public int Id { get; private set; }
-
-        // NUR NOCH EIN KONSTRUKTOR MIT ID
+        
         public MenuButton(int id, Texture2D texture, Rectangle bounds, string text, SpriteFont font, Color? textColor = null)
         {
             Id = id;

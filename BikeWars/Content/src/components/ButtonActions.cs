@@ -10,6 +10,8 @@ namespace BikeWars.Content.components
         Resume = 5,
         SaveGame = 6,
         MainMenu = 7,
-        Options = 8
+        Options = 8,
+        Statistics = 9,
+        TechDemo = 10 
     }
 }
