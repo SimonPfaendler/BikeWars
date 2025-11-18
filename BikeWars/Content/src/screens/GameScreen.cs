@@ -15,7 +15,6 @@ using BikeWars.Content.src.utils.SaveLoadExample;
 using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
 using MonoGame.Extended.Tiled.Renderers;
-using BikeWars.Content.engine;
 using BikeWars.Content.managers;
 
 namespace BikeWars.Content.screens
@@ -23,6 +22,7 @@ namespace BikeWars.Content.screens
     public class GameScreen : IScreen
     {
         private List<ItemBase> _testItems;
+        private List<ProjectileBase> _testProjectiles;
         private Player player;
         private Camera2D camera;
         private Rectangle worldBounds;
@@ -36,8 +36,10 @@ namespace BikeWars.Content.screens
         private List<BoxCollider> _collisionBoxes;
         private Hobo hobo;
         private SpriteFont _font;
-        
+
         public ScreenManager ScreenManager { get; set; }
+
+        private ContentManager _contentManager;
 
         private bool _freelook; // Has to be optimized
 
@@ -49,12 +51,14 @@ namespace BikeWars.Content.screens
             worldBounds = new Rectangle(0, 0, 11200, 11200);
 
             _testItems = new List<ItemBase>();
+            _testProjectiles = new List<ProjectileBase>();
             _testItems.Add(new Item(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
             _testItems.Add(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
             _testItems.Add(new Xp_Beer(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
             _testItems.Add(new Xp_Money(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
 
             player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(32, 32));
+            player.ShotBullet += OnPlayerShotBullet;
 
             hobo = new Hobo(new Vector2(worldBounds.Width / 2 + 10, worldBounds.Height / 2), new Point(32, 32));
 
@@ -66,7 +70,7 @@ namespace BikeWars.Content.screens
             );
             _freelook = false;
             camera.Position = player.Transform.Position;
-            
+
             // Create SaveLoad and load saved data
             var state = SaveLoad.LoadGame();
             _counter = state.Counter;
@@ -112,17 +116,22 @@ namespace BikeWars.Content.screens
                 _testItems[2].LoadContent(content);
                 _testItems[3].LoadContent(content);
             }
-            
             _font = content.Load<SpriteFont>("assets/fonts/Arial");
+            _contentManager = content; // We need this to add it later to spawning entities. (Maybe there is another possible implementation)
         }
         public void Update(GameTime gameTime)
         {
             _overlay.SetPaused(false, gameTime);
             InputHandler.Update();
-
             player.Update(gameTime);
 
             // Collision Handling with player
+            if (player.Intersects(_testItems[0].Collider))
+            {
+                player.SetLastTransform();
+                player.UpdateCollider();
+            }
+
             if (player.Intersects(_testItems[0].Collider))
             {
                 player.SetLastTransform();
@@ -138,7 +147,7 @@ namespace BikeWars.Content.screens
                     _testItems.RemoveAt(i);
                 }
             }
-            
+
             foreach (var item in _testItems)
             {
                 item.Update(gameTime);
@@ -153,9 +162,23 @@ namespace BikeWars.Content.screens
                 }
             }
 
+            // This is not a good impelementation! We need now better implementation to check about the collisioncollider
+            for (int i = _testProjectiles.Count - 1; i >= 0; i--)
+            {
+                foreach (var box in _testItems) // just for testing
+                {
+                    if (_testProjectiles[i].Intersects(box.Collider))
+                    {
+                        _testProjectiles.RemoveAt(i);
+                        break;
+                    }
+                }
+            }
+            foreach (var p in _testProjectiles)
+            {
+                p.Update(gameTime);
+            }
             _debugger.Update(gameTime);
-
-
             // Needs to be implemented elsewhere.
             if (InputHandler.IsPressed(GameAction.TOGGLE_CAMERA))
             {
@@ -170,7 +193,7 @@ namespace BikeWars.Content.screens
 
             HandleCounter(gameTime);
             HandleSaveLoadInput();
-            
+
             if (InputHandler.IsPressed(GameAction.PAUSE))
             {
                 hobo.PauseSounds();
@@ -209,7 +232,7 @@ namespace BikeWars.Content.screens
             {
                 _counter = 0;
                 _counterTimer = 0;
-                
+
                 player.Transform.Position = new Vector2(worldBounds.Width / 2, worldBounds.Height / 2);
                 Console.WriteLine("Reset counter and player position.");
             }
@@ -228,7 +251,10 @@ namespace BikeWars.Content.screens
             {
                 item.Draw(spriteBatch);
             }
-
+            foreach (var p in _testProjectiles)
+            {
+                p.Draw(spriteBatch);
+            }
             _overlay.DrawOnWorld(spriteBatch, player);
             spriteBatch.End();
 
@@ -244,6 +270,17 @@ namespace BikeWars.Content.screens
             spriteBatch.DrawString(_debugFont, $"Counter: {_counter}", new Vector2(20, 100), Color.Black);
             spriteBatch.DrawString(_debugFont, "T=Save  L=Load  R=Reset counter", new Vector2(20, 125), Color.Black);
             spriteBatch.End();
+        }
+
+        private void OnPlayerShotBullet()
+        {
+            // Needs to be implemented differently with the Direction of the Player
+            Vector2 direction = player.Transform.Position;
+            direction.X += 30;
+            direction.Y += 30;
+            Bullet b = new Bullet(direction, new Point(8, 8));
+            b.LoadContent(_contentManager);
+            _testProjectiles.Add(b);
         }
     }
 }

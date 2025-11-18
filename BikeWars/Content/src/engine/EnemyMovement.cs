@@ -3,8 +3,6 @@ using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
 
-
-
 namespace BikeWars.Content.engine;
 public class EnemyMovement: MovementBase
 {
