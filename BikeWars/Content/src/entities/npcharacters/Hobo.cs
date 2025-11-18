@@ -125,6 +125,8 @@ namespace BikeWars.Entities.Characters
                     SoundHandler.WalkingSoundInstance.Stop();
                 }
             }
+            
+            
 
             LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
             Vector2 direction = movement.Direction;
@@ -171,7 +173,24 @@ namespace BikeWars.Entities.Characters
 
             _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size);
         }
+        
+        public void PauseSounds()
+        {
+            if (SoundHandler?.WalkingSoundInstance != null &&
+                SoundHandler.WalkingSoundInstance.State == SoundState.Playing)
+            {
+                SoundHandler.WalkingSoundInstance.Pause();
+            }
+        }
 
+        public void ResumeSounds()
+        {
+            if (SoundHandler?.WalkingSoundInstance != null &&
+                SoundHandler.WalkingSoundInstance.State == SoundState.Paused)
+            {
+                SoundHandler.WalkingSoundInstance.Resume();
+            }
+        }
 
         // Is Helpful for example with colliders to set the original position back.
         public void SetLastTransform()
