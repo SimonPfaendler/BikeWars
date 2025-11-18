@@ -22,6 +22,11 @@ public class ScreenManager
     {
         _mScreenStack.Remove(screen);
     }
+    
+    public void RemoveAllScreens()
+    {
+        _mScreenStack.Clear();
+    }
 
     public void Draw(GameTime gameTime)
     {

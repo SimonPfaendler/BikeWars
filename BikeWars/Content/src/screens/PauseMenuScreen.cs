@@ -101,7 +101,12 @@ namespace BikeWars.Content.screens
                     break;
                     
                 case "Main Menu":
-                    // TODO: Go to Main Menu
+                    Game1.Instance.ScreenManager.RemoveAllScreens();
+    
+                    Texture2D background = Game1.Instance.Content.Load<Texture2D>("assets/images/Startbildschirm");
+                    SpriteFont font = Game1.Instance.Content.Load<SpriteFont>("assets/fonts/Arial");
+                    MainMenuScreen mainMenu = new MainMenuScreen(background, font);
+                    Game1.Instance.ScreenManager.AddScreen(mainMenu);;
                     break;
                     
                 case "Options":

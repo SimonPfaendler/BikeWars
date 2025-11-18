@@ -105,7 +105,6 @@ namespace BikeWars.Content.screens
                     // Change to GameScreen
                     GameScreen gameScreen = new GameScreen();
                     gameScreen.LoadContent(Game1.Instance.Content);
-                    Game1.Instance.ScreenManager.RemoveScreen(this);
                     Game1.Instance.ScreenManager.AddScreen(gameScreen);
                     break;
                     
