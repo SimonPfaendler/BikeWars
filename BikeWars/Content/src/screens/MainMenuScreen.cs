@@ -77,7 +77,7 @@ namespace BikeWars.Content.screens
                 font: _font
             ));
 
-            // Buttons on thr right side
+            // Buttons on the right side
             _buttons.Add(new MenuButton(
                 id: (int)ButtonAction.Profile,
                 texture: _buttonTexture,
@@ -141,23 +141,24 @@ namespace BikeWars.Content.screens
                     break;
             
                 case ButtonAction.LoadGame:
-                    // TODO: Spiel laden Logik
+                    // TODO: Load game Logic
                     break;
             
                 case ButtonAction.Profile:
-                    // TODO: Profil Logik
+                    // TODO: Profile Logic
                     break;
 
-                case ButtonAction.Statistics: // NEU
-                    // TODO: Statistiken Screen öffnen
+                case ButtonAction.Statistics:
+                    // TODO: Open Statistics Screen
                     break;
 
-                case ButtonAction.TechDemo: // NEU
-                    // TODO: Tech Demo Screen öffnen
+                case ButtonAction.TechDemo:
+                    // TODO: Open Tech Demo Screen
                     break;
 
-                case ButtonAction.Options: // NEU
-                    // TODO: Options Screen öffnen
+                case ButtonAction.Options:
+                    OptionScreen optionScreen = new OptionScreen(_font);
+                    ScreenManager.AddScreen(optionScreen);
                     break;
             
                 case ButtonAction.Exit:

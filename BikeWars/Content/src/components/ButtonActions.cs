@@ -12,6 +12,11 @@ namespace BikeWars.Content.components
         MainMenu = 7,
         Options = 8,
         Statistics = 9,
-        TechDemo = 10 
+        TechDemo = 10,
+        SoundOptions = 11,
+        GraphicOptions = 12,
+        KeyBindingsPlayer1 = 13,
+        KeyBindingsPlayer2 = 14,
+        Back = 15,
     }
 }
