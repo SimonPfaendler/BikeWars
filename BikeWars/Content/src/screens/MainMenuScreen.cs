@@ -35,19 +35,20 @@ namespace BikeWars.Content.screens
             int screenHeight = game.GraphicsDevice.Viewport.Height;
     
             int buttonWidth = 250;
-            int buttonHeight = 80;
-    
-            int startY = screenHeight / 6;
+            int buttonHeight = 60;
+            int verticalSpacing = 20;
             int horizontalSpacing = screenWidth / 15;
-            int verticalSpacing = 30;
-    
+            
+            int leftStartY = screenHeight / 7;
+            int rightStartY = screenHeight / 7;
+
             _buttonTexture = CreateSimpleTexture(game.GraphicsDevice, buttonWidth, buttonHeight);
 
-            // BUTTONS MIT IDs ERSTELLEN
+            // Buttons on the left side
             _buttons.Add(new MenuButton(
                 id: (int)ButtonAction.NewGame,
                 texture: _buttonTexture,
-                bounds: new Rectangle(horizontalSpacing, startY, buttonWidth, buttonHeight),
+                bounds: new Rectangle(horizontalSpacing, leftStartY, buttonWidth, buttonHeight),
                 text: "Neues Spiel",
                 font: _font
             ));
@@ -55,23 +56,48 @@ namespace BikeWars.Content.screens
             _buttons.Add(new MenuButton(
                 id: (int)ButtonAction.LoadGame,
                 texture: _buttonTexture,
-                bounds: new Rectangle(horizontalSpacing, startY + buttonHeight + verticalSpacing, buttonWidth, buttonHeight),
+                bounds: new Rectangle(horizontalSpacing, leftStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
                 text: "Spiel laden", 
                 font: _font
             ));
 
             _buttons.Add(new MenuButton(
+                id: (int)ButtonAction.Statistics,
+                texture: _buttonTexture,
+                bounds: new Rectangle(horizontalSpacing, leftStartY + 2 * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
+                text: "Statistiken",
+                font: _font
+            ));
+
+            _buttons.Add(new MenuButton(
+                id: (int)ButtonAction.TechDemo,
+                texture: _buttonTexture,
+                bounds: new Rectangle(horizontalSpacing, leftStartY + 3 * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
+                text: "Tech Demo",
+                font: _font
+            ));
+
+            // Buttons on the right side
+            _buttons.Add(new MenuButton(
                 id: (int)ButtonAction.Profile,
                 texture: _buttonTexture,
-                bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, startY, buttonWidth, buttonHeight),
+                bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY, buttonWidth, buttonHeight),
                 text: "Profil",
+                font: _font
+            ));
+
+            _buttons.Add(new MenuButton(
+                id: (int)ButtonAction.Options,
+                texture: _buttonTexture,
+                bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
+                text: "Optionen",
                 font: _font
             ));
 
             _buttons.Add(new MenuButton(
                 id: (int)ButtonAction.Exit,
                 texture: _buttonTexture,
-                bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, startY + buttonHeight + verticalSpacing, buttonWidth, buttonHeight),
+                bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY + 2 * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
                 text: "Beenden",
                 font: _font
             ));
@@ -115,11 +141,24 @@ namespace BikeWars.Content.screens
                     break;
             
                 case ButtonAction.LoadGame:
-                    // TODO: needs to be done sometime
+                    // TODO: Load game Logic
                     break;
             
                 case ButtonAction.Profile:
-                    // TODO: needs to be done sometime
+                    // TODO: Profile Logic
+                    break;
+
+                case ButtonAction.Statistics:
+                    // TODO: Open Statistics Screen
+                    break;
+
+                case ButtonAction.TechDemo:
+                    // TODO: Open Tech Demo Screen
+                    break;
+
+                case ButtonAction.Options:
+                    OptionScreen optionScreen = new OptionScreen(_font);
+                    ScreenManager.AddScreen(optionScreen);
                     break;
             
                 case ButtonAction.Exit:

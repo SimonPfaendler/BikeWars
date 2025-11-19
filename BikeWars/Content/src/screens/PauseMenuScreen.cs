@@ -112,7 +112,8 @@ namespace BikeWars.Content.screens
                     break;
             
                 case ButtonAction.Options:
-                    // TODO: Optionsmenü öffnen
+                    OptionScreen optionScreen = new OptionScreen(_font);
+                    ScreenManager.AddScreen(optionScreen);
                     break;
             
                 case ButtonAction.Exit:
