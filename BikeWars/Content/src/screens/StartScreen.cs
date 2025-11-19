@@ -52,7 +52,6 @@ public class StartScreen : IScreen
     public void Update(GameTime gameTime)
     {
         MouseState currentMouseState = Mouse.GetState();
-    
         // Change to MainMenuScreen, if button is clicked
         if (_previousMouseState.LeftButton == ButtonState.Released && 
             currentMouseState.LeftButton == ButtonState.Pressed)

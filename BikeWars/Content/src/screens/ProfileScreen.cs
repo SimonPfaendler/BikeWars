@@ -96,6 +96,8 @@ public class ProfileScreen: IScreen
             
             foreach (var button in _buttons)
             {
+                button.Update(currentMouseState);
+                
                 if (button.IsClicked(currentMouseState, _previousMouseState))
                 {
                     HandleButtonClick(button);
