@@ -1,8 +1,10 @@
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.managers;
+using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Collections.Generic;
 
 namespace BikeWars.Content.screens;
 // the first screen that pops up when the Game is started
@@ -10,7 +12,7 @@ public class StartScreen : IScreen
 {
     private Texture2D _backgroundTexture;
     private Texture2D _buttonTexture;
-    private Rectangle _buttonRectangle;
+    private MenuButton _startButton;
     private MouseState _previousMouseState;
     private SpriteFont _font;
     
@@ -19,32 +21,43 @@ public class StartScreen : IScreen
     public StartScreen(Texture2D background)
     {
         _backgroundTexture = background;
+        _font = Game1.Instance.Content.Load<SpriteFont>("assets/fonts/Arial");
         
-        // Calculate Size and Position of Start Button
+        InitializeButton();
+    }
+    
+    private void InitializeButton()
+    {
         Game1 game = Game1.Instance;
         
-        int buttonWidth = 300;
-        int buttonHeight = 100;
-    
-        _buttonRectangle = new Rectangle(
+        int buttonWidth = 250;
+        int buttonHeight = 80;
+        
+        Rectangle buttonBounds = new Rectangle(
             (game.GraphicsDevice.Viewport.Width - buttonWidth) / 2,
             (game.GraphicsDevice.Viewport.Height - buttonHeight) / 3,
             buttonWidth,
             buttonHeight
         );
         
-        _buttonTexture = CreateSimpleTexture(game.GraphicsDevice, buttonWidth, buttonHeight);
+        _buttonTexture = CreateSimpleTexture(Game1.Instance.GraphicsDevice, buttonWidth, buttonHeight);
         
-        _font = Game1.Instance.Content.Load<SpriteFont>("assets/fonts/Arial");
+        _startButton = new MenuButton(
+            id: (int)ButtonAction.NewGame,
+            texture: _buttonTexture,
+            bounds: buttonBounds,
+            text: "Start",
+            font: _font,
+            textColor: Color.Black
+        );
     }
     
-    // Button Texture might be changed later
     private Texture2D CreateSimpleTexture(GraphicsDevice graphicsDevice, int width, int height)
     {
         Texture2D texture = new Texture2D(graphicsDevice, width, height);
         Color[] data = new Color[width * height];
         for (int i = 0; i < data.Length; i++) 
-            data[i] = Color.LightGray;
+            data[i] = Color.White;
         texture.SetData(data);
         return texture;
     }
@@ -52,17 +65,14 @@ public class StartScreen : IScreen
     public void Update(GameTime gameTime)
     {
         MouseState currentMouseState = Mouse.GetState();
-        // Change to MainMenuScreen, if button is clicked
-        if (_previousMouseState.LeftButton == ButtonState.Released && 
-            currentMouseState.LeftButton == ButtonState.Pressed)
+        
+        _startButton.Update(currentMouseState);
+        
+        if (_startButton.IsClicked(currentMouseState, _previousMouseState))
         {
-            if (_buttonRectangle.Contains(currentMouseState.Position))
-            {
-                
-                MainMenuScreen mainMenu = new MainMenuScreen(_backgroundTexture, _font);
-                ScreenManager.RemoveScreen(this);
-                ScreenManager.AddScreen(mainMenu);
-            }
+            MainMenuScreen mainMenu = new MainMenuScreen(_backgroundTexture, _font);
+            ScreenManager.RemoveScreen(this);
+            ScreenManager.AddScreen(mainMenu);
         }
     
         _previousMouseState = currentMouseState;
@@ -78,19 +88,7 @@ public class StartScreen : IScreen
         Rectangle destinationRectangle = new Rectangle(0, 0, game.GraphicsDevice.Viewport.Width, game.GraphicsDevice.Viewport.Height);
         spriteBatch.Draw(_backgroundTexture, destinationRectangle, Color.White);
         
-        spriteBatch.Draw(_buttonTexture, _buttonRectangle, Color.White);
-        
-        string buttonText = "Start";
-        Vector2 textSize = _font.MeasureString(buttonText);
-        float scale = 2.0f;
-        Vector2 scaledTextSize = textSize * scale;
-        
-        Vector2 textPosition = new Vector2(
-            _buttonRectangle.X + (_buttonRectangle.Width - scaledTextSize.X) / 2,
-            _buttonRectangle.Y + (_buttonRectangle.Height - scaledTextSize.Y) / 2
-        );
-        
-        spriteBatch.DrawString(_font, buttonText, textPosition, Color.Black, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+        _startButton.Draw(spriteBatch);
     
         spriteBatch.End();
     }

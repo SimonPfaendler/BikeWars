@@ -163,7 +163,12 @@ namespace BikeWars.Content.screens
                     break;
             
                 case ButtonAction.Exit:
-                    Game1.Instance.Exit();
+                    ConfirmationDialogScreen confirmDialog = new ConfirmationDialogScreen(
+                        _font, 
+                        "Bist Du Dir sicher?", 
+                        this
+                    );
+                    ScreenManager.AddScreen(confirmDialog);
                     break;
             }
         }

@@ -24,5 +24,7 @@ namespace BikeWars.Content.components
         NewProfile = 19,
         AchievementsCharacter1 = 20,
         AchievementsCharacter2 = 21,
+        ConfirmYes = 22,
+        ConfirmNo = 23
     }
 }
