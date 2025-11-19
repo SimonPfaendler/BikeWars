@@ -103,6 +103,18 @@
 /processorParam:Quality=Best
 /build:assets/sounds/Bike_Driving.mp3
 
+#begin assets/sounds/HandgunClick.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/HandgunClick.mp3
+
+#begin assets/sounds/SoftClick.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/SoftClick.mp3
+
 #begin assets/sounds/Walking.mp3
 /importer:Mp3Importer
 /processor:SoundEffectProcessor

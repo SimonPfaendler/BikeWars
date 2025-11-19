@@ -60,9 +60,16 @@ namespace BikeWars.Content.components
 
         public bool IsClicked(MouseState currentMouseState, MouseState previousMouseState)
         {
-            return _collisionBounds.Contains(currentMouseState.Position) &&
-                   currentMouseState.LeftButton == ButtonState.Pressed &&
-                   previousMouseState.LeftButton == ButtonState.Released;
+            bool isClicked = _collisionBounds.Contains(currentMouseState.Position) &&
+                             currentMouseState.LeftButton == ButtonState.Pressed &&
+                             previousMouseState.LeftButton == ButtonState.Released;
+           
+            if (isClicked)
+            {
+                Game1.SoundHandler.PlayButtonClick((ButtonAction)Id);
+            }
+    
+            return isClicked;
         }
 
         public bool Contains(Point point)

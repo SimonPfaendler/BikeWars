@@ -13,6 +13,8 @@ public class Game1 : Game
     public SpriteBatch SpriteBatch { get; private set; }
     public ScreenManager ScreenManager;
     public static Game1 Instance { get; private set; }
+    
+    public static SoundHandler SoundHandler { get; private set; }
 
 
     public Game1()
@@ -49,6 +51,9 @@ public class Game1 : Game
         Texture2D button = Content.Load<Texture2D>("assets/images/StartButton");
         StartScreen startScreen = new StartScreen(background);
         ScreenManager.AddScreen(startScreen);
+        
+        SoundHandler = new SoundHandler();
+        SoundHandler.LoadContent(Content);
     }
 
     protected override void Update(GameTime gameTime)
