@@ -22,5 +22,9 @@ namespace BikeWars.Content.components
         Singleplayer = 17,
         Multiplayer = 18,
         NewProfile = 19,
+        AchievementsCharacter1 = 20,
+        AchievementsCharacter2 = 21,
+        ConfirmYes = 22,
+        ConfirmNo = 23
     }
 }
