@@ -66,7 +66,7 @@ public class GameConfigScreen : IScreen
                 id: (int)ButtonAction.Singleplayer,
                 texture: _buttonTexture,
                 bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY, buttonWidth, buttonHeight),
-                text: "SinglePlayer",
+                text: "Singleplayer",
                 font: _font
             ));
 
