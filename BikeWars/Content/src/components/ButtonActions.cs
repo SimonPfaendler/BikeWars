@@ -18,5 +18,9 @@ namespace BikeWars.Content.components
         KeyBindingsPlayer1 = 13,
         KeyBindingsPlayer2 = 14,
         Back = 15,
+        StartGame = 16,
+        Singleplayer = 17,
+        Multiplayer = 18,
+        NewProfile = 19,
     }
 }

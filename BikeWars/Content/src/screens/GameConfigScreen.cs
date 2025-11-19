@@ -7,28 +7,28 @@ using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 using BikeWars.Content.managers;
 
-namespace BikeWars.Content.screens
+namespace BikeWars.Content.screens;
+
+public class GameConfigScreen : IScreen
 {
-    public class MainMenuScreen : IScreen
+    private Texture2D _backgroundTexture;
+    private Texture2D _buttonTexture;
+    private SpriteFont _font;
+    private List<MenuButton> _buttons;
+    private MouseState _previousMouseState;
+        
+    public ScreenManager ScreenManager { get; set; }
+        
+    public GameConfigScreen(Texture2D background, SpriteFont font)
     {
-        private Texture2D _backgroundTexture;
-        private Texture2D _buttonTexture;
-        private SpriteFont _font;
-        private List<MenuButton> _buttons;
-        private MouseState _previousMouseState;
-        
-        public ScreenManager ScreenManager { get; set; }
-        
-        public MainMenuScreen(Texture2D background, SpriteFont font)
-        {
-            _backgroundTexture = background;
-            _font = font;
-            _buttons = new List<MenuButton>();
+        _backgroundTexture = background;
+        _font = font;
+        _buttons = new List<MenuButton>();
             
-            InitializeButtons();
-        }
-        
-        private void InitializeButtons()
+        InitializeButtons();
+    }
+    
+    private void InitializeButtons()
         {
             Game1 game = Game1.Instance;
             int screenWidth = game.GraphicsDevice.Viewport.Width;
@@ -39,66 +39,56 @@ namespace BikeWars.Content.screens
             int verticalSpacing = 20;
             int horizontalSpacing = screenWidth / 15;
             
-            int leftStartY = screenHeight / 7;
-            int rightStartY = screenHeight / 7;
+            int leftStartY = screenHeight / 4;
+            int rightStartY = screenHeight / 4;
 
             _buttonTexture = CreateSimpleTexture(game.GraphicsDevice, buttonWidth, buttonHeight);
 
             // Buttons on the left side
             _buttons.Add(new MenuButton(
-                id: (int)ButtonAction.NewGame,
+                id: (int)ButtonAction.NewProfile,
                 texture: _buttonTexture,
                 bounds: new Rectangle(horizontalSpacing, leftStartY, buttonWidth, buttonHeight),
-                text: "Neues Spiel",
+                text: "Neues Profil",
                 font: _font
             ));
 
             _buttons.Add(new MenuButton(
-                id: (int)ButtonAction.LoadGame,
+                id: (int)ButtonAction.Back,
                 texture: _buttonTexture,
                 bounds: new Rectangle(horizontalSpacing, leftStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
-                text: "Spiel laden", 
-                font: _font
-            ));
-
-            _buttons.Add(new MenuButton(
-                id: (int)ButtonAction.Statistics,
-                texture: _buttonTexture,
-                bounds: new Rectangle(horizontalSpacing, leftStartY + 2 * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
-                text: "Statistiken",
-                font: _font
-            ));
-
-            _buttons.Add(new MenuButton(
-                id: (int)ButtonAction.TechDemo,
-                texture: _buttonTexture,
-                bounds: new Rectangle(horizontalSpacing, leftStartY + 3 * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
-                text: "Tech Demo",
+                text: "Back", 
                 font: _font
             ));
 
             // Buttons on the right side
             _buttons.Add(new MenuButton(
-                id: (int)ButtonAction.Profile,
+                id: (int)ButtonAction.Singleplayer,
                 texture: _buttonTexture,
                 bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY, buttonWidth, buttonHeight),
-                text: "Profil",
+                text: "SinglePlayer",
                 font: _font
             ));
 
             _buttons.Add(new MenuButton(
-                id: (int)ButtonAction.Options,
+                id: (int)ButtonAction.Multiplayer,
                 texture: _buttonTexture,
                 bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
-                text: "Optionen",
+                text: "Multiplayer",
                 font: _font
             ));
-
+            
+            // centre start Button
             _buttons.Add(new MenuButton(
-                id: (int)ButtonAction.Exit,
+                id: (int)ButtonAction.StartGame,
                 texture: _buttonTexture,
-                bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY + 2 * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
-                text: "Beenden",
+                bounds: new Rectangle(
+                    (screenWidth - buttonWidth) / 2,
+                    screenHeight / 3 - buttonHeight / 2,
+                    buttonWidth,
+                    buttonHeight
+                ),
+                text: "Spiel starten",
                 font: _font
             ));
         }
@@ -133,34 +123,27 @@ namespace BikeWars.Content.screens
         {
             switch ((ButtonAction)button.Id)
             {
-                case ButtonAction.NewGame:
-                    GameConfigScreen gameConfigScreen = new GameConfigScreen(_backgroundTexture, _font);
-                    ScreenManager.AddScreen(gameConfigScreen);
+                case ButtonAction.StartGame:
+                    GameScreen gameScreen = new GameScreen();
+                    gameScreen.LoadContent(Game1.Instance.Content);
+                    ScreenManager.RemoveScreen(this);
+                    ScreenManager.AddScreen(gameScreen);
                     break;
             
-                case ButtonAction.LoadGame:
-                    // TODO: Load game Logic
+                case ButtonAction.Back:
+                    ScreenManager.RemoveScreen(this);
                     break;
             
-                case ButtonAction.Profile:
-                    // TODO: Profile Logic
+                case ButtonAction.NewProfile:
+                    // TODO: Profile Creation Logic
                     break;
 
-                case ButtonAction.Statistics:
-                    // TODO: Open Statistics Screen
+                case ButtonAction.Singleplayer:
+                    // TODO: Choose Singleplayer Gamemode
                     break;
 
-                case ButtonAction.TechDemo:
-                    // TODO: Open Tech Demo Screen
-                    break;
-
-                case ButtonAction.Options:
-                    OptionScreen optionScreen = new OptionScreen(_font);
-                    ScreenManager.AddScreen(optionScreen);
-                    break;
-            
-                case ButtonAction.Exit:
-                    Game1.Instance.Exit();
+                case ButtonAction.Multiplayer:
+                    // TODO: Choose Multiplayer Gamemode
                     break;
             }
         }
@@ -185,5 +168,4 @@ namespace BikeWars.Content.screens
         
         public bool DrawLower => false;
         public bool UpdateLower => false;
-    }
 }
