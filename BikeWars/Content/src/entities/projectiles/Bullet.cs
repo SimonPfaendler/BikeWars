@@ -11,14 +11,14 @@ public class Bullet: ProjectileBase
 {
     private const string TEXTURE_PATH = "assets/sprites/projectiles/bullet";
     private BoxCollider _collider { get; set; }
-    public float Speed = 100f;
+    public float Speed = 400f;
     public override BoxCollider Collider
     {
         get { return _collider; }
     }
 
     private BulletMovement _movement {get;set;}
-    public BulletMovement Movement
+    public new BulletMovement Movement
     {
         get { return _movement; }
         set { _movement = value;}
@@ -41,7 +41,7 @@ public class Bullet: ProjectileBase
         if (Movement.IsMoving)
         {
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            Movement.Direction.Normalize();
+            // Movement.Direction is already normalized when set
             Transform.Position += Movement.Direction * Speed * delta;
             _collider.Position = Transform.Position;
         }

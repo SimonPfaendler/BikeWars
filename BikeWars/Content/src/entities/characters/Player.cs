@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Audio;
 using BikeWars.Content.entities.interfaces;
 using System.Collections.Generic;
 using BikeWars.Content.managers;
+using BikeWars.Content.screens;
 
 // ============================================================
 // Player.cs
@@ -25,6 +26,9 @@ namespace BikeWars.Entities.Characters
         private PlayerMovement movement { get; set; }
         public SoundHandler SoundHandler { get; }
         private CooldownWithDuration sprint { get; }
+
+        public Vector2 GazeDirection { get; private set; }
+        public Vector2 AimTarget { get; private set; }
 
         public event Action ShotBullet;
         private Texture2D _characterAtlas;
@@ -53,6 +57,11 @@ namespace BikeWars.Entities.Characters
         public void LoadContent(ContentManager content, SoundEffect drivingSoundEffect)
         {
             _characterAtlas = content.Load<Texture2D>("assets/sprites/characters/character_atlas");
+            if (pixel == null)
+            {
+                pixel = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
+                pixel.SetData(new[] { Color.White });
+            }
 
             // Down – c1_move_down_1x2.png: x=40, y=0, w=64, h=128
             var downFrames = new List<Rectangle>
@@ -123,6 +132,11 @@ namespace BikeWars.Entities.Characters
 
         public override void Update(GameTime gameTime)
         {
+            Update(gameTime, AimTarget);
+        }
+
+        public void Update(GameTime gameTime, Vector2 mousePos)
+        {
             if (InputHandler.IsPressed(GameAction.SHOOT))
             {
                 Shooting();
@@ -179,6 +193,16 @@ namespace BikeWars.Entities.Characters
                 {
                     _currentAnimation = (direction.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
                 }
+            }
+
+            // Gaze Direction Logic (Mouse Only)
+            Vector2 eyePos = new Vector2(Transform.Position.X + Transform.Size.X / 2f, Transform.Position.Y);
+            AimTarget = mousePos;
+            
+            Vector2 diff = AimTarget - eyePos;
+            if (diff != Vector2.Zero)
+            {
+                GazeDirection = Vector2.Normalize(diff);
             }
 
             _currentAnimation?.Update(gameTime, isMoving);
@@ -253,6 +277,10 @@ namespace BikeWars.Entities.Characters
             return;
 
             _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size);
+            
+            // Draw line from eye position
+            Vector2 eyePos = new Vector2(Transform.Position.X + Transform.Size.X / 2f, Transform.Position.Y);
+            DrawLine(spriteBatch, eyePos, AimTarget, Color.Red);
         }
 
         // Is Helpful for example with colliders to set the original position back.
@@ -281,6 +309,21 @@ namespace BikeWars.Entities.Characters
         public float CooldownTimer()
         {
             return sprint.GetRemainingCooldown();
+        }
+        // Helper function to draw a line
+        private void DrawLine(SpriteBatch spriteBatch, Vector2 start, Vector2 end, Color color)
+        {
+            Vector2 edge = end - start;
+            float angle = (float)Math.Atan2(edge.Y, edge.X);
+            float length = edge.Length();
+            spriteBatch.Draw(pixel,
+                new Rectangle((int)start.X, (int)start.Y, (int)length, 2), // 2 is thickness
+                null,
+                color,
+                angle,
+                Vector2.Zero,
+                SpriteEffects.None,
+                0);
         }
     }
 }

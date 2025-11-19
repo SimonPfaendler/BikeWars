@@ -19,15 +19,8 @@ public class BulletMovement: MovementBase, IMoveable
         {
             return;
         }
-        Direction = MakeDirection();
+        // Direction is set externally (e.g. by GameScreen)
         Update(gameTime);
-    }
-
-    private Vector2 MakeDirection()
-    {
-        // Needs a better implementation. Now it just flies to the right.
-        Vector2 direction = DirectionHelper.Get(MoveDirection.RIGHT);
-        return direction;
     }
 
     private bool UpdateMoving()

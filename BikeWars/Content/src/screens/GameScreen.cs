@@ -36,7 +36,7 @@ namespace BikeWars.Content.screens
         private List<BoxCollider> _collisionBoxes;
         private Hobo hobo;
         private SpriteFont _font;
-
+        private Vector2 mouseWorldPos;
         public ScreenManager ScreenManager { get; set; }
 
         private ContentManager _contentManager;
@@ -123,7 +123,15 @@ namespace BikeWars.Content.screens
         {
             _overlay.SetPaused(false, gameTime);
             InputHandler.Update();
-            player.Update(gameTime);
+
+            // For mouse position in world coordinates
+            var mouseState = InputHandler.Mouse;
+            Vector2 mouseScreenPos = new Vector2(mouseState.X, mouseState.Y);
+            // Invert the camera matrix to go from Screen -> World
+            Matrix inverseTransform = Matrix.Invert(camera.GetTransform());
+            mouseWorldPos = Vector2.Transform(mouseScreenPos, inverseTransform);
+
+            player.Update(gameTime, mouseWorldPos);
 
             // Collision Handling with player
             if (player.Intersects(_testItems[0].Collider))
@@ -284,11 +292,15 @@ namespace BikeWars.Content.screens
 
         private void OnPlayerShotBullet()
         {
-            // Needs to be implemented differently with the Direction of the Player
-            Vector2 direction = player.Transform.Position;
-            direction.X += 30;
-            direction.Y += 30;
-            Bullet b = new Bullet(direction, new Point(8, 8));
+            // Calculate spawn position from eye (top-center of player)
+            Vector2 eyePos = new Vector2(player.Transform.Position.X + player.Transform.Size.X / 2f, player.Transform.Position.Y);
+            Vector2 direction = player.GazeDirection;
+            
+            // Spawn bullet slightly in front of the eye in the direction of gaze
+            Vector2 spawnPos = eyePos + direction * 30f;
+
+            Bullet b = new Bullet(spawnPos, new Point(8, 8));
+            b.Movement.Direction = direction; // Set the movement direction
             b.LoadContent(_contentManager);
             _testProjectiles.Add(b);
         }
