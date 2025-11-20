@@ -173,14 +173,10 @@ namespace BikeWars.Entities.Characters
             if (InputHandler.IsHeld(GameAction.SPRINT) && sprint.Ready)
             {
                 sprint.Activate();
-
             }
 
-            CurrentSpeed = sprint.IsActive ? SprintSpeed : Speed;
-
-
+            CurrentSpeed = sprint.IsActive ? SprintSpeed : movement.Speed;
             LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
-
             Vector2 direction = movement.Direction;
             bool isMoving = direction != Vector2.Zero;
 
@@ -188,17 +184,29 @@ namespace BikeWars.Entities.Characters
             {
                 direction.Normalize();
                 _facingDirection = direction; // Update facing direction
-                Transform.Position += direction * CurrentSpeed * delta;
-
-                // choose animation based on main direction
-                if (MathF.Abs(direction.X) > MathF.Abs(direction.Y))
+                
+                // Reibung
+                // Speed *= Friction;
+                // Transform.Position += direction * CurrentSpeed * delta;
+                if (sprint.IsActive)
                 {
-                    _currentAnimation = (direction.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
+                    Transform.Position += direction * CurrentSpeed * delta;
                 }
                 else
                 {
-                    _currentAnimation = (direction.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
+                    Transform.Position += direction * movement.Speed * delta;
                 }
+                _currentAnimation = _walkUpAnimation;
+                // choose animation based on main direction
+                // @TODO We need to decide on how the animation should look like so don't delete it now
+                // if (MathF.Abs(direction.X) > MathF.Abs(direction.Y))
+                // {
+                //     _currentAnimation = (direction.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
+                // }
+                // else
+                // {
+                //     _currentAnimation = (direction.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
+                // }
             }
 
             // Gaze Direction Logic
@@ -295,12 +303,15 @@ namespace BikeWars.Entities.Characters
                     Transform.Size.X,
                     Transform.Size.Y
                 );
-
                 spriteBatch.Draw(
                     ghost.Texture,
                     destinationRectangle: ghostDest,
                     sourceRectangle: ghost.Source,
-                    color: Color.White * alpha
+                    color: Color.White * alpha,
+                    rotation: movement.Rotation + MathHelper.PiOver2,
+                    origin: new Vector2(ghost.Source.Width / 2f, ghost.Source.Height / 2f),
+                    effects: SpriteEffects.None,
+                    layerDepth: 0f
                 );
             }
             // saubere Ganzzahl-Position, sonst „zittert“ Pixelart
@@ -315,7 +326,7 @@ namespace BikeWars.Entities.Characters
             if (_currentAnimation == null)
             return;
 
-            _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size);
+            _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, movement.Rotation + MathHelper.PiOver2);
             
             // Draw line from eye position only if GazeDirection is valid (non-zero)
             if (GazeDirection != Vector2.Zero)
