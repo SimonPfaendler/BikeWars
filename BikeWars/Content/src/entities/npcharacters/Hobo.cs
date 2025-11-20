@@ -169,7 +169,7 @@ namespace BikeWars.Entities.Characters
             if (_currentAnimation == null)
                 return;
 
-            _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size);
+            _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, 0f);
         }
 
         public void PauseSounds()
