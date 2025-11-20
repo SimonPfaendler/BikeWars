@@ -19,8 +19,14 @@ using BikeWars.Content.screens;
 // ============================================================
 namespace BikeWars.Entities.Characters
 {
-    public class Player : CharacterBase
+    public class Player : CharacterBase, ICombat
     {
+
+        public int Health { get; set; }
+        public int MaxHealth { get; set; }
+        public int AttackDamage { get; set; }
+        public float AttackSpeed { get; set; }
+        public bool IsDead => Health <= 0;
 
         private BoxCollider _collider { get; set; }
         private PlayerMovement movement { get; set; }
@@ -119,8 +125,23 @@ namespace BikeWars.Entities.Characters
             }
         }
 
+        public void TakeDamage(int amount)
+        {
+            Health-= amount;
+            if(Health < 0) Health = 0;
+        } 
+
+        public void Attack(ICombar target)
+        {
+            target.TakeDamage(AttackDamage);
+        }
+
         public Player(Vector2 start, Point size)
         {
+            MaxHealth = 100;
+            Health = MaxHealth;
+            AttackDamage = 10;
+            AttackSpeed = 1f;
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 200f;

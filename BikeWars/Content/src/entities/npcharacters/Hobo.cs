@@ -11,8 +11,15 @@ using BikeWars.Content.managers; // SpriteAnimation
 
 namespace BikeWars.Entities.Characters
 {
-    public class Hobo: CharacterBase
+    public class Hobo: CharacterBase, ICombat
     {
+
+        public int Health { get; set; }
+        public int MaxHealth { get; set; }
+        public int AttackDamage { get; set; }
+        public float AttackSpeed { get; set; }
+        public bool IsDead => Health <= 0;
+
         private BoxCollider _collider { get; set; }
         private EnemyMovement movement { get; set; }
         public SoundHandler SoundHandler { get; }
@@ -88,8 +95,13 @@ namespace BikeWars.Entities.Characters
         // 1x1 Texture to represent the enemy
         public static Texture2D pixel;
 
+
         public Hobo(Vector2 start, Point size)
         {
+            MaxHealth = 40;
+            Health = MaxHealth;
+            AttackDamage = 5;
+            AttackSpeed = 2f;
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 100f;
@@ -100,6 +112,16 @@ namespace BikeWars.Entities.Characters
         public override bool Intersects(ICollider collider)
         {
             return _collider.Intersects(collider);
+        }
+
+        public void TakeDamage(int amount)
+        {
+            Health -= amount;
+        }
+
+        public void Attack(ICombatant target)
+        {
+            target.TakeDamage(AttackDamage);
         }
 
         public override void Update(GameTime gameTime)
