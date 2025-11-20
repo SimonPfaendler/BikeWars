@@ -170,7 +170,7 @@ namespace BikeWars.Content.engine
             { GameAction.ESC, new[] { Buttons.B} },
             { GameAction.SPRINT, new[] { Buttons.LeftTrigger} },
             { GameAction.PAUSE, new[] { Buttons.Start} },
-            {GameAction.SHOOT, new[] { Buttons.X } }
+            {GameAction.SHOOT, new[] { Buttons.RightTrigger } }
         };
 
         public static void Update()

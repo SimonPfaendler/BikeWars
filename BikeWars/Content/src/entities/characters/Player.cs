@@ -29,6 +29,7 @@ namespace BikeWars.Entities.Characters
 
         public Vector2 GazeDirection { get; private set; }
         public Vector2 AimTarget { get; private set; }
+        private Vector2 _facingDirection = Vector2.UnitX; // Default to Right to match initial animation
 
         public event Action ShotBullet;
         private Texture2D _characterAtlas;
@@ -111,7 +112,11 @@ namespace BikeWars.Entities.Characters
 
         private void Shooting()
         {
-            ShotBullet?.Invoke();
+            // Only shoot if we have a valid gaze direction
+            if (GazeDirection != Vector2.Zero)
+            {
+                ShotBullet?.Invoke();
+            }
         }
 
         public Player(Vector2 start, Point size)
@@ -182,6 +187,7 @@ namespace BikeWars.Entities.Characters
             if (isMoving)
             {
                 direction.Normalize();
+                _facingDirection = direction; // Update facing direction
                 Transform.Position += direction * CurrentSpeed * delta;
 
                 // choose animation based on main direction
@@ -195,14 +201,47 @@ namespace BikeWars.Entities.Characters
                 }
             }
 
-            // Gaze Direction Logic (Mouse Only)
+            // Gaze Direction Logic
             Vector2 eyePos = new Vector2(Transform.Position.X + Transform.Size.X / 2f, Transform.Position.Y);
-            AimTarget = mousePos;
-            
-            Vector2 diff = AimTarget - eyePos;
-            if (diff != Vector2.Zero)
+            Vector2 potentialGaze = Vector2.Zero;
+
+            // 1. Check Controller Input (Right Stick)
+            Vector2 rightStick = InputHandler.GamePad.RightStick;
+            if (rightStick != Vector2.Zero)
             {
-                GazeDirection = Vector2.Normalize(diff);
+                // Controller aiming
+                rightStick.Y *= -1; // Invert Y for correct screen space direction
+                
+                potentialGaze = Vector2.Normalize(rightStick);
+                AimTarget = eyePos + potentialGaze * 100f; // Visual target for line
+            }
+            else
+            {
+                // 2. Fallback to Mouse Input
+                AimTarget = mousePos;
+                Vector2 diff = AimTarget - eyePos;
+                if (diff != Vector2.Zero)
+                {
+                    potentialGaze = Vector2.Normalize(diff);
+                }
+            }
+
+            // 3. Apply Angle Restriction
+            if (potentialGaze != Vector2.Zero)
+            {
+                // Check if the angle is within +/- 90 degrees (Dot product > 0)
+                if (Vector2.Dot(_facingDirection, potentialGaze) > 0)
+                {
+                    GazeDirection = potentialGaze;
+                }
+                else
+                {
+                    GazeDirection = Vector2.Zero; // Invalid aim
+                }
+            }
+            else
+            {
+                GazeDirection = Vector2.Zero;
             }
 
             _currentAnimation?.Update(gameTime, isMoving);
@@ -278,9 +317,12 @@ namespace BikeWars.Entities.Characters
 
             _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size);
             
-            // Draw line from eye position
-            Vector2 eyePos = new Vector2(Transform.Position.X + Transform.Size.X / 2f, Transform.Position.Y);
-            DrawLine(spriteBatch, eyePos, AimTarget, Color.Red);
+            // Draw line from eye position only if GazeDirection is valid (non-zero)
+            if (GazeDirection != Vector2.Zero)
+            {
+                Vector2 eyePos = new Vector2(Transform.Position.X + Transform.Size.X / 2f, Transform.Position.Y);
+                DrawLine(spriteBatch, eyePos, AimTarget, Color.Red);
+            }
         }
 
         // Is Helpful for example with colliders to set the original position back.
