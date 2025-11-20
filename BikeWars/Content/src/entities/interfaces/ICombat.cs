@@ -10,7 +10,7 @@ public interface ICombat
     float AttackSpeed { get; set; }
 
     void TakeDamage(int amount);
-    void Attack(Icombat target);
+    void Attack(ICombat target);
     bool IsDead { get; }
 
 }    

@@ -131,7 +131,7 @@ namespace BikeWars.Entities.Characters
             if(Health < 0) Health = 0;
         } 
 
-        public void Attack(ICombar target)
+        public void Attack(ICombat target)
         {
             target.TakeDamage(AttackDamage);
         }

@@ -119,7 +119,7 @@ namespace BikeWars.Entities.Characters
             Health -= amount;
         }
 
-        public void Attack(ICombatant target)
+        public void Attack(ICombat target)
         {
             target.TakeDamage(AttackDamage);
         }
@@ -188,6 +188,8 @@ namespace BikeWars.Entities.Characters
 
         public void Draw(SpriteBatch spriteBatch)
         {
+            if(IsDead)
+                return;
             if (_currentAnimation == null)
                 return;
 

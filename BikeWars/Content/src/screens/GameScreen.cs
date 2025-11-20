@@ -181,10 +181,20 @@ namespace BikeWars.Content.screens
                     }
                 }
             }
-            foreach (var p in _testProjectiles)
+
+            for (int i = _testProjectiles.Count - 1; i >= 0; i--)
             {
+                var p = _testProjectiles[i];
                 p.Update(gameTime);
+
+                if (hobo.Intersects(p.Collider))
+                {
+                    hobo.TakeDamage(p.Damage);
+                    Console.WriteLine("Damage: " + p.Damage + " Health Hobo: " + hobo.Health);
+                    _testProjectiles.RemoveAt(i);
+                }
             }
+
             _debugger.Update(gameTime);
             // Needs to be implemented elsewhere.
             if (InputHandler.IsPressed(GameAction.TOGGLE_CAMERA))

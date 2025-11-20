@@ -10,6 +10,7 @@ namespace BikeWars.Content.entities.interfaces;
 // Like everything that will fly and should do damage.
 public abstract class ProjectileBase : IProjectile
 {
+    public int Damage { get; set; }
     private Transform _transform { get; set; }
     public Transform Transform { get => _transform;  set => _transform = value; }
     private ICollider _collider { get; set; }

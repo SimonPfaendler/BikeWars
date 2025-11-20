@@ -4,6 +4,7 @@ using BikeWars.Content.engine;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework.Content;
+using System.Collections.Generic;
 using System;
 
 namespace BikeWars.Content.entities.items;
@@ -25,6 +26,7 @@ public class Bullet: ProjectileBase
     }
     public Bullet(Vector2 start, Point size)
     {
+        Damage = 10;
         Transform = new Transform(start, size);
         _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y);
         Movement = new BulletMovement(true, true);
