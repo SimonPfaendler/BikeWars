@@ -231,7 +231,11 @@ namespace BikeWars.Entities.Characters
             }
 
             // Gaze Direction Logic
-            Vector2 eyePos = new Vector2(Transform.Position.X + Transform.Size.X / 2f, Transform.Position.Y);
+            // Calculate eye position based on rotation
+            Vector2 center = new Vector2(Transform.Position.X + Transform.Size.X / 2f, Transform.Position.Y + Transform.Size.Y / 2f);
+            float headDist = Transform.Size.Y / 2f;
+            Vector2 headOffset = new Vector2((float)Math.Cos(movement.Rotation), (float)Math.Sin(movement.Rotation)) * headDist;
+            Vector2 eyePos = center + headOffset;
             Vector2 potentialGaze = Vector2.Zero;
 
             // 1. Check Controller Input (Right Stick)
@@ -265,7 +269,18 @@ namespace BikeWars.Entities.Characters
                 }
                 else
                 {
-                    GazeDirection = Vector2.Zero; // Invalid aim
+                    // Clamp to nearest 90 degree angle
+                    Vector2 perp1 = new Vector2(-_facingDirection.Y, _facingDirection.X); // -90 degrees
+                    Vector2 perp2 = new Vector2(_facingDirection.Y, -_facingDirection.X); // +90 degrees
+
+                    if (Vector2.Dot(perp1, potentialGaze) > Vector2.Dot(perp2, potentialGaze))
+                    {
+                        GazeDirection = perp1;
+                    }
+                    else
+                    {
+                        GazeDirection = perp2;
+                    }
                 }
             }
             else
@@ -352,8 +367,15 @@ namespace BikeWars.Entities.Characters
             // Draw line from eye position only if GazeDirection is valid (non-zero)
             if (GazeDirection != Vector2.Zero)
             {
-                Vector2 eyePos = new Vector2(Transform.Position.X + Transform.Size.X / 2f, Transform.Position.Y);
-                DrawLine(spriteBatch, eyePos, AimTarget, Color.Red);
+                Vector2 center = Transform.Position;
+                
+                // Draw static valid zone arc based on facing direction
+                float facingAngle = (float)Math.Atan2(_facingDirection.Y, _facingDirection.X);
+                DrawArc(spriteBatch, center, 50f, facingAngle, MathHelper.Pi, Color.Red * 0.5f); // Semi-transparent red for zone
+
+                // Draw aiming line
+                Vector2 aimEnd = center + GazeDirection * 50f;
+                DrawLine(spriteBatch, center, aimEnd, Color.Red);
             }
         }
 
@@ -398,6 +420,23 @@ namespace BikeWars.Entities.Characters
                 Vector2.Zero,
                 SpriteEffects.None,
                 0);
+        }
+
+        private void DrawArc(SpriteBatch spriteBatch, Vector2 center, float radius, float angle, float sweep, Color color, int segments = 16)
+        {
+            float startAngle = angle - sweep / 2f;
+            float step = sweep / segments;
+
+            for (int i = 0; i < segments; i++)
+            {
+                float theta1 = startAngle + i * step;
+                float theta2 = startAngle + (i + 1) * step;
+
+                Vector2 p1 = center + new Vector2((float)Math.Cos(theta1), (float)Math.Sin(theta1)) * radius;
+                Vector2 p2 = center + new Vector2((float)Math.Cos(theta2), (float)Math.Sin(theta2)) * radius;
+
+                DrawLine(spriteBatch, p1, p2, color);
+            }
         }
     }
 }
