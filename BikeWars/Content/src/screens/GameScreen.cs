@@ -309,12 +309,8 @@ namespace BikeWars.Content.screens
 
         private void OnPlayerShotBullet()
         {
-            // Calculate spawn position from eye (top-center of player)
-            Vector2 eyePos = new Vector2(player.Transform.Position.X + player.Transform.Size.X / 2f, player.Transform.Position.Y);
+            Vector2 spawnPos = player.Transform.Position;
             Vector2 direction = player.GazeDirection;
-            
-            // Spawn bullet slightly in front of the eye in the direction of gaze
-            Vector2 spawnPos = eyePos + direction * 30f;
 
             Bullet b = new Bullet(spawnPos, new Point(8, 8));
             b.Movement.Direction = direction; // Set the movement direction

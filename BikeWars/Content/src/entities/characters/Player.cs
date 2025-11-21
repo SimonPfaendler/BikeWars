@@ -231,11 +231,7 @@ namespace BikeWars.Entities.Characters
             }
 
             // Gaze Direction Logic
-            // Calculate eye position based on rotation
-            Vector2 center = new Vector2(Transform.Position.X + Transform.Size.X / 2f, Transform.Position.Y + Transform.Size.Y / 2f);
-            float headDist = Transform.Size.Y / 2f;
-            Vector2 headOffset = new Vector2((float)Math.Cos(movement.Rotation), (float)Math.Sin(movement.Rotation)) * headDist;
-            Vector2 eyePos = center + headOffset;
+            Vector2 eyePos = Transform.Position;
             Vector2 potentialGaze = Vector2.Zero;
 
             // 1. Check Controller Input (Right Stick)
