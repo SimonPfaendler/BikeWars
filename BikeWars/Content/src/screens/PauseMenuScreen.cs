@@ -9,26 +9,17 @@ using BikeWars.Content.src.screens.Overlay;
 
 namespace BikeWars.Content.screens
 {
-    public class PauseMenuScreen : IScreen
+    public class PauseMenuScreen : ScreenBase, IScreen
     {
-        private Texture2D _backgroundTexture;
-        private Texture2D _buttonTexture;
-        private SpriteFont _font;
-        private List<MenuButton> _buttons;
-        private MouseState _previousMouseState;
         private Overlay _overlay; 
         
-        public ScreenManager ScreenManager { get; set; }
-        
         public PauseMenuScreen(SpriteFont font)
+            :base(null, font)
         {
-            _font = font;
-            _buttons = new List<MenuButton>();
-            
-            InitializeButtons();
+
         }
         
-        private void InitializeButtons()
+        protected override void InitializeButtons()
         {
             Game1 game = Game1.Instance;
             int screenWidth = game.GraphicsDevice.Viewport.Width;
@@ -75,26 +66,10 @@ namespace BikeWars.Content.screens
             return texture;
         }
         
-        public void Update(GameTime gameTime)
-        {
-            
-            MouseState currentMouseState = Mouse.GetState();
-            
-            foreach (var button in _buttons)
-            {
-                button.Update(currentMouseState);
-                
-                if (button.IsClicked(currentMouseState, _previousMouseState))
-                {
-                    HandleButtonClick(button, gameTime);
-                }
-            }
-            
-            _previousMouseState = currentMouseState;
-        }
         
-        private void HandleButtonClick(MenuButton button, GameTime gameTime)
+        protected override void HandleButtonClick(MenuButton button)
         {
+            // Use _currentGameTime from ScreenBase class if GameTime is needed
             switch ((ButtonAction)button.Id)
             {
                 case ButtonAction.Resume:
@@ -129,7 +104,7 @@ namespace BikeWars.Content.screens
             }
         }
         
-        public void Draw(GameTime gameTime)
+        public override void Draw(GameTime gameTime)
         {
             Game1 game = Game1.Instance;
             SpriteBatch spriteBatch = game.SpriteBatch;
@@ -156,8 +131,7 @@ namespace BikeWars.Content.screens
             texture.SetData(data);
             return texture;
         }
-        
-        public bool DrawLower => true;    // GameScreen gets drawn
-        public bool UpdateLower => false; // GameScreen doesn't get updated
+        public override bool DrawLower => true;    // GameScreen gets drawn
+        public override bool UpdateLower => false; // GameScreen doesn't get updated
     }
 }

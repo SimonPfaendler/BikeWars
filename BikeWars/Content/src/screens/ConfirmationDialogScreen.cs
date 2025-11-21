@@ -8,29 +8,19 @@ using BikeWars.Content.managers;
 
 namespace BikeWars.Content.screens
 {
-    public class ConfirmationDialogScreen : IScreen
+    public class ConfirmationDialogScreen : ScreenBase, IScreen
     {
-        private Texture2D _backgroundTexture;
-        private Texture2D _buttonTexture;
-        private SpriteFont _font;
-        private List<MenuButton> _buttons;
-        private MouseState _previousMouseState;
         private string _message;
         private IScreen _previousScreen;
         
-        public ScreenManager ScreenManager { get; set; }
-        
         public ConfirmationDialogScreen(SpriteFont font, string message, IScreen previousScreen)
+            :base(null, font)
         {
-            _font = font;
             _message = message;
             _previousScreen = previousScreen;
-            _buttons = new List<MenuButton>();
-            
-            InitializeButtons();
         }
         
-        private void InitializeButtons()
+        protected override void InitializeButtons()
         {
             Game1 game = Game1.Instance;
             int screenWidth = game.GraphicsDevice.Viewport.Width;
@@ -72,24 +62,7 @@ namespace BikeWars.Content.screens
             return texture;
         }
         
-        public void Update(GameTime gameTime)
-        {
-            MouseState currentMouseState = Mouse.GetState();
-            
-            foreach (var button in _buttons)
-            {
-                button.Update(currentMouseState);
-                
-                if (button.IsClicked(currentMouseState, _previousMouseState))
-                {
-                    HandleButtonClick(button);
-                }
-            }
-            
-            _previousMouseState = currentMouseState;
-        }
-        
-        private void HandleButtonClick(MenuButton button)
+        protected override void HandleButtonClick(MenuButton button)
         {
             switch ((ButtonAction)button.Id)
             {
@@ -103,7 +76,7 @@ namespace BikeWars.Content.screens
             }
         }
         
-        public void Draw(GameTime gameTime)
+        public override void Draw(GameTime gameTime)
         {
             Game1 game = Game1.Instance;
             SpriteBatch spriteBatch = game.SpriteBatch;
@@ -142,8 +115,7 @@ namespace BikeWars.Content.screens
             texture.SetData(data);
             return texture;
         }
-        
-        public bool DrawLower => true;
-        public bool UpdateLower => false;
+        public override bool DrawLower => true;
+        public override bool UpdateLower => false;
     }
 }

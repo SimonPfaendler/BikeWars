@@ -9,26 +9,16 @@ using BikeWars.Content.managers;
 
 namespace BikeWars.Content.screens;
 
-public class GameConfigScreen : IScreen
+public class GameConfigScreen : ScreenBase, IScreen
 {
-    private Texture2D _backgroundTexture;
-    private Texture2D _buttonTexture;
-    private SpriteFont _font;
-    private List<MenuButton> _buttons;
-    private MouseState _previousMouseState;
-        
-    public ScreenManager ScreenManager { get; set; }
         
     public GameConfigScreen(Texture2D background, SpriteFont font)
+        :base(background, font)
     {
-        _backgroundTexture = background;
-        _font = font;
-        _buttons = new List<MenuButton>();
-            
-        InitializeButtons();
+
     }
     
-    private void InitializeButtons()
+    protected override void InitializeButtons()
         {
             Game1 game = Game1.Instance;
             int screenWidth = game.GraphicsDevice.Viewport.Width;
@@ -104,24 +94,8 @@ public class GameConfigScreen : IScreen
             return texture;
         }
         
-        public void Update(GameTime gameTime)
-        {
-            MouseState currentMouseState = Mouse.GetState();
-            
-            foreach (var button in _buttons)
-            {
-                button.Update(currentMouseState);
-                
-                if (button.IsClicked(currentMouseState, _previousMouseState))
-                {
-                    HandleButtonClick(button);
-                }
-            }
-            
-            _previousMouseState = currentMouseState;
-        }
         
-        private void HandleButtonClick(MenuButton button)
+        protected override void HandleButtonClick(MenuButton button)
         {
             switch ((ButtonAction)button.Id)
             {
@@ -149,25 +123,6 @@ public class GameConfigScreen : IScreen
                     break;
             }
         }
-        
-        public void Draw(GameTime gameTime)
-        {
-            Game1 game = Game1.Instance;
-            SpriteBatch spriteBatch = game.SpriteBatch;
-            
-            spriteBatch.Begin();
-            
-            Rectangle destinationRect = new Rectangle(0, 0, game.GraphicsDevice.Viewport.Width, game.GraphicsDevice.Viewport.Height);
-            spriteBatch.Draw(_backgroundTexture, destinationRect, Color.White);
-            
-            foreach (var button in _buttons)
-            {
-                button.Draw(spriteBatch);
-            }
-            
-            spriteBatch.End();
-        }
-        
-        public bool DrawLower => false;
-        public bool UpdateLower => false;
+        public override bool DrawLower => false;
+        public override bool UpdateLower => false;
 }
