@@ -3,6 +3,11 @@ using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
 
+// Handles the enemy movement:
+// the enemy chases the player
+// if it collides with an object on the map, the enemy will turn 90 degrees
+// to the right and try again
+
 namespace BikeWars.Content.engine;
 
 public enum EnemyState
@@ -16,14 +21,14 @@ public class EnemyMovement : MovementBase
     public EnemyState State { get; private set; } = EnemyState.Chasing;
 
     private float _sidestepTimeLeft = 0f;
-    private const float SidestepDuration = 0.3f; // you can try 0.8f later
+    private const float SidestepDuration = 0.4f;
 
     private Vector2 _sidestepDirection;
 
     public Vector2 PlayerPosition;
     public Vector2 EnemyPosition;
 
-    private const float StopRadius = 30f;
+    private const float StopRadius = 50f;
 
     private int _sidestepCount = 0;
 
@@ -34,6 +39,7 @@ public class EnemyMovement : MovementBase
         IsMoving = isMoving;
     }
 
+    // controls chasing and a timed sidestepping 
     public override void HandleMovement(GameTime gameTime)
     {
         if (!CanMove) return;
@@ -52,13 +58,14 @@ public class EnemyMovement : MovementBase
             if (_sidestepTimeLeft <= 0)
             {
                 State = EnemyState.Chasing;
-                _sidestepCount = 0; // reset for next obstacle
+                _sidestepCount = 0; 
             }
         }
 
         Update(gameTime);
     }
 
+    // calculates the length from the enemy to the player
     private Vector2 DirectionToTarget()
     {
         Vector2 toTarget = PlayerPosition - EnemyPosition;
@@ -80,7 +87,7 @@ public class EnemyMovement : MovementBase
 
         currentDirection.Normalize();
 
-        // rotate right by 90° * (sidestepCount + 1)
+        // Rotate the current direction by 90° per sidestep to find the next escape direction.
         float angle = MathHelper.ToRadians(90 * (_sidestepCount + 1));
 
         Vector2 rotated = new Vector2(
