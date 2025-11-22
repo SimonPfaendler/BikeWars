@@ -9,7 +9,7 @@ using BikeWars.Content.managers;
 
 namespace BikeWars.Content.screens
 {
-    public class MainMenuScreen : ScreenBase, IScreen
+    public class MainMenuScreen : MenuScreenBase, IScreen
     {
         
         public MainMenuScreen(Texture2D background, SpriteFont font)

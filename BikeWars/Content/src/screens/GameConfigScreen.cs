@@ -9,7 +9,7 @@ using BikeWars.Content.managers;
 
 namespace BikeWars.Content.screens;
 
-public class GameConfigScreen : ScreenBase, IScreen
+public class GameConfigScreen : MenuScreenBase, IScreen
 {
         
     public GameConfigScreen(Texture2D background, SpriteFont font)

@@ -9,7 +9,7 @@ using BikeWars.Content.managers;
 
 namespace BikeWars.Content.screens;
 
-public class OptionScreen : ScreenBase, IScreen
+public class OptionScreen : MenuScreenBase, IScreen
 {
     public OptionScreen(SpriteFont font)
         :base(Game1.Instance.Content.Load<Texture2D>("assets/images/Startbildschirm"), font)

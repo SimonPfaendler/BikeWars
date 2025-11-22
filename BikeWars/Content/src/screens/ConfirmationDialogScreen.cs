@@ -8,7 +8,7 @@ using BikeWars.Content.managers;
 
 namespace BikeWars.Content.screens
 {
-    public class ConfirmationDialogScreen : ScreenBase, IScreen
+    public class ConfirmationDialogScreen : MenuScreenBase, IScreen
     {
         private string _message;
         private IScreen _previousScreen;

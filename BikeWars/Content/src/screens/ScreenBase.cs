@@ -9,7 +9,7 @@ using BikeWars.Content.managers;
 
 namespace BikeWars.Content.screens
 {
-    public abstract class ScreenBase : IScreen
+    public abstract class MenuScreenBase : IScreen
     {
         protected Texture2D _backgroundTexture;
         protected Texture2D _buttonTexture;
@@ -19,7 +19,7 @@ namespace BikeWars.Content.screens
         protected GameTime _currentGameTime;
         public ScreenManager ScreenManager { get; set; }
         
-        protected ScreenBase(Texture2D background, SpriteFont font)
+        protected MenuScreenBase(Texture2D background, SpriteFont font)
         {
             _backgroundTexture = background;
             _font = font;

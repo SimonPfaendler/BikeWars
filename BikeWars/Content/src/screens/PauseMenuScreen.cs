@@ -9,7 +9,7 @@ using BikeWars.Content.src.screens.Overlay;
 
 namespace BikeWars.Content.screens
 {
-    public class PauseMenuScreen : ScreenBase, IScreen
+    public class PauseMenuScreen : MenuScreenBase, IScreen
     {
         private Overlay _overlay; 
         
