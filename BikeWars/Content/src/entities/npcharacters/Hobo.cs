@@ -23,6 +23,8 @@ namespace BikeWars.Entities.Characters
         private BoxCollider _collider { get; set; }
         private EnemyMovement movement { get; set; }
         public SoundHandler SoundHandler { get; }
+        
+        public EnemyMovement Movement => movement;
 
         // Animation mit SpriteManager
         private Texture2D _characterAtlas;

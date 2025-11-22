@@ -160,7 +160,8 @@ namespace BikeWars.Content.screens
             {
                 item.Update(gameTime);
             }
-
+            
+            // player collision
             foreach (var box in _collisionBoxes)
             {
                 if (player.Intersects(box))
@@ -169,6 +170,25 @@ namespace BikeWars.Content.screens
                     player.UpdateCollider();
                 }
             }
+            
+            // Hobo collision sidestep
+            foreach (var box in _collisionBoxes)
+            {
+                if (hobo.Intersects(box))
+                {
+                    hobo.SetLastTransform();
+                    hobo.UpdateCollider();
+                    hobo.Movement.StartSidestepping(hobo.Movement.Direction);
+                    
+                    if (hobo.Movement.State == EnemyState.Chasing)
+                    {
+                        hobo.Movement.StartSidestepping(hobo.Movement.Direction);
+                    }
+                    
+                    break;
+                }
+            }
+            
             // This is not a good impelementation! We need now better implementation to check about the collisioncollider
             for (int i = _testProjectiles.Count - 1; i >= 0; i--)
             {
@@ -205,6 +225,10 @@ namespace BikeWars.Content.screens
             camera.Update(gameTime, player.Transform.Position, _freelook);
 
             _tiledMapRenderer.Update(gameTime);
+            
+            // Give the movement logic the current hobo and player positions
+            hobo.Movement.PlayerPosition = player.Transform.Position;
+            hobo.Movement.EnemyPosition = hobo.Transform.Position;
 
             hobo.Update(gameTime);
 

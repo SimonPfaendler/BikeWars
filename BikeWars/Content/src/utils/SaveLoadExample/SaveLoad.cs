@@ -34,6 +34,8 @@ public static class SaveLoad
         public float PlayerX { get; set; } = _worldBounds;
         public float PlayerY { get; set; } = _worldBounds;
         public List<ProjectileSaveModel> Projectiles {get; set;}
+        public float HoboX { get; set; } = _worldBounds - 20;
+        public float HoboY { get; set; } = _worldBounds - 30;
     }
 
     public class ProjectileSaveModel

@@ -4,48 +4,103 @@ using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
 
 namespace BikeWars.Content.engine;
-public class EnemyMovement: MovementBase
+
+public enum EnemyState
 {
-    private double _walkTimer {set; get;}
+    Chasing,
+    Sidestepping
+}
+
+public class EnemyMovement : MovementBase
+{
+    public EnemyState State { get; private set; } = EnemyState.Chasing;
+
+    private float _sidestepTimeLeft = 0f;
+    private const float SidestepDuration = 0.3f; // you can try 0.8f later
+
+    private Vector2 _sidestepDirection;
+
+    public Vector2 PlayerPosition;
+    public Vector2 EnemyPosition;
+
+    private const float StopRadius = 30f;
+
+    private int _sidestepCount = 0;
+
     public EnemyMovement(bool canMove, bool isMoving)
     {
         Direction = Vector2.Zero;
         CanMove = canMove;
         IsMoving = isMoving;
-        _walkTimer = 0;
     }
 
     public override void HandleMovement(GameTime gameTime)
     {
-        if (!CanMove)
+        if (!CanMove) return;
+
+        if (State == EnemyState.Chasing)
         {
-            return;
+            Direction = DirectionToTarget();
         }
-        _walkTimer += gameTime.ElapsedGameTime.TotalSeconds; // This should be just temporary until we implement it correctly.
-        Direction = MakeDirection();
+        else if (State == EnemyState.Sidestepping)
+        {
+            Direction = _sidestepDirection;
+
+            float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            _sidestepTimeLeft -= delta;
+
+            if (_sidestepTimeLeft <= 0)
+            {
+                State = EnemyState.Chasing;
+                _sidestepCount = 0; // reset for next obstacle
+            }
+        }
+
         Update(gameTime);
     }
 
-    private Vector2 MakeDirection()
+    private Vector2 DirectionToTarget()
     {
-        Vector2 direction = Vector2.Zero;
-        if (_walkTimer <= 2) // Needs improvement but it's ok for the start
-        {
-            direction = DirectionHelper.Get(MoveDirection.LEFT);
-        } else if (_walkTimer <= 4)
-        {
-            direction = DirectionHelper.Get(MoveDirection.RIGHT);
-        }
-        else
-        {
-            _walkTimer = 0;
-        }
-        return direction;
+        Vector2 toTarget = PlayerPosition - EnemyPosition;
+
+        if (toTarget.LengthSquared() < StopRadius * StopRadius)
+            return Vector2.Zero;
+
+        toTarget.Normalize();
+        return toTarget;
     }
-    private bool UpdateMoving()
+
+    public void StartSidestepping(Vector2 currentDirection)
     {
-        return Direction != Vector2.Zero;
+        if (currentDirection == Vector2.Zero)
+            currentDirection = DirectionToTarget();
+
+        if (currentDirection == Vector2.Zero)
+            return;
+
+        currentDirection.Normalize();
+
+        // rotate right by 90° * (sidestepCount + 1)
+        float angle = MathHelper.ToRadians(90 * (_sidestepCount + 1));
+
+        Vector2 rotated = new Vector2(
+            currentDirection.X * (float)Math.Cos(angle) - currentDirection.Y * (float)Math.Sin(angle),
+            currentDirection.X * (float)Math.Sin(angle) + currentDirection.Y * (float)Math.Cos(angle)
+        );
+
+        rotated.Normalize();
+        _sidestepDirection = rotated;
+
+        _sidestepTimeLeft = SidestepDuration;
+        State = EnemyState.Sidestepping;
+
+        _sidestepCount++;
+        if (_sidestepCount > 3)
+            _sidestepCount = 0;
     }
+
+    private bool UpdateMoving() => Direction != Vector2.Zero;
+
     public override void Update(GameTime gameTime)
     {
         IsMoving = UpdateMoving();
