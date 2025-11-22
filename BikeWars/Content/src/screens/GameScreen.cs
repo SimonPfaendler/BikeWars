@@ -35,6 +35,7 @@ namespace BikeWars.Content.screens
         private float _counterTimer = 0;
         private List<BoxCollider> _collisionBoxes;
         private Hobo hobo;
+        private BikeThief bikethief;
         private SpriteFont _font;
         private Vector2 mouseWorldPos;
         public ScreenManager ScreenManager { get; set; }
@@ -61,7 +62,8 @@ namespace BikeWars.Content.screens
             player.ShotBullet += OnPlayerShotBullet;
 
             hobo = new Hobo(new Vector2(worldBounds.Width / 2 + 10, worldBounds.Height / 2), new Point(32, 32));
-
+            bikethief = new BikeThief(new Vector2(worldBounds.Width / 2 - 10, worldBounds.Height / 2 - 80), new Point(32, 32));
+            
             Game1 game = Game1.Instance;
             camera = new Camera2D(
                 game.GraphicsDevice.Viewport.Width,
@@ -108,7 +110,8 @@ namespace BikeWars.Content.screens
             SoundHandler soundHandler = new SoundHandler();
             player.LoadContent(content, content.Load<SoundEffect>(soundHandler.DRIVING_SOUND_PATH));
             hobo.LoadContent(content, content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
-
+            bikethief.LoadContent(content, content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
+            
             // Items
             if (_testItems.Count > 1)
             {
@@ -231,13 +234,15 @@ namespace BikeWars.Content.screens
             hobo.Movement.EnemyPosition = hobo.Transform.Position;
 
             hobo.Update(gameTime);
-
+            bikethief.Update(gameTime);
+            
             HandleCounter(gameTime);
             HandleSaveLoadInput();
 
             if (InputHandler.IsPressed(GameAction.PAUSE))
             {
                 hobo.PauseSounds();
+                bikethief.PauseSounds();
                 _overlay.SetPaused(true, gameTime);
                 PauseMenuScreen pauseMenu = new PauseMenuScreen(_font);
                 ScreenManager.AddScreen(pauseMenu);
@@ -299,6 +304,8 @@ namespace BikeWars.Content.screens
             spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.GetTransform());
             player.Draw(spriteBatch);
             hobo.Draw(spriteBatch);
+            bikethief.Draw(spriteBatch);
+            
             foreach (var item in _testItems)
             {
                 item.Draw(spriteBatch);
@@ -326,12 +333,8 @@ namespace BikeWars.Content.screens
 
         private void OnPlayerShotBullet()
         {
-            // Calculate spawn position from eye (top-center of player)
-            Vector2 eyePos = new Vector2(player.Transform.Position.X + player.Transform.Size.X / 2f, player.Transform.Position.Y);
+            Vector2 spawnPos = player.Transform.Position;
             Vector2 direction = player.GazeDirection;
-            
-            // Spawn bullet slightly in front of the eye in the direction of gaze
-            Vector2 spawnPos = eyePos + direction * 30f;
 
             Bullet b = new Bullet(spawnPos, new Point(8, 8));
             b.Movement.Direction = direction; // Set the movement direction

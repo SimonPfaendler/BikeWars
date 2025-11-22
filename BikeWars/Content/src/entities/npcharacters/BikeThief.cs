@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Content;
@@ -7,11 +7,11 @@ using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework.Audio;
 using BikeWars.Content.entities.interfaces;
-using BikeWars.Content.managers; // SpriteAnimation
+using BikeWars.Content.managers; 
 
 namespace BikeWars.Entities.Characters
 {
-    public class Hobo: CharacterBase, ICombat
+    public class BikeThief : CharacterBase, ICombat
     {
 
         public int Health { get; set; }
@@ -23,8 +23,6 @@ namespace BikeWars.Entities.Characters
         private BoxCollider _collider { get; set; }
         private EnemyMovement movement { get; set; }
         public SoundHandler SoundHandler { get; }
-        
-        public EnemyMovement Movement => movement;
 
         // Animation mit SpriteManager
         private Texture2D _characterAtlas;
@@ -37,48 +35,68 @@ namespace BikeWars.Entities.Characters
 
         public void LoadContent(ContentManager content, SoundEffect walkingSoundEffect)
         {
-            // Atlas laden
+            // Atlas laden (Pfad ggf. anpassen)
             _characterAtlas = content.Load<Texture2D>("assets/sprites/characters/character_atlas");
 
-            // idle
-            // e1_drunkdude_standing.png "frame": {"x":0,"y":0,"w":40,"h":50}
+            // === IDLE ===
+            // TODO: Rechteck auf BikeThief-Idle-Sprite anpassen
             var idleFrames = new List<Rectangle>
             {
-                new Rectangle(0, 0, 40, 50)
+                new Rectangle(281, 385, 128, 184) 
             };
-            _idleAnimation = new SpriteAnimation(_characterAtlas, idleFrames, 0.4f);
+            _idleAnimation = new SpriteAnimation(_characterAtlas, idleFrames, 0.6f);
 
-            // e1_drunkdude_walking_left.png 
+            
+            // e2_bikethief_walking_left.png 
 
-            int leftBaseX = 64;
-            int leftBaseY = 128;
-            int leftW = 96;
-            int leftH = 127;
-            int leftFrameW = leftW / 2;   
-            int leftFrameH = leftH / 2;       
+            int leftBaseX = 153;
+            int leftBaseY = 385;
+            int leftW = 128;
+            int leftH = 184;
+            int leftFrameW = leftW / 2;  
+            int leftFrameH = leftH / 3;   
 
             var leftFrames = new List<Rectangle>
             {
-                new Rectangle(leftBaseX + 0 * leftFrameW, leftBaseY, leftFrameW, leftFrameH),
-                new Rectangle(leftBaseX + 1 * leftFrameW, leftBaseY, leftFrameW, leftFrameH)
+                // Zeile 0
+                new Rectangle(leftBaseX + 0 * leftFrameW, leftBaseY + 0 * leftFrameH, leftFrameW, leftFrameH),
+                new Rectangle(leftBaseX + 1 * leftFrameW, leftBaseY + 0 * leftFrameH, leftFrameW, leftFrameH),
+
+                // Zeile 1
+                new Rectangle(leftBaseX + 0 * leftFrameW, leftBaseY + 1 * leftFrameH, leftFrameW, leftFrameH),
+                new Rectangle(leftBaseX + 1 * leftFrameW, leftBaseY + 1 * leftFrameH, leftFrameW, leftFrameH),
+
+                // Zeile 2
+                new Rectangle(leftBaseX + 0 * leftFrameW, leftBaseY + 2 * leftFrameH, leftFrameW, leftFrameH),
+                new Rectangle(leftBaseX + 1 * leftFrameW, leftBaseY + 2 * leftFrameH, leftFrameW, leftFrameH),
             };
+            
             _walkLeftAnimation = new SpriteAnimation(_characterAtlas, leftFrames, 0.15f);
+            
+            // e2_bikethief_walking_right.png
 
-
-            // e1_drunkdude_walking_right.png  "frame": {"x":296,"y":0,"w":80,"h":108}
-
-            int rightBaseX = 190;
-            int rightBaseY = 0;
-            int rightW = 80;
-            int rightH = 108;
+            int rightBaseX = 281;
+            int rightBaseY = 385;
+            int rightW = 128;
+            int rightH = 184;
             int rightFrameW = rightW / 2; 
-            int rightFrameH = rightH / 2;     
+            int rightFrameH = rightH / 3; 
 
             var rightFrames = new List<Rectangle>
             {
-                new Rectangle(rightBaseX + 0 * rightFrameW, rightBaseY, rightFrameW, rightFrameH),
-                new Rectangle(rightBaseX + 1 * rightFrameW, rightBaseY, rightFrameW, rightFrameH)
+                // Zeile 0
+                new Rectangle(rightBaseX + 0 * rightFrameW, rightBaseY + 0 * rightFrameH, rightFrameW, rightFrameH),
+                new Rectangle(rightBaseX + 1 * rightFrameW, rightBaseY + 0 * rightFrameH, rightFrameW, rightFrameH),
+
+                // Zeile 1
+                new Rectangle(rightBaseX + 0 * rightFrameW, rightBaseY + 1 * rightFrameH, rightFrameW, rightFrameH),
+                new Rectangle(rightBaseX + 1 * rightFrameW, rightBaseY + 1 * rightFrameH, rightFrameW, rightFrameH),
+
+                // Zeile 2
+                new Rectangle(rightBaseX + 0 * rightFrameW, rightBaseY + 2 * rightFrameH, rightFrameW, rightFrameH),
+                new Rectangle(rightBaseX + 1 * rightFrameW, rightBaseY + 2 * rightFrameH, rightFrameW, rightFrameH),
             };
+            
             _walkRightAnimation = new SpriteAnimation(_characterAtlas, rightFrames, 0.15f);
 
             // Startzustand: Idle
@@ -91,15 +109,19 @@ namespace BikeWars.Entities.Characters
 
         public void UpdateCollider()
         {
-            _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y);
+            _collider = new BoxCollider(
+                new Vector2(Transform.Position.X, Transform.Position.Y),
+                Transform.Size.X,
+                Transform.Size.Y
+            );
         }
 
         // 1x1 Texture to represent the enemy
         public static Texture2D pixel;
 
-
-        public Hobo(Vector2 start, Point size)
+        public BikeThief(Vector2 start, Point size)
         {
+            // Werte kannst du anpassen, wenn der BikeThief z.B. stärker/schneller sein soll
             MaxHealth = 40;
             Health = MaxHealth;
             AttackDamage = 5;
@@ -111,6 +133,7 @@ namespace BikeWars.Entities.Characters
             SoundHandler = new SoundHandler();
             UpdateCollider();
         }
+
         public override bool Intersects(ICollider collider)
         {
             return _collider.Intersects(collider);
@@ -134,23 +157,27 @@ namespace BikeWars.Entities.Characters
                 SoundHandler.WalkingSoundInstance.Stop();
                 return;
             }
+
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
             // Sound-Control
             if (SoundHandler.WalkingSoundInstance != null)
             {
-                // Start Playing Walking Sound if Player starts moving around
                 if (movement.IsMoving)
                 {
                     SoundHandler.WalkingSoundInstance.Play();
                 }
-                // Stop Playing Walking Sound if Player stops moving around
                 else
                 {
                     SoundHandler.WalkingSoundInstance.Stop();
                 }
             }
 
-            LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
+            LastTransform = new Transform(
+                new Vector2(Transform.Position.X, Transform.Position.Y),
+                Transform.Size
+            );
+
             Vector2 direction = movement.Direction;
             bool isMoving = direction != Vector2.Zero;
 
@@ -190,7 +217,7 @@ namespace BikeWars.Entities.Characters
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            if(IsDead)
+            if (IsDead)
                 return;
             if (_currentAnimation == null)
                 return;
@@ -216,17 +243,22 @@ namespace BikeWars.Entities.Characters
             }
         }
 
-        // Is Helpful for example with colliders to set the original position back.
+        // Ist hilfreich z.B. bei Kollisionen, um die ursprüngliche Position wiederherzustellen.
         public void SetLastTransform()
         {
-            Transform = new Transform(new Vector2(LastTransform.Position.X, LastTransform.Position.Y), LastTransform.Size);
+            Transform = new Transform(
+                new Vector2(LastTransform.Position.X, LastTransform.Position.Y),
+                LastTransform.Size
+            );
         }
 
         public void Immobalize(bool value)
         {
-            if (value) {
+            if (value)
+            {
                 movement.CanMove = false;
-            } else
+            }
+            else
             {
                 movement.CanMove = true;
             }

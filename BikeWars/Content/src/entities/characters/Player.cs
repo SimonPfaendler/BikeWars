@@ -70,35 +70,35 @@ namespace BikeWars.Entities.Characters
                 pixel.SetData(new[] { Color.White });
             }
 
-            // Down – c1_move_down_1x2.png: x=40, y=0, w=64, h=128
+            // Down – c1_move_down_1x2.png: x=270, y=0, w=64, h=128
             var downFrames = new List<Rectangle>
             {
-                new Rectangle(40, 0, 64, 64),
-                new Rectangle(40, 64, 64, 64)
+                new Rectangle(270, 0, 64, 64),
+                new Rectangle(270, 64, 64, 64)
             };
             _walkDownAnimation = new SpriteAnimation(_characterAtlas, downFrames, 0.16f);
 
-            // Left – c1_move_left_1x2.png: x=104, y=0, w=64, h=128
+            // Left – c1_move_left_1x2.png: x=334, y=0, w=64, h=128
             var leftFrames = new List<Rectangle>
             {
-                new Rectangle(104, 0, 64, 64),
-                new Rectangle(104, 64, 64, 64)
+                new Rectangle(334, 0, 64, 64),
+                new Rectangle(334, 64, 64, 64)
             };
             _walkLeftAnimation = new SpriteAnimation(_characterAtlas, leftFrames, 0.16f);
 
-            // Right – c1_move_right_1x2.png: x=168, y=0, w=64, h=128
+            // Right – c1_move_right_1x2.png: x=398, y=0, w=64, h=128
             var rightFrames = new List<Rectangle>
             {
-                new Rectangle(168, 0, 64, 64),
-                new Rectangle(168, 64, 64, 64)
+                new Rectangle(398, 0, 64, 64),
+                new Rectangle(398, 64, 64, 64)
             };
             _walkRightAnimation = new SpriteAnimation(_characterAtlas, rightFrames, 0.16f);
 
-            // Up – c1_move_up_1x2.png: x=232, y=0, w=64, h=128
+            // Up – c1_move_up_1x2.png: x=0, y=128, w=64, h=128
             var upFrames = new List<Rectangle>
             {
-                new Rectangle(232, 0, 64, 64),
-                new Rectangle(232, 64, 64, 64)
+                new Rectangle(0, 128, 64, 64),
+                new Rectangle(0, 192, 64, 64)
             };
             _walkUpAnimation = new SpriteAnimation(_characterAtlas, upFrames, 0.16f);
 
@@ -231,11 +231,7 @@ namespace BikeWars.Entities.Characters
             }
 
             // Gaze Direction Logic
-            // Calculate eye position based on rotation
-            Vector2 center = new Vector2(Transform.Position.X + Transform.Size.X / 2f, Transform.Position.Y + Transform.Size.Y / 2f);
-            float headDist = Transform.Size.Y / 2f;
-            Vector2 headOffset = new Vector2((float)Math.Cos(movement.Rotation), (float)Math.Sin(movement.Rotation)) * headDist;
-            Vector2 eyePos = center + headOffset;
+            Vector2 eyePos = Transform.Position;
             Vector2 potentialGaze = Vector2.Zero;
 
             // 1. Check Controller Input (Right Stick)
