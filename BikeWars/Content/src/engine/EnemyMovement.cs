@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 
 // Handles the enemy movement:
 // the enemy chases the player
-// if it collides with an object on the map, the enemy will turn 90 degrees
+// if it collides with an object on the map, the enemy will turn 30 degrees
 // to the right and try again
 
 namespace BikeWars.Content.engine;
@@ -30,7 +30,7 @@ public class EnemyMovement : MovementBase
 
     private const float StopRadius = 50f;
 
-    private int _sidestepCount = 0;
+    private int _sidestepCount = 1;
 
     public EnemyMovement(bool canMove, bool isMoving)
     {
@@ -58,7 +58,7 @@ public class EnemyMovement : MovementBase
             if (_sidestepTimeLeft <= 0)
             {
                 State = EnemyState.Chasing;
-                _sidestepCount = 0; 
+                _sidestepCount = 1; 
             }
         }
 
@@ -79,16 +79,15 @@ public class EnemyMovement : MovementBase
 
     public void StartSidestepping(Vector2 currentDirection)
     {
-        if (currentDirection == Vector2.Zero)
-            currentDirection = DirectionToTarget();
 
         if (currentDirection == Vector2.Zero)
             return;
 
         currentDirection.Normalize();
 
-        // Rotate the current direction by 90° per sidestep to find the next escape direction.
-        float angle = MathHelper.ToRadians(90 * (_sidestepCount + 1));
+        // Rotate the current direction by 30° per sidestep to find the next escape direction.
+        _sidestepCount += 1;
+        float angle = MathHelper.ToRadians(30 * (_sidestepCount));
 
         Vector2 rotated = new Vector2(
             currentDirection.X * (float)Math.Cos(angle) - currentDirection.Y * (float)Math.Sin(angle),
@@ -101,9 +100,8 @@ public class EnemyMovement : MovementBase
         _sidestepTimeLeft = SidestepDuration;
         State = EnemyState.Sidestepping;
 
-        _sidestepCount++;
-        if (_sidestepCount > 3)
-            _sidestepCount = 0;
+        if (_sidestepCount > 5)
+            _sidestepCount = 1;
     }
 
     private bool UpdateMoving() => Direction != Vector2.Zero;
