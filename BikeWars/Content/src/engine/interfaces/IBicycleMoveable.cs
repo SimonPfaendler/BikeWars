@@ -1,7 +1,0 @@
-using Microsoft.Xna.Framework;
-
-namespace BikeWars.Content.engine.interfaces;
-public interface IBicycleMoveable: IMoveable
-{
-
-}

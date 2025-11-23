@@ -129,7 +129,7 @@ namespace BikeWars.Entities.Characters
         {
             Health-= amount;
             if(Health < 0) Health = 0;
-        } 
+        }
 
         public void Attack(ICombat target)
         {
@@ -167,8 +167,8 @@ namespace BikeWars.Entities.Characters
             {
                 Shooting();
             }
-            movement.HandleMovement(gameTime);
-            if (!movement.CanMove)
+            movement.Update(gameTime);
+            if (!movement.CurrentMovement.CanMove)
             {
                 SoundHandler.DrivingSoundInstance.Stop();
                 return;
@@ -178,7 +178,7 @@ namespace BikeWars.Entities.Characters
             if (SoundHandler.DrivingSoundInstance != null)
             {
                 // Start Playing Walking Sound if Player starts moving around
-                if (movement.IsMoving)
+                if (movement.CurrentMovement.IsMoving)
                 {
                     SoundHandler.DrivingSoundInstance.Play();
                 }
@@ -196,16 +196,22 @@ namespace BikeWars.Entities.Characters
                 sprint.Activate();
             }
 
-            CurrentSpeed = sprint.IsActive ? SprintSpeed : movement.Speed;
+            // Console.WriteLine(movement.Speed);
+            CurrentSpeed = sprint.IsActive ? SprintSpeed : movement.CurrentMovement.Speed;
             LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
-            Vector2 direction = movement.Direction;
+            Vector2 direction = movement.CurrentMovement.Direction;
             bool isMoving = direction != Vector2.Zero;
+
+            // Console.WriteLine("CurrentSpeed");
+            // Console.WriteLine(CurrentSpeed);
+
+            // Console.WriteLine(direction);
 
             if (isMoving)
             {
                 direction.Normalize();
                 _facingDirection = direction; // Update facing direction
-                
+
                 // Reibung
                 // Speed *= Friction;
                 // Transform.Position += direction * CurrentSpeed * delta;
@@ -215,7 +221,7 @@ namespace BikeWars.Entities.Characters
                 }
                 else
                 {
-                    Transform.Position += direction * movement.Speed * delta;
+                    Transform.Position += direction * movement.CurrentMovement.Speed * delta;
                 }
                 _currentAnimation = _walkUpAnimation;
                 // choose animation based on main direction
@@ -240,7 +246,7 @@ namespace BikeWars.Entities.Characters
             {
                 // Controller aiming
                 rightStick.Y *= -1; // Invert Y for correct screen space direction
-                
+
                 potentialGaze = Vector2.Normalize(rightStick);
                 AimTarget = eyePos + potentialGaze * 100f; // Visual target for line
             }
@@ -286,7 +292,7 @@ namespace BikeWars.Entities.Characters
 
             _currentAnimation?.Update(gameTime, isMoving);
 
-            if (movement.IsMoving && sprint.IsActive && _currentAnimation != null)
+            if (movement.CurrentMovement.IsMoving && sprint.IsActive && _currentAnimation != null)
             {
                 _ghostSpawnTimer -= delta;
                 if (_ghostSpawnTimer <= 0f)
@@ -359,12 +365,12 @@ namespace BikeWars.Entities.Characters
             return;
 
             _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, movement.Rotation + MathHelper.PiOver2);
-            
+
             // Draw line from eye position only if GazeDirection is valid (non-zero)
             if (GazeDirection != Vector2.Zero)
             {
                 Vector2 center = Transform.Position;
-                
+
                 // Draw static valid zone arc based on facing direction
                 float facingAngle = (float)Math.Atan2(_facingDirection.Y, _facingDirection.X);
                 DrawArc(spriteBatch, center, 50f, facingAngle, MathHelper.Pi, Color.Red * 0.5f); // Semi-transparent red for zone
@@ -385,11 +391,11 @@ namespace BikeWars.Entities.Characters
         {
             if (value)
             {
-                movement.CanMove = false;
+                movement.CurrentMovement.CanMove = false;
             }
             else
             {
-                movement.CanMove = true;
+                movement.CurrentMovement.CanMove = true;
             }
         }
 
