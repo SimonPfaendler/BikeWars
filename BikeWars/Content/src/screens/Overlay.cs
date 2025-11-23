@@ -49,9 +49,6 @@ namespace BikeWars.Content.src.screens.Overlay
         {
             // timer
             DrawTimer(spriteBatch, frameTime);
-            
-            // inventory
-            DrawInventory(spriteBatch);
         }
 
         public void DrawOnWorld(SpriteBatch spriteBatch, Player player)
@@ -81,44 +78,6 @@ namespace BikeWars.Content.src.screens.Overlay
             
             // draws the counter on screen
             spriteBatch.DrawString(_counterFont, $"Time: {minutes:00}:{seconds:00}", _timerPosition, Color.White);
-        }
-        
-        // draw the inventory
-        private void DrawInventory(SpriteBatch spriteBatch)
-        {
-            int slotSize = 40;
-            int slotGap = 8;
-            int totalSlots = 5;
-            
-            int screenWidth = spriteBatch.GraphicsDevice.Viewport.Width;
-
-            // total width of all slots combined
-            int totalWidth = totalSlots * slotSize + (totalSlots - 1) * slotGap;
-
-            // position inventory row in the top-right corner of the screen
-            Vector2 startPos = new Vector2(screenWidth - totalWidth - 20, 40);
-            
-            // draws the background of the inventory
-            Rectangle backgroundRect = new Rectangle(
-                (int)startPos.X - 10,           
-                (int)startPos.Y - 10,           
-                totalWidth + 20,               
-                slotSize + 20                   
-            );
-                
-            spriteBatch.Draw(_pixel, backgroundRect, Color.Orange);
-            
-            // draw each slot
-            for (int i = 0; i < totalSlots; i++)
-            {
-            
-                int x = (int)(startPos.X + i * (slotSize + slotGap));
-                int y = (int)startPos.Y;
-                
-                Rectangle innerRect = new Rectangle(x + 5, y + 5, slotSize - 10,slotSize - 10);
-                spriteBatch.Draw(_pixel, innerRect, Color.Blue);
-            }
-            
         }
 
         private void DrawLifeLines(SpriteBatch spriteBatch, Player player)
