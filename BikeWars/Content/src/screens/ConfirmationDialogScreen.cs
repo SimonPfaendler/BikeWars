@@ -10,7 +10,7 @@ namespace BikeWars.Content.screens
 {
     public class ConfirmationDialogScreen : MenuScreenBase, IScreen
     {
-        private string _message;
+        private readonly string _message;
         private IScreen _previousScreen;
 
         public ConfirmationDialogScreen(SpriteFont font, string message, IScreen previousScreen)

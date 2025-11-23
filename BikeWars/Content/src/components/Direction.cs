@@ -10,7 +10,7 @@ public enum MoveDirection
 
 public static class DirectionHelper
 {
-    public static Dictionary<MoveDirection, Vector2> _directions = new()
+    private static readonly Dictionary<MoveDirection, Vector2> _directions = new()
     {
         {MoveDirection.LEFT, new Vector2(-1, 0)},
         {MoveDirection.RIGHT, new Vector2(1, 0)},

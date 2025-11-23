@@ -25,12 +25,24 @@ public class EnemyMovement : MovementBase
 
     private Vector2 _sidestepDirection;
 
-    public Vector2 PlayerPosition;
-    public Vector2 EnemyPosition;
+    private Vector2 _playerPosition;
+    public Vector2 PlayerPosition
+    {
+        get => _playerPosition;
+        set => _playerPosition = value;
+    }
+
+    private Vector2 _enemyPosition;
+
+    public Vector2 EnemyPosition
+    {
+        get => _enemyPosition;
+        set => _enemyPosition =  value;
+    }
 
     private const float StopRadius = 50f;
 
-    private int _sidestepCount = 1;
+    private int _sidestepCount = 0;
 
     public EnemyMovement(bool canMove, bool isMoving)
     {
@@ -86,7 +98,7 @@ public class EnemyMovement : MovementBase
         currentDirection.Normalize();
 
         // Rotate the current direction by 30° per sidestep to find the next escape direction.
-        _sidestepCount += 1;
+        _sidestepCount = (_sidestepCount + 1) % 6;
         float angle = MathHelper.ToRadians(30 * (_sidestepCount));
 
         Vector2 rotated = new Vector2(
@@ -99,9 +111,6 @@ public class EnemyMovement : MovementBase
 
         _sidestepTimeLeft = SidestepDuration;
         State = EnemyState.Sidestepping;
-
-        if (_sidestepCount > 5)
-            _sidestepCount = 1;
     }
 
     private bool UpdateMoving() => Direction != Vector2.Zero;

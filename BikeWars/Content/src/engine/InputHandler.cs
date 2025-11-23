@@ -99,7 +99,7 @@ namespace BikeWars.Content.engine
         private GamePadState _current;
         private GamePadState _previous;
 
-        private PlayerIndex _playerIndex;
+        private readonly PlayerIndex _playerIndex;
         private const float DeadZone = 0.25f;
 
         public GamePadInfo(PlayerIndex playerIndex = PlayerIndex.One)
@@ -143,7 +143,7 @@ namespace BikeWars.Content.engine
 
 
         // Keyboard Mapping
-        public static Dictionary<GameAction, Keys[]> KeyMapping = new()
+        public static Dictionary<GameAction, Keys[]> KeyMapping { get; } = new()
         {
             { GameAction.MOVE_LEFT,new[] { Keys.A, Keys.Left } },
             { GameAction.MOVE_RIGHT, new[] { Keys.D, Keys.Right } },
@@ -162,7 +162,7 @@ namespace BikeWars.Content.engine
             { GameAction.SWITCH, new[] {Keys.X } }
         };
 
-        public static Dictionary<GameAction, Buttons[]> GamepadMap = new()
+        public static Dictionary<GameAction, Buttons[]> GamepadMap { get; } = new()
         {
 
             { GameAction.SAVE, new[]  {Buttons.DPadUp} },
