@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 namespace BikeWars.Content.entities.interfaces;
 public abstract class ItemBase : IItem
 {
+    public virtual bool InventoryItem => false; //Items which go in the inventory
     private Transform _transform { get; set; }
     public Transform Transform { get => _transform;  set => _transform = value; }
     private ICollider _collider { get; set; }

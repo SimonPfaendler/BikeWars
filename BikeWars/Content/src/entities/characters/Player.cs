@@ -7,6 +7,7 @@ using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework.Audio;
 using BikeWars.Content.entities.interfaces;
 using System.Collections.Generic;
+using BikeWars.Content.entities.Inventory;
 using BikeWars.Content.managers;
 using BikeWars.Content.screens;
 
@@ -26,6 +27,7 @@ namespace BikeWars.Entities.Characters
         public int MaxHealth { get; set; }
         public int AttackDamage { get; set; }
         public float AttackSpeed { get; set; }
+        public Inventory Inventory { get; private set; }
         public bool IsDead => Health <= 0;
 
         private BoxCollider _collider { get; set; }
@@ -36,7 +38,7 @@ namespace BikeWars.Entities.Characters
         public Vector2 GazeDirection { get; private set; }
         public Vector2 AimTarget { get; private set; }
         private Vector2 _facingDirection = Vector2.UnitX; // Default to Right to match initial animation
-
+        
         public event Action ShotBullet;
         private Texture2D _characterAtlas;
 
@@ -149,6 +151,7 @@ namespace BikeWars.Entities.Characters
             movement = new PlayerMovement(canMove: true, isMoving: false);
             SoundHandler = new SoundHandler();
             sprint = new CooldownWithDuration(1f, 5f);
+            Inventory = new Inventory();
             UpdateCollider();
         }
         public override bool Intersects(ICollider collider)

@@ -21,7 +21,7 @@ namespace BikeWars.Content.screens
 {
     public class GameScreen : IScreen
     {
-        private List<ItemBase> _testItems;
+        private ItemManager _itemManager;
         private List<ProjectileBase> _testProjectiles;
         private Player player;
         private Camera2D camera;
@@ -37,6 +37,7 @@ namespace BikeWars.Content.screens
         private Hobo hobo;
         private BikeThief bikethief;
         private SpriteFont _font;
+        private Texture2D _pixel;
         private Vector2 mouseWorldPos;
         public ScreenManager ScreenManager { get; set; }
 
@@ -51,12 +52,12 @@ namespace BikeWars.Content.screens
         {
             worldBounds = new Rectangle(0, 0, 11200, 11200);
 
-            _testItems = new List<ItemBase>();
+            _itemManager = new ItemManager();
             _testProjectiles = new List<ProjectileBase>();
-            _testItems.Add(new Item(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
-            _testItems.Add(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
-            _testItems.Add(new Xp_Beer(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
-            _testItems.Add(new Xp_Money(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
+            _itemManager.AddItem(new Item(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
+            _itemManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
+            _itemManager.AddItem(new Xp_Beer(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
+            _itemManager.AddItem(new Xp_Money(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
 
             player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(32, 32));
             player.ShotBullet += OnPlayerShotBullet;
@@ -113,14 +114,12 @@ namespace BikeWars.Content.screens
             bikethief.LoadContent(content, content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
             
             // Items
-            if (_testItems.Count > 1)
-            {
-                _testItems[1].LoadContent(content);
-                _testItems[2].LoadContent(content);
-                _testItems[3].LoadContent(content);
-            }
+            _itemManager.LoadContent(content);
             _font = content.Load<SpriteFont>("assets/fonts/Arial");
             _contentManager = content; // We need this to add it later to spawning entities. (Maybe there is another possible implementation)
+            
+            _pixel = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
+            _pixel.SetData(new[] { Color.White });
         }
         public void Update(GameTime gameTime)
         {
@@ -135,35 +134,10 @@ namespace BikeWars.Content.screens
             mouseWorldPos = Vector2.Transform(mouseScreenPos, inverseTransform);
 
             player.Update(gameTime, mouseWorldPos);
-
-            // Collision Handling with player
-            if (player.Intersects(_testItems[0].Collider))
-            {
-                player.SetLastTransform();
-                player.UpdateCollider();
-            }
-
-            if (player.Intersects(_testItems[0].Collider))
-            {
-                player.SetLastTransform();
-                player.UpdateCollider();
-            }
-
-            for (int i = _testItems.Count - 1; i >= 0; i--)
-            {
-                var item = _testItems[i];
-
-                if (_testItems.Count > 1 && player.Intersects(item.Collider))
-                {
-                    _testItems.RemoveAt(i);
-                }
-            }
-
-            foreach (var item in _testItems)
-            {
-                item.Update(gameTime);
-            }
-
+            
+            _itemManager.Update(gameTime, player);
+            
+            // player collision
             foreach (var box in _collisionBoxes)
             {
                 if (player.Intersects(box))
@@ -172,10 +146,61 @@ namespace BikeWars.Content.screens
                     player.UpdateCollider();
                 }
             }
+            
+            // If the hobo hits a wall, push him back/sideways and start sidestepping.
+            foreach (var box in _collisionBoxes)
+            {
+                if (hobo.Intersects(box))
+                {
+                    hobo.Transform.Position -= hobo.Movement.Direction * 1.0f;
+                    
+                    Vector2 rightNudge = new Vector2(
+                        hobo.Movement.Direction.Y,
+                        -hobo.Movement.Direction.X
+                    );
+                    
+                    rightNudge.Normalize();
+                    hobo.Transform.Position += rightNudge * 1.0f;
+                    hobo.UpdateCollider();
+                    
+                    if (hobo.Movement.State == EnemyState.Chasing)
+                    {
+                        hobo.Movement.StartSidestepping(hobo.Movement.Direction);
+                    }
+                    
+                    break;
+                }
+            }
+            
+            // If the BikeThief hits a wall, push him back/sideways and start sidestepping.
+            foreach (var box in _collisionBoxes)
+            {
+                if (bikethief.Intersects(box))
+                {
+                    bikethief.Transform.Position -= bikethief.Movement.Direction * 5f;
+                    
+                    Vector2 rightNudge = new Vector2(
+                        bikethief.Movement.Direction.Y,
+                        -bikethief.Movement.Direction.X
+                    );
+                    
+                    rightNudge.Normalize();
+                    bikethief.Transform.Position += rightNudge * 0.8f;
+                    bikethief.UpdateCollider();
+
+                    if (bikethief.Movement.State == EnemyState.Chasing)
+                    {
+                        bikethief.Movement.StartSidestepping(bikethief.Movement.Direction);
+                    }
+
+                    break;
+                }
+            }
+            
             // This is not a good impelementation! We need now better implementation to check about the collisioncollider
             for (int i = _testProjectiles.Count - 1; i >= 0; i--)
             {
-                foreach (var box in _testItems) // just for testing
+                foreach (var box in _itemManager.Items) // just for testing
                 {
                     if (_testProjectiles[i].Intersects(box.Collider))
                     {
@@ -208,9 +233,19 @@ namespace BikeWars.Content.screens
             camera.Update(gameTime, player.Transform.Position, _freelook);
 
             _tiledMapRenderer.Update(gameTime);
+            
+            // Give the movement logic the current hobo and player positions
+            hobo.Movement.PlayerPosition = player.Transform.Position;
+            hobo.Movement.EnemyPosition = hobo.Transform.Position;
+            
+            // Give the movement logic the current player and thief position
+            bikethief.Movement.PlayerPosition = player.Transform.Position;
+            bikethief.Movement.EnemyPosition = bikethief.Transform.Position;
 
             hobo.Update(gameTime);
             bikethief.Update(gameTime);
+            
+            KeepEnemiesApart();
             
             HandleCounter(gameTime);
             HandleSaveLoadInput();
@@ -239,7 +274,7 @@ namespace BikeWars.Content.screens
         private void HandleSaveLoadInput()
         {
             if (InputHandler.IsPressed(GameAction.SAVE))
-                SaveLoad.SaveGame(_counter, player.Transform, _testProjectiles);
+                SaveLoad.SaveGame(_counter, player.Transform, _testProjectiles, hobo.Transform, bikethief.Transform);
 
             if (InputHandler.IsPressed(GameAction.LOAD))
             {
@@ -247,6 +282,13 @@ namespace BikeWars.Content.screens
                _counter = state.Counter;
                 _counterTimer = 0;
                 player.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
+                
+                hobo.Transform.Position = new Vector2(state.HoboX, state.HoboY);
+                hobo.UpdateCollider();
+                
+                bikethief.Transform.Position = new Vector2(state.BikeThiefX, state.BikeThiefY);
+                bikethief.UpdateCollider();
+                
                 _testProjectiles = [];
                 foreach (var p in state.Projectiles)
                 {
@@ -267,9 +309,53 @@ namespace BikeWars.Content.screens
                 _counterTimer = 0;
 
                 player.Transform.Position = new Vector2(worldBounds.Width / 2, worldBounds.Height / 2);
+                hobo.Transform.Position = new Vector2(worldBounds.Width / 2 - 60, worldBounds.Height / 2 + 30);
+                bikethief.Transform.Position = new Vector2(worldBounds.Width / 2 + 100, worldBounds.Height / 2 - 70);
                 Console.WriteLine("Reset counter and player position.");
             }
         }
+        
+        // keep the enemies from overlapping
+        private void KeepEnemiesApart()
+        {
+            // If one is dead, we might not care
+            if (hobo.IsDead || bikethief.IsDead)
+                return;
+
+            const float minDistance = 40f; // how many pixels apart they should stay
+            Vector2 posA = hobo.Transform.Position;
+            Vector2 posB = bikethief.Transform.Position;
+
+            Vector2 delta = posB - posA;
+            float distSq = delta.LengthSquared();
+
+            if (distSq == 0f)
+            {
+                // they are at exactly the same position, just give them a tiny offset
+                delta = new Vector2(1f, 0f);
+                distSq = 1f;
+            }
+
+            float minDistSq = minDistance * minDistance;
+
+            // Only push them apart if they're too close
+            if (distSq < minDistSq)
+            {
+                float dist = (float)Math.Sqrt(distSq);
+                Vector2 dir = delta / dist; // normalized direction from hobo -> thief
+
+                float overlap = minDistance - dist; // how much too close they are
+
+                // Move each enemy half the overlap in opposite directions
+                hobo.Transform.Position  -= dir * (overlap * 0.5f);
+                bikethief.Transform.Position += dir * (overlap * 0.5f);
+
+                // Update their colliders after we changed the positions
+                hobo.UpdateCollider();
+                bikethief.UpdateCollider();
+            }
+        }
+        
         public void Draw(GameTime gameTime)
         {
             Game1 game = Game1.Instance;
@@ -282,7 +368,7 @@ namespace BikeWars.Content.screens
             hobo.Draw(spriteBatch);
             bikethief.Draw(spriteBatch);
             
-            foreach (var item in _testItems)
+            foreach (var item in _itemManager.Items)
             {
                 item.Draw(spriteBatch);
             }
@@ -304,6 +390,10 @@ namespace BikeWars.Content.screens
             spriteBatch.Begin();
             spriteBatch.DrawString(_debugFont, $"Counter: {_counter}", new Vector2(20, 100), Color.Black);
             spriteBatch.DrawString(_debugFont, "T=Save  L=Load  R=Reset counter", new Vector2(20, 125), Color.Black);
+            spriteBatch.End();
+            
+            spriteBatch.Begin();
+            player.Inventory.Draw(spriteBatch, _pixel);
             spriteBatch.End();
         }
 

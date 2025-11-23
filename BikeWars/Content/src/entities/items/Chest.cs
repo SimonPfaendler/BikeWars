@@ -8,7 +8,9 @@ using System;
 
 namespace BikeWars.Content.entities.items;
 public class Chest: ItemBase, IPickable
-{
+{   
+    public override bool InventoryItem => true;
+    
     private const String TEXTURE_PATH = "assets/sprites/chest_texture";
     private BoxCollider _collider { get; set; }
     public override BoxCollider Collider

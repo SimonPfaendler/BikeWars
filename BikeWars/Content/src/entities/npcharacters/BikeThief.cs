@@ -23,6 +23,8 @@ namespace BikeWars.Entities.Characters
         private BoxCollider _collider { get; set; }
         private EnemyMovement movement { get; set; }
         public SoundHandler SoundHandler { get; }
+        
+        public EnemyMovement Movement => movement;
 
         // Animation mit SpriteManager
         private Texture2D _characterAtlas;
@@ -42,7 +44,7 @@ namespace BikeWars.Entities.Characters
             // TODO: Rechteck auf BikeThief-Idle-Sprite anpassen
             var idleFrames = new List<Rectangle>
             {
-                new Rectangle(281, 385, 128, 184) 
+                new Rectangle(281, 385, 128/2, 184/3) 
             };
             _idleAnimation = new SpriteAnimation(_characterAtlas, idleFrames, 0.6f);
 
