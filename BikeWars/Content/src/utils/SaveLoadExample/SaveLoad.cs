@@ -5,16 +5,23 @@ using System.Text.Json;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using BikeWars.Content.engine; 
+using BikeWars.Content.engine;
 using BikeWars.Content.entities;
 using BikeWars.Content.src.screens;
+using System.Collections.Generic;
+using BikeWars.Content.entities.interfaces;
+using BikeWars.Content.entities.items;
+using BikeWars.Entities.Characters;
 
 namespace BikeWars.Content.src.utils.SaveLoadExample;
 
 public static class SaveLoad
 {
     private static int _worldBounds = 11200 / 2;
-    
+    public enum TYPES
+    {
+        BULLET
+    }
     // save file path in the user's Documents folder
     private static readonly string SAVE_PATH = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.Personal),
@@ -27,21 +34,80 @@ public static class SaveLoad
         public int Counter { get; set; } = 0;
         public float PlayerX { get; set; } = _worldBounds;
         public float PlayerY { get; set; } = _worldBounds;
+        public List<ProjectileSaveModel> Projectiles {get; set;}
+
+        public float HoboX { get; set; } = _worldBounds - 60;
+        public float HoboY { get; set; } = _worldBounds + 30;
+
+        public float BikeThiefX { get; set; } = _worldBounds + 100;
+        public float BikeThiefY { get; set; } = _worldBounds - 70;
+    }
+
+    public class ProjectileSaveModel
+    {
+        public TYPES Type {get; set;} // Type of the projectile. Like bullet
+
+        public Vector2Save Position {get;set;}
+
+        public PointSave Size {get;set;}
+
+        public ProjectileSaveModel() {}
+
+        public ProjectileSaveModel(TYPES type, Vector2 position, Point size)
+        {
+            Type = type;
+            Position = new Vector2Save(position);
+            // position;
+            Size = new PointSave(size);
+        }
+    }
+
+    public class PointSave
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+        public PointSave() {}
+        public PointSave(Point p)
+        {
+            X = p.X;
+            Y = p.Y;
+        }
+        public Point ToPoint() => new Point(X, Y);
+    }
+
+    public class Vector2Save
+    {
+        public float X { get; set; }
+        public float Y { get; set; }
+
+        public Vector2Save() {}
+
+        public Vector2Save(Vector2 v)
+        {
+            X = v.X;
+            Y = v.Y;
+        }
+        public Vector2 ToVector2() => new Vector2(X, Y);
     }
 
 
-
     // save the counter in a JSON file
-    public static void SaveGame(int counter, Transform playerPosition)
+    public static void SaveGame(int counter, Transform playerPosition, List<ProjectileBase> projectiles, Transform hoboPosition,
+        Transform bikeThiefPosition)
     {
         try
         {
-            // serialize the current counter into JSON text
+            // serialize the current info into JSON text
             GameState state = new GameState
             {
                 Counter = counter,
-                PlayerX = playerPosition.Position.X, 
-                PlayerY = playerPosition.Position.Y
+                PlayerX = playerPosition.Position.X,
+                PlayerY = playerPosition.Position.Y,
+                Projectiles = MakeProjectileSaveList(projectiles),
+                HoboX = hoboPosition.Position.X,
+                HoboY = hoboPosition.Position.Y,
+                BikeThiefX = bikeThiefPosition.Position.X,
+                BikeThiefY = bikeThiefPosition.Position.Y,
             };
             string json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
 
@@ -68,7 +134,7 @@ public static class SaveLoad
         if (!File.Exists(SAVE_PATH))
         {
             Console.WriteLine("No save file yet — starting with default values.");
-            return new GameState(); 
+            return new GameState();
         }
 
         // read the contents of the JSON file into a string
@@ -84,7 +150,25 @@ public static class SaveLoad
 
         Console.WriteLine("Loaded. Counter=" + state.Counter);
         Console.WriteLine("Loaded. Player Position=" + state.PlayerX + " " + state.PlayerY);
+        Console.WriteLine("Loaded. Player Position=" + state.HoboX + " " + state.HoboY);
+        Console.WriteLine("Loaded. Player Position=" + state.BikeThiefX + " " + state.BikeThiefY);
         return state;
     }
 
+    private static ProjectileSaveModel MakeProjectileSaveModel(ProjectileBase projectile)
+    {
+        return projectile switch
+        {
+            Bullet b => new ProjectileSaveModel(TYPES.BULLET, projectile.Transform.Position, projectile.Transform.Size),
+        };
+    }
+    private static List<ProjectileSaveModel> MakeProjectileSaveList(List<ProjectileBase> pList)
+    {
+        List<ProjectileSaveModel> crtList = [];
+        foreach (var p in pList)
+        {
+            crtList.Add(MakeProjectileSaveModel(p));
+        }
+        return crtList;
+    }
 }

@@ -1,63 +1,54 @@
-using BikeWars.Content.engine.interfaces;
-using Microsoft.Xna.Framework;
 using BikeWars.Content.components;
-
-
+using BikeWars.Content.engine.interfaces;
+using System.Collections.Generic;
 
 namespace BikeWars.Content.engine;
-public class PlayerMovement: MovementBase
+public class PlayerMovement
 {
+    private IMoveable _currentMovement {get; set;}
+    public IMoveable CurrentMovement {get => _currentMovement; set => _currentMovement = value;}
+
+    public float Rotation = 0.0f; // in Radiant
+
+    public float RotationAcceleration = 0.1f;
+    public float SpeedAcceleration = 4f;
+    public float MaxSpeed = 200f;
+    public float Friction = 0.95f;
+
     public PlayerMovement(bool canMove, bool isMoving)
     {
-        Direction = Vector2.Zero;
-        CanMove = canMove;
-        IsMoving = isMoving;
+        CurrentMovement = new BicycleMovement(canMove, isMoving, RotationAcceleration);
     }
-
-    public override void HandleMovement(GameTime gameTime)
+    private List<MoveDirection> MakeMoveDirections()
     {
-        if (!CanMove)
-        {
-            return;
-        }
-        Direction = MakeDirection();
-        Update(gameTime);
-    }
-
-    private Vector2 MakeDirection()
-    {
-        Vector2 direction = Vector2.Zero;
+        List<MoveDirection> directions = [];
         if (InputHandler.IsHeld(GameAction.MOVE_UP))
         {
-            direction += DirectionHelper.Get(MoveDirection.UP);
+            directions.Add(MoveDirection.UP);
+            directions.Add(MoveDirection.FORWARD);
         }
         if (InputHandler.IsHeld(GameAction.MOVE_DOWN))
         {
-            direction += DirectionHelper.Get(MoveDirection.DOWN);
+            directions.Add(MoveDirection.DOWN);
+            directions.Add(MoveDirection.BACKWARD);
         }
         if (InputHandler.IsHeld(GameAction.MOVE_LEFT))
         {
-            direction += DirectionHelper.Get(MoveDirection.LEFT);
+            directions.Add(MoveDirection.LEFT);
         }
         if (InputHandler.IsHeld(GameAction.MOVE_RIGHT))
         {
-            direction += DirectionHelper.Get(MoveDirection.RIGHT);
+            directions.Add(MoveDirection.RIGHT);
         }
-
-        Vector2 stick = InputHandler.GamePad.LeftStick;
-        if (stick != Vector2.Zero)
-        {
-            direction += stick;
-        }
-        return direction;
+        return directions;
+    }
+    public void Update()
+    {
+        CurrentMovement.HandleMovement(MakeMoveDirections(), CurrentMovement.Speed, SpeedAcceleration, Rotation, RotationAcceleration, 0, MaxSpeed);
     }
 
-    private bool UpdateMoving()
+    public bool IsMoving()
     {
-        return Direction != Vector2.Zero;
-    }
-    public override void Update(GameTime gameTime)
-    {
-        IsMoving = UpdateMoving();
+        return CurrentMovement.IsMoving;
     }
 }

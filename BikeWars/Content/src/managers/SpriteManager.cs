@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-// Animationslogik 
+// Animationslogik
 
 namespace BikeWars.Content.managers
 {
@@ -16,7 +16,7 @@ namespace BikeWars.Content.managers
         private int _frameIndex;
         private float _timer;
 
-        
+
         public SpriteAnimation(Texture2D sheet, List<Rectangle> frames, float secondsPerFrame)
         {
             _sheet = sheet;
@@ -44,13 +44,13 @@ namespace BikeWars.Content.managers
             }
         }
 
-        
+
         public Rectangle GetCurrentFrame()
         {
             return _frames[_frameIndex];
         }
 
-        public void Draw(SpriteBatch spriteBatch, Vector2 position, Point size)
+        public void Draw(SpriteBatch spriteBatch, Vector2 position, Point size, float rotation)
         {
             // aktueller Frame aus der Liste
             Rectangle source = _frames[_frameIndex];
@@ -62,7 +62,7 @@ namespace BikeWars.Content.managers
                 size.Y
             );
 
-            spriteBatch.Draw(_sheet, dest, source, Color.White);
+            spriteBatch.Draw(_sheet, dest, source, Color.White, rotation: rotation, new Vector2(source.Width / 2f, source.Height / 2f), SpriteEffects.None, layerDepth:0f);
         }
     }
 }

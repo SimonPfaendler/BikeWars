@@ -7,7 +7,10 @@ using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework.Audio;
 using BikeWars.Content.entities.interfaces;
 using System.Collections.Generic;
+using BikeWars.Content.entities.Inventory;
 using BikeWars.Content.managers;
+using BikeWars.Content.screens;
+using Microsoft.Xna.Framework.Input;
 
 // ============================================================
 // Player.cs
@@ -18,16 +21,28 @@ using BikeWars.Content.managers;
 // ============================================================
 namespace BikeWars.Entities.Characters
 {
-    public class Player : CharacterBase
+    public class Player : CharacterBase, ICombat
     {
-        
+
+        public int Health { get; set; }
+        public int MaxHealth { get; set; }
+        public int AttackDamage { get; set; }
+        public float AttackSpeed { get; set; }
+        public Inventory Inventory { get; private set; }
+        public bool IsDead => Health <= 0;
+
         private BoxCollider _collider { get; set; }
         private PlayerMovement movement { get; set; }
         public SoundHandler SoundHandler { get; }
         private CooldownWithDuration sprint { get; }
 
+        public Vector2 GazeDirection { get; private set; }
+        public Vector2 AimTarget { get; private set; }
+        private Vector2 _facingDirection = Vector2.UnitX; // Default to Right to match initial animation
+
+        public event Action ShotBullet;
         private Texture2D _characterAtlas;
-        
+
         private SpriteAnimation _walkDownAnimation;
         private SpriteAnimation _walkUpAnimation;
         private SpriteAnimation _walkLeftAnimation;
@@ -52,36 +67,41 @@ namespace BikeWars.Entities.Characters
         public void LoadContent(ContentManager content, SoundEffect drivingSoundEffect)
         {
             _characterAtlas = content.Load<Texture2D>("assets/sprites/characters/character_atlas");
+            if (pixel == null)
+            {
+                pixel = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
+                pixel.SetData(new[] { Color.White });
+            }
 
-            // Down – c1_move_down_1x2.png: x=40, y=0, w=64, h=128
+            // Down – c1_move_down_1x2.png: x=270, y=0, w=64, h=128
             var downFrames = new List<Rectangle>
             {
-                new Rectangle(40, 0, 64, 64),
-                new Rectangle(40, 64, 64, 64)
+                new Rectangle(270, 0, 64, 64),
+                new Rectangle(270, 64, 64, 64)
             };
             _walkDownAnimation = new SpriteAnimation(_characterAtlas, downFrames, 0.16f);
 
-            // Left – c1_move_left_1x2.png: x=104, y=0, w=64, h=128
+            // Left – c1_move_left_1x2.png: x=334, y=0, w=64, h=128
             var leftFrames = new List<Rectangle>
             {
-                new Rectangle(104, 0, 64, 64),
-                new Rectangle(104, 64, 64, 64)
+                new Rectangle(334, 0, 64, 64),
+                new Rectangle(334, 64, 64, 64)
             };
             _walkLeftAnimation = new SpriteAnimation(_characterAtlas, leftFrames, 0.16f);
 
-            // Right – c1_move_right_1x2.png: x=168, y=0, w=64, h=128
+            // Right – c1_move_right_1x2.png: x=398, y=0, w=64, h=128
             var rightFrames = new List<Rectangle>
             {
-                new Rectangle(168, 0, 64, 64),
-                new Rectangle(168, 64, 64, 64)
+                new Rectangle(398, 0, 64, 64),
+                new Rectangle(398, 64, 64, 64)
             };
             _walkRightAnimation = new SpriteAnimation(_characterAtlas, rightFrames, 0.16f);
 
-            // Up – c1_move_up_1x2.png: x=232, y=0, w=64, h=128
+            // Up – c1_move_up_1x2.png: x=0, y=128, w=64, h=128
             var upFrames = new List<Rectangle>
             {
-                new Rectangle(232, 0, 64, 64),
-                new Rectangle(232, 64, 64, 64)
+                new Rectangle(0, 128, 64, 64),
+                new Rectangle(0, 192, 64, 64)
             };
             _walkUpAnimation = new SpriteAnimation(_characterAtlas, upFrames, 0.16f);
 
@@ -90,7 +110,7 @@ namespace BikeWars.Entities.Characters
             SoundHandler.DrivingSoundInstance = drivingSoundEffect.CreateInstance();
             SoundHandler.DrivingSoundInstance.IsLooped = true;
         }
-        
+
         public void UpdateCollider()
         {
             _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y);
@@ -99,8 +119,32 @@ namespace BikeWars.Entities.Characters
         // 1x1 Texture to represent the player
         public static Texture2D pixel;
 
+        private void Shooting()
+        {
+            // Only shoot if we have a valid gaze direction
+            if (GazeDirection != Vector2.Zero)
+            {
+                ShotBullet?.Invoke();
+            }
+        }
+
+        public void TakeDamage(int amount)
+        {
+            Health-= amount;
+            if(Health < 0) Health = 0;
+        }
+
+        public void Attack(ICombat target)
+        {
+            target.TakeDamage(AttackDamage);
+        }
+
         public Player(Vector2 start, Point size)
         {
+            MaxHealth = 100;
+            Health = MaxHealth;
+            AttackDamage = 10;
+            AttackSpeed = 1f;
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 200f;
@@ -108,6 +152,7 @@ namespace BikeWars.Entities.Characters
             movement = new PlayerMovement(canMove: true, isMoving: false);
             SoundHandler = new SoundHandler();
             sprint = new CooldownWithDuration(1f, 5f);
+            Inventory = new Inventory();
             UpdateCollider();
         }
         public override bool Intersects(ICollider collider)
@@ -117,8 +162,29 @@ namespace BikeWars.Entities.Characters
 
         public override void Update(GameTime gameTime)
         {
-            movement.HandleMovement(gameTime);
-            if (!movement.CanMove)
+            Update(gameTime, AimTarget);
+        }
+
+        public void Update(GameTime gameTime, Vector2 mousePos)
+        {
+            // TODO THIS IS NOW ONLY FOR TESTING AND SHOWING
+            if (InputHandler.IsPressed(GameAction.SWITCH))
+            {
+                if (movement.CurrentMovement.GetType() == typeof(BicycleMovement))
+                {
+                    movement.CurrentMovement = new WalkingMovement(true, true);
+                } else
+                {
+                    movement.CurrentMovement = new BicycleMovement(true, true, movement.RotationAcceleration);
+                }
+            }
+
+            if (InputHandler.IsPressed(GameAction.SHOOT))
+            {
+                Shooting();
+            }
+            movement.Update();
+            if (!movement.CurrentMovement.CanMove)
             {
                 SoundHandler.DrivingSoundInstance.Stop();
                 return;
@@ -128,7 +194,7 @@ namespace BikeWars.Entities.Characters
             if (SoundHandler.DrivingSoundInstance != null)
             {
                 // Start Playing Walking Sound if Player starts moving around
-                if (movement.IsMoving)
+                if (movement.CurrentMovement.IsMoving)
                 {
                     SoundHandler.DrivingSoundInstance.Play();
                 }
@@ -144,24 +210,35 @@ namespace BikeWars.Entities.Characters
             if (InputHandler.IsHeld(GameAction.SPRINT) && sprint.Ready)
             {
                 sprint.Activate();
-
             }
-            
-            CurrentSpeed = sprint.IsActive ? SprintSpeed : Speed;
 
-
+            // Console.WriteLine(movement.Speed);
+            CurrentSpeed = sprint.IsActive ? SprintSpeed : movement.CurrentMovement.Speed;
             LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
-            
-            Vector2 direction = movement.Direction;
-            bool isMoving = direction != Vector2.Zero;
+            Vector2 direction = movement.CurrentMovement.Direction;
 
+            bool isMoving = movement.IsMoving();
             if (isMoving)
             {
                 direction.Normalize();
-                Transform.Position += direction * CurrentSpeed * delta;
-
+                _facingDirection = direction; // Update facing direction
+                // Reibung
+                // Speed *= Friction;
+                // Transform.Position += direction * CurrentSpeed * delta;
+                if (sprint.IsActive)
+                {
+                    Transform.Position += direction * CurrentSpeed * delta;
+                }
+                else
+                {
+                    Transform.Position += direction * movement.CurrentMovement.Speed * delta;
+                }
+                _currentAnimation = _walkUpAnimation;
                 // choose animation based on main direction
-                if (MathF.Abs(direction.X) > MathF.Abs(direction.Y))
+                // @TODO We need to decide on how the animation should look like so don't delete it now
+                if (movement.CurrentMovement.GetType() == typeof(WalkingMovement)) // THIS IS ONLY INSERTED TO SHOW. BUT NOT GOOD!
+                {
+                    if (MathF.Abs(direction.X) > MathF.Abs(direction.Y))
                 {
                     _currentAnimation = (direction.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
                 }
@@ -169,13 +246,66 @@ namespace BikeWars.Entities.Characters
                 {
                     _currentAnimation = (direction.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
                 }
+                }
             }
-            
 
-            
+            // Gaze Direction Logic
+            Vector2 eyePos = Transform.Position;
+            Vector2 potentialGaze = Vector2.Zero;
+
+            // 1. Check Controller Input (Right Stick)
+            Vector2 rightStick = InputHandler.GamePad.RightStick;
+            if (rightStick != Vector2.Zero)
+            {
+                // Controller aiming
+                rightStick.Y *= -1; // Invert Y for correct screen space direction
+
+                potentialGaze = Vector2.Normalize(rightStick);
+                AimTarget = eyePos + potentialGaze * 100f; // Visual target for line
+            }
+            else
+            {
+                // 2. Fallback to Mouse Input
+                AimTarget = mousePos;
+                Vector2 diff = AimTarget - eyePos;
+                if (diff != Vector2.Zero)
+                {
+                    potentialGaze = Vector2.Normalize(diff);
+                }
+            }
+
+            // 3. Apply Angle Restriction
+            if (potentialGaze != Vector2.Zero)
+            {
+                // Check if the angle is within +/- 90 degrees (Dot product > 0)
+                if (Vector2.Dot(_facingDirection, potentialGaze) > 0)
+                {
+                    GazeDirection = potentialGaze;
+                }
+                else
+                {
+                    // Clamp to nearest 90 degree angle
+                    Vector2 perp1 = new Vector2(-_facingDirection.Y, _facingDirection.X); // -90 degrees
+                    Vector2 perp2 = new Vector2(_facingDirection.Y, -_facingDirection.X); // +90 degrees
+
+                    if (Vector2.Dot(perp1, potentialGaze) > Vector2.Dot(perp2, potentialGaze))
+                    {
+                        GazeDirection = perp1;
+                    }
+                    else
+                    {
+                        GazeDirection = perp2;
+                    }
+                }
+            }
+            else
+            {
+                GazeDirection = Vector2.Zero;
+            }
+
             _currentAnimation?.Update(gameTime, isMoving);
-            
-            if (movement.IsMoving && sprint.IsActive && _currentAnimation != null)
+
+            if (movement.CurrentMovement.IsMoving && sprint.IsActive && _currentAnimation != null)
             {
                 _ghostSpawnTimer -= delta;
                 if (_ghostSpawnTimer <= 0f)
@@ -194,7 +324,6 @@ namespace BikeWars.Entities.Characters
                 }
             }
 
-            
             for (int i = _ghostTrail.Count - 1; i >= 0; i--)
             {
                 var ghost = _ghostTrail[i];
@@ -209,7 +338,6 @@ namespace BikeWars.Entities.Characters
                     _ghostTrail[i] = ghost;
                 }
             }
-
             UpdateCollider();
         }
         public void Draw(SpriteBatch spriteBatch)
@@ -224,12 +352,15 @@ namespace BikeWars.Entities.Characters
                     Transform.Size.X,
                     Transform.Size.Y
                 );
-
                 spriteBatch.Draw(
                     ghost.Texture,
                     destinationRectangle: ghostDest,
                     sourceRectangle: ghost.Source,
-                    color: Color.White * alpha
+                    color: Color.White * alpha,
+                    rotation: movement.Rotation,
+                    origin: new Vector2(ghost.Source.Width / 2f, ghost.Source.Height / 2f),
+                    effects: SpriteEffects.None,
+                    layerDepth: 0f
                 );
             }
             // saubere Ganzzahl-Position, sonst „zittert“ Pixelart
@@ -244,7 +375,27 @@ namespace BikeWars.Entities.Characters
             if (_currentAnimation == null)
             return;
 
-            _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size);
+            if (movement.CurrentMovement.GetType() == typeof(WalkingMovement)) // TODO THIS IS ONLY INSERTED TO SHOW. BUT NOT GOOD!
+            {
+                _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, movement.CurrentMovement.Rotation);
+            } else
+            {
+                _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, movement.CurrentMovement.Rotation + MathHelper.PiOver2);
+            }
+
+            // Draw line from eye position only if GazeDirection is valid (non-zero)
+            if (GazeDirection != Vector2.Zero)
+            {
+                Vector2 center = Transform.Position;
+
+                // Draw static valid zone arc based on facing direction
+                float facingAngle = (float)Math.Atan2(_facingDirection.Y, _facingDirection.X);
+                DrawArc(spriteBatch, center, 50f, facingAngle, MathHelper.Pi, Color.Red * 0.5f); // Semi-transparent red for zone
+
+                // Draw aiming line
+                Vector2 aimEnd = center + GazeDirection * 50f;
+                DrawLine(spriteBatch, center, aimEnd, Color.Red);
+            }
         }
 
         // Is Helpful for example with colliders to set the original position back.
@@ -257,11 +408,11 @@ namespace BikeWars.Entities.Characters
         {
             if (value)
             {
-                movement.CanMove = false;
+                movement.CurrentMovement.CanMove = false;
             }
             else
             {
-                movement.CanMove = true;
+                movement.CurrentMovement.CanMove = true;
             }
         }
 
@@ -273,6 +424,38 @@ namespace BikeWars.Entities.Characters
         public float CooldownTimer()
         {
             return sprint.GetRemainingCooldown();
+        }
+        // Helper function to draw a line
+        private void DrawLine(SpriteBatch spriteBatch, Vector2 start, Vector2 end, Color color)
+        {
+            Vector2 edge = end - start;
+            float angle = (float)Math.Atan2(edge.Y, edge.X);
+            float length = edge.Length();
+            spriteBatch.Draw(pixel,
+                new Rectangle((int)start.X, (int)start.Y, (int)length, 2), // 2 is thickness
+                null,
+                color,
+                angle,
+                Vector2.Zero,
+                SpriteEffects.None,
+                0);
+        }
+
+        private void DrawArc(SpriteBatch spriteBatch, Vector2 center, float radius, float angle, float sweep, Color color, int segments = 16)
+        {
+            float startAngle = angle - sweep / 2f;
+            float step = sweep / segments;
+
+            for (int i = 0; i < segments; i++)
+            {
+                float theta1 = startAngle + i * step;
+                float theta2 = startAngle + (i + 1) * step;
+
+                Vector2 p1 = center + new Vector2((float)Math.Cos(theta1), (float)Math.Sin(theta1)) * radius;
+                Vector2 p2 = center + new Vector2((float)Math.Cos(theta2), (float)Math.Sin(theta2)) * radius;
+
+                DrawLine(spriteBatch, p1, p2, color);
+            }
         }
     }
 }

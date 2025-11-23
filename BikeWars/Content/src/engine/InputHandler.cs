@@ -30,7 +30,11 @@ namespace BikeWars.Content.engine
         DEBUG_TOGGLE,
         TOGGLE_CAMERA,
         ESC,
-        SPRINT
+        SPRINT,
+        PAUSE,
+        SHOOT,
+        INTERACT,
+        SWITCH
     }
 
     public class KeyboardInfo
@@ -89,13 +93,13 @@ namespace BikeWars.Content.engine
 
 
     }
-    
+
     public class GamePadInfo
     {
         private GamePadState _current;
         private GamePadState _previous;
 
-        private PlayerIndex _playerIndex;
+        private readonly PlayerIndex _playerIndex;
         private const float DeadZone = 0.25f;
 
         public GamePadInfo(PlayerIndex playerIndex = PlayerIndex.One)
@@ -130,7 +134,7 @@ namespace BikeWars.Content.engine
 
 
     }
-    
+
     public static class InputHandler
     {
         public static readonly KeyboardInfo Keyboard = new();
@@ -139,7 +143,7 @@ namespace BikeWars.Content.engine
 
 
         // Keyboard Mapping
-        public static Dictionary<GameAction, Keys[]> KeyMapping = new()
+        public static Dictionary<GameAction, Keys[]> KeyMapping { get; } = new()
         {
             { GameAction.MOVE_LEFT,new[] { Keys.A, Keys.Left } },
             { GameAction.MOVE_RIGHT, new[] { Keys.D, Keys.Right } },
@@ -151,22 +155,31 @@ namespace BikeWars.Content.engine
             { GameAction.DEBUG_TOGGLE, new[] { Keys.P } },
             { GameAction.TOGGLE_CAMERA,new [] {Keys.C } },
             { GameAction.ESC, new[] {Keys.Escape } },
-            {GameAction.SPRINT, new[] { Keys.LeftShift, Keys.RightShift } }
+            { GameAction.SPRINT, new[] { Keys.LeftShift, Keys.RightShift } },
+            { GameAction.PAUSE, new[] { Keys.Escape, Keys.P } },
+            {GameAction.SHOOT, new[] { Keys.G } },
+            { GameAction.INTERACT, new[] {Keys.Q } },
+            { GameAction.SWITCH, new[] {Keys.X } }
         };
 
-        
-        public static Dictionary<GameAction, Buttons[]> GamepadMap = new()
+        public static Dictionary<GameAction, Buttons[]> GamepadMap { get; } = new()
         {
-            
+
             { GameAction.SAVE, new[]  {Buttons.DPadUp} },
             { GameAction.LOAD, new[] {Buttons.DPadRight} },
             { GameAction.RESET, new[] {Buttons.DPadLeft} },
             { GameAction.DEBUG_TOGGLE, new[] {Buttons.DPadDown} },
             { GameAction.TOGGLE_CAMERA,new [] {Buttons.A} },
             { GameAction.ESC, new[] { Buttons.B} },
-            {GameAction.SPRINT, new[] { Buttons.LeftTrigger} }
+            { GameAction.SPRINT, new[] { Buttons.LeftTrigger} },
+            { GameAction.PAUSE, new[] { Buttons.Start} },
+            {GameAction.SHOOT, new[] { Buttons.RightTrigger } },
+            { GameAction.INTERACT, new[] { Buttons.X } }
+            /* INTERACT should be A not X, but X is already used and I m not sure for what.
+             Should be fixed later*/
+
         };
-        
+
         public static void Update()
         {
             Keyboard.Update();
@@ -184,7 +197,7 @@ namespace BikeWars.Content.engine
                     if (Keyboard.IsKeyHeld(key))
                         return true;
                 }
-                
+
             }
             if (GamepadMap.TryGetValue(action, out var buttons))
             {
@@ -207,7 +220,7 @@ namespace BikeWars.Content.engine
                     if (Keyboard.IsKeyPressed(key))
                         return true;
                 }
-                
+
             }
             if (GamepadMap.TryGetValue(action, out var buttons))
             {
@@ -229,7 +242,7 @@ namespace BikeWars.Content.engine
                     if (Keyboard.IsKeyReleased(key))
                         return true;
                 }
-                
+
             }
             return false;
         }

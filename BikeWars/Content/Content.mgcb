@@ -103,6 +103,18 @@
 /processorParam:Quality=Best
 /build:assets/sounds/Bike_Driving.mp3
 
+#begin assets/sounds/HandgunClick.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/HandgunClick.mp3
+
+#begin assets/sounds/SoftClick.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/SoftClick.mp3
+
 #begin assets/sounds/Walking.mp3
 /importer:Mp3Importer
 /processor:SoundEffectProcessor
@@ -133,6 +145,18 @@
 /processorParam:TextureFormat=Color
 /build:assets/sprites/chest_texture.png
 
+#begin assets/sprites/projectiles/bullet.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/sprites/projectiles/bullet.png
+
 #begin assets/sprites/XP/xp_beer_texture.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -156,3 +180,4 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:assets/sprites/XP/xp_money_texture.png
+

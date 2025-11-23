@@ -2,8 +2,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-
-// Basic class for implementing a Menu Button with variable text
 namespace BikeWars.Content.components
 {
     public class MenuButton
@@ -14,15 +12,26 @@ namespace BikeWars.Content.components
         private string _text;
         private SpriteFont _font;
         private Color _textColor;
-
-        public MenuButton(Texture2D texture, Rectangle bounds, string text, SpriteFont font, Color? textColor = null)
+        
+        private Rectangle _originalBounds;
+        private Rectangle _hoverBounds;
+        private bool _isHovered;
+        private const float HOVER_SCALE = 1.2f;
+        public int Id { get; private set; }
+        
+        public MenuButton(int id, Texture2D texture, Rectangle bounds, string text, SpriteFont font, Color? textColor = null)
         {
+            Id = id;
             _texture = texture;
+            _originalBounds = bounds;
             _drawBounds = bounds;
             _collisionBounds = bounds;
             _text = text;
             _font = font;
             _textColor = textColor ?? Color.Black;
+            
+            CalculateHoverBounds();
+            _drawBounds = _originalBounds;
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -40,20 +49,47 @@ namespace BikeWars.Content.components
             
             spriteBatch.DrawString(_font, _text, textPosition, _textColor, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
         }
+        
+        public void Update(MouseState mouseState)
+        {
+            // make button bigger when the mouse is in its bounds
+            _isHovered = _collisionBounds.Contains(mouseState.Position);
+            
+            _drawBounds = _isHovered ? _hoverBounds : _originalBounds;
+        }
 
         public bool IsClicked(MouseState currentMouseState, MouseState previousMouseState)
         {
-            return _collisionBounds.Contains(currentMouseState.Position) &&
-                   currentMouseState.LeftButton == ButtonState.Pressed &&
-                   previousMouseState.LeftButton == ButtonState.Released;
+            bool isClicked = _collisionBounds.Contains(currentMouseState.Position) &&
+                             currentMouseState.LeftButton == ButtonState.Pressed &&
+                             previousMouseState.LeftButton == ButtonState.Released;
+           
+            if (isClicked)
+            {
+                Game1.SoundHandler.PlayButtonClick((ButtonAction)Id);
+            }
+    
+            return isClicked;
         }
 
         public bool Contains(Point point)
         {
             return _collisionBounds.Contains(point);
         }
+        
+        private void CalculateHoverBounds()
+        {
+            int hoverWidth = (int)(_originalBounds.Width * HOVER_SCALE);
+            int hoverHeight = (int)(_originalBounds.Height * HOVER_SCALE);
+            
+            int hoverX = _originalBounds.X - (hoverWidth - _originalBounds.Width) / 2;
+            int hoverY = _originalBounds.Y - (hoverHeight - _originalBounds.Height) / 2;
+            
+            _hoverBounds = new Rectangle(hoverX, hoverY, hoverWidth, hoverHeight);
+        }
 
         public Rectangle Bounds => _collisionBounds; 
         public string Text => _text;
+        public bool IsHovered => _isHovered;
     }
 }

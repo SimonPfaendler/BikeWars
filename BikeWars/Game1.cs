@@ -13,6 +13,8 @@ public class Game1 : Game
     public SpriteBatch SpriteBatch { get; private set; }
     public ScreenManager ScreenManager;
     public static Game1 Instance { get; private set; }
+    
+    public static SoundHandler SoundHandler { get; private set; }
 
 
     public Game1()
@@ -29,7 +31,16 @@ public class Game1 : Game
     protected override void Initialize()
     {
         ScreenManager = new ScreenManager();
+        ScreenManager.OnReturnToMainMenu += CreateMainMenu;
         base.Initialize();
+    }
+    
+    private void CreateMainMenu()
+    {
+        Texture2D background = Content.Load<Texture2D>("assets/images/Startbildschirm");
+        SpriteFont font = Content.Load<SpriteFont>("assets/fonts/Arial");
+        MainMenuScreen mainMenu = new MainMenuScreen(background, font);
+        ScreenManager.AddScreen(mainMenu);
     }
 
     protected override void LoadContent()
@@ -40,6 +51,9 @@ public class Game1 : Game
         Texture2D button = Content.Load<Texture2D>("assets/images/StartButton");
         StartScreen startScreen = new StartScreen(background);
         ScreenManager.AddScreen(startScreen);
+        
+        SoundHandler = new SoundHandler();
+        SoundHandler.LoadContent(Content);
     }
 
     protected override void Update(GameTime gameTime)

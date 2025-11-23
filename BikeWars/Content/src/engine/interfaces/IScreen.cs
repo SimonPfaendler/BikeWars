@@ -1,3 +1,4 @@
+using BikeWars.Content.managers;
 using Microsoft.Xna.Framework;
 
 namespace BikeWars.Content.engine.interfaces;
@@ -13,4 +14,6 @@ public interface IScreen
     public bool UpdateLower { get; }
 
     public bool DrawLower { get; }
+    
+    ScreenManager ScreenManager { set; }
 }
