@@ -11,6 +11,7 @@ using BikeWars.Content.src.screens;
 using System.Collections.Generic;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.entities.items;
+using BikeWars.Entities.Characters;
 
 namespace BikeWars.Content.src.utils.SaveLoadExample;
 
@@ -34,6 +35,12 @@ public static class SaveLoad
         public float PlayerX { get; set; } = _worldBounds;
         public float PlayerY { get; set; } = _worldBounds;
         public List<ProjectileSaveModel> Projectiles {get; set;}
+        
+        public float HoboX { get; set; } = _worldBounds - 60;
+        public float HoboY { get; set; } = _worldBounds + 30;
+        
+        public float BikeThiefX { get; set; } = _worldBounds + 100;
+        public float BikeThiefY { get; set; } = _worldBounds - 70;
     }
 
     public class ProjectileSaveModel
@@ -85,17 +92,22 @@ public static class SaveLoad
 
 
     // save the counter in a JSON file
-    public static void SaveGame(int counter, Transform playerPosition, List<ProjectileBase> projectiles)
+    public static void SaveGame(int counter, Transform playerPosition, List<ProjectileBase> projectiles, Transform hoboPosition, 
+        Transform bikeThiefPosition)
     {
         try
         {
-            // serialize the current counter into JSON text
+            // serialize the current info into JSON text
             GameState state = new GameState
             {
                 Counter = counter,
                 PlayerX = playerPosition.Position.X,
                 PlayerY = playerPosition.Position.Y,
-                Projectiles = MakeProjectileSaveList(projectiles)
+                Projectiles = MakeProjectileSaveList(projectiles),
+                HoboX = hoboPosition.Position.X,
+                HoboY = hoboPosition.Position.Y,
+                BikeThiefX = bikeThiefPosition.Position.X,
+                BikeThiefY = bikeThiefPosition.Position.Y,
             };
             string json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
 
@@ -138,6 +150,8 @@ public static class SaveLoad
 
         Console.WriteLine("Loaded. Counter=" + state.Counter);
         Console.WriteLine("Loaded. Player Position=" + state.PlayerX + " " + state.PlayerY);
+        Console.WriteLine("Loaded. Player Position=" + state.HoboX + " " + state.HoboY);
+        Console.WriteLine("Loaded. Player Position=" + state.BikeThiefX + " " + state.BikeThiefY);
         return state;
     }
 
