@@ -21,7 +21,7 @@ namespace BikeWars.Content.screens
 {
     public class GameScreen : IScreen
     {
-        private List<ItemBase> _testItems;
+        private ItemManager _itemManager;
         private List<ProjectileBase> _testProjectiles;
         private Player player;
         private Camera2D camera;
@@ -37,6 +37,7 @@ namespace BikeWars.Content.screens
         private Hobo hobo;
         private BikeThief bikethief;
         private SpriteFont _font;
+        private Texture2D _pixel;
         private Vector2 mouseWorldPos;
         public ScreenManager ScreenManager { get; set; }
 
@@ -51,12 +52,12 @@ namespace BikeWars.Content.screens
         {
             worldBounds = new Rectangle(0, 0, 11200, 11200);
 
-            _testItems = new List<ItemBase>();
+            _itemManager = new ItemManager();
             _testProjectiles = new List<ProjectileBase>();
-            _testItems.Add(new Item(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
-            _testItems.Add(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
-            _testItems.Add(new Xp_Beer(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
-            _testItems.Add(new Xp_Money(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
+            _itemManager.AddItem(new Item(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
+            _itemManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
+            _itemManager.AddItem(new Xp_Beer(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
+            _itemManager.AddItem(new Xp_Money(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
 
             player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(32, 32));
             player.ShotBullet += OnPlayerShotBullet;
@@ -113,14 +114,12 @@ namespace BikeWars.Content.screens
             bikethief.LoadContent(content, content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
             
             // Items
-            if (_testItems.Count > 1)
-            {
-                _testItems[1].LoadContent(content);
-                _testItems[2].LoadContent(content);
-                _testItems[3].LoadContent(content);
-            }
+            _itemManager.LoadContent(content);
             _font = content.Load<SpriteFont>("assets/fonts/Arial");
             _contentManager = content; // We need this to add it later to spawning entities. (Maybe there is another possible implementation)
+            
+            _pixel = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
+            _pixel.SetData(new[] { Color.White });
         }
         public void Update(GameTime gameTime)
         {
@@ -135,34 +134,8 @@ namespace BikeWars.Content.screens
             mouseWorldPos = Vector2.Transform(mouseScreenPos, inverseTransform);
 
             player.Update(gameTime, mouseWorldPos);
-
-            // Collision Handling with player
-            if (player.Intersects(_testItems[0].Collider))
-            {
-                player.SetLastTransform();
-                player.UpdateCollider();
-            }
-
-            if (player.Intersects(_testItems[0].Collider))
-            {
-                player.SetLastTransform();
-                player.UpdateCollider();
-            }
-
-            for (int i = _testItems.Count - 1; i >= 0; i--)
-            {
-                var item = _testItems[i];
-
-                if (_testItems.Count > 1 && player.Intersects(item.Collider))
-                {
-                    _testItems.RemoveAt(i);
-                }
-            }
-
-            foreach (var item in _testItems)
-            {
-                item.Update(gameTime);
-            }
+            
+            _itemManager.Update(gameTime, player);
             
             // player collision
             foreach (var box in _collisionBoxes)
@@ -227,7 +200,7 @@ namespace BikeWars.Content.screens
             // This is not a good impelementation! We need now better implementation to check about the collisioncollider
             for (int i = _testProjectiles.Count - 1; i >= 0; i--)
             {
-                foreach (var box in _testItems) // just for testing
+                foreach (var box in _itemManager.Items) // just for testing
                 {
                     if (_testProjectiles[i].Intersects(box.Collider))
                     {
@@ -395,7 +368,7 @@ namespace BikeWars.Content.screens
             hobo.Draw(spriteBatch);
             bikethief.Draw(spriteBatch);
             
-            foreach (var item in _testItems)
+            foreach (var item in _itemManager.Items)
             {
                 item.Draw(spriteBatch);
             }
@@ -417,6 +390,10 @@ namespace BikeWars.Content.screens
             spriteBatch.Begin();
             spriteBatch.DrawString(_debugFont, $"Counter: {_counter}", new Vector2(20, 100), Color.Black);
             spriteBatch.DrawString(_debugFont, "T=Save  L=Load  R=Reset counter", new Vector2(20, 125), Color.Black);
+            spriteBatch.End();
+            
+            spriteBatch.Begin();
+            player.Inventory.Draw(spriteBatch, _pixel);
             spriteBatch.End();
         }
 

@@ -32,7 +32,8 @@ namespace BikeWars.Content.engine
         ESC,
         SPRINT,
         PAUSE,
-        SHOOT
+        SHOOT,
+        INTERACT
     }
 
     public class KeyboardInfo
@@ -155,7 +156,8 @@ namespace BikeWars.Content.engine
             { GameAction.ESC, new[] {Keys.Escape } },
             { GameAction.SPRINT, new[] { Keys.LeftShift, Keys.RightShift } },
             { GameAction.PAUSE, new[] { Keys.Escape, Keys.P } },
-            {GameAction.SHOOT, new[] { Keys.G } }
+            {GameAction.SHOOT, new[] { Keys.G } },
+            { GameAction.INTERACT, new[] {Keys.Q } }
         };
 
 
@@ -170,7 +172,11 @@ namespace BikeWars.Content.engine
             { GameAction.ESC, new[] { Buttons.B} },
             { GameAction.SPRINT, new[] { Buttons.LeftTrigger} },
             { GameAction.PAUSE, new[] { Buttons.Start} },
-            {GameAction.SHOOT, new[] { Buttons.RightTrigger } }
+            {GameAction.SHOOT, new[] { Buttons.RightTrigger } },
+            { GameAction.INTERACT, new[] { Buttons.X } }
+            /* INTERACT should be A not X, but X is already used and I m not sure for what.
+             Should be fixed later*/
+            
         };
 
         public static void Update()
