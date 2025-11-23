@@ -7,7 +7,7 @@ using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework.Audio;
 using BikeWars.Content.entities.interfaces;
-using BikeWars.Content.managers; 
+using BikeWars.Content.managers;
 
 namespace BikeWars.Entities.Characters
 {
@@ -23,7 +23,7 @@ namespace BikeWars.Entities.Characters
         private BoxCollider _collider { get; set; }
         private EnemyMovement movement { get; set; }
         public SoundHandler SoundHandler { get; }
-        
+
         public EnemyMovement Movement => movement;
 
         // Animation mit SpriteManager
@@ -44,19 +44,19 @@ namespace BikeWars.Entities.Characters
             // TODO: Rechteck auf BikeThief-Idle-Sprite anpassen
             var idleFrames = new List<Rectangle>
             {
-                new Rectangle(281, 385, 128/2, 184/3) 
+                new Rectangle(281, 385, 128/2, 184/3)
             };
             _idleAnimation = new SpriteAnimation(_characterAtlas, idleFrames, 0.6f);
 
-            
-            // e2_bikethief_walking_left.png 
+
+            // e2_bikethief_walking_left.png
 
             int leftBaseX = 153;
             int leftBaseY = 385;
             int leftW = 128;
             int leftH = 184;
-            int leftFrameW = leftW / 2;  
-            int leftFrameH = leftH / 3;   
+            int leftFrameW = leftW / 2;
+            int leftFrameH = leftH / 3;
 
             var leftFrames = new List<Rectangle>
             {
@@ -72,17 +72,17 @@ namespace BikeWars.Entities.Characters
                 new Rectangle(leftBaseX + 0 * leftFrameW, leftBaseY + 2 * leftFrameH, leftFrameW, leftFrameH),
                 new Rectangle(leftBaseX + 1 * leftFrameW, leftBaseY + 2 * leftFrameH, leftFrameW, leftFrameH),
             };
-            
+
             _walkLeftAnimation = new SpriteAnimation(_characterAtlas, leftFrames, 0.15f);
-            
+
             // e2_bikethief_walking_right.png
 
             int rightBaseX = 281;
             int rightBaseY = 385;
             int rightW = 128;
             int rightH = 184;
-            int rightFrameW = rightW / 2; 
-            int rightFrameH = rightH / 3; 
+            int rightFrameW = rightW / 2;
+            int rightFrameH = rightH / 3;
 
             var rightFrames = new List<Rectangle>
             {
@@ -98,7 +98,7 @@ namespace BikeWars.Entities.Characters
                 new Rectangle(rightBaseX + 0 * rightFrameW, rightBaseY + 2 * rightFrameH, rightFrameW, rightFrameH),
                 new Rectangle(rightBaseX + 1 * rightFrameW, rightBaseY + 2 * rightFrameH, rightFrameW, rightFrameH),
             };
-            
+
             _walkRightAnimation = new SpriteAnimation(_characterAtlas, rightFrames, 0.15f);
 
             // Startzustand: Idle

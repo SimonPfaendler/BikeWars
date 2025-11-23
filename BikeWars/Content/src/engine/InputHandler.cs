@@ -33,7 +33,8 @@ namespace BikeWars.Content.engine
         SPRINT,
         PAUSE,
         SHOOT,
-        INTERACT
+        INTERACT,
+        SWITCH
     }
 
     public class KeyboardInfo
@@ -157,9 +158,9 @@ namespace BikeWars.Content.engine
             { GameAction.SPRINT, new[] { Keys.LeftShift, Keys.RightShift } },
             { GameAction.PAUSE, new[] { Keys.Escape, Keys.P } },
             {GameAction.SHOOT, new[] { Keys.G } },
-            { GameAction.INTERACT, new[] {Keys.Q } }
+            { GameAction.INTERACT, new[] {Keys.Q } },
+            { GameAction.SWITCH, new[] {Keys.X } }
         };
-
 
         public static Dictionary<GameAction, Buttons[]> GamepadMap = new()
         {
@@ -176,7 +177,7 @@ namespace BikeWars.Content.engine
             { GameAction.INTERACT, new[] { Buttons.X } }
             /* INTERACT should be A not X, but X is already used and I m not sure for what.
              Should be fixed later*/
-            
+
         };
 
         public static void Update()

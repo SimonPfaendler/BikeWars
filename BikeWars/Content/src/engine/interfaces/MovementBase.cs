@@ -8,6 +8,7 @@ public abstract class MovementBase : IMoveable
     private Vector2 _direction { get; set; }
     private bool _isMoving { get; set; }
     private bool _canMove { get; set; }
+    private float _rotation { get; set; }
 
     public bool IsMoving { get => _isMoving; set => _isMoving = value; }
     public bool CanMove {
@@ -28,11 +29,6 @@ public abstract class MovementBase : IMoveable
         set
         {
             _direction = value;
-            if (_direction.X == 1)
-            {
-
-            }
-            // Update();
         }
     }
     private float _speed { get; set; }
@@ -46,6 +42,19 @@ public abstract class MovementBase : IMoveable
                 return;
             }
             _speed = value;
+        }
+    }
+
+    public float Rotation {
+        get => _rotation;
+        set
+        {
+            if (value < 0)
+            {
+                _rotation = 0;
+                return;
+            }
+            _rotation = value;
         }
     }
 
@@ -63,6 +72,11 @@ public abstract class MovementBase : IMoveable
     }
 
     public float HandleSpeed(List<MoveDirection> direction, float currentSpeed, float acceleration, float minSpeed, float maxSpeed)
+    {
+        return 0f;
+    }
+
+    public float HandleRotation(List<MoveDirection> moveDirections)
     {
         return 0f;
     }

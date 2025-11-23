@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using BikeWars.Content.entities.Inventory;
 using BikeWars.Content.managers;
 using BikeWars.Content.screens;
+using Microsoft.Xna.Framework.Input;
 
 // ============================================================
 // Player.cs
@@ -38,7 +39,7 @@ namespace BikeWars.Entities.Characters
         public Vector2 GazeDirection { get; private set; }
         public Vector2 AimTarget { get; private set; }
         private Vector2 _facingDirection = Vector2.UnitX; // Default to Right to match initial animation
-        
+
         public event Action ShotBullet;
         private Texture2D _characterAtlas;
 
@@ -166,11 +167,23 @@ namespace BikeWars.Entities.Characters
 
         public void Update(GameTime gameTime, Vector2 mousePos)
         {
+            // TODO THIS IS NOW ONLY FOR TESTING AND SHOWING
+            if (InputHandler.IsPressed(GameAction.SWITCH))
+            {
+                if (movement.CurrentMovement.GetType() == typeof(BicycleMovement))
+                {
+                    movement.CurrentMovement = new WalkingMovement(true, true);
+                } else
+                {
+                    movement.CurrentMovement = new BicycleMovement(true, true, movement.RotationAcceleration);
+                }
+            }
+
             if (InputHandler.IsPressed(GameAction.SHOOT))
             {
                 Shooting();
             }
-            movement.Update(gameTime);
+            movement.Update();
             if (!movement.CurrentMovement.CanMove)
             {
                 SoundHandler.DrivingSoundInstance.Stop();
@@ -203,18 +216,12 @@ namespace BikeWars.Entities.Characters
             CurrentSpeed = sprint.IsActive ? SprintSpeed : movement.CurrentMovement.Speed;
             LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
             Vector2 direction = movement.CurrentMovement.Direction;
-            bool isMoving = direction != Vector2.Zero;
 
-            // Console.WriteLine("CurrentSpeed");
-            // Console.WriteLine(CurrentSpeed);
-
-            // Console.WriteLine(direction);
-
+            bool isMoving = movement.IsMoving();
             if (isMoving)
             {
                 direction.Normalize();
                 _facingDirection = direction; // Update facing direction
-
                 // Reibung
                 // Speed *= Friction;
                 // Transform.Position += direction * CurrentSpeed * delta;
@@ -229,14 +236,17 @@ namespace BikeWars.Entities.Characters
                 _currentAnimation = _walkUpAnimation;
                 // choose animation based on main direction
                 // @TODO We need to decide on how the animation should look like so don't delete it now
-                // if (MathF.Abs(direction.X) > MathF.Abs(direction.Y))
-                // {
-                //     _currentAnimation = (direction.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
-                // }
-                // else
-                // {
-                //     _currentAnimation = (direction.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
-                // }
+                if (movement.CurrentMovement.GetType() == typeof(WalkingMovement)) // THIS IS ONLY INSERTED TO SHOW. BUT NOT GOOD!
+                {
+                    if (MathF.Abs(direction.X) > MathF.Abs(direction.Y))
+                {
+                    _currentAnimation = (direction.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
+                }
+                else
+                {
+                    _currentAnimation = (direction.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
+                }
+                }
             }
 
             // Gaze Direction Logic
@@ -314,7 +324,6 @@ namespace BikeWars.Entities.Characters
                 }
             }
 
-
             for (int i = _ghostTrail.Count - 1; i >= 0; i--)
             {
                 var ghost = _ghostTrail[i];
@@ -329,7 +338,6 @@ namespace BikeWars.Entities.Characters
                     _ghostTrail[i] = ghost;
                 }
             }
-
             UpdateCollider();
         }
         public void Draw(SpriteBatch spriteBatch)
@@ -349,7 +357,7 @@ namespace BikeWars.Entities.Characters
                     destinationRectangle: ghostDest,
                     sourceRectangle: ghost.Source,
                     color: Color.White * alpha,
-                    rotation: movement.Rotation + MathHelper.PiOver2,
+                    rotation: movement.Rotation,
                     origin: new Vector2(ghost.Source.Width / 2f, ghost.Source.Height / 2f),
                     effects: SpriteEffects.None,
                     layerDepth: 0f
@@ -367,7 +375,13 @@ namespace BikeWars.Entities.Characters
             if (_currentAnimation == null)
             return;
 
-            _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, movement.Rotation + MathHelper.PiOver2);
+            if (movement.CurrentMovement.GetType() == typeof(WalkingMovement)) // TODO THIS IS ONLY INSERTED TO SHOW. BUT NOT GOOD!
+            {
+                _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, movement.CurrentMovement.Rotation);
+            } else
+            {
+                _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, movement.CurrentMovement.Rotation + MathHelper.PiOver2);
+            }
 
             // Draw line from eye position only if GazeDirection is valid (non-zero)
             if (GazeDirection != Vector2.Zero)

@@ -9,9 +9,10 @@ public interface IMoveable
     bool IsMoving { get; set; }
     bool CanMove { get; set; }
     float Speed {get; set;}
-    void Update(GameTime gameTime);
+    float Rotation {get; set;}
+    // void Update(GameTime gameTime);
     void HandleMovement(List<MoveDirection> moveDirections, float currentSpeed, float speedAcceleration, float currentRotation, float rotationAcceleration, float minSpeed, float maxSpeed); // User or other input
-    // Vector2 HandleDirection(float rotation);
     Vector2 HandleDirection(List<MoveDirection> moveDirections);
     float HandleSpeed(List<MoveDirection> moveDirections, float currentSpeed, float acceleration, float minSpeed, float maxSpeed);
+    float HandleRotation(List<MoveDirection> moveDirections);
 }

@@ -35,10 +35,10 @@ public static class SaveLoad
         public float PlayerX { get; set; } = _worldBounds;
         public float PlayerY { get; set; } = _worldBounds;
         public List<ProjectileSaveModel> Projectiles {get; set;}
-        
+
         public float HoboX { get; set; } = _worldBounds - 60;
         public float HoboY { get; set; } = _worldBounds + 30;
-        
+
         public float BikeThiefX { get; set; } = _worldBounds + 100;
         public float BikeThiefY { get; set; } = _worldBounds - 70;
     }
@@ -92,7 +92,7 @@ public static class SaveLoad
 
 
     // save the counter in a JSON file
-    public static void SaveGame(int counter, Transform playerPosition, List<ProjectileBase> projectiles, Transform hoboPosition, 
+    public static void SaveGame(int counter, Transform playerPosition, List<ProjectileBase> projectiles, Transform hoboPosition,
         Transform bikeThiefPosition)
     {
         try

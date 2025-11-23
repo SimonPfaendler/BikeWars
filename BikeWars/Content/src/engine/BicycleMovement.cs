@@ -31,11 +31,6 @@ public class BicycleMovement : IMoveable
         set
         {
             _direction = value;
-            if (_direction.X == 1)
-            {
-
-            }
-            // Update();
         }
     }
 
@@ -74,13 +69,9 @@ public class BicycleMovement : IMoveable
         IsMoving = isMoving;
         RotationAcceleration = rotationAcceleration;
     }
-    private bool UpdateMoving()
+    private bool MakeIsMoving()
     {
         return Direction != Vector2.Zero;
-    }
-    public void Update(GameTime gameTime)
-    {
-        IsMoving = UpdateMoving();
     }
     private float MovingForward(float currentSpeed, float acceleration, float minSpeed, float maxSpeed)
     {
@@ -92,7 +83,7 @@ public class BicycleMovement : IMoveable
         return MathHelper.Clamp(currentSpeed - acceleration, minSpeed, maxSpeed);
     }
 
-    public Vector2 HandleDirection(List<MoveDirection> moveDirections)
+    public float HandleRotation(List<MoveDirection> moveDirections)
     {
         foreach (var dir in moveDirections)
         {
@@ -105,6 +96,10 @@ public class BicycleMovement : IMoveable
                 Rotation += RotationAcceleration;
             }
         }
+        return Rotation;
+    }
+    public Vector2 HandleDirection(List<MoveDirection> moveDirections)
+    {
         return new Vector2(
             (float)Math.Cos(Rotation),
             (float)Math.Sin(Rotation)
@@ -130,7 +125,9 @@ public class BicycleMovement : IMoveable
 
     public void HandleMovement(List<MoveDirection> moveDirections, float currentSpeed, float speedAcceleration, float currentRotation, float rotationAcceleration, float minSpeed, float maxSpeed)
     {
+        Rotation = HandleRotation(moveDirections);
         Direction = HandleDirection(moveDirections);
+        IsMoving = MakeIsMoving();
         Speed = HandleSpeed(moveDirections, currentSpeed, speedAcceleration, minSpeed, maxSpeed);
     }
 }
