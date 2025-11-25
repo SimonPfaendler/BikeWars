@@ -7,6 +7,7 @@ using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework.Audio;
 using BikeWars.Content.entities.interfaces;
 using System.Collections.Generic;
+using BikeWars.Content.engine.Audio;
 using BikeWars.Content.entities.Inventory;
 using BikeWars.Content.managers;
 using BikeWars.Content.screens;
@@ -33,7 +34,6 @@ namespace BikeWars.Entities.Characters
 
         private BoxCollider _collider { get; set; }
         private PlayerMovement movement { get; set; }
-        public SoundHandler SoundHandler { get; }
         private CooldownWithDuration sprint { get; }
 
         public Vector2 GazeDirection { get; private set; }
@@ -49,6 +49,8 @@ namespace BikeWars.Entities.Characters
         private SpriteAnimation _walkRightAnimation;
 
         private SpriteAnimation _currentAnimation;
+        
+        private readonly AudioService _audio;
 
         private struct GhostFrame
         {
@@ -64,7 +66,7 @@ namespace BikeWars.Entities.Characters
         private const float GhostSpawnInterval = 0.05f; // alle 0,05s ein neues Ghost
         private const float GhostLifeTime = 0.1f;
 
-        public void LoadContent(ContentManager content, SoundEffect drivingSoundEffect)
+        public void LoadContent(ContentManager content)
         {
             _characterAtlas = content.Load<Texture2D>("assets/sprites/characters/character_atlas");
             if (pixel == null)
@@ -106,9 +108,6 @@ namespace BikeWars.Entities.Characters
             _walkUpAnimation = new SpriteAnimation(_characterAtlas, upFrames, 0.16f);
 
             _currentAnimation = _walkRightAnimation;
-
-            SoundHandler.DrivingSoundInstance = drivingSoundEffect.CreateInstance();
-            SoundHandler.DrivingSoundInstance.IsLooped = true;
         }
 
         public void UpdateCollider()
@@ -139,7 +138,7 @@ namespace BikeWars.Entities.Characters
             target.TakeDamage(AttackDamage);
         }
 
-        public Player(Vector2 start, Point size)
+        public Player(Vector2 start, Point size, AudioService audio)
         {
             MaxHealth = 100;
             Health = MaxHealth;
@@ -150,9 +149,9 @@ namespace BikeWars.Entities.Characters
             Speed = 200f;
             SprintSpeed = 350f;
             movement = new PlayerMovement(canMove: true, isMoving: false);
-            SoundHandler = new SoundHandler();
             sprint = new CooldownWithDuration(1f, 5f);
             Inventory = new Inventory();
+            _audio = audio;
             UpdateCollider();
         }
         public override bool Intersects(ICollider collider)
@@ -184,27 +183,20 @@ namespace BikeWars.Entities.Characters
                 Shooting();
             }
             movement.Update();
-            if (!movement.CurrentMovement.CanMove)
-            {
-                SoundHandler.DrivingSoundInstance.Stop();
-                return;
-            }
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
             // Sound-Control
-            if (SoundHandler.DrivingSoundInstance != null)
-            {
-                // Start Playing Walking Sound if Player starts moving around
-                if (movement.CurrentMovement.IsMoving)
-                {
-                    SoundHandler.DrivingSoundInstance.Play();
-                }
-                // Stop Playing Walking Sound if Player stops moving around
-                else
-                {
-                    SoundHandler.DrivingSoundInstance.Stop();
-                }
-            }
+            string movementSound = movement.CurrentMovement is BicycleMovement
+                ? AudioAssets.Driving 
+                : AudioAssets.Walking;
 
+            if (movement.CurrentMovement.IsMoving)
+            {
+                _audio.Sounds.PlayLoop(movementSound);
+            }
+            else
+            {
+                _audio.Sounds.StopLoop(movementSound);
+            }
             // Sprinting Logic
             sprint.Update(gameTime);
             if (InputHandler.IsHeld(GameAction.SPRINT) && sprint.Ready)

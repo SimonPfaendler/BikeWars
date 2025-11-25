@@ -65,10 +65,10 @@ namespace BikeWars.Content.screens
             _itemManager.AddItem(new Xp_Beer(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
             _itemManager.AddItem(new Xp_Money(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
 
-            player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(32, 32));
+            player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(32, 32), _audioService);
             player.ShotBullet += OnPlayerShotBullet;
 
-            hobo = new Hobo(new Vector2(worldBounds.Width / 2 + 10, worldBounds.Height / 2), new Point(32, 32));
+            hobo = new Hobo(new Vector2(worldBounds.Width / 2 + 10, worldBounds.Height / 2), new Point(32, 32), audioService);
             bikethief = new BikeThief(new Vector2(worldBounds.Width / 2 - 10, worldBounds.Height / 2 - 80), new Point(32, 32));
             
             Game1 game = Game1.Instance;
@@ -115,8 +115,8 @@ namespace BikeWars.Content.screens
 
             // Player and Hobo Soundeffects
             SoundHandler soundHandler = new SoundHandler();
-            player.LoadContent(content, content.Load<SoundEffect>(soundHandler.DRIVING_SOUND_PATH));
-            hobo.LoadContent(content, content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
+            player.LoadContent(content);
+            hobo.LoadContent(content);
             bikethief.LoadContent(content, content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
             
             // Items
@@ -270,7 +270,6 @@ namespace BikeWars.Content.screens
 
             if (InputHandler.IsPressed(GameAction.PAUSE))
             {
-                hobo.PauseSounds();
                 bikethief.PauseSounds();
                 _overlay.SetPaused(true, gameTime);
                 PauseMenuScreen pauseMenu = new PauseMenuScreen(_font, _audioService);

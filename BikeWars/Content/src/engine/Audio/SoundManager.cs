@@ -76,6 +76,20 @@ namespace BikeWars.Content.engine.Audio
             inst.Dispose();
         }
         
+        public void PauseLoop(string id)
+        {
+            if (_loopInstances.TryGetValue(id, out var inst))
+                inst.Pause();
+        }
+
+        public void ResumeLoop(string id)
+        {
+            if (_loopInstances.TryGetValue(id, out var inst))
+                if (inst.State == SoundState.Paused)
+                    inst.Resume();
+        }
+
+        
         public void Update(GameTime gameTime)
         {
             // remove stopped one-shot sounds
