@@ -10,6 +10,7 @@ using BikeWars.Content.engine;
 using BikeWars.Utilities;
 using Microsoft.Xna.Framework.Audio;
 using System.Collections.Generic;
+using BikeWars.Content.engine.Audio;
 using BikeWars.Content.src.screens.Overlay;
 using BikeWars.Content.src.utils.SaveLoadExample;
 using Microsoft.Xna.Framework.Content;
@@ -44,15 +45,18 @@ namespace BikeWars.Content.screens
         public ScreenManager ScreenManager { get; set; }
 
         private ContentManager _contentManager;
+        private readonly AudioService _audioService;
 
         private bool _freelook; // Has to be optimized
 
         public bool DrawLower => false;
         public bool UpdateLower => false;
 
-        public GameScreen()
+        public GameScreen(AudioService audioService)
         {
             worldBounds = new Rectangle(0, 0, 11200, 11200);
+            
+            _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
 
             _itemManager = new ItemManager();
             _testProjectiles = new List<ProjectileBase>();
@@ -269,7 +273,7 @@ namespace BikeWars.Content.screens
                 hobo.PauseSounds();
                 bikethief.PauseSounds();
                 _overlay.SetPaused(true, gameTime);
-                PauseMenuScreen pauseMenu = new PauseMenuScreen(_font);
+                PauseMenuScreen pauseMenu = new PauseMenuScreen(_font, _audioService);
                 ScreenManager.AddScreen(pauseMenu);
             }
         }

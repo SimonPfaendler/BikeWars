@@ -5,20 +5,22 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
+using BikeWars.Content.engine.Audio;
 using BikeWars.Content.managers;
 
 namespace BikeWars.Content.screens;
 
 public class GameConfigScreen : MenuScreenBase, IScreen
 {
-        
-    public GameConfigScreen(Texture2D background, SpriteFont font)
+    private readonly AudioService _audioService;
+    public GameConfigScreen(Texture2D background, SpriteFont font, AudioService audioService)
         :base(background, font)
     {
-
+        _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
+        InitializeButtons();
     }
     
-    protected override void InitializeButtons()
+    protected sealed override void InitializeButtons()
         {
             Game1 game = Game1.Instance;
             int screenWidth = game.GraphicsDevice.Viewport.Width;
@@ -40,7 +42,8 @@ public class GameConfigScreen : MenuScreenBase, IScreen
                 texture: _buttonTexture,
                 bounds: new Rectangle(horizontalSpacing, leftStartY, buttonWidth, buttonHeight),
                 text: "Neues Profil",
-                font: _font
+                font: _font,
+                audioService: _audioService
             ));
 
             _buttons.Add(new MenuButton(
@@ -48,7 +51,8 @@ public class GameConfigScreen : MenuScreenBase, IScreen
                 texture: _buttonTexture,
                 bounds: new Rectangle(horizontalSpacing, leftStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
                 text: "Back", 
-                font: _font
+                font: _font,
+                audioService: _audioService
             ));
 
             // Buttons on the right side
@@ -57,7 +61,8 @@ public class GameConfigScreen : MenuScreenBase, IScreen
                 texture: _buttonTexture,
                 bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY, buttonWidth, buttonHeight),
                 text: "Singleplayer",
-                font: _font
+                font: _font,
+                audioService: _audioService
             ));
 
             _buttons.Add(new MenuButton(
@@ -65,7 +70,8 @@ public class GameConfigScreen : MenuScreenBase, IScreen
                 texture: _buttonTexture,
                 bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
                 text: "Multiplayer",
-                font: _font
+                font: _font,
+                audioService: _audioService
             ));
             
             // centre start Button
@@ -79,7 +85,8 @@ public class GameConfigScreen : MenuScreenBase, IScreen
                     buttonHeight
                 ),
                 text: "Spiel starten",
-                font: _font
+                font: _font,
+                audioService: _audioService
             ));
         }
         
@@ -100,7 +107,7 @@ public class GameConfigScreen : MenuScreenBase, IScreen
             switch ((ButtonAction)button.Id)
             {
                 case ButtonAction.StartGame:
-                    GameScreen gameScreen = new GameScreen();
+                    GameScreen gameScreen = new GameScreen(_audioService);
                     gameScreen.LoadContent(Game1.Instance.Content);
                     ScreenManager.RemoveScreen(this);
                     ScreenManager.AddScreen(gameScreen);

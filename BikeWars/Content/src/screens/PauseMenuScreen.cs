@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
+using BikeWars.Content.engine.Audio;
 using BikeWars.Content.managers;
 using BikeWars.Content.src.screens.Overlay;
 
@@ -12,14 +13,15 @@ namespace BikeWars.Content.screens
     public class PauseMenuScreen : MenuScreenBase, IScreen
     {
         private Overlay _overlay; 
-        
-        public PauseMenuScreen(SpriteFont font)
+        private readonly AudioService _audioService;
+        public PauseMenuScreen(SpriteFont font, AudioService audioService)
             :base(null, font)
         {
-
+            _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
+            InitializeButtons();
         }
         
-        protected override void InitializeButtons()
+        protected sealed override void InitializeButtons()
         {
             Game1 game = Game1.Instance;
             int screenWidth = game.GraphicsDevice.Viewport.Width;
@@ -50,7 +52,8 @@ namespace BikeWars.Content.screens
                     texture: _buttonTexture,
                     bounds: new Rectangle((screenWidth - buttonWidth) / 2, startY + i * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
                     text: buttonDefinitions[i].text,
-                    font: _font
+                    font: _font,
+                    audioService: _audioService
                 ));
             }
         }
@@ -89,7 +92,7 @@ namespace BikeWars.Content.screens
                     break;
             
                 case ButtonAction.Options:
-                    OptionScreen optionScreen = new OptionScreen(_font);
+                    OptionScreen optionScreen = new OptionScreen(_font, _audioService);
                     ScreenManager.AddScreen(optionScreen);
                     break;
             
@@ -97,7 +100,8 @@ namespace BikeWars.Content.screens
                     ConfirmationDialogScreen confirmDialog = new ConfirmationDialogScreen(
                         _font, 
                         "Bist Du Dir sicher?", 
-                        this
+                        this,
+                        _audioService
                     );
                     ScreenManager.AddScreen(confirmDialog);
                     break;
