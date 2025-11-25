@@ -13,11 +13,13 @@ public class BoxCollider : ColliderBase
     {
         get { return _collisionShape; }
     }
-    public BoxCollider(Vector2 pos, int w, int h)
+    public BoxCollider(Vector2 pos, int w, int h, CollisionLayer layer, object owner = null)
     {
         width = w;
         height = h;
         Position = pos;
+        Layer = layer;
+        Owner = owner;
     }
 
     public void SetSize(int w, int h)
@@ -26,7 +28,7 @@ public class BoxCollider : ColliderBase
         height = h;
         Update();
     }
-    
+
     protected override void Update()
     {
         _collisionShape = new EnhancedRectangle(new Rectangle((int)Position.X, (int)Position.Y, width, height));
