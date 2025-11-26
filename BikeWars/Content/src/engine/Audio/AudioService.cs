@@ -17,13 +17,13 @@ namespace BikeWars.Content.engine.Audio
         public void LoadContent(ContentManager content)
         {
             Sounds.Load(content, AudioAssets.SoundEffectPaths);
-            //Music.Load(content, AudioAssets.SongPaths);
+            Music.Load(content, AudioAssets.SongPaths);
         }
         
         public void Update(GameTime gameTime)
         {
             Sounds.Update(gameTime);
-            //Music.Update(gameTime);
+            Music.Update(gameTime);
         }
     }
 }

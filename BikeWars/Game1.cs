@@ -16,8 +16,6 @@ public class Game1 : Game
     private AudioService _audioService;
     public static AudioService Audio => Instance._audioService;
     public static Game1 Instance { get; private set; }
-    
-    public static SoundHandler SoundHandler { get; private set; }
 
 
     public Game1()
@@ -29,6 +27,7 @@ public class Game1 : Game
 
         _graphics.PreferredBackBufferWidth = 1280;
         _graphics.PreferredBackBufferHeight = 720;
+
     }
 
     protected override void Initialize()
@@ -57,9 +56,7 @@ public class Game1 : Game
         Texture2D button = Content.Load<Texture2D>("assets/images/StartButton");
         StartScreen startScreen = new StartScreen(background, _audioService);
         ScreenManager.AddScreen(startScreen);
-        
-        SoundHandler = new SoundHandler();
-        SoundHandler.LoadContent(Content);
+        ScreenManager.SetAudio(_audioService);
     }
 
     protected override void Update(GameTime gameTime)
@@ -68,9 +65,8 @@ public class Game1 : Game
 
         if (InputHandler.IsPressed(GameAction.ESC))
             Exit();
+        
         _audioService.Update(gameTime);
-        bool isGameScreenActive = ScreenManager.GameScreenIsActive();
-        SoundHandler.PlayGameMusic(isGameScreenActive);
 
         base.Update(gameTime);
     }

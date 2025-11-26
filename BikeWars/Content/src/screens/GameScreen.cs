@@ -48,6 +48,8 @@ namespace BikeWars.Content.screens
 
         private ContentManager _contentManager;
         private readonly AudioService _audioService;
+        public string DesiredMusic => AudioAssets.GameMusic;
+        public float MusicVolume => 1f;
 
         private CollisionManager _collisionManager;
 

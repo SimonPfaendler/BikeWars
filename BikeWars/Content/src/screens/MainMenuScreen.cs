@@ -13,6 +13,8 @@ namespace BikeWars.Content.screens
     public class MainMenuScreen : MenuScreenBase, IScreen
     {
         private readonly AudioService _audioService;
+        public string DesiredMusic => AudioAssets.MenuMusic;
+        public float MusicVolume => 1f;
         public MainMenuScreen(Texture2D background, SpriteFont font, AudioService audioService)
             : base(background, font)
         {
