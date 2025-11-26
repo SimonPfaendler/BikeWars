@@ -76,6 +76,7 @@ namespace BikeWars.Content.screens
             switch ((ButtonAction)button.Id)
             {
                 case ButtonAction.Resume:
+                    _audioService.Sounds.ResumeAll();
                     ScreenManager.RemoveScreen(this);
                     break;
             
@@ -88,6 +89,8 @@ namespace BikeWars.Content.screens
                     break;
             
                 case ButtonAction.MainMenu:
+                    _audioService.Sounds.StopAll();
+                    _audioService.Sounds.Play(AudioAssets.SoftClick);
                     ScreenManager.ReturnToMainMenu();
                     break;
             

@@ -51,6 +51,8 @@ namespace BikeWars.Entities.Characters
         private SpriteAnimation _currentAnimation;
         
         private readonly AudioService _audio;
+        private string _currentMovementSound = null;
+
 
         private struct GhostFrame
         {
@@ -167,6 +169,7 @@ namespace BikeWars.Entities.Characters
         public void Update(GameTime gameTime, Vector2 mousePos)
         {
             // TODO THIS IS NOW ONLY FOR TESTING AND SHOWING
+
             if (InputHandler.IsPressed(GameAction.SWITCH))
             {
                 if (movement.CurrentMovement.GetType() == typeof(BicycleMovement))
@@ -185,18 +188,36 @@ namespace BikeWars.Entities.Characters
             movement.Update();
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
             // Sound-Control
-            string movementSound = movement.CurrentMovement is BicycleMovement
-                ? AudioAssets.Driving 
+            string desiredSound = movement.CurrentMovement is BicycleMovement
+                ? AudioAssets.Driving
                 : AudioAssets.Walking;
+            
+            float speedThreshold = 5.0f;
+            bool hasSpeed = movement.CurrentMovement.Speed > speedThreshold;
+            bool isInputMoving = movement.IsMoving();
+            
+            bool shouldPlaySound = hasSpeed && isInputMoving; 
 
-            if (movement.CurrentMovement.IsMoving)
+            if (!shouldPlaySound)
             {
-                _audio.Sounds.PlayLoop(movementSound);
+                if (_currentMovementSound != null)
+                {
+                    _audio.Sounds.StopLoop(_currentMovementSound);
+                    _currentMovementSound = null;
+                }
             }
             else
             {
-                _audio.Sounds.StopLoop(movementSound);
+                if (_currentMovementSound != desiredSound)
+                {
+                    if (_currentMovementSound != null)
+                        _audio.Sounds.StopLoop(_currentMovementSound);
+
+                    _audio.Sounds.PlayLoop(desiredSound);
+                    _currentMovementSound = desiredSound;
+                }
             }
+
             // Sprinting Logic
             sprint.Update(gameTime);
             if (InputHandler.IsHeld(GameAction.SPRINT) && sprint.Ready)

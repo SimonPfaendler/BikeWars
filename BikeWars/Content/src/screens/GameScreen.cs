@@ -69,7 +69,7 @@ namespace BikeWars.Content.screens
             player.ShotBullet += OnPlayerShotBullet;
 
             hobo = new Hobo(new Vector2(worldBounds.Width / 2 + 10, worldBounds.Height / 2), new Point(32, 32), audioService);
-            bikethief = new BikeThief(new Vector2(worldBounds.Width / 2 - 10, worldBounds.Height / 2 - 80), new Point(32, 32));
+            bikethief = new BikeThief(new Vector2(worldBounds.Width / 2 - 10, worldBounds.Height / 2 - 80), new Point(32, 32), _audioService);
             
             Game1 game = Game1.Instance;
             camera = new Camera2D(
@@ -114,10 +114,9 @@ namespace BikeWars.Content.screens
             _overlay = new Overlay(_debugFont, Game1.Instance.GraphicsDevice);
 
             // Player and Hobo Soundeffects
-            SoundHandler soundHandler = new SoundHandler();
             player.LoadContent(content);
             hobo.LoadContent(content);
-            bikethief.LoadContent(content, content.Load<SoundEffect>(soundHandler.WALKING_SOUND_PATH));
+            bikethief.LoadContent(content);
             
             // Items
             _itemManager.LoadContent(content);
@@ -270,7 +269,7 @@ namespace BikeWars.Content.screens
 
             if (InputHandler.IsPressed(GameAction.PAUSE))
             {
-                bikethief.PauseSounds();
+                _audioService.Sounds.PauseAll();
                 _overlay.SetPaused(true, gameTime);
                 PauseMenuScreen pauseMenu = new PauseMenuScreen(_font, _audioService);
                 ScreenManager.AddScreen(pauseMenu);

@@ -51,10 +51,19 @@ namespace BikeWars.Content.engine.Audio
         // Looping sound
         public void PlayLoop(string id)
         {
-            if (!_sfx.TryGetValue(id, out var sfx) || sfx == null) return;
-
-            if (_loopInstances.TryGetValue(id, out var existing) && existing.State == SoundState.Playing)
+            if (!_sfx.TryGetValue(id, out var sfx) || sfx == null)
                 return;
+
+            if (_loopInstances.TryGetValue(id, out var existing))
+            {
+                if (existing.State == SoundState.Stopped)
+                {
+                    existing.Dispose();
+                    _loopInstances.Remove(id);
+                }
+                else
+                    return;
+            }
 
             var inst = sfx.CreateInstance();
             inst.IsLooped = true;
@@ -62,32 +71,77 @@ namespace BikeWars.Content.engine.Audio
             inst.Play();
             _loopInstances[id] = inst;
         }
+
         
-        public void StopLoop(string id, bool stopImmediate = false)
+        public void StopLoop(string id)
         {
-            if (!_loopInstances.TryGetValue(id, out var inst)) return;
-
-            if (stopImmediate)
+            if (_loopInstances.TryGetValue(id, out var inst))
+            {
                 inst.Stop();
-            else
-                inst.Stop(false); // allow fade-out logic later
-
-            _loopInstances.Remove(id);
-            inst.Dispose();
+                inst.Dispose();
+                _loopInstances.Remove(id);
+            }
         }
+
         
         public void PauseLoop(string id)
         {
             if (_loopInstances.TryGetValue(id, out var inst))
-                inst.Pause();
+            {
+                if (inst.State == SoundState.Playing)
+                    inst.Pause();
+            }
         }
+
 
         public void ResumeLoop(string id)
         {
-            if (_loopInstances.TryGetValue(id, out var inst))
+            if (!_loopInstances.TryGetValue(id, out var inst))
+            {
+                PlayLoop(id);
+                return;
+            }
+
+            if (inst.State == SoundState.Paused)
+                inst.Resume();
+        }
+        
+        public void PauseAll()
+        {
+            // One-shot sounds
+            foreach (var inst in _activeInstances)
+            {
+                if (inst.State == SoundState.Playing)
+                    inst.Pause();
+            }
+
+            // Loop sounds
+            foreach (var inst in _loopInstances.Values)
+            {
+                if (inst.State == SoundState.Playing)
+                    inst.Pause();
+            }
+        }
+        
+        public void ResumeAll()
+        {
+            // One-shot sounds
+            foreach (var inst in _activeInstances)
+            {
                 if (inst.State == SoundState.Paused)
                     inst.Resume();
+            }
+
+            // Loop sounds
+            foreach (var inst in _loopInstances.Values)
+            {
+                if (inst.State == SoundState.Paused)
+                    inst.Resume();
+            }
         }
+
+
+
 
         
         public void Update(GameTime gameTime)
