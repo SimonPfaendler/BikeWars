@@ -28,7 +28,7 @@ public class Bullet: ProjectileBase
     {
         Damage = 10;
         Transform = new Transform(start, size);
-        _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y);
+        _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.PROJECTILE, this);
         Movement = new BulletMovement(true, true);
     }
 

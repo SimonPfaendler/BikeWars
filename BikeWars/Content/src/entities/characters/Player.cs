@@ -10,8 +10,6 @@ using System.Collections.Generic;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.entities.Inventory;
 using BikeWars.Content.managers;
-using BikeWars.Content.screens;
-using Microsoft.Xna.Framework.Input;
 
 // ============================================================
 // Player.cs
@@ -33,6 +31,7 @@ namespace BikeWars.Entities.Characters
         public bool IsDead => Health <= 0;
 
         private BoxCollider _collider { get; set; }
+        public BoxCollider Collider {get => _collider;}
         private PlayerMovement movement { get; set; }
         private CooldownWithDuration sprint { get; }
 
@@ -112,9 +111,9 @@ namespace BikeWars.Entities.Characters
             _currentAnimation = _walkRightAnimation;
         }
 
-        public void UpdateCollider()
+        public override void UpdateCollider()
         {
-            _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y);
+            _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.PLAYER, this);
         }
 
         // 1x1 Texture to represent the player
@@ -227,8 +226,8 @@ namespace BikeWars.Entities.Characters
 
             // Console.WriteLine(movement.Speed);
             CurrentSpeed = sprint.IsActive ? SprintSpeed : movement.CurrentMovement.Speed;
-            LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
             Vector2 direction = movement.CurrentMovement.Direction;
+            LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
 
             bool isMoving = movement.IsMoving();
             if (isMoving)
@@ -412,7 +411,7 @@ namespace BikeWars.Entities.Characters
         }
 
         // Is Helpful for example with colliders to set the original position back.
-        public void SetLastTransform()
+        public override void SetLastTransform()
         {
             Transform = new Transform(new Vector2(LastTransform.Position.X, LastTransform.Position.Y), LastTransform.Size);
         }

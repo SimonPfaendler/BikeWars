@@ -22,6 +22,7 @@ namespace BikeWars.Entities.Characters
         public bool IsDead => Health <= 0;
 
         private BoxCollider _collider { get; set; }
+        public BoxCollider Collider {get => _collider;}
         private EnemyMovement movement { get; set; }
         
         private readonly AudioService _audio;
@@ -50,14 +51,14 @@ namespace BikeWars.Entities.Characters
             };
             _idleAnimation = new SpriteAnimation(_characterAtlas, idleFrames, 0.4f);
 
-            // e1_drunkdude_walking_left.png 
+            // e1_drunkdude_walking_left.png
 
             int leftBaseX = 64;
             int leftBaseY = 128;
             int leftW = 96;
             int leftH = 127;
-            int leftFrameW = leftW / 2;   
-            int leftFrameH = leftH / 2;       
+            int leftFrameW = leftW / 2;
+            int leftFrameH = leftH / 2;
 
             var leftFrames = new List<Rectangle>
             {
@@ -73,8 +74,8 @@ namespace BikeWars.Entities.Characters
             int rightBaseY = 0;
             int rightW = 80;
             int rightH = 108;
-            int rightFrameW = rightW / 2; 
-            int rightFrameH = rightH / 2;     
+            int rightFrameW = rightW / 2;
+            int rightFrameH = rightH / 2;
 
             var rightFrames = new List<Rectangle>
             {
@@ -90,9 +91,9 @@ namespace BikeWars.Entities.Characters
 
         }
 
-        public void UpdateCollider()
+        public override void UpdateCollider()
         {
-            _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y);
+            _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.CHARACTER, this);
         }
 
         // 1x1 Texture to represent the enemy
@@ -144,8 +145,8 @@ namespace BikeWars.Entities.Characters
                 _audio.Sounds.PauseLoop(AudioAssets.Walking);
             }
 
-            LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
             Vector2 direction = movement.Direction;
+            LastTransform = new Transform(new Vector2(Transform.Position.X - direction.X, Transform.Position.Y - direction.Y), Transform.Size);
             bool isMoving = direction != Vector2.Zero;
 
             if (isMoving)
@@ -193,7 +194,7 @@ namespace BikeWars.Entities.Characters
         }
 
         // Is Helpful for example with colliders to set the original position back.
-        public void SetLastTransform()
+        public override void SetLastTransform()
         {
             Transform = new Transform(new Vector2(LastTransform.Position.X, LastTransform.Position.Y), LastTransform.Size);
         }

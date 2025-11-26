@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using BikeWars.Content.engine.interfaces;
+using BikeWars.Content.screens;
 using Microsoft.Xna.Framework;
 // The screen manager handles all existing screens:
 // -> decides which screen are drawn
@@ -34,6 +35,15 @@ namespace BikeWars.Content.managers
         {
             _mScreenStack.Clear();
             OnReturnToMainMenu?.Invoke();
+        }
+        
+        // used for the Game/ Menu music
+        public bool GameScreenIsActive()
+        {
+            if (_mScreenStack.Count == 0)
+                return false;
+
+            return _mScreenStack[_mScreenStack.Count - 1] is GameScreen;
         }
 
         public void Draw(GameTime gameTime)

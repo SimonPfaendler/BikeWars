@@ -121,6 +121,18 @@
 /processorParam:Quality=Best
 /build:assets/sounds/Walking.mp3
 
+#begin assets/sounds/Game_music.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/Game_music.mp3
+
+#begin assets/sounds/Menu_music.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/Menu_music.mp3
+
 #begin assets/sprites/characters/character_atlas.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -180,4 +192,3 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:assets/sprites/XP/xp_money_texture.png
-

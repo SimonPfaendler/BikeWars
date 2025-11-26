@@ -15,11 +15,11 @@ public class Item: ItemBase
     {
         get { return _collider; }
     }
-    
+
     public Item(Vector2 start, Point size)
     {
         Transform = new Transform(start, size);
-        _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y);
+        _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.ITEM, this);
     }
 
     public override void Update(GameTime gameTime)
@@ -29,7 +29,7 @@ public class Item: ItemBase
 
     public override void LoadContent(ContentManager contentManager)
     {
-        
+
     }
 
     public override void Draw(SpriteBatch spriteBatch)
@@ -45,5 +45,5 @@ public class Item: ItemBase
     public override bool Intersects(ICollider collider)
         {
             return _collider.Intersects(collider);
-        }   
+        }
 }
