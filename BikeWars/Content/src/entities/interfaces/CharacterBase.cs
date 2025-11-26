@@ -14,6 +14,8 @@ public abstract class CharacterBase : ICharacter
     public float CurrentSpeed { get; set; }
 
     private ICollider _collider { get; set; }
+    public abstract void SetLastTransform();
+    public abstract void UpdateCollider();
     public abstract void Update(GameTime gameTime); // Use this to update the logic like where the position is or resize the collision box
     public abstract bool Intersects(ICollider other);
 }

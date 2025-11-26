@@ -8,20 +8,20 @@ using System;
 
 namespace BikeWars.Content.entities.items;
 public class Chest: ItemBase, IPickable
-{   
+{
     public override bool InventoryItem => true;
-    
+
     private const String TEXTURE_PATH = "assets/sprites/chest_texture";
     private BoxCollider _collider { get; set; }
     public override BoxCollider Collider
     {
         get { return _collider; }
     }
-    
+
     public Chest(Vector2 start, Point size)
     {
         Transform = new Transform(start, size);
-        _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y);
+        _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.ITEM, this);
     }
 
     public override void Draw(SpriteBatch spriteBatch)

@@ -21,6 +21,7 @@ namespace BikeWars.Entities.Characters
         public bool IsDead => Health <= 0;
 
         private BoxCollider _collider { get; set; }
+        public BoxCollider Collider {get => _collider;}
         private EnemyMovement movement { get; set; }
         public SoundHandler SoundHandler { get; }
 
@@ -109,12 +110,14 @@ namespace BikeWars.Entities.Characters
             SoundHandler.WalkingSoundInstance.IsLooped = true;
         }
 
-        public void UpdateCollider()
+        public override void UpdateCollider()
         {
             _collider = new BoxCollider(
                 new Vector2(Transform.Position.X, Transform.Position.Y),
                 Transform.Size.X,
-                Transform.Size.Y
+                Transform.Size.Y,
+                CollisionLayer.CHARACTER,
+                this
             );
         }
 
@@ -175,12 +178,12 @@ namespace BikeWars.Entities.Characters
                 }
             }
 
+            Vector2 direction = movement.Direction;
             LastTransform = new Transform(
-                new Vector2(Transform.Position.X, Transform.Position.Y),
+                new Vector2(Transform.Position.X - direction.X, Transform.Position.Y - direction.Y),
                 Transform.Size
             );
 
-            Vector2 direction = movement.Direction;
             bool isMoving = direction != Vector2.Zero;
 
             if (isMoving)
@@ -246,7 +249,7 @@ namespace BikeWars.Entities.Characters
         }
 
         // Ist hilfreich z.B. bei Kollisionen, um die ursprüngliche Position wiederherzustellen.
-        public void SetLastTransform()
+        public override void SetLastTransform()
         {
             Transform = new Transform(
                 new Vector2(LastTransform.Position.X, LastTransform.Position.Y),

@@ -33,15 +33,15 @@ public class ItemManager
         {
             var item = _items[i];
             bool collision = player.Intersects(item.Collider);
-            
-            if (!item.InventoryItem && item is IPickable)
-            {
-                if (collision)
-                {
-                    _items.RemoveAt(i);
-                    continue;
-                }
-            }
+
+            // if (!item.InventoryItem && item is IPickable)
+            // {
+            //     if (collision)
+            //     {
+            //         _items.RemoveAt(i);
+            //         continue;
+            //     }
+            // }
 
             if (item.InventoryItem)
             {
@@ -65,5 +65,10 @@ public class ItemManager
         {
             item.Draw(spriteBatch);
         }
+    }
+
+    public void Remove(ItemBase item)
+    {
+        _items.Remove(item);
     }
 }
