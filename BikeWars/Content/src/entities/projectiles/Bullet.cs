@@ -4,8 +4,6 @@ using BikeWars.Content.engine;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework.Content;
-using System.Collections.Generic;
-using System;
 
 namespace BikeWars.Content.entities.items;
 public class Bullet: ProjectileBase
@@ -24,12 +22,14 @@ public class Bullet: ProjectileBase
         get { return _movement; }
         set { _movement = value;}
     }
-    public Bullet(Vector2 start, Point size)
+    public Bullet(Vector2 start, Point size, object owner)
     {
         Damage = 10;
         Transform = new Transform(start, size);
         _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.PROJECTILE, this);
         Movement = new BulletMovement(true, true);
+        Owner = owner;
+        HasHit = false;
     }
 
     public override void Draw(SpriteBatch spriteBatch)

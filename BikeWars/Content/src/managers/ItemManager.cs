@@ -1,17 +1,15 @@
 using System.Collections.Generic;
 using BikeWars.Content.engine;
-using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using BikeWars.Content.entities.items;
 using BikeWars.Entities.Characters;
 namespace BikeWars.Content.managers;
 public class ItemManager
 {
     private readonly List<ItemBase> _items = new();
-    public IReadOnlyList<ItemBase> Items => _items;
+    public List<ItemBase> Items => _items;
     public void AddItem(ItemBase item)
     {
         _items.Add(item);

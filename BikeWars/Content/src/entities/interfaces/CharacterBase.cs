@@ -18,4 +18,5 @@ public abstract class CharacterBase : ICharacter
     public abstract void UpdateCollider();
     public abstract void Update(GameTime gameTime); // Use this to update the logic like where the position is or resize the collision box
     public abstract bool Intersects(ICollider other);
+    public abstract void TakeDamage(int amount);
 }

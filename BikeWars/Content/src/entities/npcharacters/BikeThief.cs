@@ -20,7 +20,7 @@ namespace BikeWars.Entities.Characters
         public int AttackDamage { get; set; }
         public float AttackSpeed { get; set; }
         public bool IsDead => Health <= 0;
-        
+
         private readonly AudioService _audio;
         private BoxCollider _collider { get; set; }
         public BoxCollider Collider {get => _collider;}
@@ -143,7 +143,7 @@ namespace BikeWars.Entities.Characters
             return _collider.Intersects(collider);
         }
 
-        public void TakeDamage(int amount)
+        public override void TakeDamage(int amount)
         {
             Health -= amount;
         }

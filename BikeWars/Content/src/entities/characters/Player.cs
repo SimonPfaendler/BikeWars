@@ -48,7 +48,7 @@ namespace BikeWars.Entities.Characters
         private SpriteAnimation _walkRightAnimation;
 
         private SpriteAnimation _currentAnimation;
-        
+
         private readonly AudioService _audio;
         private string _currentMovementSound = null;
 
@@ -128,7 +128,7 @@ namespace BikeWars.Entities.Characters
             }
         }
 
-        public void TakeDamage(int amount)
+        public override void TakeDamage(int amount)
         {
             Health-= amount;
             if(Health < 0) Health = 0;
@@ -190,12 +190,12 @@ namespace BikeWars.Entities.Characters
             string desiredSound = movement.CurrentMovement is BicycleMovement
                 ? AudioAssets.Driving
                 : AudioAssets.Walking;
-            
+
             float speedThreshold = 5.0f;
             bool hasSpeed = movement.CurrentMovement.Speed > speedThreshold;
             bool isInputMoving = movement.IsMoving();
-            
-            bool shouldPlaySound = hasSpeed && isInputMoving; 
+
+            bool shouldPlaySound = hasSpeed && isInputMoving;
 
             if (!shouldPlaySound)
             {
@@ -224,7 +224,6 @@ namespace BikeWars.Entities.Characters
                 sprint.Activate();
             }
 
-            // Console.WriteLine(movement.Speed);
             CurrentSpeed = sprint.IsActive ? SprintSpeed : movement.CurrentMovement.Speed;
             Vector2 direction = movement.CurrentMovement.Direction;
             LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);

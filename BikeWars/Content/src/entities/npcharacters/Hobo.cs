@@ -24,9 +24,9 @@ namespace BikeWars.Entities.Characters
         private BoxCollider _collider { get; set; }
         public BoxCollider Collider {get => _collider;}
         private EnemyMovement movement { get; set; }
-        
+
         private readonly AudioService _audio;
-        
+
         public EnemyMovement Movement => movement;
 
         // Animation mit SpriteManager
@@ -118,7 +118,7 @@ namespace BikeWars.Entities.Characters
             return _collider.Intersects(collider);
         }
 
-        public void TakeDamage(int amount)
+        public override void TakeDamage(int amount)
         {
             Health -= amount;
         }
@@ -131,7 +131,7 @@ namespace BikeWars.Entities.Characters
         public override void Update(GameTime gameTime)
         {
             movement.HandleMovement(gameTime);
-            
+
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
             // Sound-Control
             bool hoboIsMoving = movement.Direction != Vector2.Zero && movement.CanMove;
@@ -189,7 +189,6 @@ namespace BikeWars.Entities.Characters
                 return;
             if (_currentAnimation == null)
                 return;
-
             _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, 0f);
         }
 
