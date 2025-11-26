@@ -5,18 +5,21 @@ using Microsoft.Xna.Framework;
 namespace BikeWars.Content.engine;
 public class BoxCollider : ColliderBase
 {
-    private int width { get; set; }
-    private int height { get; set; }
+    private int _width { get; set; }
+    private int _height { get; set; }
+
+    public int Height {get => _height; set => _height = value;}
+    public int Width {get => _width; set => _width = value;}
 
     private EnhancedRectangle _collisionShape { get; set; }
     public EnhancedRectangle CollisionShape
     {
         get { return _collisionShape; }
     }
-    public BoxCollider(Vector2 pos, int w, int h, CollisionLayer layer, object owner = null)
+    public BoxCollider(Vector2 pos, int w, int h, CollisionLayer layer, object owner)
     {
-        width = w;
-        height = h;
+        Width = w;
+        Height = h;
         Position = pos;
         Layer = layer;
         Owner = owner;
@@ -24,14 +27,14 @@ public class BoxCollider : ColliderBase
 
     public void SetSize(int w, int h)
     {
-        width = w;
-        height = h;
+        Width = w;
+        Height = h;
         Update();
     }
 
     protected override void Update()
     {
-        _collisionShape = new EnhancedRectangle(new Rectangle((int)Position.X, (int)Position.Y, width, height));
+        _collisionShape = new EnhancedRectangle(new Rectangle((int)Position.X, (int)Position.Y, Width, Height));
     }
     public override bool Intersects(ICollider other)
     {

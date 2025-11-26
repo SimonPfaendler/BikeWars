@@ -5,5 +5,6 @@ public enum CollisionLayer
     CHARACTER,
     PROJECTILE,
     ITEM,
-    WALL
+    WALL,
+    WATER
 }

@@ -178,12 +178,12 @@ namespace BikeWars.Entities.Characters
                 }
             }
 
+            Vector2 direction = movement.Direction;
             LastTransform = new Transform(
-                new Vector2(Transform.Position.X, Transform.Position.Y),
+                new Vector2(Transform.Position.X - direction.X, Transform.Position.Y - direction.Y),
                 Transform.Size
             );
 
-            Vector2 direction = movement.Direction;
             bool isMoving = direction != Vector2.Zero;
 
             if (isMoving)

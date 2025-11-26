@@ -19,7 +19,7 @@ public class Item: ItemBase
     public Item(Vector2 start, Point size)
     {
         Transform = new Transform(start, size);
-        _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.ITEM);
+        _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.ITEM, this);
     }
 
     public override void Update(GameTime gameTime)

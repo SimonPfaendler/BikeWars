@@ -213,8 +213,8 @@ namespace BikeWars.Entities.Characters
 
             // Console.WriteLine(movement.Speed);
             CurrentSpeed = sprint.IsActive ? SprintSpeed : movement.CurrentMovement.Speed;
-            LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
             Vector2 direction = movement.CurrentMovement.Direction;
+            LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
 
             bool isMoving = movement.IsMoving();
             if (isMoving)

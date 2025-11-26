@@ -66,4 +66,9 @@ public class ItemManager
             item.Draw(spriteBatch);
         }
     }
+
+    public void Remove(ItemBase item)
+    {
+        _items.Remove(item);
+    }
 }

@@ -23,9 +23,8 @@ namespace BikeWars.Entities.Characters
         private BoxCollider _collider { get; set; }
         public BoxCollider Collider {get => _collider;}
         private EnemyMovement movement { get; set; }
-        public SoundHandler SoundHandler { get; }
-
         public EnemyMovement Movement => movement;
+        public SoundHandler SoundHandler { get; }
 
         // Animation mit SpriteManager
         private Texture2D _characterAtlas;
@@ -151,8 +150,8 @@ namespace BikeWars.Entities.Characters
                 }
             }
 
-            LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
             Vector2 direction = movement.Direction;
+            LastTransform = new Transform(new Vector2(Transform.Position.X - direction.X, Transform.Position.Y - direction.Y), Transform.Size);
             bool isMoving = direction != Vector2.Zero;
 
             if (isMoving)

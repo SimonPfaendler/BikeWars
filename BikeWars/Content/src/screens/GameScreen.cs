@@ -66,11 +66,11 @@ namespace BikeWars.Content.screens
 
             _collisionManager = new CollisionManager(CELL_SIZE, SEARCH_RADIUS);
 
-            player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(32, 32));
+            player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2 + 100), new Point(32, 32));
             player.ShotBullet += OnPlayerShotBullet;
 
-            hobo = new Hobo(new Vector2(worldBounds.Width / 2 + 10, worldBounds.Height / 2), new Point(32, 32));
-            bikethief = new BikeThief(new Vector2(worldBounds.Width / 2 - 10, worldBounds.Height / 2 - 80), new Point(32, 32));
+            hobo = new Hobo(new Vector2(worldBounds.Width / 2 + 100, worldBounds.Height / 2), new Point(32, 32));
+            bikethief = new BikeThief(new Vector2(worldBounds.Width / 2 - 100, worldBounds.Height / 2 - 80), new Point(32, 32));
 
             Game1 game = Game1.Instance;
             camera = new Camera2D(
@@ -108,7 +108,7 @@ namespace BikeWars.Content.screens
                 int x = tile.X * 16;
                 int y = tile.Y * 16;
 
-                BoxCollider box = new BoxCollider(new Vector2(x, y), 16, 16, CollisionLayer.WALL);
+                BoxCollider box = new BoxCollider(new Vector2(x, y), 16, 16, CollisionLayer.WALL, this);
                 _collisionBoxes.Add(box);
                 _collisionManager.StaticHash.Insert(box);
             }
@@ -143,21 +143,20 @@ namespace BikeWars.Content.screens
             _collisionManager.DynamicHash.Insert(player.Collider);
             _collisionManager.DynamicHash.Insert(hobo.Collider);
             _collisionManager.DynamicHash.Insert(bikethief.Collider);
+            foreach(ProjectileBase p in _testProjectiles)
+            {
+                _collisionManager.DynamicHash.Insert(p.Collider);
+            }
 
+            List<ProjectileBase> toRemoveProjectiles = new();
+            List<ItemBase> toRemoveItemBase = new();
             foreach (ICollider c in _collisionManager.DynamicHash.AllColliders())
             {
                 List<ICollider> statics = _collisionManager.StaticHash.QueryNearby(c.Position);
+                List<ICollider> dynamics = _collisionManager.DynamicHash.QueryNearby(c.Position);
                 foreach (var b in statics)
                 {
-                    if (c.Layer == CollisionLayer.PLAYER)
-                    {
-                        if (c.Intersects(b))
-                        {
-                            player.SetLastTransform();
-                            player.UpdateCollider();
-                        }
-                    }
-                    if (c.Layer == CollisionLayer.CHARACTER)
+                    if (c.Layer == CollisionLayer.CHARACTER || c.Layer == CollisionLayer.PLAYER)
                     {
                         if (c.Intersects(b))
                         {
@@ -166,7 +165,53 @@ namespace BikeWars.Content.screens
                             ch.UpdateCollider();
                         }
                     }
+
+                    if (c.Layer == CollisionLayer.PROJECTILE)
+                    {
+                        if (c.Intersects(b))
+                        {
+                            ProjectileBase p = (ProjectileBase)c.Owner;
+                            toRemoveProjectiles.Add(p);
+                        }
+                    }
                 }
+                foreach (var d in dynamics)
+                {
+                    if (c.Layer == CollisionLayer.PLAYER)
+                    {
+                        if (d.Layer == CollisionLayer.ITEM)
+                        {
+                            if (c.Intersects(d))
+                            {
+                                toRemoveItemBase.Add((ItemBase)d.Owner);
+                            }
+                        }
+                    }
+                    if (c.Layer == CollisionLayer.CHARACTER || c.Layer == CollisionLayer.PLAYER)
+                    {
+                        if (d.Layer == CollisionLayer.CHARACTER || d.Layer == CollisionLayer.PLAYER)
+                        {
+                            if (c.Intersects(d) && c.Owner != d.Owner)
+                            {
+                                CharacterBase ch = (CharacterBase)c.Owner;
+                                CharacterBase chd = (CharacterBase)d.Owner;
+                                Vector2 t = _collisionManager.GetPenetrationVector(c, d);
+                                ch.Transform.Position -= t * 0.025f;
+                                chd.Transform.Position += t * 0.025f;
+                                ch.UpdateCollider();
+                                chd.UpdateCollider();
+                            }
+                        }
+                    }
+                }
+            }
+            foreach (ProjectileBase p in toRemoveProjectiles)
+            {
+                _testProjectiles.Remove(p);
+            }
+            foreach (ItemBase i in toRemoveItemBase)
+            {
+                _itemManager.Remove(i);
             }
 
             // For mouse position in world coordinates
