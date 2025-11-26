@@ -14,6 +14,9 @@ namespace BikeWars.Content.screens
     {
         private Overlay _overlay; 
         private readonly AudioService _audioService;
+        public string DesiredMusic => AudioAssets.GameMusic;
+        public float MusicVolume => 0.5f;
+
         public PauseMenuScreen(SpriteFont font, AudioService audioService)
             :base(null, font)
         {

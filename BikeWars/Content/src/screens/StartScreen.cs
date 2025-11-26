@@ -17,6 +17,9 @@ public class StartScreen : IScreen
     private MouseState _previousMouseState;
     private SpriteFont _font;
     private readonly AudioService _audioService;
+    public string DesiredMusic => AudioAssets.MenuMusic;
+    public float MusicVolume => 1f;
+
     
     public ScreenManager ScreenManager { get; set; }
     

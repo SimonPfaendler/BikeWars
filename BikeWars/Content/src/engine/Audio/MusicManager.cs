@@ -10,8 +10,13 @@ namespace BikeWars.Content.engine.Audio
     {
         private readonly Dictionary<string, Song> _songs = new();
         private string _currentSongId = null;
-        public float MasterVolume { get; set; } = 1f;
-        public float MusicVolume { get; set; } = 1f;
+        public float MasterVolume { get; set; } = 0.25f;
+        public float MusicVolume { get; set; } = 0.5f;
+        
+        public bool IsPlaying => MediaPlayer.State == MediaState.Playing;
+
+        public string CurrentSong => _currentSongId;
+
         
         // Load: used only once when starting the game: paths = ID -> content path
         public void Load(ContentManager content, Dictionary<string, string> paths)
@@ -35,10 +40,16 @@ namespace BikeWars.Content.engine.Audio
 
         public void Play(string id, bool isRepeating = true)
         {
-            if (!_songs.TryGetValue(id, out var song) || song == null) return;
+            if (!_songs.TryGetValue(id, out var song) || song == null)
+                return;
+
+            if (_currentSongId == id && MediaPlayer.State == MediaState.Playing)
+                return;
+
             _currentSongId = id;
             MediaPlayer.IsRepeating = isRepeating;
             MediaPlayer.Volume = Math.Clamp(MasterVolume * MusicVolume, 0f, 1f);
+
             MediaPlayer.Play(song);
         }
 
@@ -50,13 +61,17 @@ namespace BikeWars.Content.engine.Audio
 
         public void Pause()
         {
-            MediaPlayer.Pause();
+            if (MediaPlayer.State == MediaState.Playing)
+                MediaPlayer.Pause();
         }
+
 
         public void Resume()
         {
-            MediaPlayer.Resume();
+            if (MediaPlayer.State == MediaState.Paused)
+                MediaPlayer.Resume();
         }
+
 
         public void Update(GameTime gameTime)
         {

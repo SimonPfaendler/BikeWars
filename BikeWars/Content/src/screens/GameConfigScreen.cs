@@ -13,6 +13,8 @@ namespace BikeWars.Content.screens;
 public class GameConfigScreen : MenuScreenBase, IScreen
 {
     private readonly AudioService _audioService;
+    public string DesiredMusic => AudioAssets.MenuMusic;
+    public float MusicVolume => 1f;
     public GameConfigScreen(Texture2D background, SpriteFont font, AudioService audioService)
         :base(background, font)
     {

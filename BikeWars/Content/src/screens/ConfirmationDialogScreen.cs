@@ -14,6 +14,7 @@ namespace BikeWars.Content.screens
         private readonly string _message;
         private readonly IScreen _previousScreen;
         private readonly AudioService _audioService;
+        public float MusicVolume => 0.5f;
         private Texture2D _overlayTexture;
 
         public ConfirmationDialogScreen(SpriteFont font, string message, IScreen previousScreen, AudioService audioService)

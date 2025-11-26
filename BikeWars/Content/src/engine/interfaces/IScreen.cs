@@ -14,6 +14,8 @@ public interface IScreen
     public bool UpdateLower { get; }
 
     public bool DrawLower { get; }
-    
+    string? DesiredMusic => null;
+    float MusicVolume => 1f;
+
     ScreenManager ScreenManager { set; }
 }

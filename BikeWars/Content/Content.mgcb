@@ -123,13 +123,13 @@
 
 #begin assets/sounds/Game_music.mp3
 /importer:Mp3Importer
-/processor:SoundEffectProcessor
+/processor:SongProcessor
 /processorParam:Quality=Best
 /build:assets/sounds/Game_music.mp3
 
 #begin assets/sounds/Menu_music.mp3
 /importer:Mp3Importer
-/processor:SoundEffectProcessor
+/processor:SongProcessor
 /processorParam:Quality=Best
 /build:assets/sounds/Menu_music.mp3
 

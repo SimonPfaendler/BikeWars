@@ -20,12 +20,13 @@ namespace BikeWars.Content.engine.Audio
         };
 
         // Song IDs to be used in the code
-        // TODO: Add Main theme
-        //public const string MainTheme = "music_main_theme";
-        //public static readonly Dictionary<string, string> SongPaths = new()
-        //{
-         //   { MainTheme, "assets/music/MainTheme" }
-            // weitere Songs hier
-        //};
+        public const string MenuMusic = "Menu_music";
+        public const string GameMusic = "Game_music";
+        public static readonly Dictionary<string, string> SongPaths = new()
+        {
+            { MenuMusic, "assets/sounds/Menu_music" },
+            { GameMusic, "assets/sounds/Game_music" },
+
+        };
     }
 }
