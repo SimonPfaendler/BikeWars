@@ -62,6 +62,8 @@ public class Game1 : Game
 
         if (InputHandler.IsPressed(GameAction.ESC))
             Exit();
+        bool isGameScreenActive = ScreenManager.GameScreenIsActive();
+        SoundHandler.PlayGameMusic(isGameScreenActive);
 
         base.Update(gameTime);
     }
