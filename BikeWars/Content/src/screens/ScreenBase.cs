@@ -24,8 +24,6 @@ namespace BikeWars.Content.screens
             _backgroundTexture = background;
             _font = font;
             _buttons = new List<MenuButton>();
-            
-            InitializeButtons();
         }
         
         protected abstract void InitializeButtons();

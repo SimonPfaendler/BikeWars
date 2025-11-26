@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
+using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework.Audio;
 using BikeWars.Content.entities.interfaces;
@@ -23,8 +24,10 @@ namespace BikeWars.Entities.Characters
         private BoxCollider _collider { get; set; }
         public BoxCollider Collider {get => _collider;}
         private EnemyMovement movement { get; set; }
+        
+        private readonly AudioService _audio;
+        
         public EnemyMovement Movement => movement;
-        public SoundHandler SoundHandler { get; }
 
         // Animation mit SpriteManager
         private Texture2D _characterAtlas;
@@ -35,7 +38,7 @@ namespace BikeWars.Entities.Characters
 
         private SpriteAnimation _currentAnimation;
 
-        public void LoadContent(ContentManager content, SoundEffect walkingSoundEffect)
+        public void LoadContent(ContentManager content)
         {
             // Atlas laden
             _characterAtlas = content.Load<Texture2D>("assets/sprites/characters/character_atlas");
@@ -85,8 +88,7 @@ namespace BikeWars.Entities.Characters
             _currentAnimation = _idleAnimation;
 
             // sounds
-            SoundHandler.WalkingSoundInstance = walkingSoundEffect.CreateInstance();
-            SoundHandler.WalkingSoundInstance.IsLooped = true;
+
         }
 
         public override void UpdateCollider()
@@ -98,8 +100,9 @@ namespace BikeWars.Entities.Characters
         public static Texture2D pixel;
 
 
-        public Hobo(Vector2 start, Point size)
+        public Hobo(Vector2 start, Point size, AudioService audio)
         {
+            _audio = audio;
             MaxHealth = 40;
             Health = MaxHealth;
             AttackDamage = 5;
@@ -108,7 +111,6 @@ namespace BikeWars.Entities.Characters
             LastTransform = new Transform(start, size);
             Speed = 100f;
             movement = new EnemyMovement(canMove: true, isMoving: false);
-            SoundHandler = new SoundHandler();
             UpdateCollider();
         }
         public override bool Intersects(ICollider collider)
@@ -129,25 +131,18 @@ namespace BikeWars.Entities.Characters
         public override void Update(GameTime gameTime)
         {
             movement.HandleMovement(gameTime);
-            if (!movement.CanMove)
-            {
-                SoundHandler.WalkingSoundInstance.Stop();
-                return;
-            }
+            
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
             // Sound-Control
-            if (SoundHandler.WalkingSoundInstance != null)
+            bool hoboIsMoving = movement.Direction != Vector2.Zero && movement.CanMove;
+
+            if (hoboIsMoving)
             {
-                // Start Playing Walking Sound if Player starts moving around
-                if (movement.IsMoving)
-                {
-                    SoundHandler.WalkingSoundInstance.Play();
-                }
-                // Stop Playing Walking Sound if Player stops moving around
-                else
-                {
-                    SoundHandler.WalkingSoundInstance.Stop();
-                }
+                _audio.Sounds.ResumeLoop(AudioAssets.Walking);
+            }
+            else
+            {
+                _audio.Sounds.PauseLoop(AudioAssets.Walking);
             }
 
             Vector2 direction = movement.Direction;
@@ -196,24 +191,6 @@ namespace BikeWars.Entities.Characters
                 return;
 
             _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, 0f);
-        }
-
-        public void PauseSounds()
-        {
-            if (SoundHandler?.WalkingSoundInstance != null &&
-                SoundHandler.WalkingSoundInstance.State == SoundState.Playing)
-            {
-                SoundHandler.WalkingSoundInstance.Pause();
-            }
-        }
-
-        public void ResumeSounds()
-        {
-            if (SoundHandler?.WalkingSoundInstance != null &&
-                SoundHandler.WalkingSoundInstance.State == SoundState.Paused)
-            {
-                SoundHandler.WalkingSoundInstance.Resume();
-            }
         }
 
         // Is Helpful for example with colliders to set the original position back.

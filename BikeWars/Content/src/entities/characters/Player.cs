@@ -7,6 +7,7 @@ using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework.Audio;
 using BikeWars.Content.entities.interfaces;
 using System.Collections.Generic;
+using BikeWars.Content.engine.Audio;
 using BikeWars.Content.entities.Inventory;
 using BikeWars.Content.managers;
 
@@ -32,7 +33,6 @@ namespace BikeWars.Entities.Characters
         private BoxCollider _collider { get; set; }
         public BoxCollider Collider {get => _collider;}
         private PlayerMovement movement { get; set; }
-        public SoundHandler SoundHandler { get; }
         private CooldownWithDuration sprint { get; }
 
         public Vector2 GazeDirection { get; private set; }
@@ -48,6 +48,10 @@ namespace BikeWars.Entities.Characters
         private SpriteAnimation _walkRightAnimation;
 
         private SpriteAnimation _currentAnimation;
+        
+        private readonly AudioService _audio;
+        private string _currentMovementSound = null;
+
 
         private struct GhostFrame
         {
@@ -63,7 +67,7 @@ namespace BikeWars.Entities.Characters
         private const float GhostSpawnInterval = 0.05f; // alle 0,05s ein neues Ghost
         private const float GhostLifeTime = 0.1f;
 
-        public void LoadContent(ContentManager content, SoundEffect drivingSoundEffect)
+        public void LoadContent(ContentManager content)
         {
             _characterAtlas = content.Load<Texture2D>("assets/sprites/characters/character_atlas");
             if (pixel == null)
@@ -105,9 +109,6 @@ namespace BikeWars.Entities.Characters
             _walkUpAnimation = new SpriteAnimation(_characterAtlas, upFrames, 0.16f);
 
             _currentAnimation = _walkRightAnimation;
-
-            SoundHandler.DrivingSoundInstance = drivingSoundEffect.CreateInstance();
-            SoundHandler.DrivingSoundInstance.IsLooped = true;
         }
 
         public override void UpdateCollider()
@@ -138,7 +139,7 @@ namespace BikeWars.Entities.Characters
             target.TakeDamage(AttackDamage);
         }
 
-        public Player(Vector2 start, Point size)
+        public Player(Vector2 start, Point size, AudioService audio)
         {
             MaxHealth = 100;
             Health = MaxHealth;
@@ -149,9 +150,9 @@ namespace BikeWars.Entities.Characters
             Speed = 200f;
             SprintSpeed = 350f;
             movement = new PlayerMovement(canMove: true, isMoving: false);
-            SoundHandler = new SoundHandler();
             sprint = new CooldownWithDuration(1f, 5f);
             Inventory = new Inventory();
+            _audio = audio;
             UpdateCollider();
         }
         public override bool Intersects(ICollider collider)
@@ -167,6 +168,7 @@ namespace BikeWars.Entities.Characters
         public void Update(GameTime gameTime, Vector2 mousePos)
         {
             // TODO THIS IS NOW ONLY FOR TESTING AND SHOWING
+
             if (InputHandler.IsPressed(GameAction.SWITCH))
             {
                 if (movement.CurrentMovement.GetType() == typeof(BicycleMovement))
@@ -183,24 +185,35 @@ namespace BikeWars.Entities.Characters
                 Shooting();
             }
             movement.Update();
-            if (!movement.CurrentMovement.CanMove)
-            {
-                SoundHandler.DrivingSoundInstance.Stop();
-                return;
-            }
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
             // Sound-Control
-            if (SoundHandler.DrivingSoundInstance != null)
+            string desiredSound = movement.CurrentMovement is BicycleMovement
+                ? AudioAssets.Driving
+                : AudioAssets.Walking;
+            
+            float speedThreshold = 5.0f;
+            bool hasSpeed = movement.CurrentMovement.Speed > speedThreshold;
+            bool isInputMoving = movement.IsMoving();
+            
+            bool shouldPlaySound = hasSpeed && isInputMoving; 
+
+            if (!shouldPlaySound)
             {
-                // Start Playing Walking Sound if Player starts moving around
-                if (movement.CurrentMovement.IsMoving)
+                if (_currentMovementSound != null)
                 {
-                    SoundHandler.DrivingSoundInstance.Play();
+                    _audio.Sounds.StopLoop(_currentMovementSound);
+                    _currentMovementSound = null;
                 }
-                // Stop Playing Walking Sound if Player stops moving around
-                else
+            }
+            else
+            {
+                if (_currentMovementSound != desiredSound)
                 {
-                    SoundHandler.DrivingSoundInstance.Stop();
+                    if (_currentMovementSound != null)
+                        _audio.Sounds.StopLoop(_currentMovementSound);
+
+                    _audio.Sounds.PlayLoop(desiredSound);
+                    _currentMovementSound = desiredSound;
                 }
             }
 
