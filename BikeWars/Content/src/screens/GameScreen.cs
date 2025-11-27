@@ -46,6 +46,10 @@ namespace BikeWars.Content.screens
         public string DesiredMusic => AudioAssets.GameMusic;
         public float MusicVolume => 1f;
 
+        private HUD hud;
+        private Texture2D hudTexture;
+        private float hpTestTimer = 0f;
+
         private CollisionManager _collisionManager;
 
         private bool _freelook; // Has to be optimized
@@ -72,6 +76,7 @@ namespace BikeWars.Content.screens
 
             hobo = new Hobo(new Vector2(worldBounds.Width / 2 + 100, worldBounds.Height / 2), new Point(32, 32), _audioService);
             bikethief = new BikeThief(new Vector2(worldBounds.Width / 2 - 100, worldBounds.Height / 2 - 80), new Point(32, 32), _audioService);
+
 
             Game1 game = Game1.Instance;
             camera = new Camera2D(
@@ -102,6 +107,11 @@ namespace BikeWars.Content.screens
             // Overlay
             _overlay = new Overlay(_debugFont, Game1.Instance.GraphicsDevice);
 
+            // HUD
+            hudTexture = content.Load<Texture2D>("assets/sprites/HUD/HUD_sheet");
+            hud = new HUD(hudTexture);
+
+
             // Player and Hobo Soundeffects
             player.LoadContent(content);
             hobo.LoadContent(content);
@@ -130,6 +140,20 @@ namespace BikeWars.Content.screens
 
             player.Update(gameTime, mouseWorldPos);
             _itemManager.Update(gameTime, player);
+            hpTestTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            // testing
+            if (hpTestTimer >= 1f) // jede Sekunde
+            {
+                player.Health -= 5;   // 5 HP verlieren
+                if (player.Health < 0)
+                    player.Health = 0;
+
+                hpTestTimer = 0f;
+            }
+            if (InputHandler.IsPressed(GameAction.DEBUG_HEAL))
+                player.Health = player.MaxHealth;
+
 
             // If the hobo hits a wall, push him back/sideways and start sidestepping.
             foreach (var box in _collisionManager.CollisionBoxes)
@@ -356,12 +380,16 @@ namespace BikeWars.Content.screens
             spriteBatch.End();
 
             spriteBatch.Begin();
-            spriteBatch.DrawString(_debugFont, $"Counter: {_counter}", new Vector2(20, 100), Color.Black);
-            spriteBatch.DrawString(_debugFont, "T=Save  L=Load  R=Reset counter", new Vector2(20, 125), Color.Black);
+            spriteBatch.DrawString(_debugFont, $"Counter: {_counter}", new Vector2(20, 160), Color.Black);
+            spriteBatch.DrawString(_debugFont, "T=Save  L=Load  R=Reset counter", new Vector2(20, 185), Color.Black);
             spriteBatch.End();
 
             spriteBatch.Begin();
             player.Inventory.Draw(spriteBatch, _pixel);
+            spriteBatch.End();
+
+            spriteBatch.Begin();
+            hud.Draw(spriteBatch, player);
             spriteBatch.End();
 
         }

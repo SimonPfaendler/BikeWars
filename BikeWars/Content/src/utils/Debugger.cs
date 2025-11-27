@@ -40,10 +40,11 @@ namespace BikeWars.Utilities
             string debugInfo = $"Player Position: X: {(int)_player.Transform.Position.X} Y: {(int)_player.Transform.Position.Y}\n" +
                                $"Player Velocity: {_player.CurrentSpeed}\n" +
                                $"Player Bounds: {_player.Transform.Size}\n" +  
-                               $"Player Sprint Cooldown: {(int)_player.CooldownTimer()}";
+                               $"Player Sprint Cooldown: {(int)_player.CooldownTimer()}\n" +
+                               $"Player Health: {_player.Health}";
 
 
-            spriteBatch.DrawString(_font, debugInfo, new Vector2(10, 10), Color.White);
+            spriteBatch.DrawString(_font, debugInfo, new Vector2(10, 600), Color.White);
         }
     }
 }

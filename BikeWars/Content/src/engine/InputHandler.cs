@@ -34,7 +34,8 @@ namespace BikeWars.Content.engine
         PAUSE,
         SHOOT,
         INTERACT,
-        SWITCH
+        SWITCH,
+        DEBUG_HEAL
     }
 
     public class KeyboardInfo
@@ -159,7 +160,8 @@ namespace BikeWars.Content.engine
             { GameAction.PAUSE, new[] { Keys.Escape, Keys.P } },
             {GameAction.SHOOT, new[] { Keys.G } },
             { GameAction.INTERACT, new[] {Keys.Q } },
-            { GameAction.SWITCH, new[] {Keys.X } }
+            { GameAction.SWITCH, new[] {Keys.X } },
+            { GameAction.DEBUG_HEAL, new[] {Keys.M } }
         };
 
         public static Dictionary<GameAction, Buttons[]> GamepadMap { get; } = new()

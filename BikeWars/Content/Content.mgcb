@@ -103,11 +103,23 @@
 /processorParam:Quality=Best
 /build:assets/sounds/Bike_Driving.mp3
 
+#begin assets/sounds/Game_music.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/Game_music.mp3
+
 #begin assets/sounds/HandgunClick.mp3
 /importer:Mp3Importer
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:assets/sounds/HandgunClick.mp3
+
+#begin assets/sounds/Menu_music.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/Menu_music.mp3
 
 #begin assets/sounds/SoftClick.mp3
 /importer:Mp3Importer
@@ -120,18 +132,6 @@
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:assets/sounds/Walking.mp3
-
-#begin assets/sounds/Game_music.mp3
-/importer:Mp3Importer
-/processor:SongProcessor
-/processorParam:Quality=Best
-/build:assets/sounds/Game_music.mp3
-
-#begin assets/sounds/Menu_music.mp3
-/importer:Mp3Importer
-/processor:SongProcessor
-/processorParam:Quality=Best
-/build:assets/sounds/Menu_music.mp3
 
 #begin assets/sprites/characters/character_atlas.png
 /importer:TextureImporter
@@ -156,6 +156,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:assets/sprites/chest_texture.png
+
+#begin assets/sprites/HUD/HUD_sheet.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/sprites/HUD/HUD_sheet.png
 
 #begin assets/sprites/projectiles/bullet.png
 /importer:TextureImporter
@@ -192,3 +204,4 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:assets/sprites/XP/xp_money_texture.png
+
