@@ -1,12 +1,10 @@
 using Microsoft.Xna.Framework;
-using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
-using Microsoft.Xna.Framework.Audio;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.managers; // SpriteAnimation
 
@@ -21,8 +19,6 @@ namespace BikeWars.Entities.Characters
         public float AttackSpeed { get; set; }
         public bool IsDead => Health <= 0;
 
-        private BoxCollider _collider { get; set; }
-        public BoxCollider Collider {get => _collider;}
         private EnemyMovement movement { get; set; }
 
         private readonly AudioService _audio;
@@ -38,7 +34,7 @@ namespace BikeWars.Entities.Characters
 
         private SpriteAnimation _currentAnimation;
 
-        public void LoadContent(ContentManager content)
+        public override void LoadContent(ContentManager content)
         {
             // Atlas laden
             _characterAtlas = content.Load<Texture2D>("assets/sprites/characters/character_atlas");
@@ -93,7 +89,7 @@ namespace BikeWars.Entities.Characters
 
         public override void UpdateCollider()
         {
-            _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.CHARACTER, this);
+            Collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.CHARACTER, this);
         }
 
         // 1x1 Texture to represent the enemy
@@ -113,11 +109,6 @@ namespace BikeWars.Entities.Characters
             movement = new EnemyMovement(canMove: true, isMoving: false);
             UpdateCollider();
         }
-        public override bool Intersects(ICollider collider)
-        {
-            return _collider.Intersects(collider);
-        }
-
         public override void TakeDamage(int amount)
         {
             Health -= amount;
@@ -183,7 +174,7 @@ namespace BikeWars.Entities.Characters
             UpdateCollider();
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public override void Draw(SpriteBatch spriteBatch)
         {
             if(IsDead)
                 return;

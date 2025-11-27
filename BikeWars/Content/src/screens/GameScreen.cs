@@ -3,11 +3,9 @@ using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.entities.items;
-using BikeWars.Content.entities.interfaces;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
 using BikeWars.Utilities;
-using System.Collections.Generic;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.src.screens.Overlay;
 using BikeWars.Content.src.utils.SaveLoadExample;
@@ -20,8 +18,6 @@ namespace BikeWars.Content.screens
     public class GameScreen : IScreen
     {
         private readonly ItemManager _itemManager;
-        private List<ProjectileBase> _testProjectiles;
-        private readonly Player player;
         private readonly Camera2D camera;
         private Rectangle worldBounds;
         private Overlay _overlay;
@@ -30,11 +26,8 @@ namespace BikeWars.Content.screens
         private Debugger _debugger;
         private int _counter = 0;
         private float _counterTimer = 0;
-        private Hobo hobo;
-        private BikeThief bikethief;
         private SpriteFont _font;
         private Texture2D _pixel;
-        private Vector2 mouseWorldPos;
         private const float SideNudgeStrength = 0.8f;
         private const float BackwardPushStrength = 3f;
         private const int CELL_SIZE = 32;
@@ -51,6 +44,7 @@ namespace BikeWars.Content.screens
         private float hpTestTimer = 0f;
 
         private CollisionManager _collisionManager;
+        private GameObjectManager _gameObjectManager;
 
         private bool _freelook; // Has to be optimized
 
@@ -64,19 +58,20 @@ namespace BikeWars.Content.screens
             _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
 
             _itemManager = new ItemManager();
-            _testProjectiles = new List<ProjectileBase>();
+            // _testProjectiles = new List<ProjectileBase>();
             _itemManager.AddItem(new Item(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
             _itemManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
             _itemManager.AddItem(new Xp_Beer(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
             _itemManager.AddItem(new Xp_Money(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
             _collisionManager = new CollisionManager(CELL_SIZE, SEARCH_RADIUS);
-
-            player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2 + 100), new Point(32, 32), _audioService);
-            player.ShotBullet += OnPlayerShotBullet;
-
-            hobo = new Hobo(new Vector2(worldBounds.Width / 2 + 100, worldBounds.Height / 2), new Point(32, 32), _audioService);
-            bikethief = new BikeThief(new Vector2(worldBounds.Width / 2 - 100, worldBounds.Height / 2 - 80), new Point(32, 32), _audioService);
-
+            Player player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2 + 100), new Point(32, 32), _audioService);
+            _gameObjectManager = new GameObjectManager(_contentManager, player, null);
+            for (int i = 0; i < 50; i++)
+            {
+                _gameObjectManager.AddCharacter(new Hobo(new Vector2(worldBounds.Width / 2 + i*10, worldBounds.Height / 2), new Point(32, 32), _audioService));
+            }
+            _gameObjectManager.AddCharacter(new BikeThief(new Vector2(worldBounds.Width / 2 - 100, worldBounds.Height / 2 - 80), new Point(32, 32), _audioService));
+            _gameObjectManager.Items = _itemManager.Items;
 
             Game1 game = Game1.Instance;
             camera = new Camera2D(
@@ -85,12 +80,12 @@ namespace BikeWars.Content.screens
                 worldBounds
             );
             _freelook = false;
-            camera.Position = player.Transform.Position;
+            camera.Position = _gameObjectManager.Player1.Transform.Position;
 
             // Create SaveLoad and load saved data
             var state = SaveLoad.LoadGame();
             _counter = state.Counter;
-            player.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
+            _gameObjectManager.Player1.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
             Console.WriteLine("Loaded saved position (or default if no file).");
         }
 
@@ -98,7 +93,7 @@ namespace BikeWars.Content.screens
         {
             // Font and Debugger
             _debugFont = content.Load<SpriteFont>("assets/fonts/Arial");
-            _debugger = new Debugger(_debugFont, player);
+            _debugger = new Debugger(_debugFont, _gameObjectManager.Player1);
 
             // Tiled Map
             _collisionManager.LoadContent(content);
@@ -111,16 +106,10 @@ namespace BikeWars.Content.screens
             hudTexture = content.Load<Texture2D>("assets/sprites/HUD/HUD_sheet");
             hud = new HUD(hudTexture);
 
-
-            // Player and Hobo Soundeffects
-            player.LoadContent(content);
-            hobo.LoadContent(content);
-            bikethief.LoadContent(content);
-
-            // Items
-            _itemManager.LoadContent(content);
+            _gameObjectManager.LoadContent(content);
             _font = content.Load<SpriteFont>("assets/fonts/Arial");
             _contentManager = content; // We need this to add it later to spawning entities. (Maybe there is another possible implementation)
+            _gameObjectManager._contentManager = content;
 
             _pixel = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
             _pixel.SetData(new[] { Color.White });
@@ -129,120 +118,34 @@ namespace BikeWars.Content.screens
         {
             _overlay.SetPaused(false, gameTime);
             InputHandler.Update();
-            _collisionManager.Update(player, hobo, bikethief, _itemManager.Items, _testProjectiles);
+            _collisionManager.Update(_gameObjectManager.Player1, _itemManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.Characters);
 
-            // For mouse position in world coordinates
-            var mouseState = InputHandler.Mouse;
-            Vector2 mouseScreenPos = new Vector2(mouseState.X, mouseState.Y);
-            // Invert the camera matrix to go from Screen -> World
-            Matrix inverseTransform = Matrix.Invert(camera.GetTransform());
-            mouseWorldPos = Vector2.Transform(mouseScreenPos, inverseTransform);
-
-            player.Update(gameTime, mouseWorldPos);
-            _itemManager.Update(gameTime, player);
+            _gameObjectManager.Update(gameTime, InputHandler.MakeMouseWorldPosByCamera(camera));
+            _itemManager.Update(gameTime, _gameObjectManager.Player1);
             hpTestTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             // testing
             if (hpTestTimer >= 1f) // jede Sekunde
             {
-                player.Health -= 5;   // 5 HP verlieren
-                if (player.Health < 0)
-                    player.Health = 0;
+                _gameObjectManager.Player1.Health -= 5;   // 5 HP verlieren
+                if (_gameObjectManager.Player1.Health < 0)
+                    _gameObjectManager.Player1.Health = 0;
 
                 hpTestTimer = 0f;
             }
             if (InputHandler.IsPressed(GameAction.DEBUG_HEAL))
-                player.Health = player.MaxHealth;
-
-
-            // If the hobo hits a wall, push him back/sideways and start sidestepping.
-            foreach (var box in _collisionManager.CollisionBoxes)
-            {
-                if (hobo.Intersects(box))
-                {
-                    var dir = hobo.Movement.Direction;
-
-                    if (dir != Vector2.Zero)
-                    {
-                        Vector2 rightNudge = new Vector2(dir.Y, -dir.X);
-
-                        if (rightNudge != Vector2.Zero)
-                        {
-                            rightNudge.Normalize();
-                            hobo.Transform.Position += rightNudge * SideNudgeStrength;
-                        }
-                    }
-
-                    hobo.UpdateCollider();
-
-                    if (hobo.Movement.State == EnemyState.Chasing)
-                    {
-                        hobo.Movement.StartSidestepping(hobo.Movement.Direction);
-                    }
-
-                    break;
-                }
-            }
-
-            // If the BikeThief hits a wall, push him back/sideways and start sidestepping.
-            foreach (var box in _collisionManager.CollisionBoxes)
-            {
-                if (bikethief.Intersects(box))
-                {
-                    var dir = bikethief.Movement.Direction;
-
-                    if (dir != Vector2.Zero)
-                    {
-                        Vector2 rightNudge = new Vector2(dir.Y, -dir.X);
-
-                        if (rightNudge != Vector2.Zero)
-                        {
-                            rightNudge.Normalize();
-                            bikethief.Transform.Position += rightNudge * SideNudgeStrength;
-                        }
-                    }
-
-                    bikethief.UpdateCollider();
-
-                    if (bikethief.Movement.State == EnemyState.Chasing)
-                    {
-                        bikethief.Movement.StartSidestepping(bikethief.Movement.Direction);
-                    }
-
-                    break;
-                }
-            }
-
-            for (int i = _testProjectiles.Count - 1; i >= 0; i--)
-            {
-                var p = _testProjectiles[i];
-                p.Update(gameTime);
-            }
+                _gameObjectManager.Player1.Health = _gameObjectManager.Player1.MaxHealth;
 
             _debugger.Update(gameTime);
             // Needs to be implemented elsewhere.
             if (InputHandler.IsPressed(GameAction.TOGGLE_CAMERA))
             {
                 _freelook = !_freelook;
-                player.Immobalize(_freelook);
+                _gameObjectManager.Player1.Immobalize(_freelook);
             }
-            camera.Update(gameTime, player.Transform.Position, _freelook);
+            camera.Update(gameTime, _gameObjectManager.Player1.Transform.Position, _freelook);
 
             _tiledMapRenderer.Update(gameTime);
-
-            // Give the movement logic the current hobo and player positions
-            hobo.Movement.PlayerPosition = player.Transform.Position;
-            hobo.Movement.EnemyPosition = hobo.Transform.Position;
-
-            // Give the movement logic the current player and thief position
-            bikethief.Movement.PlayerPosition = player.Transform.Position;
-            bikethief.Movement.EnemyPosition = bikethief.Transform.Position;
-
-            hobo.Update(gameTime);
-            bikethief.Update(gameTime);
-
-            KeepEnemiesApart();
-
             HandleCounter(gameTime);
             HandleSaveLoadInput();
 
@@ -269,31 +172,23 @@ namespace BikeWars.Content.screens
         private void HandleSaveLoadInput()
         {
             if (InputHandler.IsPressed(GameAction.SAVE))
-                SaveLoad.SaveGame(_counter, player.Transform, _testProjectiles, hobo.Transform, bikethief.Transform);
+                SaveLoad.SaveGame(_counter, _gameObjectManager.Player1.Transform, _gameObjectManager.Projectiles);
 
             if (InputHandler.IsPressed(GameAction.LOAD))
             {
-               var state = SaveLoad.LoadGame();
-               _counter = state.Counter;
+                var state = SaveLoad.LoadGame();
+                _counter = state.Counter;
                 _counterTimer = 0;
-                player.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
-
-                hobo.Transform.Position = new Vector2(state.HoboX, state.HoboY);
-                hobo.UpdateCollider();
-
-                bikethief.Transform.Position = new Vector2(state.BikeThiefX, state.BikeThiefY);
-                bikethief.UpdateCollider();
-
-                _testProjectiles = [];
+                _gameObjectManager.Player1.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
+                _gameObjectManager.Projectiles.Clear();
                 foreach (var p in state.Projectiles)
                 {
                     if (p.Type == SaveLoad.TYPES.BULLET)
                     {
-                        Bullet b = new Bullet(p.Position.ToVector2(), p.Size.ToPoint(), player); // TODO player doesn't make sense here
+                        Bullet b = new Bullet(p.Position.ToVector2(), p.Size.ToPoint(), _gameObjectManager.Player1); // TODO player doesn't make sense here
                         b.LoadContent(_contentManager);
-                        _testProjectiles.Add(b);
+                        _gameObjectManager.AddProjectile(b);
                     }
-
                 }
                 Console.WriteLine("Game loaded.");
             }
@@ -303,48 +198,8 @@ namespace BikeWars.Content.screens
                 _counter = 0;
                 _counterTimer = 0;
 
-                player.Transform.Position = new Vector2(worldBounds.Width / 2, worldBounds.Height / 2);
-                hobo.Transform.Position = new Vector2(worldBounds.Width / 2 - 60, worldBounds.Height / 2 + 30);
-                bikethief.Transform.Position = new Vector2(worldBounds.Width / 2 + 100, worldBounds.Height / 2 - 70);
+                _gameObjectManager.Player1.Transform.Position = new Vector2(worldBounds.Width / 2, worldBounds.Height / 2);
                 Console.WriteLine("Reset counter and player position.");
-            }
-        }
-
-        // keep the enemies from overlapping
-        private void KeepEnemiesApart()
-        {
-            if (hobo.IsDead || bikethief.IsDead)
-                return;
-
-            const float minDistance = 40f;
-            Vector2 posA = hobo.Transform.Position;
-            Vector2 posB = bikethief.Transform.Position;
-
-            Vector2 delta = posB - posA;
-            float distSq = delta.LengthSquared();
-
-            if (distSq == 0f)
-            {
-                // they are at exactly the same position, just give them a tiny offset
-                delta = new Vector2(1f, 0f);
-                distSq = 1f;
-            }
-
-            float minDistSq = minDistance * minDistance;
-
-            // Only push them apart if they're too close
-            if (distSq < minDistSq)
-            {
-                float dist = (float)Math.Sqrt(distSq);
-                Vector2 dir = delta / dist;
-
-                float overlap = minDistance - dist;
-
-                hobo.Transform.Position  -= dir * (overlap * 0.5f);
-                bikethief.Transform.Position += dir * (overlap * 0.5f);
-
-                hobo.UpdateCollider();
-                bikethief.UpdateCollider();
             }
         }
 
@@ -356,53 +211,20 @@ namespace BikeWars.Content.screens
             _tiledMapRenderer.Draw(camera.GetTransform());
 
             spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.GetTransform());
-            player.Draw(spriteBatch);
-            hobo.Draw(spriteBatch);
-            bikethief.Draw(spriteBatch);
+            _gameObjectManager.Draw(spriteBatch);
+            _overlay.DrawOnWorld(spriteBatch, _gameObjectManager.Player1);
 
-            foreach (var item in _itemManager.Items)
-            {
-                item.Draw(spriteBatch);
-            }
-            foreach (var p in _testProjectiles)
-            {
-                p.Draw(spriteBatch);
-            }
-            _overlay.DrawOnWorld(spriteBatch, player);
             spriteBatch.End();
-
             spriteBatch.Begin();
+
             _debugger.Draw(spriteBatch);
-            spriteBatch.End();
-
-            spriteBatch.Begin();
             _overlay.DrawOnScreen(spriteBatch, gameTime);
-            spriteBatch.End();
-
-            spriteBatch.Begin();
             spriteBatch.DrawString(_debugFont, $"Counter: {_counter}", new Vector2(20, 160), Color.Black);
             spriteBatch.DrawString(_debugFont, "T=Save  L=Load  R=Reset counter", new Vector2(20, 185), Color.Black);
+            _gameObjectManager.Player1.Inventory.Draw(spriteBatch, _pixel);
+            hud.Draw(spriteBatch, _gameObjectManager.Player1);
+
             spriteBatch.End();
-
-            spriteBatch.Begin();
-            player.Inventory.Draw(spriteBatch, _pixel);
-            spriteBatch.End();
-
-            spriteBatch.Begin();
-            hud.Draw(spriteBatch, player);
-            spriteBatch.End();
-
-        }
-
-        private void OnPlayerShotBullet()
-        {
-            Vector2 spawnPos = player.Transform.Position;
-            Vector2 direction = player.GazeDirection;
-
-            Bullet b = new Bullet(spawnPos, new Point(8, 8), player);
-            b.Movement.Direction = direction; // Set the movement direction
-            b.LoadContent(_contentManager);
-            _testProjectiles.Add(b);
         }
     }
 }

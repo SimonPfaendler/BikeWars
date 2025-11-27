@@ -14,7 +14,7 @@ public class CollisionManager
     private const string MAP = "assets/Map/Bike_Wars_Map";
     private const string TILED_MAP_LAYER = "Collision";
     private const int CELL_SIZE = 16;
-    private const float BOUNCE = 0.025f;
+    private const float BOUNCE = 0.001f;
 
     private SpatialHash _dynamicHash {get; set;}
     public SpatialHash DynamicHash {get => _dynamicHash; set => _dynamicHash = value;}
@@ -90,18 +90,20 @@ public class CollisionManager
         return new Vector2(0,0);
     }
 
-    private void Insertions(List<ItemBase> items, Player player, Hobo hobo, BikeThief bikeThief, List<ProjectileBase> projectiles)
+    private void Insertions(List<ItemBase> items, Player player, List<ProjectileBase> projectiles, List<CharacterBase> characters)
     {
         foreach (var c in items)
         {
             DynamicHash.Insert(c.Collider);
         }
         DynamicHash.Insert(player.Collider);
-        DynamicHash.Insert(hobo.Collider);
-        DynamicHash.Insert(bikeThief.Collider);
         foreach(ProjectileBase p in projectiles)
         {
             DynamicHash.Insert(p.Collider);
+        }
+        foreach(CharacterBase c in characters)
+        {
+            DynamicHash.Insert(c.Collider);
         }
     }
 
@@ -129,7 +131,7 @@ public class CollisionManager
             }
         }
     }
-    private void HandleDynamics(ICollider c, List<ICollider> dynamics, List<ItemBase> toRemoveItems, List<ProjectileBase> toRemoveProjectils)
+    private void HandleDynamics(ICollider c, List<ICollider> dynamics, List<ItemBase> toRemoveItems, List<ProjectileBase> toRemoveProjectils, List<CharacterBase> toRemoveCharacters)
     {
         foreach (var d in dynamics)
         {
@@ -175,6 +177,29 @@ public class CollisionManager
                             break;
                         }
                         ch.TakeDamage(p.Damage);
+                        // We need to change this. But it's ok for now
+                        if (ch is Player player)
+                        {
+                            if (player.IsDead)
+                            {
+                                toRemoveCharacters.Add(player);
+                            }
+                        }
+                        if (ch is Hobo hobo)
+                        {
+                            if (hobo.IsDead)
+                            {
+                                toRemoveCharacters.Add(hobo);
+                            }
+                        }
+
+                        if (ch is BikeThief bikeThief)
+                        {
+                            if (bikeThief.IsDead)
+                            {
+                                toRemoveCharacters.Add(bikeThief);
+                            }
+                        }
                         p.HasHit = true;
                         toRemoveProjectils.Add(p);
                     }
@@ -183,18 +208,19 @@ public class CollisionManager
         }
     }
 
-    public void Update(Player player, Hobo hobo, BikeThief bikeThief, List<ItemBase> items, List<ProjectileBase> projectiles)
+    public void Update(Player player, List<ItemBase> items, List<ProjectileBase> projectiles, List<CharacterBase> characters)
     {
         DynamicHash.Clear();
-        Insertions(items, player, hobo, bikeThief, projectiles);
+        Insertions(items, player, projectiles, characters);
         List<ProjectileBase> toRemoveProjectiles = new List<ProjectileBase>();
         List<ItemBase> toRemoveItems = new List<ItemBase>();
+        List<CharacterBase> toRemoveCharacters = new List<CharacterBase>();
         foreach (ICollider c in DynamicHash.AllColliders())
         {
             List<ICollider> statics = StaticHash.QueryNearby(c.Position);
             List<ICollider> dynamics = DynamicHash.QueryNearby(c.Position);
             HandleStatics(c, statics, toRemoveProjectiles);
-            HandleDynamics(c, dynamics, toRemoveItems, toRemoveProjectiles);
+            HandleDynamics(c, dynamics, toRemoveItems, toRemoveProjectiles, toRemoveCharacters);
         }
         foreach (ProjectileBase p in toRemoveProjectiles)
         {
@@ -204,5 +230,67 @@ public class CollisionManager
         {
             items.Remove(i);
         }
+        foreach (CharacterBase c in toRemoveCharacters)
+        {
+            characters.Remove(c);
+        }
     }
+    // This is old code to have some logic movement for the units
+    // If the hobo hits a wall, push him back/sideways and start sidestepping.
+            // foreach (var box in _collisionManager.CollisionBoxes)
+            // {
+            //     if (hobo.Intersects(box))
+            //     {
+            //         var dir = hobo.Movement.Direction;
+
+            //         if (dir != Vector2.Zero)
+            //         {
+            //             Vector2 rightNudge = new Vector2(dir.Y, -dir.X);
+
+            //             if (rightNudge != Vector2.Zero)
+            //             {
+            //                 rightNudge.Normalize();
+            //                 hobo.Transform.Position += rightNudge * SideNudgeStrength;
+            //             }
+            //         }
+
+            //         hobo.UpdateCollider();
+
+            //         if (hobo.Movement.State == EnemyState.Chasing)
+            //         {
+            //             hobo.Movement.StartSidestepping(hobo.Movement.Direction);
+            //         }
+
+            //         break;
+            //     }
+            // }
+
+            // If the BikeThief hits a wall, push him back/sideways and start sidestepping.
+            // foreach (var box in _collisionManager.CollisionBoxes)
+            // {
+            //     if (bikethief.Intersects(box))
+            //     {
+            //         var dir = bikethief.Movement.Direction;
+
+            //         if (dir != Vector2.Zero)
+            //         {
+            //             Vector2 rightNudge = new Vector2(dir.Y, -dir.X);
+
+            //             if (rightNudge != Vector2.Zero)
+            //             {
+            //                 rightNudge.Normalize();
+            //                 bikethief.Transform.Position += rightNudge * SideNudgeStrength;
+            //             }
+            //         }
+
+            //         bikethief.UpdateCollider();
+
+            //         if (bikethief.Movement.State == EnemyState.Chasing)
+            //         {
+            //             bikethief.Movement.StartSidestepping(bikethief.Movement.Direction);
+            //         }
+
+            //         break;
+            //     }
+            // }
 }

@@ -1,6 +1,8 @@
 ﻿using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.engine;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.entities.interfaces;
 public abstract class CharacterBase : ICharacter
@@ -12,11 +14,17 @@ public abstract class CharacterBase : ICharacter
     public float Speed;
     public float SprintSpeed;
     public float CurrentSpeed { get; set; }
+    private BoxCollider _collider { get; set; }
+    public BoxCollider Collider {get => _collider; set => _collider = value;}
 
-    private ICollider _collider { get; set; }
     public abstract void SetLastTransform();
     public abstract void UpdateCollider();
     public abstract void Update(GameTime gameTime); // Use this to update the logic like where the position is or resize the collision box
-    public abstract bool Intersects(ICollider other);
+    public abstract void Draw(SpriteBatch spriteBatch);
+    public abstract void LoadContent(ContentManager contentManager);
+    public bool Intersects(ICollider other)
+    {
+        return Collider.Intersects(other);
+    }
     public abstract void TakeDamage(int amount);
 }

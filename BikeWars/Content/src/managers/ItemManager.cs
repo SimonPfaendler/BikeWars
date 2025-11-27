@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using BikeWars.Content.engine;
 using BikeWars.Content.entities.interfaces;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Entities.Characters;
 namespace BikeWars.Content.managers;
@@ -15,14 +14,6 @@ public class ItemManager
         _items.Add(item);
     }
 
-    public void LoadContent(ContentManager content)
-    {
-        foreach (var item in _items)
-        {
-            item.LoadContent(content);
-        }
-    }
-
     public void Update(GameTime gameTime, Player player)
     // if a Player collides with a none Inventory, pickable Item it gets collect.
     // if it is a pickable item and player is pressing q it gets collected otherwise not
@@ -31,15 +22,6 @@ public class ItemManager
         {
             var item = _items[i];
             bool collision = player.Intersects(item.Collider);
-
-            // if (!item.InventoryItem && item is IPickable)
-            // {
-            //     if (collision)
-            //     {
-            //         _items.RemoveAt(i);
-            //         continue;
-            //     }
-            // }
 
             if (item.InventoryItem)
             {
@@ -52,7 +34,6 @@ public class ItemManager
                     }
                 }
             }
-
             item.Update(gameTime);
         }
     }

@@ -1,12 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
-using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
-using Microsoft.Xna.Framework.Audio;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.managers;
 
@@ -14,7 +12,6 @@ namespace BikeWars.Entities.Characters
 {
     public class BikeThief : CharacterBase, ICombat
     {
-
         public int Health { get; set; }
         public int MaxHealth { get; set; }
         public int AttackDamage { get; set; }
@@ -22,8 +19,6 @@ namespace BikeWars.Entities.Characters
         public bool IsDead => Health <= 0;
 
         private readonly AudioService _audio;
-        private BoxCollider _collider { get; set; }
-        public BoxCollider Collider {get => _collider;}
         private EnemyMovement movement { get; set; }
 
         public EnemyMovement Movement => movement;
@@ -37,7 +32,7 @@ namespace BikeWars.Entities.Characters
 
         private SpriteAnimation _currentAnimation;
 
-        public void LoadContent(ContentManager content)
+        public override void LoadContent(ContentManager content)
         {
             // Atlas laden (Pfad ggf. anpassen)
             _characterAtlas = content.Load<Texture2D>("assets/sprites/characters/character_atlas");
@@ -111,7 +106,7 @@ namespace BikeWars.Entities.Characters
 
         public override void UpdateCollider()
         {
-            _collider = new BoxCollider(
+            Collider = new BoxCollider(
                 new Vector2(Transform.Position.X, Transform.Position.Y),
                 Transform.Size.X,
                 Transform.Size.Y,
@@ -136,11 +131,6 @@ namespace BikeWars.Entities.Characters
             Speed = 100f;
             movement = new EnemyMovement(canMove: true, isMoving: false);
             UpdateCollider();
-        }
-
-        public override bool Intersects(ICollider collider)
-        {
-            return _collider.Intersects(collider);
         }
 
         public override void TakeDamage(int amount)
@@ -213,7 +203,7 @@ namespace BikeWars.Entities.Characters
             UpdateCollider();
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public override void Draw(SpriteBatch spriteBatch)
         {
             if (IsDead)
                 return;

@@ -1,17 +1,11 @@
 ﻿using System;
-using System.Diagnostics.Metrics;
 using System.IO;
 using System.Text.Json;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using BikeWars.Content.engine;
-using BikeWars.Content.entities;
-using BikeWars.Content.src.screens;
 using System.Collections.Generic;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.entities.items;
-using BikeWars.Entities.Characters;
 
 namespace BikeWars.Content.src.utils.SaveLoadExample;
 
@@ -92,8 +86,7 @@ public static class SaveLoad
 
 
     // save the counter in a JSON file
-    public static void SaveGame(int counter, Transform playerPosition, List<ProjectileBase> projectiles, Transform hoboPosition,
-        Transform bikeThiefPosition)
+    public static void SaveGame(int counter, Transform playerPosition, List<ProjectileBase> projectiles)
     {
         try
         {
@@ -104,10 +97,6 @@ public static class SaveLoad
                 PlayerX = playerPosition.Position.X,
                 PlayerY = playerPosition.Position.Y,
                 Projectiles = MakeProjectileSaveList(projectiles),
-                HoboX = hoboPosition.Position.X,
-                HoboY = hoboPosition.Position.Y,
-                BikeThiefX = bikeThiefPosition.Position.X,
-                BikeThiefY = bikeThiefPosition.Position.Y,
             };
             string json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
 

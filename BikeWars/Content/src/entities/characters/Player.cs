@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
-using Microsoft.Xna.Framework.Audio;
 using BikeWars.Content.entities.interfaces;
 using System.Collections.Generic;
 using BikeWars.Content.engine.Audio;
@@ -28,10 +27,8 @@ namespace BikeWars.Entities.Characters
         public int AttackDamage { get; set; }
         public float AttackSpeed { get; set; }
         public Inventory Inventory { get; private set; }
-        public bool IsDead => Health <= 0;
 
-        private BoxCollider _collider { get; set; }
-        public BoxCollider Collider {get => _collider;}
+        public bool IsDead => Health <= 0;
         private PlayerMovement movement { get; set; }
         private CooldownWithDuration sprint { get; }
 
@@ -67,7 +64,7 @@ namespace BikeWars.Entities.Characters
         private const float GhostSpawnInterval = 0.05f; // alle 0,05s ein neues Ghost
         private const float GhostLifeTime = 0.1f;
 
-        public void LoadContent(ContentManager content)
+        public override void LoadContent(ContentManager content)
         {
             _characterAtlas = content.Load<Texture2D>("assets/sprites/characters/character_atlas");
             if (pixel == null)
@@ -113,7 +110,7 @@ namespace BikeWars.Entities.Characters
 
         public override void UpdateCollider()
         {
-            _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.PLAYER, this);
+            Collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.PLAYER, this);
         }
 
         // 1x1 Texture to represent the player
@@ -155,10 +152,6 @@ namespace BikeWars.Entities.Characters
             _audio = audio;
             UpdateCollider();
         }
-        public override bool Intersects(ICollider collider)
-        {
-            return _collider.Intersects(collider);
-        }
 
         public override void Update(GameTime gameTime)
         {
@@ -168,7 +161,6 @@ namespace BikeWars.Entities.Characters
         public void Update(GameTime gameTime, Vector2 mousePos)
         {
             // TODO THIS IS NOW ONLY FOR TESTING AND SHOWING
-
             if (InputHandler.IsPressed(GameAction.SWITCH))
             {
                 if (movement.CurrentMovement.GetType() == typeof(BicycleMovement))
@@ -233,9 +225,6 @@ namespace BikeWars.Entities.Characters
             {
                 direction.Normalize();
                 _facingDirection = direction; // Update facing direction
-                // Reibung
-                // Speed *= Friction;
-                // Transform.Position += direction * CurrentSpeed * delta;
                 if (sprint.IsActive)
                 {
                     Transform.Position += direction * CurrentSpeed * delta;
@@ -351,7 +340,7 @@ namespace BikeWars.Entities.Characters
             }
             UpdateCollider();
         }
-        public void Draw(SpriteBatch spriteBatch)
+        public override void Draw(SpriteBatch spriteBatch)
         {
             foreach (var ghost in _ghostTrail)
             {

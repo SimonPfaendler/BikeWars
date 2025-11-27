@@ -38,6 +38,13 @@ namespace BikeWars.Content.engine
         DEBUG_HEAL
     }
 
+    public enum MouseButton
+    {
+        Left,
+        Right,
+        Middle
+    }
+
     public class KeyboardInfo
     {
         private KeyboardState _current;
@@ -76,23 +83,30 @@ namespace BikeWars.Content.engine
         public int Y => _current.Y;
 
         public Point Delta => _current.Position - _previous.Position;
-
-        public bool LeftHeld => _current.LeftButton == ButtonState.Pressed;
-        public bool LeftPressed => _current.LeftButton == ButtonState.Pressed && _previous.LeftButton == ButtonState.Released;
-
-        public bool RightHeld => _current.RightButton == ButtonState.Pressed;
-        public bool RightPressed => _current.RightButton == ButtonState.Pressed && _previous.RightButton == ButtonState.Released;
-
         public int ScrollDelta => _current.ScrollWheelValue - _previous.ScrollWheelValue;
 
+        // Generic button handling
+        public bool Held(MouseButton button) => button switch
+        {
+            MouseButton.Left   => _current.LeftButton   == ButtonState.Pressed,
+            MouseButton.Right  => _current.RightButton  == ButtonState.Pressed,
+            MouseButton.Middle => _current.MiddleButton == ButtonState.Pressed,
+            _ => false
+        };
+
+        public bool Pressed(MouseButton button) => button switch
+        {
+            MouseButton.Left   => _current.LeftButton   == ButtonState.Pressed && _previous.LeftButton   == ButtonState.Released,
+            MouseButton.Right  => _current.RightButton  == ButtonState.Pressed && _previous.RightButton  == ButtonState.Released,
+            MouseButton.Middle => _current.MiddleButton == ButtonState.Pressed && _previous.MiddleButton == ButtonState.Released,
+            _ => false
+        };
 
         public void Update()
         {
             _previous = _current;
             _current = Mouse.GetState();
         }
-
-
     }
 
     public class GamePadInfo
@@ -133,7 +147,6 @@ namespace BikeWars.Content.engine
         public bool Held(Buttons button) => _current.IsButtonDown(button);
         public bool Pressed(Buttons button) => _current.IsButtonDown(button) && !_previous.IsButtonDown(button);
 
-
     }
 
     public static class InputHandler
@@ -158,10 +171,14 @@ namespace BikeWars.Content.engine
             { GameAction.ESC, new[] {Keys.Escape } },
             { GameAction.SPRINT, new[] { Keys.LeftShift, Keys.RightShift } },
             { GameAction.PAUSE, new[] { Keys.Escape, Keys.P } },
-            {GameAction.SHOOT, new[] { Keys.G } },
+            { GameAction.SHOOT, new[] {Keys.None } },
             { GameAction.INTERACT, new[] {Keys.Q } },
             { GameAction.SWITCH, new[] {Keys.X } },
             { GameAction.DEBUG_HEAL, new[] {Keys.M } }
+        };
+        public static Dictionary<GameAction, MouseButton[]> MouseMapping { get; } = new()
+        {
+            { GameAction.SHOOT, new[] { MouseButton.Left } }
         };
 
         public static Dictionary<GameAction, Buttons[]> GamepadMap { get; } = new()
@@ -175,7 +192,7 @@ namespace BikeWars.Content.engine
             { GameAction.ESC, new[] { Buttons.B} },
             { GameAction.SPRINT, new[] { Buttons.LeftTrigger} },
             { GameAction.PAUSE, new[] { Buttons.Start} },
-            {GameAction.SHOOT, new[] { Buttons.RightTrigger } },
+            { GameAction.SHOOT, new[] { Buttons.RightTrigger } },
             { GameAction.INTERACT, new[] { Buttons.X } }
             /* INTERACT should be A not X, but X is already used and I m not sure for what.
              Should be fixed later*/
@@ -191,7 +208,14 @@ namespace BikeWars.Content.engine
 
         public static bool IsHeld(GameAction action)
         {
-
+            if (MouseMapping.TryGetValue(action, out var mouseButtons))
+            {
+                foreach (var mb in mouseButtons)
+                {
+                    if (Mouse.Held(mb))
+                        return true;
+                }
+            }
             if (KeyMapping.TryGetValue(action, out var keys))
             {
                 foreach (var key in keys)
@@ -199,7 +223,6 @@ namespace BikeWars.Content.engine
                     if (Keyboard.IsKeyHeld(key))
                         return true;
                 }
-
             }
             if (GamepadMap.TryGetValue(action, out var buttons))
             {
@@ -215,6 +238,16 @@ namespace BikeWars.Content.engine
 
         public static bool IsPressed(GameAction action)
         {
+
+            if (MouseMapping.TryGetValue(action, out var mouseButtons))
+            {
+                foreach (var mb in mouseButtons)
+                {
+                    if (Mouse.Pressed(mb))
+                        return true;
+                }
+            }
+
             if (KeyMapping.TryGetValue(action, out var keys))
             {
                 foreach (var key in keys)
@@ -222,7 +255,6 @@ namespace BikeWars.Content.engine
                     if (Keyboard.IsKeyPressed(key))
                         return true;
                 }
-
             }
             if (GamepadMap.TryGetValue(action, out var buttons))
             {
@@ -247,6 +279,14 @@ namespace BikeWars.Content.engine
 
             }
             return false;
+        }
+        public static Vector2 MakeMouseWorldPosByCamera(Camera2D camera)
+        {
+            // Invert the camera matrix to go from Screen -> World
+            return Vector2.Transform(
+                new Vector2(Mouse.X, Mouse.Y),
+                Matrix.Invert(camera.GetTransform())
+            );
         }
     }
 }
