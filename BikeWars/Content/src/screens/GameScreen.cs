@@ -58,7 +58,6 @@ namespace BikeWars.Content.screens
             _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
 
             _itemManager = new ItemManager();
-            // _testProjectiles = new List<ProjectileBase>();
             _itemManager.AddItem(new Item(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
             _itemManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
             _itemManager.AddItem(new Xp_Beer(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
