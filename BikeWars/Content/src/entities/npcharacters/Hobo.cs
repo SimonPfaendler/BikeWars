@@ -8,7 +8,8 @@ using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework.Audio;
 using BikeWars.Content.entities.interfaces;
-using BikeWars.Content.managers; // SpriteAnimation
+using BikeWars.Content.managers;
+using BikeWars.Content.utils;
 
 namespace BikeWars.Entities.Characters
 {
@@ -44,44 +45,17 @@ namespace BikeWars.Entities.Characters
             _characterAtlas = content.Load<Texture2D>("assets/sprites/characters/character_atlas");
 
             // idle
-            // e1_drunkdude_standing.png "frame": {"x":0,"y":0,"w":40,"h":50}
-            var idleFrames = new List<Rectangle>
-            {
-                new Rectangle(0, 0, 40, 50)
-            };
+            // e1_drunkdude_standing.png 
+            var idleFrames = SpriteFrameDictionary.GetFrames("Hobo_Idle");
             _idleAnimation = new SpriteAnimation(_characterAtlas, idleFrames, 0.4f);
 
             // e1_drunkdude_walking_left.png
-
-            int leftBaseX = 64;
-            int leftBaseY = 128;
-            int leftW = 96;
-            int leftH = 127;
-            int leftFrameW = leftW / 2;
-            int leftFrameH = leftH / 2;
-
-            var leftFrames = new List<Rectangle>
-            {
-                new Rectangle(leftBaseX + 0 * leftFrameW, leftBaseY, leftFrameW, leftFrameH),
-                new Rectangle(leftBaseX + 1 * leftFrameW, leftBaseY, leftFrameW, leftFrameH)
-            };
+            var leftFrames = SpriteFrameDictionary.GetFrames("Hobo_WalkLeft");
             _walkLeftAnimation = new SpriteAnimation(_characterAtlas, leftFrames, 0.15f);
 
 
-            // e1_drunkdude_walking_right.png  "frame": {"x":296,"y":0,"w":80,"h":108}
-
-            int rightBaseX = 190;
-            int rightBaseY = 0;
-            int rightW = 80;
-            int rightH = 108;
-            int rightFrameW = rightW / 2;
-            int rightFrameH = rightH / 2;
-
-            var rightFrames = new List<Rectangle>
-            {
-                new Rectangle(rightBaseX + 0 * rightFrameW, rightBaseY, rightFrameW, rightFrameH),
-                new Rectangle(rightBaseX + 1 * rightFrameW, rightBaseY, rightFrameW, rightFrameH)
-            };
+            // e1_drunkdude_walking_right.png 
+            var rightFrames = SpriteFrameDictionary.GetFrames("Hobo_WalkRight");
             _walkRightAnimation = new SpriteAnimation(_characterAtlas, rightFrames, 0.15f);
 
             // Startzustand: Idle
