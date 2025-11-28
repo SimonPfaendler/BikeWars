@@ -10,13 +10,32 @@ namespace BikeWars.Content.engine.Audio
     public class SoundManager
     {
         private readonly Dictionary<string, SoundEffect> _sfx = new();
-        private readonly List<SoundEffectInstance> _activeInstances = new();
+        private readonly List<ManagedInstance> _activeInstances = new();
 
         // dictionary for looped instances (walking, driving, etc.)
         private readonly Dictionary<string, SoundEffectInstance> _loopInstances = new();
 
         public float MasterVolume { get; set; } = 1f;
         public float SfxVolume { get; set; } = 1f;
+        
+        private const int MaxTotalSounds = 15;
+        private const int MaxPerType = 3;
+        
+        private int ActiveSoundCount =>
+            _activeInstances.Count + _loopInstances.Count;
+
+        // internal wrapper to store id + instance
+        private class ManagedInstance
+        {
+            public string Id;
+            public SoundEffectInstance Instance;
+
+            public ManagedInstance(string id, SoundEffectInstance instance)
+            {
+                Id = id;
+                Instance = instance;
+            }
+        }
 
         // Load: used only once when starting the game: paths = ID -> content path
         public void Load(ContentManager content, Dictionary<string, string> paths)
@@ -35,17 +54,56 @@ namespace BikeWars.Content.engine.Audio
                 }
             }
         }
+        
+        private int CountInstancesOf(string id)
+        {
+            int count = _activeInstances.Count(i => i.Id == id);
+            if (_loopInstances.ContainsKey(id))
+                count++;
+            return count;
+        }
+
+        private void EnforceLimits()
+        {
+            // While we already reached the global capacity, drop oldest one-shot instances (FIFO).
+            while (ActiveSoundCount >= MaxTotalSounds)
+            {
+                if (_activeInstances.Count > 0)
+                {
+                    var oldest = _activeInstances[0];
+                    try
+                    {
+                        oldest.Instance.Stop();
+                        oldest.Instance.Dispose();
+                    }
+                    catch { }
+                    _activeInstances.RemoveAt(0);
+                }
+                else
+                {
+                    // if there are no one-shot instances to drop, we can't free more (loop instances are kept)
+                    break;
+                }
+            }
+        }
 
         // one-shot Play
         public void Play(string id)
         {
-            if (!_sfx.TryGetValue(id, out var sfx) || sfx == null) return;
+            if (!_sfx.TryGetValue(id, out var sfx) || sfx == null)
+                return;
+
+            if (CountInstancesOf(id) >= MaxPerType)
+                return;
+
+            EnforceLimits();
 
             var inst = sfx.CreateInstance();
             inst.Volume = Math.Clamp(MasterVolume * SfxVolume, 0f, 1f);
             inst.IsLooped = false;
             inst.Play();
-            _activeInstances.Add(inst);
+
+            _activeInstances.Add(new ManagedInstance(id, inst));
         }
 
         // Looping sound
@@ -53,16 +111,21 @@ namespace BikeWars.Content.engine.Audio
         {
             if (!_sfx.TryGetValue(id, out var sfx) || sfx == null)
                 return;
+            
+            if (CountInstancesOf(id) >= MaxPerType)
+                return;
+
+            EnforceLimits();
 
             if (_loopInstances.TryGetValue(id, out var existing))
             {
                 if (existing.State == SoundState.Stopped)
                 {
-                    existing.Dispose();
+                    try { existing.Dispose(); } catch { }
                     _loopInstances.Remove(id);
                 }
                 else
-                    return;
+                    return; // already playing
             }
 
             var inst = sfx.CreateInstance();
@@ -72,18 +135,15 @@ namespace BikeWars.Content.engine.Audio
             _loopInstances[id] = inst;
         }
 
-        
         public void StopLoop(string id)
         {
             if (_loopInstances.TryGetValue(id, out var inst))
             {
-                inst.Stop();
-                inst.Dispose();
+                try { inst.Stop(); inst.Dispose(); } catch { }
                 _loopInstances.Remove(id);
             }
         }
 
-        
         public void PauseLoop(string id)
         {
             if (_loopInstances.TryGetValue(id, out var inst))
@@ -92,7 +152,6 @@ namespace BikeWars.Content.engine.Audio
                     inst.Pause();
             }
         }
-
 
         public void ResumeLoop(string id)
         {
@@ -109,79 +168,97 @@ namespace BikeWars.Content.engine.Audio
         public void PauseAll()
         {
             // One-shot sounds
-            foreach (var inst in _activeInstances)
+            foreach (var managed in _activeInstances)
             {
-                if (inst.State == SoundState.Playing)
-                    inst.Pause();
+                try
+                {
+                    if (managed.Instance.State == SoundState.Playing)
+                        managed.Instance.Pause();
+                }
+                catch { }
             }
 
             // Loop sounds
             foreach (var inst in _loopInstances.Values)
             {
-                if (inst.State == SoundState.Playing)
-                    inst.Pause();
+                try
+                {
+                    if (inst.State == SoundState.Playing)
+                        inst.Pause();
+                }
+                catch { }
             }
         }
         
         public void ResumeAll()
         {
             // One-shot sounds
-            foreach (var inst in _activeInstances)
+            foreach (var managed in _activeInstances)
             {
-                if (inst.State == SoundState.Paused)
-                    inst.Resume();
+                try
+                {
+                    if (managed.Instance.State == SoundState.Paused)
+                        managed.Instance.Resume();
+                }
+                catch { }
             }
 
             // Loop sounds
             foreach (var inst in _loopInstances.Values)
             {
-                if (inst.State == SoundState.Paused)
-                    inst.Resume();
+                try
+                {
+                    if (inst.State == SoundState.Paused)
+                        inst.Resume();
+                }
+                catch { }
             }
         }
 
-
-
-
-        
         public void Update(GameTime gameTime)
         {
             // remove stopped one-shot sounds
-            _activeInstances.RemoveAll(i =>
+            _activeInstances.RemoveAll(mi =>
             {
-                if (i.State == SoundState.Stopped)
+                try
                 {
-                    i.Dispose();
-                    return true;
+                    if (mi.Instance.State == SoundState.Stopped)
+                    {
+                        mi.Instance.Dispose();
+                        return true;
+                    }
                 }
+                catch { }
                 return false;
             });
 
-            // Update Volumes for Loop-Instruments
+            // Update Volumes and cleanup loop instances
             foreach (var kv in _loopInstances.ToList())
             {
                 var inst = kv.Value;
                 if (inst.State == SoundState.Stopped)
                 {
-                    inst.Dispose();
+                    try { inst.Dispose(); } catch { }
                     _loopInstances.Remove(kv.Key);
                 }
                 else
                 {
-                    inst.Volume = Math.Clamp(MasterVolume * SfxVolume, 0f, 1f);
+                    try { inst.Volume = Math.Clamp(MasterVolume * SfxVolume, 0f, 1f); } catch { }
                 }
             }
         }
         
         public void StopAll()
         {
-            foreach (var inst in _activeInstances)
+            // Stop & dispose one-shot instances
+            foreach (var managed in _activeInstances)
             {
-                try { inst.Stop(); inst.Dispose(); } catch { }
+                try { managed.Instance.Stop(); managed.Instance.Dispose(); } catch { }
             }
             _activeInstances.Clear();
 
-            foreach (var kv in _loopInstances)
+            // Stop & dispose loop instances
+            foreach (var kv in _loopInstances.ToList())
             {
                 try { kv.Value.Stop(); kv.Value.Dispose(); } catch { }
             }
