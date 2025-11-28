@@ -119,7 +119,7 @@ namespace BikeWars.Entities.Characters
             MaxHealth = 40;
             Health = MaxHealth;
             AttackDamage = 5;
-            AttackSpeed = 2f;
+            AttackCooldown = 2f;
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 100f;
@@ -140,12 +140,16 @@ namespace BikeWars.Entities.Characters
         }
         public override void Attack(ICombat target)
         {
+            if (!CanAttack()) return;
             target.TakeDamage(AttackDamage);
+            ResetAttackCooldown(); 
         }
 
         public override void Update(GameTime gameTime)
         {
             movement.HandleMovement(gameTime);
+
+            UpdateAttackCooldown(gameTime);
 
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
 

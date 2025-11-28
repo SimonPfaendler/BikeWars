@@ -19,8 +19,29 @@ public abstract class CharacterBase : ICharacter, ICombat
     public int Health { get; set; }
     public int MaxHealth { get; set; }
     public int AttackDamage { get; set; }
-    public float AttackSpeed { get; set; }
+    public float AttackCooldown { get; set; }
+    private float _attackCooldownTimer = 0f;
     public bool IsDead => Health <= 0;
+
+    public void UpdateAttackCooldown(GameTime gameTime)
+    {
+        if (_attackCooldownTimer > 0f)
+        {
+            _attackCooldownTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (_attackCooldownTimer < 0f)
+                _attackCooldownTimer = 0f;
+        }
+    }
+
+    public bool CanAttack()
+    {
+        return _attackCooldownTimer <= 0f;
+    }
+
+    public void ResetAttackCooldown()
+    {
+        _attackCooldownTimer = AttackCooldown;
+    }
 
     public abstract void TakeDamage(int amount);
     public abstract void Attack(ICombat target);

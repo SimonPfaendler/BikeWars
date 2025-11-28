@@ -133,15 +133,6 @@ namespace BikeWars.Content.screens
             _itemManager.Update(gameTime, _gameObjectManager.Player1);
             hpTestTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            // testing
-            if (hpTestTimer >= 1f) // jede Sekunde
-            {
-                _gameObjectManager.Player1.Health -= 5;   // 5 HP verlieren
-                if (_gameObjectManager.Player1.Health < 0)
-                    _gameObjectManager.Player1.Health = 0;
-
-                hpTestTimer = 0f;
-            }
             if (InputHandler.IsPressed(GameAction.DEBUG_HEAL))
                 _gameObjectManager.Player1.Health = _gameObjectManager.Player1.MaxHealth;
 

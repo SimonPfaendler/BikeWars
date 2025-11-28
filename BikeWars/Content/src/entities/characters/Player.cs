@@ -126,15 +126,17 @@ namespace BikeWars.Entities.Characters
 
         public override void Attack(ICombat target)
         {
+            if (!CanAttack()) return;
             target.TakeDamage(AttackDamage);
+            ResetAttackCooldown(); 
         }
 
         public Player(Vector2 start, Point size, AudioService audio)
         {
-            MaxHealth = 999999;
+            MaxHealth = 1000;
             Health = MaxHealth;
             AttackDamage = 10;
-            AttackSpeed = 1f;
+            AttackCooldown = 2f;
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 200f;
@@ -153,6 +155,8 @@ namespace BikeWars.Entities.Characters
 
         public void Update(GameTime gameTime, Vector2 mousePos)
         {
+            UpdateAttackCooldown(gameTime);
+
             // TODO THIS IS NOW ONLY FOR TESTING AND SHOWING
             if (InputHandler.IsPressed(GameAction.SWITCH))
             {
