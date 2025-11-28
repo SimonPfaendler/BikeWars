@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.entities.interfaces;
-public abstract class CharacterBase : ICharacter
+public abstract class CharacterBase : ICharacter, ICombat
 {
     private Transform _transform { get; set; }
     public Transform Transform { get => _transform;  set => _transform = value; }
@@ -16,6 +16,14 @@ public abstract class CharacterBase : ICharacter
     public float CurrentSpeed { get; set; }
     private BoxCollider _collider { get; set; }
     public BoxCollider Collider {get => _collider; set => _collider = value;}
+    public int Health { get; set; }
+    public int MaxHealth { get; set; }
+    public int AttackDamage { get; set; }
+    public float AttackSpeed { get; set; }
+    public bool IsDead => Health <= 0;
+
+    public abstract void TakeDamage(int amount);
+    public abstract void Attack(ICombat target);
 
     public abstract void SetLastTransform();
     public abstract void UpdateCollider();
@@ -26,5 +34,4 @@ public abstract class CharacterBase : ICharacter
     {
         return Collider.Intersects(other);
     }
-    public abstract void TakeDamage(int amount);
 }

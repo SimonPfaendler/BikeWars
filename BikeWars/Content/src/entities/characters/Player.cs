@@ -19,16 +19,9 @@ using BikeWars.Content.managers;
 // ============================================================
 namespace BikeWars.Entities.Characters
 {
-    public class Player : CharacterBase, ICombat
+    public class Player : CharacterBase
     {
-
-        public int Health { get; set; }
-        public int MaxHealth { get; set; }
-        public int AttackDamage { get; set; }
-        public float AttackSpeed { get; set; }
         public Inventory Inventory { get; private set; }
-
-        public bool IsDead => Health <= 0;
         private PlayerMovement movement { get; set; }
         private CooldownWithDuration sprint { get; }
 
@@ -131,14 +124,14 @@ namespace BikeWars.Entities.Characters
             if(Health < 0) Health = 0;
         }
 
-        public void Attack(ICombat target)
+        public override void Attack(ICombat target)
         {
             target.TakeDamage(AttackDamage);
         }
 
         public Player(Vector2 start, Point size, AudioService audio)
         {
-            MaxHealth = 100;
+            MaxHealth = 999999;
             Health = MaxHealth;
             AttackDamage = 10;
             AttackSpeed = 1f;

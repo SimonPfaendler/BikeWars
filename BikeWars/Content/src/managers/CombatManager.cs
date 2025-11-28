@@ -14,56 +14,42 @@ namespace BikeWars.Content.managers;
 /// Reacts to events from collision manager
 public class CombatManager
 {
-    public Action<CharacterBase> OnCharacterDeath; // Event for deah
-    public Action<Player, ItemBase> OnItemPickup;   // Event for item pickup
-
-    public CombatManager(CollisionManager collisionManager)
+    public CombatManager()
     {
-        // Register to events from collision manager
-        collisionManager.OnProjectileHit += HandleProjectileHit;
-        collisionManager.OnItemPickup += HandleItemPickup;
-        collisionManager.OnCharacterCollision += HandleCharacterCollision;
     }
 
-    private void HandleProjectileHit(CharacterBase target, ProjectileBase projectile)
+    // Projectile hits a character
+    public void HandleProjectileHit(CharacterBase target, ProjectileBase projectile)
     {
         if (target.IsDead) return;
         if (target == projectile.Owner) return;
 
+        // Apply Damage
         target.TakeDamage(projectile.Damage);
-
         projectile.HasHit = true;
-        // projectile.MarkForRemoval = true;
 
-        if (target.Health <= 0) HandleDeath(target);
+        // if (target.Health <= 0) HandleDeath(target);
     }
 
-    private void HandleItemPickup(Player player, ItemBase item)
-    {
-        // player.Inventory?.Add(item);
-        // item.MarkForRemoval = true;
-        // OnItemPickup?.Invoke(player, item);
-    }
-
-    private void HandleCharacterCollision(CharacterBase a, CharacterBase b)
+    // Two Characters collide (Close combat / Melee attack)
+    public void HandleCharacterCollision(CharacterBase a, CharacterBase b)
     {
         if (a.IsDead || b.IsDead) return;
 
-        if (a is Player && b is IEnemyBase enemy)
+        if (a is Player && b is CharacterBase enemy)
         {
-            a.TakeDamage(enemy.Damage);
-            if (a.Health <= 0) HandleDeath(a);
+            a.TakeDamage(enemy.AttackDamage);
+            // if (a.Health <= 0) HandleDeath(a);
+            // Just for debugging. Delete later
+            Console.WriteLine($"Player HP: {a.Health}");
         }
-        else if (b is Player && a is IEnemyBase enemy2)
+        else if (b is Player && a is CharacterBase enemy2)
         {
-            b.TakeDamage(enemy2.Damage);
-            if (b.Health <= 0) HandleDeath(b);
+            b.TakeDamage(enemy2.AttackDamage);
+            // if (b.Health <= 0) HandleDeath(b);
+            // Just for debugging. Delete later
+            Console.WriteLine($"Player HP: {b.Health}");
         }
-    }
 
-    private void HandleDeath(CharacterBase character)
-    {
-        character.IsDead = true;
-        OnCharacterDeath?.Invoke(character);
     }
 }

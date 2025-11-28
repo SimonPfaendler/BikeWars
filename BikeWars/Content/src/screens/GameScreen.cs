@@ -46,6 +46,8 @@ namespace BikeWars.Content.screens
         private CollisionManager _collisionManager;
         private GameObjectManager _gameObjectManager;
 
+        private CombatManager _combatManager;
+
         private bool _freelook; // Has to be optimized
 
         public bool DrawLower => false;
@@ -97,6 +99,14 @@ namespace BikeWars.Content.screens
             // Tiled Map
             _collisionManager.LoadContent(content);
             _tiledMapRenderer = new TiledMapRenderer(Game1.Instance.GraphicsDevice, _collisionManager.TiledMap);
+
+            // Create Combat Manager
+            _combatManager = new CombatManager();
+
+            // Connect Event Listener Collision → Combat
+            _collisionManager.OnProjectileHit += _combatManager.HandleProjectileHit;
+            _collisionManager.OnCharacterCollision += _combatManager.HandleCharacterCollision;
+
 
             // Overlay
             _overlay = new Overlay(_debugFont, Game1.Instance.GraphicsDevice);

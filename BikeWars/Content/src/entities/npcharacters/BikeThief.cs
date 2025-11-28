@@ -10,14 +10,8 @@ using BikeWars.Content.managers;
 
 namespace BikeWars.Entities.Characters
 {
-    public class BikeThief : CharacterBase, ICombat, IEnemyBase
+    public class BikeThief : CharacterBase
     {
-        public int Health { get; set; }
-        public int MaxHealth { get; set; }
-        public int AttackDamage { get; set; }
-        public float AttackSpeed { get; set; }
-        public bool IsDead => Health <= 0;
-
         private readonly AudioService _audio;
         private EnemyMovement movement { get; set; }
 
@@ -135,10 +129,16 @@ namespace BikeWars.Entities.Characters
 
         public override void TakeDamage(int amount)
         {
-            Health -= amount;
-        }
+            if (IsDead) return;
 
-        public void Attack(ICombat target)
+            Health -= amount;
+
+            if (Health <= 0)
+            {
+                Health = 0;
+            }
+        }
+        public override void Attack(ICombat target)
         {
             target.TakeDamage(AttackDamage);
         }

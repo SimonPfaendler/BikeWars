@@ -10,15 +10,8 @@ using BikeWars.Content.managers; // SpriteAnimation
 
 namespace BikeWars.Entities.Characters
 {
-    public class Hobo: CharacterBase, ICombat, IEnemyBase
+    public class Hobo: CharacterBase
     {
-
-        public int Health { get; set; }
-        public int MaxHealth { get; set; }
-        public int AttackDamage { get; set; }
-        public float AttackSpeed { get; set; }
-        public bool IsDead => Health <= 0;
-
         private EnemyMovement movement { get; set; }
 
         private readonly AudioService _audio;
@@ -111,10 +104,17 @@ namespace BikeWars.Entities.Characters
         }
         public override void TakeDamage(int amount)
         {
+            if (IsDead) return;
+
             Health -= amount;
+
+            if (Health <= 0)
+            {
+                Health = 0;
+            }
         }
 
-        public void Attack(ICombat target)
+        public override void Attack(ICombat target)
         {
             target.TakeDamage(AttackDamage);
         }

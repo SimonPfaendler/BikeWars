@@ -175,23 +175,27 @@ public class CollisionManager
                 {
                     if (c.Intersects(d))
                     {
-                        // Event for a character or player gets hit by projectile
-                        OnProjectileHit?.Invoke((CharacterBase)c.Owner, (ProjectileBase)d.Owner);
-
                         ProjectileBase p = (ProjectileBase)d.Owner;
-                        if (p.HasHit)
-                        {
-                            toRemoveProjectils.Add(p);
-                            break;
-                        }
-                        CharacterBase ch = (CharacterBase)c.Owner;
 
                         if (c.Owner == p.Owner) // The shot came from this character
                         {
                             break;
                         }
-                        ch.TakeDamage(p.Damage);
+
+                        // Event for a character or player gets hit by projectile
+                        OnProjectileHit?.Invoke((CharacterBase)c.Owner, (ProjectileBase)d.Owner);
+
+
+                        if (p.HasHit)
+                        {
+                            toRemoveProjectils.Add(p);
+                            break;
+                        }
+
+                        CharacterBase ch = (CharacterBase)c.Owner;
+
                         // We need to change this. But it's ok for now
+
                         if (ch is Player player)
                         {
                             if (player.IsDead)
