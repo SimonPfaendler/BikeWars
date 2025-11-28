@@ -6,6 +6,8 @@ using BikeWars.Entities.Characters;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using BikeWars.Content.engine.Audio;
+using BikeWars.Content.engine.interfaces;
 
 namespace BikeWars.Content.managers;
 public class GameObjectManager
@@ -28,6 +30,8 @@ public class GameObjectManager
     public List<ProjectileBase> Projectiles {get => _projectiles;}
 
     public ContentManager _contentManager {get; set;} // TODO do we need this one?
+    
+    private WorldAudioManager _worldAudioManager;
 
     public GameObjectManager(ContentManager content)
     {
@@ -63,8 +67,12 @@ public class GameObjectManager
     }
     public void AddCharacter(CharacterBase character)
     {
+        if (_worldAudioManager != null && character is IWorldAudioAware wa)
+            wa.SetWorldAudioManager(_worldAudioManager);
+
         Characters.Add(character);
     }
+    
 
     public void AddItem(ItemBase item)
     {
@@ -170,4 +178,19 @@ public class GameObjectManager
         b.LoadContent(_contentManager);
         AddProjectile(b);
     }
+    
+    public void SetWorldAudioManager(WorldAudioManager worldAudioManager)
+    {
+        _worldAudioManager = worldAudioManager;
+        
+        if (Player1 is IWorldAudioAware pa)
+            pa.SetWorldAudioManager(worldAudioManager);
+        
+        foreach (var c in Characters)
+        {
+            if (c is IWorldAudioAware wa)
+                wa.SetWorldAudioManager(worldAudioManager);
+        }
+    }
+
 }
