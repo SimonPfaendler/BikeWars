@@ -11,6 +11,11 @@ using MonoGame.Extended.Tiled;
 namespace BikeWars.Content.managers;
 public class CollisionManager
 {
+    // Events that can be followed by other classes
+    public event Action<Player, ItemBase> OnItemPickup;
+    public event Action<CharacterBase, ProjectileBase> OnProjectileHit;
+    public event Action<CharacterBase, CharacterBase> OnCharacterCollision;
+
     private const string MAP = "assets/Map/Bike_Wars_Map";
     private const string TILED_MAP_LAYER = "Collision";
     private const int CELL_SIZE = 16;
@@ -141,6 +146,9 @@ public class CollisionManager
                 {
                     if (c.Intersects(d))
                     {
+                        // Event for picking up items
+                        OnItemPickup?.Invoke((Player)c.Owner, (ItemBase)d.Owner);
+
                         toRemoveItems.Add((ItemBase)d.Owner);
                     }
                 }
@@ -151,6 +159,9 @@ public class CollisionManager
                 {
                     if (c.Intersects(d) && c.Owner != d.Owner)
                     {
+                        // Event for two Characters directly colliding (Close combat)
+                        OnCharacterCollision?.Invoke((CharacterBase)c.Owner, (CharacterBase)d.Owner);
+
                         CharacterBase ch = (CharacterBase)c.Owner;
                         CharacterBase chd = (CharacterBase)d.Owner;
                         Vector2 t = GetPenetrationVector(c, d);
@@ -164,6 +175,9 @@ public class CollisionManager
                 {
                     if (c.Intersects(d))
                     {
+                        // Event for a character or player gets hit by projectile
+                        OnProjectileHit?.Invoke((CharacterBase)c.Owner, (ProjectileBase)d.Owner);
+
                         ProjectileBase p = (ProjectileBase)d.Owner;
                         if (p.HasHit)
                         {
