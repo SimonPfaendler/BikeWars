@@ -10,7 +10,7 @@ using BikeWars.Content.managers; // SpriteAnimation
 
 namespace BikeWars.Entities.Characters
 {
-    public class Hobo: CharacterBase, ICombat
+    public class Hobo: CharacterBase, ICombat, IEnemyBase
     {
 
         public int Health { get; set; }

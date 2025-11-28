@@ -10,7 +10,7 @@ using BikeWars.Content.managers;
 
 namespace BikeWars.Entities.Characters
 {
-    public class BikeThief : CharacterBase, ICombat
+    public class BikeThief : CharacterBase, ICombat, IEnemyBase
     {
         public int Health { get; set; }
         public int MaxHealth { get; set; }

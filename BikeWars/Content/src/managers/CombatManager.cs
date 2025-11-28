@@ -33,7 +33,7 @@ public class CombatManager
         target.TakeDamage(projectile.Damage);
 
         projectile.HasHit = true;
-        projectile.MarkForRemoval = true;
+        // projectile.MarkForRemoval = true;
 
         if (target.Health <= 0) HandleDeath(target);
     }
@@ -49,12 +49,12 @@ public class CombatManager
     {
         if (a.IsDead || b.IsDead) return;
 
-        if (a is Player && b is EnemyBase enemy)
+        if (a is Player && b is IEnemyBase enemy)
         {
             a.TakeDamage(enemy.Damage);
             if (a.Health <= 0) HandleDeath(a);
         }
-        else if (b is Player && a is EnemyBase enemy2)
+        else if (b is Player && a is IEnemyBase enemy2)
         {
             b.TakeDamage(enemy2.Damage);
             if (b.Health <= 0) HandleDeath(b);
