@@ -10,7 +10,7 @@ using BikeWars.Content.managers; // SpriteAnimation
 
 namespace BikeWars.Entities.Characters
 {
-    public class Hobo: CharacterBase, ICombat
+    public class Hobo: CharacterBase, ICombat, IWorldAudioAware
     {
 
         public int Health { get; set; }
@@ -22,6 +22,8 @@ namespace BikeWars.Entities.Characters
         private EnemyMovement movement { get; set; }
 
         private readonly AudioService _audio;
+        private WorldAudioManager _worldAudioManager;
+
 
         public EnemyMovement Movement => movement;
 
@@ -127,7 +129,7 @@ namespace BikeWars.Entities.Characters
             // Sound-Control
             bool hoboIsMoving = movement.Direction != Vector2.Zero && movement.CanMove;
 
-            if (hoboIsMoving)
+            if (hoboIsMoving && CanPlaySound())
             {
                 _audio.Sounds.ResumeLoop(AudioAssets.Walking);
             }
@@ -187,6 +189,17 @@ namespace BikeWars.Entities.Characters
         public override void SetLastTransform()
         {
             Transform = new Transform(new Vector2(LastTransform.Position.X, LastTransform.Position.Y), LastTransform.Size);
+        }
+        
+        public void SetWorldAudioManager(WorldAudioManager manager)
+        {
+            _worldAudioManager = manager;
+        }
+        
+        private bool CanPlaySound()
+        {
+            return _worldAudioManager != null &&
+                   _worldAudioManager.IsAudible(Transform.Position);
         }
 
         public void Immobalize(bool value)

@@ -33,6 +33,7 @@ namespace BikeWars.Content.screens
         private const int CELL_SIZE = 32;
         private const float SEARCH_RADIUS = 20f;
         public ScreenManager ScreenManager { get; set; }
+        private WorldAudioManager _worldAudioManager;
 
         private ContentManager _contentManager;
         private readonly AudioService _audioService;
@@ -112,9 +113,18 @@ namespace BikeWars.Content.screens
 
             _pixel = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
             _pixel.SetData(new[] { Color.White });
+             // sound control
+            Rectangle initialView = GetCameraWorldRect();
+            _worldAudioManager = new WorldAudioManager(initialView);
+            _gameObjectManager.SetWorldAudioManager(_worldAudioManager);
+
         }
         public void Update(GameTime gameTime)
         {
+            if (_worldAudioManager != null && _gameObjectManager.Player1 != null)
+            {
+                _worldAudioManager.UpdateListenerPosition(_gameObjectManager.Player1.Transform.Position);
+            }
             _overlay.SetPaused(false, gameTime);
             InputHandler.Update();
             _collisionManager.Update(_gameObjectManager.Player1, _itemManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.Characters);
@@ -225,5 +235,27 @@ namespace BikeWars.Content.screens
 
             spriteBatch.End();
         }
+        
+        private Rectangle GetCameraWorldRect()
+        {
+            var game = Game1.Instance;
+            int viewW = game.GraphicsDevice.Viewport.Width;
+            int viewH = game.GraphicsDevice.Viewport.Height;
+
+            // world half extents depend on zoom (analog zur Camera2D.ClampToWorld)
+            float halfW = (viewW / 2f) / camera.Zoom;
+            float halfH = (viewH / 2f) / camera.Zoom;
+
+            float leftF = camera.Position.X - halfW;
+            float topF = camera.Position.Y - halfH;
+
+            return new Rectangle(
+                (int)MathF.Floor(leftF),
+                (int)MathF.Floor(topF),
+                (int)MathF.Ceiling(halfW * 2f),
+                (int)MathF.Ceiling(halfH * 2f)
+            );
+        }
+
     }
 }

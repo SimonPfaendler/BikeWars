@@ -5,6 +5,8 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Input;
 
+// don't use this class anymore, it's outdated!!!
+
 namespace BikeWars.Content.engine
 {
     public class SoundHandler

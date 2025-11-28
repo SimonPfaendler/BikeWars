@@ -19,7 +19,7 @@ using BikeWars.Content.managers;
 // ============================================================
 namespace BikeWars.Entities.Characters
 {
-    public class Player : CharacterBase, ICombat
+    public class Player : CharacterBase, ICombat, IWorldAudioAware
     {
 
         public int Health { get; set; }
@@ -47,6 +47,7 @@ namespace BikeWars.Entities.Characters
         private SpriteAnimation _currentAnimation;
 
         private readonly AudioService _audio;
+        private WorldAudioManager _worldAudioManager;
         private string _currentMovementSound = null;
 
 
@@ -439,6 +440,11 @@ namespace BikeWars.Entities.Characters
                 Vector2.Zero,
                 SpriteEffects.None,
                 0);
+        }
+        
+        public void SetWorldAudioManager(WorldAudioManager manager)
+        {
+            _worldAudioManager = manager;
         }
 
         private void DrawArc(SpriteBatch spriteBatch, Vector2 center, float radius, float angle, float sweep, Color color, int segments = 16)
