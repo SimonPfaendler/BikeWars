@@ -76,6 +76,33 @@ namespace BikeWars.Content.utils
                 }
             },
             
+            // Hobo_WalkDown: e1_drunkdude_walking_down.png
+            { "Hobo_WalkDown", new List<Rectangle> 
+                {
+                    // Reihe 1 
+                    new Rectangle(0, 385, 51, 63),   // Frame 1
+                    new Rectangle(51, 385, 51, 63),  // Frame 2
+                    new Rectangle(102, 385, 51, 63), // Frame 3
+        
+                    // Reihe 2 
+                    new Rectangle(0, 448, 51, 64),   // Frame 4 
+                    new Rectangle(51, 448, 51, 64),  // Frame 5
+                    new Rectangle(102, 448, 51, 64)  // Frame 6 
+                }
+            },
+
+            //  Hobo_WalkUp: e1_drunkdude_walking_up.png
+            { "Hobo_WalkUp", new List<Rectangle> 
+                {
+                    // Reihe 1 
+                    new Rectangle(262, 128, 51, 63), // Frame 1 
+                    new Rectangle(313, 128, 51, 63), // Frame 2 
+        
+                    // Reihe 2
+                    new Rectangle(262, 191, 51, 64)  // Frame 3 
+                }
+            },
+            
             // BIKE THIEF (Enemy 2)
 
             // BikeThief_Idle 

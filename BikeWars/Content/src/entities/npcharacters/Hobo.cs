@@ -36,7 +36,8 @@ namespace BikeWars.Entities.Characters
         private SpriteAnimation _idleAnimation;
         private SpriteAnimation _walkLeftAnimation;
         private SpriteAnimation _walkRightAnimation;
-
+        private SpriteAnimation _walkUpAnimation;
+        private SpriteAnimation _walkDownAnimation;
         private SpriteAnimation _currentAnimation;
 
         public void LoadContent(ContentManager content)
@@ -52,11 +53,18 @@ namespace BikeWars.Entities.Characters
             // e1_drunkdude_walking_left.png
             var leftFrames = SpriteFrameDictionary.GetFrames("Hobo_WalkLeft");
             _walkLeftAnimation = new SpriteAnimation(_characterAtlas, leftFrames, 0.15f);
-
-
+            
             // e1_drunkdude_walking_right.png 
             var rightFrames = SpriteFrameDictionary.GetFrames("Hobo_WalkRight");
             _walkRightAnimation = new SpriteAnimation(_characterAtlas, rightFrames, 0.15f);
+            
+            // e1_drunkdude_walking_down.png
+            var downFrames = SpriteFrameDictionary.GetFrames("Hobo_WalkDown");
+            _walkDownAnimation = new SpriteAnimation(_characterAtlas, downFrames, 0.15f); 
+    
+            // e1_drunkdude_walking_up.png
+            var upFrames = SpriteFrameDictionary.GetFrames("Hobo_WalkUp");
+            _walkUpAnimation = new SpriteAnimation(_characterAtlas, upFrames, 0.15f);
 
             // Startzustand: Idle
             _currentAnimation = _idleAnimation;
@@ -129,18 +137,15 @@ namespace BikeWars.Entities.Characters
                 Transform.Position += direction * Speed * delta;
 
                 // Animation anhand der horizontalen Richtung wählen
-                if (direction.X > 0.1f)
+                if (MathF.Abs(direction.X) > MathF.Abs(direction.Y))
                 {
-                    _currentAnimation = _walkRightAnimation;
+                    // Horizontale Bewegung dominiert
+                    _currentAnimation = (direction.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
                 }
-                else if (direction.X < -0.1f)
+                else // Dies deckt vertikal dominante oder rein vertikale Bewegungen ab
                 {
-                    _currentAnimation = _walkLeftAnimation;
-                }
-                else
-                {
-                    // bewegt sich nur hoch/runter → vorerst Idle
-                    _currentAnimation = _idleAnimation;
+                    // Vertikale Bewegung dominiert
+                    _currentAnimation = (direction.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
                 }
             }
             else
