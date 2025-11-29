@@ -32,21 +32,42 @@ public abstract class CharacterBase : ICharacter, ICombat
                 _attackCooldownTimer = 0f;
         }
     }
+    
+    public virtual void TakeDamage(int amount)
+    {
+        if (IsDead) return;
+
+        Health -= amount;
+
+        if (Health <= 0)
+        {
+            Health = 0;
+        }
+    }
 
     public bool CanAttack()
     {
         return _attackCooldownTimer <= 0f;
+    }
+    
+    public virtual void Attack(ICombat target)
+    {
+        if (!CanAttack()) return;
+        target.TakeDamage(AttackDamage);
+        ResetAttackCooldown(); 
+    }
+    
+    // Is Helpful for example with colliders to set the original position back.
+    public virtual void SetLastTransform()
+    {
+        Transform = new Transform(new Vector2(LastTransform.Position.X, LastTransform.Position.Y), LastTransform.Size);
     }
 
     public void ResetAttackCooldown()
     {
         _attackCooldownTimer = AttackCooldown;
     }
-
-    public abstract void TakeDamage(int amount);
-    public abstract void Attack(ICombat target);
-
-    public abstract void SetLastTransform();
+    
     public abstract void UpdateCollider();
     public abstract void Update(GameTime gameTime); // Use this to update the logic like where the position is or resize the collision box
     public abstract void Draw(SpriteBatch spriteBatch);

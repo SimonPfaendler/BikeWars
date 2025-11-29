@@ -66,10 +66,10 @@ public class CollisionManager
         if (a is BoxCollider bca && b is BoxCollider bcb)
         {
             // Calculate center to center
-            float aWidthHalf = bca.Width / 2;
-            float aHeightHalf = bca.Height / 2;
-            float bWidthHalf = bcb.Width / 2;
-            float bHeightHalf = bcb.Height / 2;
+            float aWidthHalf = bca.Width / 2f;
+            float aHeightHalf = bca.Height / 2f;
+            float bWidthHalf = bcb.Width / 2f;
+            float bHeightHalf = bcb.Height / 2f;
 
             Vector2 aCenter = new Vector2(a.Position.X + aWidthHalf, a.Position.Y + aHeightHalf);
             Vector2 bCenter = new Vector2(b.Position.X + bWidthHalf, b.Position.Y + bHeightHalf);

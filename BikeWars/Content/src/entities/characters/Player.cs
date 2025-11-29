@@ -119,19 +119,6 @@ namespace BikeWars.Entities.Characters
             }
         }
 
-        public override void TakeDamage(int amount)
-        {
-            Health-= amount;
-            if(Health < 0) Health = 0;
-        }
-
-        public override void Attack(ICombat target)
-        {
-            if (!CanAttack()) return;
-            target.TakeDamage(AttackDamage);
-            ResetAttackCooldown(); 
-        }
-
         public Player(Vector2 start, Point size, AudioService audio)
         {
             MaxHealth = 1000;
@@ -394,12 +381,6 @@ namespace BikeWars.Entities.Characters
                 Vector2 aimEnd = center + GazeDirection * 50f;
                 DrawLine(spriteBatch, center, aimEnd, Color.Red);
             }
-        }
-
-        // Is Helpful for example with colliders to set the original position back.
-        public override void SetLastTransform()
-        {
-            Transform = new Transform(new Vector2(LastTransform.Position.X, LastTransform.Position.Y), LastTransform.Size);
         }
 
         public void Immobalize(bool value)
