@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.entities.Inventory;
 using BikeWars.Content.managers;
+using BikeWars.Content.utils;
 
 // ============================================================
 // Player.cs
@@ -68,35 +69,19 @@ namespace BikeWars.Entities.Characters
             }
 
             // Down – c1_move_down_1x2.png: x=270, y=0, w=64, h=128
-            var downFrames = new List<Rectangle>
-            {
-                new Rectangle(270, 0, 64, 64),
-                new Rectangle(270, 64, 64, 64)
-            };
+            var downFrames = SpriteFrameDictionary.GetFrames("Character1_WalkDown");
             _walkDownAnimation = new SpriteAnimation(_characterAtlas, downFrames, 0.16f);
 
             // Left – c1_move_left_1x2.png: x=334, y=0, w=64, h=128
-            var leftFrames = new List<Rectangle>
-            {
-                new Rectangle(334, 0, 64, 64),
-                new Rectangle(334, 64, 64, 64)
-            };
+            var leftFrames = SpriteFrameDictionary.GetFrames("Character1_WalkLeft");
             _walkLeftAnimation = new SpriteAnimation(_characterAtlas, leftFrames, 0.16f);
 
             // Right – c1_move_right_1x2.png: x=398, y=0, w=64, h=128
-            var rightFrames = new List<Rectangle>
-            {
-                new Rectangle(398, 0, 64, 64),
-                new Rectangle(398, 64, 64, 64)
-            };
+            var rightFrames = SpriteFrameDictionary.GetFrames("Character1_WalkRight");
             _walkRightAnimation = new SpriteAnimation(_characterAtlas, rightFrames, 0.16f);
 
             // Up – c1_move_up_1x2.png: x=0, y=128, w=64, h=128
-            var upFrames = new List<Rectangle>
-            {
-                new Rectangle(0, 128, 64, 64),
-                new Rectangle(0, 192, 64, 64)
-            };
+            var upFrames = SpriteFrameDictionary.GetFrames("Character1_WalkUp");
             _walkUpAnimation = new SpriteAnimation(_characterAtlas, upFrames, 0.16f);
 
             _currentAnimation = _walkRightAnimation;
