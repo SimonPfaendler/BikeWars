@@ -177,7 +177,15 @@ public class CollisionManager
                     {
                         ProjectileBase p = (ProjectileBase)d.Owner;
 
-                        if (c.Owner == p.Owner) // The shot came from this character
+                        // Make sure projectile cannot hit more than once
+                        if (p.HasHit)
+                        {
+                            toRemoveProjectils.Add(p);
+                            break;
+                        }
+
+                        // Ignore self-hit
+                        if (c.Owner == p.Owner)
                         {
                             break;
                         }
@@ -185,39 +193,11 @@ public class CollisionManager
                         // Event for a character or player gets hit by projectile
                         OnProjectileHit?.Invoke((CharacterBase)c.Owner, (ProjectileBase)d.Owner);
 
-
-                        if (p.HasHit)
-                        {
-                            toRemoveProjectils.Add(p);
-                            break;
-                        }
-
                         CharacterBase ch = (CharacterBase)c.Owner;
 
-                        // We need to change this. But it's ok for now
+                        if(ch.IsDead)
+                            toRemoveCharacters.Add(ch);
 
-                        if (ch is Player player)
-                        {
-                            if (player.IsDead)
-                            {
-                                toRemoveCharacters.Add(player);
-                            }
-                        }
-                        if (ch is Hobo hobo)
-                        {
-                            if (hobo.IsDead)
-                            {
-                                toRemoveCharacters.Add(hobo);
-                            }
-                        }
-
-                        if (ch is BikeThief bikeThief)
-                        {
-                            if (bikeThief.IsDead)
-                            {
-                                toRemoveCharacters.Add(bikeThief);
-                            }
-                        }
                         p.HasHit = true;
                         toRemoveProjectils.Add(p);
                     }
