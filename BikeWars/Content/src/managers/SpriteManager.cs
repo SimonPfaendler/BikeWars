@@ -3,10 +3,15 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-// Animationslogik
 
 namespace BikeWars.Content.managers
 {
+    /// <summary>
+    /// Verwaltet die Erstellung/Bereitstellung aller SpriteAnimation-Objekte für die Spielentitäten.
+    /// - zentralisiert das Laden des Texture Atlas
+    /// - Instanziierung der vollständigen Animationsobjekte
+    /// - ruft die gespeicherten Frame-Koordinaten ab
+    /// </summary>
     public class SpriteAnimation
     {
         private readonly Texture2D _sheet;
