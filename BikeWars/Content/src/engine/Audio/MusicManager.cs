@@ -19,7 +19,7 @@ namespace BikeWars.Content.engine.Audio
 
         
         // Load: used only once when starting the game: paths = ID -> content path
-        public void Load(ContentManager content, Dictionary<string, string> paths)
+        public void Load(ContentManager content, IReadOnlyDictionary<string, string> paths)
         {
             _songs.Clear();
             foreach (var kv in paths)

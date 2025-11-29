@@ -1,3 +1,5 @@
+namespace BikeWars.Content.engine;
+
 public enum CollisionLayer
 {
     NONE,

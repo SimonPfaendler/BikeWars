@@ -128,24 +128,6 @@ namespace BikeWars.Entities.Characters
             UpdateCollider();
         }
 
-        public override void TakeDamage(int amount)
-        {
-            if (IsDead) return;
-
-            Health -= amount;
-
-            if (Health <= 0)
-            {
-                Health = 0;
-            }
-        }
-        public override void Attack(ICombat target)
-        {
-            if (!CanAttack()) return;
-            target.TakeDamage(AttackDamage);
-            ResetAttackCooldown(); 
-        }
-
         public override void Update(GameTime gameTime)
         {
             movement.HandleMovement(gameTime);
@@ -216,15 +198,6 @@ namespace BikeWars.Entities.Characters
                 return;
 
             _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, 0f);
-        }
-
-        // Ist hilfreich z.B. bei Kollisionen, um die ursprüngliche Position wiederherzustellen.
-        public override void SetLastTransform()
-        {
-            Transform = new Transform(
-                new Vector2(LastTransform.Position.X, LastTransform.Position.Y),
-                LastTransform.Size
-            );
         }
         
         public void SetWorldAudioManager(WorldAudioManager manager)
