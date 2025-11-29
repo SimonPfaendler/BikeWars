@@ -10,15 +10,8 @@ using BikeWars.Content.managers; // SpriteAnimation
 
 namespace BikeWars.Entities.Characters
 {
-    public class Hobo: CharacterBase, ICombat, IWorldAudioAware
+    public class Hobo: CharacterBase, IWorldAudioAware
     {
-
-        public int Health { get; set; }
-        public int MaxHealth { get; set; }
-        public int AttackDamage { get; set; }
-        public float AttackSpeed { get; set; }
-        public bool IsDead => Health <= 0;
-
         private EnemyMovement movement { get; set; }
 
         private readonly AudioService _audio;
@@ -104,7 +97,7 @@ namespace BikeWars.Entities.Characters
             MaxHealth = 40;
             Health = MaxHealth;
             AttackDamage = 5;
-            AttackSpeed = 2f;
+            AttackCooldown = 2f;
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 100f;
@@ -113,17 +106,28 @@ namespace BikeWars.Entities.Characters
         }
         public override void TakeDamage(int amount)
         {
+            if (IsDead) return;
+
             Health -= amount;
+
+            if (Health <= 0)
+            {
+                Health = 0;
+            }
         }
 
-        public void Attack(ICombat target)
+        public override void Attack(ICombat target)
         {
+            if (!CanAttack()) return;
             target.TakeDamage(AttackDamage);
+            ResetAttackCooldown(); 
         }
 
         public override void Update(GameTime gameTime)
         {
             movement.HandleMovement(gameTime);
+
+            UpdateAttackCooldown(gameTime);
 
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
             // Sound-Control

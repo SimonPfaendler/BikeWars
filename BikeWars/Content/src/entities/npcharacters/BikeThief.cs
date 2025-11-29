@@ -10,14 +10,8 @@ using BikeWars.Content.managers;
 
 namespace BikeWars.Entities.Characters
 {
-    public class BikeThief : CharacterBase, ICombat, IWorldAudioAware
+    public class BikeThief : CharacterBase, IWorldAudioAware
     {
-        public int Health { get; set; }
-        public int MaxHealth { get; set; }
-        public int AttackDamage { get; set; }
-        public float AttackSpeed { get; set; }
-        public bool IsDead => Health <= 0;
-
         private readonly AudioService _audio;
         private WorldAudioManager _worldAudioManager;
         private EnemyMovement movement { get; set; }
@@ -126,7 +120,7 @@ namespace BikeWars.Entities.Characters
             MaxHealth = 40;
             Health = MaxHealth;
             AttackDamage = 5;
-            AttackSpeed = 2f;
+            AttackCooldown = 2f;
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 100f;
@@ -136,17 +130,27 @@ namespace BikeWars.Entities.Characters
 
         public override void TakeDamage(int amount)
         {
-            Health -= amount;
-        }
+            if (IsDead) return;
 
-        public void Attack(ICombat target)
+            Health -= amount;
+
+            if (Health <= 0)
+            {
+                Health = 0;
+            }
+        }
+        public override void Attack(ICombat target)
         {
+            if (!CanAttack()) return;
             target.TakeDamage(AttackDamage);
+            ResetAttackCooldown(); 
         }
 
         public override void Update(GameTime gameTime)
         {
             movement.HandleMovement(gameTime);
+
+            UpdateAttackCooldown(gameTime);
 
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
 

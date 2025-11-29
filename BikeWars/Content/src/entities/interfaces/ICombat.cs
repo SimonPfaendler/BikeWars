@@ -7,10 +7,16 @@ public interface ICombat
     int MaxHealth { get; set; }
 
     int AttackDamage { get; set; }
-    float AttackSpeed { get; set; }
+    float AttackCooldown { get; set; }
 
     void TakeDamage(int amount);
     void Attack(ICombat target);
+
+    void UpdateAttackCooldown(GameTime gametime);
+    bool CanAttack();
+
+    void ResetAttackCooldown();
+    
     bool IsDead { get; }
 
 }    

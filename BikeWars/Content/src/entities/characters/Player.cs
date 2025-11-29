@@ -19,16 +19,9 @@ using BikeWars.Content.managers;
 // ============================================================
 namespace BikeWars.Entities.Characters
 {
-    public class Player : CharacterBase, ICombat, IWorldAudioAware
+    public class Player : CharacterBase, IWorldAudioAware
     {
-
-        public int Health { get; set; }
-        public int MaxHealth { get; set; }
-        public int AttackDamage { get; set; }
-        public float AttackSpeed { get; set; }
         public Inventory Inventory { get; private set; }
-
-        public bool IsDead => Health <= 0;
         private PlayerMovement movement { get; set; }
         private CooldownWithDuration sprint { get; }
 
@@ -132,17 +125,19 @@ namespace BikeWars.Entities.Characters
             if(Health < 0) Health = 0;
         }
 
-        public void Attack(ICombat target)
+        public override void Attack(ICombat target)
         {
+            if (!CanAttack()) return;
             target.TakeDamage(AttackDamage);
+            ResetAttackCooldown(); 
         }
 
         public Player(Vector2 start, Point size, AudioService audio)
         {
-            MaxHealth = 100;
+            MaxHealth = 1000;
             Health = MaxHealth;
             AttackDamage = 10;
-            AttackSpeed = 1f;
+            AttackCooldown = 2f;
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 200f;
@@ -161,6 +156,8 @@ namespace BikeWars.Entities.Characters
 
         public void Update(GameTime gameTime, Vector2 mousePos)
         {
+            UpdateAttackCooldown(gameTime);
+
             // TODO THIS IS NOW ONLY FOR TESTING AND SHOWING
             if (InputHandler.IsPressed(GameAction.SWITCH))
             {

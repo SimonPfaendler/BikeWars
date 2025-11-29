@@ -47,6 +47,8 @@ namespace BikeWars.Content.screens
         private CollisionManager _collisionManager;
         private GameObjectManager _gameObjectManager;
 
+        private CombatManager _combatManager;
+
         private bool _freelook; // Has to be optimized
 
         public bool DrawLower => false;
@@ -64,11 +66,11 @@ namespace BikeWars.Content.screens
             _itemManager.AddItem(new Xp_Beer(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
             _itemManager.AddItem(new Xp_Money(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
             _collisionManager = new CollisionManager(CELL_SIZE, SEARCH_RADIUS);
-            Player player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2 + 100), new Point(32, 32), _audioService);
+            Player player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(32, 32), _audioService);
             _gameObjectManager = new GameObjectManager(_contentManager, player, null);
             for (int i = 0; i < 50; i++)
             {
-                _gameObjectManager.AddCharacter(new Hobo(new Vector2(worldBounds.Width / 2 + i*10, worldBounds.Height / 2), new Point(32, 32), _audioService));
+                _gameObjectManager.AddCharacter(new Hobo(new Vector2(worldBounds.Width / 2 + i*10, worldBounds.Height / 2 -500), new Point(32, 32), _audioService));
             }
             _gameObjectManager.AddCharacter(new BikeThief(new Vector2(worldBounds.Width / 2 - 100, worldBounds.Height / 2 - 80), new Point(32, 32), _audioService));
             _gameObjectManager.Items = _itemManager.Items;
@@ -98,6 +100,14 @@ namespace BikeWars.Content.screens
             // Tiled Map
             _collisionManager.LoadContent(content);
             _tiledMapRenderer = new TiledMapRenderer(Game1.Instance.GraphicsDevice, _collisionManager.TiledMap);
+
+            // Create Combat Manager
+            _combatManager = new CombatManager();
+
+            // Combat Manager subcribes to Events from Collision Manager:  Collision → Combat
+            _collisionManager.OnProjectileHit += _combatManager.HandleProjectileHit;
+            _collisionManager.OnCharacterCollision += _combatManager.HandleCharacterCollision;
+
 
             // Overlay
             _overlay = new Overlay(_debugFont, Game1.Instance.GraphicsDevice);
@@ -133,15 +143,6 @@ namespace BikeWars.Content.screens
             _itemManager.Update(gameTime, _gameObjectManager.Player1);
             hpTestTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            // testing
-            if (hpTestTimer >= 1f) // jede Sekunde
-            {
-                _gameObjectManager.Player1.Health -= 5;   // 5 HP verlieren
-                if (_gameObjectManager.Player1.Health < 0)
-                    _gameObjectManager.Player1.Health = 0;
-
-                hpTestTimer = 0f;
-            }
             if (InputHandler.IsPressed(GameAction.DEBUG_HEAL))
                 _gameObjectManager.Player1.Health = _gameObjectManager.Player1.MaxHealth;
 
