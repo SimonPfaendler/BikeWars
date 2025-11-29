@@ -24,6 +24,8 @@ namespace BikeWars.Entities.Characters
         public Inventory Inventory { get; private set; }
         private PlayerMovement movement { get; set; }
         private CooldownWithDuration sprint { get; }
+        
+        public bool IsGodMode { get; set; }
 
         public Vector2 GazeDirection { get; private set; }
         public Vector2 AimTarget { get; private set; }
@@ -121,6 +123,9 @@ namespace BikeWars.Entities.Characters
 
         public override void TakeDamage(int amount)
         {
+            if (IsGodMode)
+                return;
+            
             Health-= amount;
             if(Health < 0) Health = 0;
         }

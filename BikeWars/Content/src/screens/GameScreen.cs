@@ -36,7 +36,9 @@ namespace BikeWars.Content.screens
         private WorldAudioManager _worldAudioManager;
 
         private ContentManager _contentManager;
+        public ContentManager ContentManager => _contentManager;
         private readonly AudioService _audioService;
+        public AudioService AudioService => _audioService;
         public string DesiredMusic => AudioAssets.GameMusic;
         public float MusicVolume => 1f;
 
@@ -46,6 +48,7 @@ namespace BikeWars.Content.screens
 
         private CollisionManager _collisionManager;
         private GameObjectManager _gameObjectManager;
+        public GameObjectManager GameObjectManager => _gameObjectManager;
 
         private CombatManager _combatManager;
 
@@ -53,9 +56,16 @@ namespace BikeWars.Content.screens
 
         public bool DrawLower => false;
         public bool UpdateLower => false;
+        
+        private readonly bool _isTechDemo;
+        private bool _showStaticHitboxes = false;
 
-        public GameScreen(AudioService audioService)
+        public GameScreen(AudioService audioService, bool isTechDemo = false)
         {
+            
+            // check if you are in tech demo mode or just gameplay mode
+            _isTechDemo = isTechDemo;
+            
             worldBounds = new Rectangle(0, 0, 11200, 11200);
 
             _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
@@ -67,6 +77,13 @@ namespace BikeWars.Content.screens
             _itemManager.AddItem(new Xp_Money(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
             _collisionManager = new CollisionManager(CELL_SIZE, SEARCH_RADIUS);
             Player player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(32, 32), _audioService);
+            
+            // if we are in the techdemo it transforms the player in god mode
+            if (_isTechDemo)
+            {
+                player.IsGodMode = true; 
+            }
+            
             _gameObjectManager = new GameObjectManager(_contentManager, player, null);
             for (int i = 0; i < 50; i++)
             {
@@ -91,7 +108,7 @@ namespace BikeWars.Content.screens
             Console.WriteLine("Loaded saved position (or default if no file).");
         }
 
-        public void LoadContent(ContentManager content)
+        public virtual void LoadContent(ContentManager content)
         {
             // Font and Debugger
             _debugFont = content.Load<SpriteFont>("assets/fonts/Arial");
@@ -129,7 +146,7 @@ namespace BikeWars.Content.screens
             _gameObjectManager.SetWorldAudioManager(_worldAudioManager);
 
         }
-        public void Update(GameTime gameTime)
+        public virtual void Update(GameTime gameTime)
         {
             if (_worldAudioManager != null && _gameObjectManager.Player1 != null)
             {
@@ -145,6 +162,17 @@ namespace BikeWars.Content.screens
 
             if (InputHandler.IsPressed(GameAction.DEBUG_HEAL))
                 _gameObjectManager.Player1.Health = _gameObjectManager.Player1.MaxHealth;
+            
+            if (InputHandler.IsPressed(GameAction.TECH_DEMO))
+            {
+                ScreenManager.AddScreen(new TechDemoScreen(_audioService));
+            }
+            
+            if (InputHandler.IsPressed(GameAction.DEBUG_HITBOXES) && _isTechDemo)
+            {
+                _showStaticHitboxes = !_showStaticHitboxes;
+            }
+
 
             _debugger.Update(gameTime);
             // Needs to be implemented elsewhere.
@@ -213,7 +241,7 @@ namespace BikeWars.Content.screens
             }
         }
 
-        public void Draw(GameTime gameTime)
+        public virtual void Draw(GameTime gameTime)
         {
             Game1 game = Game1.Instance;
             SpriteBatch spriteBatch = game.SpriteBatch;
@@ -223,6 +251,11 @@ namespace BikeWars.Content.screens
             spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.GetTransform());
             _gameObjectManager.Draw(spriteBatch);
             _overlay.DrawOnWorld(spriteBatch, _gameObjectManager.Player1);
+            
+            if (_isTechDemo && _showStaticHitboxes)
+            {
+                _collisionManager.DrawHitboxes(spriteBatch, _pixel);
+            }
 
             spriteBatch.End();
             spriteBatch.Begin();

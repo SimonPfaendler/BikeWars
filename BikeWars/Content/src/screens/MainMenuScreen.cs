@@ -139,6 +139,7 @@ namespace BikeWars.Content.screens
 
                 case ButtonAction.TechDemo:
                     // TODO: Open Tech Demo Screen
+                    ScreenManager.AddScreen(new TechDemoScreen(_audioService));
                     break;
 
                 case ButtonAction.Options:

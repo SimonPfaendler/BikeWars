@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Entities.Characters;
 using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace BikeWars.Content.managers;
 public class CollisionManager
@@ -233,6 +234,35 @@ public class CollisionManager
             characters.Remove(c);
         }
     }
+
+    public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel)
+    {
+        // BoxCollider stores position + width/height, we convert to a Rectangle
+        foreach (var box in _collisionBoxes)
+        {
+            var rect = new Rectangle(
+                (int)box.Position.X,
+                (int)box.Position.Y,
+                (int)box.Width,
+                (int)box.Height
+            );
+            DrawRectOutline(spriteBatch, pixel, rect, Color.Red * 0.7f);
+        }
+    }
+
+    private void DrawRectOutline(SpriteBatch spriteBatch, Texture2D pixel, Rectangle rect, Color color)
+    {
+        // top
+        spriteBatch.Draw(pixel, new Rectangle(rect.Left, rect.Top, rect.Width, 1), color);
+        // bottom
+        spriteBatch.Draw(pixel, new Rectangle(rect.Left, rect.Bottom - 1, rect.Width, 1), color);
+        // left
+        spriteBatch.Draw(pixel, new Rectangle(rect.Left, rect.Top, 1, rect.Height), color);
+        // right
+        spriteBatch.Draw(pixel, new Rectangle(rect.Right - 1, rect.Top, 1, rect.Height), color);
+    }
+    
+    
     // This is old code to have some logic movement for the units
     // If the hobo hits a wall, push him back/sideways and start sidestepping.
             // foreach (var box in _collisionManager.CollisionBoxes)
