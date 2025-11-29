@@ -137,7 +137,7 @@ namespace BikeWars.Entities.Characters
                 Transform.Position += direction * Speed * delta;
 
                 
-                if (Math.Abs(direction.X) > Math.Abs(direction.Y))
+                if (System.Math.Abs(direction.X) > System.Math.Abs(direction.Y))
                 {
                     
                     _currentAnimation = (direction.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
@@ -153,7 +153,7 @@ namespace BikeWars.Entities.Characters
                 _currentAnimation = _idleAnimation;
             }
 
-            // SpriteAnimation updaten (setzt intern FrameIndex usw.)
+            
             if (_currentAnimation != null)
             {
                 _currentAnimation.Update(gameTime, isMoving);
