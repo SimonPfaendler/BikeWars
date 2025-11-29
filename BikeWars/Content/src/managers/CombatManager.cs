@@ -39,16 +39,10 @@ public class CombatManager
         if (a is Player && b is CharacterBase enemy)
         {
             enemy.Attack(a);
-            // if (a.Health <= 0) HandleDeath(a);
-            // Just for debugging. Delete later
-            Console.WriteLine($"Player HP: {a.Health}");
         }
         else if (b is Player && a is CharacterBase enemy2)
         {
             enemy2.Attack(b);
-            // if (b.Health <= 0) HandleDeath(b);
-            // Just for debugging. Delete later
-            Console.WriteLine($"Player HP: {b.Health}");
         }
 
     }
