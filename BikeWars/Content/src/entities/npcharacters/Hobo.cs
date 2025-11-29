@@ -136,15 +136,15 @@ namespace BikeWars.Entities.Characters
                 direction.Normalize();
                 Transform.Position += direction * Speed * delta;
 
-                // Animation anhand der horizontalen Richtung wählen
-                if (MathF.Abs(direction.X) > MathF.Abs(direction.Y))
+                
+                if (Math.Abs(direction.X) > Math.Abs(direction.Y))
                 {
-                    // Horizontale Bewegung dominiert
+                    
                     _currentAnimation = (direction.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
                 }
-                else // Dies deckt vertikal dominante oder rein vertikale Bewegungen ab
+                else 
                 {
-                    // Vertikale Bewegung dominiert
+                    
                     _currentAnimation = (direction.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
                 }
             }
