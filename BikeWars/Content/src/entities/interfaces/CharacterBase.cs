@@ -1,4 +1,5 @@
-﻿using BikeWars.Content.engine.interfaces;
+﻿using System;
+using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.engine;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -36,6 +37,7 @@ public abstract class CharacterBase : ICharacter, ICombat
     
     public virtual void TakeDamage(int amount)
     {
+        
         if (IsGodMode)
             return; 
         

@@ -28,7 +28,7 @@ namespace BikeWars.Entities.Characters
         public Vector2 GazeDirection { get; private set; }
         public Vector2 AimTarget { get; private set; }
         private Vector2 _facingDirection = Vector2.UnitX; // Default to Right to match initial animation
-        public bool IsGodMode { get; set; }
+        // public bool IsGodMode { get; set; }
 
         public event Action ShotBullet;
         private Texture2D _characterAtlas;
