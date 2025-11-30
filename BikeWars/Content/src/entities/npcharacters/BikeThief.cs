@@ -7,6 +7,7 @@ using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.managers;
+using BikeWars.Content.utils;
 
 namespace BikeWars.Entities.Characters
 {
@@ -32,65 +33,17 @@ namespace BikeWars.Entities.Characters
             // Atlas laden (Pfad ggf. anpassen)
             _characterAtlas = content.Load<Texture2D>("assets/sprites/characters/character_atlas");
 
-            // === IDLE ===
-            // TODO: Rechteck auf BikeThief-Idle-Sprite anpassen
-            var idleFrames = new List<Rectangle>
-            {
-                new Rectangle(281, 385, 128/2, 184/3)
-            };
+            // IDLE
+            var idleFrames = SpriteFrameDictionary.GetFrames("BikeThief_Idle");
             _idleAnimation = new SpriteAnimation(_characterAtlas, idleFrames, 0.6f);
 
 
             // e2_bikethief_walking_left.png
-
-            int leftBaseX = 153;
-            int leftBaseY = 385;
-            int leftW = 128;
-            int leftH = 184;
-            int leftFrameW = leftW / 2;
-            int leftFrameH = leftH / 3;
-
-            var leftFrames = new List<Rectangle>
-            {
-                // Zeile 0
-                new Rectangle(leftBaseX + 0 * leftFrameW, leftBaseY + 0 * leftFrameH, leftFrameW, leftFrameH),
-                new Rectangle(leftBaseX + 1 * leftFrameW, leftBaseY + 0 * leftFrameH, leftFrameW, leftFrameH),
-
-                // Zeile 1
-                new Rectangle(leftBaseX + 0 * leftFrameW, leftBaseY + 1 * leftFrameH, leftFrameW, leftFrameH),
-                new Rectangle(leftBaseX + 1 * leftFrameW, leftBaseY + 1 * leftFrameH, leftFrameW, leftFrameH),
-
-                // Zeile 2
-                new Rectangle(leftBaseX + 0 * leftFrameW, leftBaseY + 2 * leftFrameH, leftFrameW, leftFrameH),
-                new Rectangle(leftBaseX + 1 * leftFrameW, leftBaseY + 2 * leftFrameH, leftFrameW, leftFrameH),
-            };
-
+            var leftFrames = SpriteFrameDictionary.GetFrames("BikeThief_WalkLeft");
             _walkLeftAnimation = new SpriteAnimation(_characterAtlas, leftFrames, 0.15f);
 
             // e2_bikethief_walking_right.png
-
-            int rightBaseX = 281;
-            int rightBaseY = 385;
-            int rightW = 128;
-            int rightH = 184;
-            int rightFrameW = rightW / 2;
-            int rightFrameH = rightH / 3;
-
-            var rightFrames = new List<Rectangle>
-            {
-                // Zeile 0
-                new Rectangle(rightBaseX + 0 * rightFrameW, rightBaseY + 0 * rightFrameH, rightFrameW, rightFrameH),
-                new Rectangle(rightBaseX + 1 * rightFrameW, rightBaseY + 0 * rightFrameH, rightFrameW, rightFrameH),
-
-                // Zeile 1
-                new Rectangle(rightBaseX + 0 * rightFrameW, rightBaseY + 1 * rightFrameH, rightFrameW, rightFrameH),
-                new Rectangle(rightBaseX + 1 * rightFrameW, rightBaseY + 1 * rightFrameH, rightFrameW, rightFrameH),
-
-                // Zeile 2
-                new Rectangle(rightBaseX + 0 * rightFrameW, rightBaseY + 2 * rightFrameH, rightFrameW, rightFrameH),
-                new Rectangle(rightBaseX + 1 * rightFrameW, rightBaseY + 2 * rightFrameH, rightFrameW, rightFrameH),
-            };
-
+            var rightFrames = SpriteFrameDictionary.GetFrames("BikeThief_WalkRight");
             _walkRightAnimation = new SpriteAnimation(_characterAtlas, rightFrames, 0.15f);
 
             // Startzustand: Idle
@@ -126,24 +79,6 @@ namespace BikeWars.Entities.Characters
             Speed = 100f;
             movement = new EnemyMovement(canMove: true, isMoving: false);
             UpdateCollider();
-        }
-
-        public override void TakeDamage(int amount)
-        {
-            if (IsDead) return;
-
-            Health -= amount;
-
-            if (Health <= 0)
-            {
-                Health = 0;
-            }
-        }
-        public override void Attack(ICombat target)
-        {
-            if (!CanAttack()) return;
-            target.TakeDamage(AttackDamage);
-            ResetAttackCooldown(); 
         }
 
         public override void Update(GameTime gameTime)
@@ -216,15 +151,6 @@ namespace BikeWars.Entities.Characters
                 return;
 
             _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, 0f);
-        }
-
-        // Ist hilfreich z.B. bei Kollisionen, um die ursprüngliche Position wiederherzustellen.
-        public override void SetLastTransform()
-        {
-            Transform = new Transform(
-                new Vector2(LastTransform.Position.X, LastTransform.Position.Y),
-                LastTransform.Size
-            );
         }
         
         public void SetWorldAudioManager(WorldAudioManager manager)

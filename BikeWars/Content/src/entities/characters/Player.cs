@@ -24,12 +24,11 @@ namespace BikeWars.Entities.Characters
         public Inventory Inventory { get; private set; }
         private PlayerMovement movement { get; set; }
         private CooldownWithDuration sprint { get; }
-        
-        public bool IsGodMode { get; set; }
 
         public Vector2 GazeDirection { get; private set; }
         public Vector2 AimTarget { get; private set; }
         private Vector2 _facingDirection = Vector2.UnitX; // Default to Right to match initial animation
+        public bool IsGodMode { get; set; }
 
         public event Action ShotBullet;
         private Texture2D _characterAtlas;
@@ -119,22 +118,6 @@ namespace BikeWars.Entities.Characters
             {
                 ShotBullet?.Invoke();
             }
-        }
-
-        public override void TakeDamage(int amount)
-        {
-            if (IsGodMode)
-                return;
-            
-            Health-= amount;
-            if(Health < 0) Health = 0;
-        }
-
-        public override void Attack(ICombat target)
-        {
-            if (!CanAttack()) return;
-            target.TakeDamage(AttackDamage);
-            ResetAttackCooldown(); 
         }
 
         public Player(Vector2 start, Point size, AudioService audio)

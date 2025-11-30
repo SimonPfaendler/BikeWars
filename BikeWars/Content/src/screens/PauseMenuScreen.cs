@@ -61,18 +61,6 @@ namespace BikeWars.Content.screens
             }
         }
         
-        private Texture2D CreateSimpleTexture(GraphicsDevice graphicsDevice, int width, int height)
-        {
-            // screen gets darker when game is paused
-            Texture2D texture = new Texture2D(graphicsDevice, width, height);
-            Color[] data = new Color[width * height];
-            for (int i = 0; i < data.Length; i++) 
-                data[i] = Color.DarkGray;
-            texture.SetData(data);
-            return texture;
-        }
-        
-        
         protected override void HandleButtonClick(MenuButton button)
         {
             // Use _currentGameTime from ScreenBase class if GameTime is needed

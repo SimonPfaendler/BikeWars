@@ -40,7 +40,7 @@ public class EnemyMovement : MovementBase
         set => _enemyPosition =  value;
     }
 
-    private const float StopRadius = 50f;
+    private const float StopRadius = 10f;
 
     private int _sidestepCount = 0;
 

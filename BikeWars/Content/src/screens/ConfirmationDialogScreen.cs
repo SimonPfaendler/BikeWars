@@ -62,16 +62,6 @@ namespace BikeWars.Content.screens
             _overlayTexture = CreateOverlayTexture(game.GraphicsDevice, screenWidth, screenHeight);
         }
 
-        private Texture2D CreateSimpleTexture(GraphicsDevice graphicsDevice, int width, int height)
-        {
-            Texture2D texture = new Texture2D(graphicsDevice, width, height);
-            Color[] data = new Color[width * height];
-            for (int i = 0; i < data.Length; i++)
-                data[i] = Color.White;
-            texture.SetData(data);
-            return texture;
-        }
-
         protected override void HandleButtonClick(MenuButton button)
         {
             switch ((ButtonAction)button.Id)

@@ -11,7 +11,7 @@ namespace BikeWars.Content.engine.Audio
         public const string Driving = "bike_driving";
 
         // Mapping ID -> Content-Path
-        public static readonly Dictionary<string, string> SoundEffectPaths = new()
+        public static readonly IReadOnlyDictionary<string, string> SoundEffectPaths = new Dictionary<string, string>
         {
             { SoftClick, "assets/sounds/SoftClick" },
             { HandgunClick, "assets/sounds/HandgunClick" },
@@ -22,7 +22,7 @@ namespace BikeWars.Content.engine.Audio
         // Song IDs to be used in the code
         public const string MenuMusic = "Menu_music";
         public const string GameMusic = "Game_music";
-        public static readonly Dictionary<string, string> SongPaths = new()
+        public static readonly IReadOnlyDictionary<string, string> SongPaths = new Dictionary<string, string>
         {
             { MenuMusic, "assets/sounds/Menu_music" },
             { GameMusic, "assets/sounds/Game_music" },

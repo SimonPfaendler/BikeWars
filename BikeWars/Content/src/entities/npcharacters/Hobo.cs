@@ -6,7 +6,8 @@ using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
-using BikeWars.Content.managers; // SpriteAnimation
+using BikeWars.Content.managers;
+using BikeWars.Content.utils;
 
 namespace BikeWars.Entities.Characters
 {
@@ -26,7 +27,8 @@ namespace BikeWars.Entities.Characters
         private SpriteAnimation _idleAnimation;
         private SpriteAnimation _walkLeftAnimation;
         private SpriteAnimation _walkRightAnimation;
-
+        private SpriteAnimation _walkUpAnimation;
+        private SpriteAnimation _walkDownAnimation;
         private SpriteAnimation _currentAnimation;
 
         public override void LoadContent(ContentManager content)
@@ -35,45 +37,25 @@ namespace BikeWars.Entities.Characters
             _characterAtlas = content.Load<Texture2D>("assets/sprites/characters/character_atlas");
 
             // idle
-            // e1_drunkdude_standing.png "frame": {"x":0,"y":0,"w":40,"h":50}
-            var idleFrames = new List<Rectangle>
-            {
-                new Rectangle(0, 0, 40, 50)
-            };
+            // e1_drunkdude_standing.png 
+            var idleFrames = SpriteFrameDictionary.GetFrames("Hobo_Idle");
             _idleAnimation = new SpriteAnimation(_characterAtlas, idleFrames, 0.4f);
 
             // e1_drunkdude_walking_left.png
-
-            int leftBaseX = 64;
-            int leftBaseY = 128;
-            int leftW = 96;
-            int leftH = 127;
-            int leftFrameW = leftW / 2;
-            int leftFrameH = leftH / 2;
-
-            var leftFrames = new List<Rectangle>
-            {
-                new Rectangle(leftBaseX + 0 * leftFrameW, leftBaseY, leftFrameW, leftFrameH),
-                new Rectangle(leftBaseX + 1 * leftFrameW, leftBaseY, leftFrameW, leftFrameH)
-            };
+            var leftFrames = SpriteFrameDictionary.GetFrames("Hobo_WalkLeft");
             _walkLeftAnimation = new SpriteAnimation(_characterAtlas, leftFrames, 0.15f);
-
-
-            // e1_drunkdude_walking_right.png  "frame": {"x":296,"y":0,"w":80,"h":108}
-
-            int rightBaseX = 190;
-            int rightBaseY = 0;
-            int rightW = 80;
-            int rightH = 108;
-            int rightFrameW = rightW / 2;
-            int rightFrameH = rightH / 2;
-
-            var rightFrames = new List<Rectangle>
-            {
-                new Rectangle(rightBaseX + 0 * rightFrameW, rightBaseY, rightFrameW, rightFrameH),
-                new Rectangle(rightBaseX + 1 * rightFrameW, rightBaseY, rightFrameW, rightFrameH)
-            };
+            
+            // e1_drunkdude_walking_right.png 
+            var rightFrames = SpriteFrameDictionary.GetFrames("Hobo_WalkRight");
             _walkRightAnimation = new SpriteAnimation(_characterAtlas, rightFrames, 0.15f);
+            
+            // e1_drunkdude_walking_down.png
+            var downFrames = SpriteFrameDictionary.GetFrames("Hobo_WalkDown");
+            _walkDownAnimation = new SpriteAnimation(_characterAtlas, downFrames, 0.15f); 
+    
+            // e1_drunkdude_walking_up.png
+            var upFrames = SpriteFrameDictionary.GetFrames("Hobo_WalkUp");
+            _walkUpAnimation = new SpriteAnimation(_characterAtlas, upFrames, 0.15f);
 
             // Startzustand: Idle
             _currentAnimation = _idleAnimation;
@@ -104,24 +86,6 @@ namespace BikeWars.Entities.Characters
             movement = new EnemyMovement(canMove: true, isMoving: false);
             UpdateCollider();
         }
-        public override void TakeDamage(int amount)
-        {
-            if (IsDead) return;
-
-            Health -= amount;
-
-            if (Health <= 0)
-            {
-                Health = 0;
-            }
-        }
-
-        public override void Attack(ICombat target)
-        {
-            if (!CanAttack()) return;
-            target.TakeDamage(AttackDamage);
-            ResetAttackCooldown(); 
-        }
 
         public override void Update(GameTime gameTime)
         {
@@ -151,19 +115,16 @@ namespace BikeWars.Entities.Characters
                 direction.Normalize();
                 Transform.Position += direction * Speed * delta;
 
-                // Animation anhand der horizontalen Richtung wählen
-                if (direction.X > 0.1f)
+                
+                if (System.Math.Abs(direction.X) > System.Math.Abs(direction.Y))
                 {
-                    _currentAnimation = _walkRightAnimation;
+                    
+                    _currentAnimation = (direction.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
                 }
-                else if (direction.X < -0.1f)
+                else 
                 {
-                    _currentAnimation = _walkLeftAnimation;
-                }
-                else
-                {
-                    // bewegt sich nur hoch/runter → vorerst Idle
-                    _currentAnimation = _idleAnimation;
+                    
+                    _currentAnimation = (direction.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
                 }
             }
             else
@@ -171,7 +132,7 @@ namespace BikeWars.Entities.Characters
                 _currentAnimation = _idleAnimation;
             }
 
-            // SpriteAnimation updaten (setzt intern FrameIndex usw.)
+            
             if (_currentAnimation != null)
             {
                 _currentAnimation.Update(gameTime, isMoving);
@@ -187,12 +148,6 @@ namespace BikeWars.Entities.Characters
             if (_currentAnimation == null)
                 return;
             _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, 0f);
-        }
-
-        // Is Helpful for example with colliders to set the original position back.
-        public override void SetLastTransform()
-        {
-            Transform = new Transform(new Vector2(LastTransform.Position.X, LastTransform.Position.Y), LastTransform.Size);
         }
         
         public void SetWorldAudioManager(WorldAudioManager manager)

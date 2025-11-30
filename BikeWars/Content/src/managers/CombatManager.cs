@@ -22,6 +22,7 @@ public class CombatManager
     public void HandleProjectileHit(CharacterBase target, ProjectileBase projectile)
     {
         if (target.IsDead) return;
+        if (target.IsGodMode) return;
         if (target == projectile.Owner) return;
 
         // Apply Damage

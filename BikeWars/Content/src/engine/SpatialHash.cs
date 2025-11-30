@@ -4,6 +4,7 @@ using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework;
 
 // public class SpatialHash2D<T>
+namespace BikeWars.Content.engine;
 public class SpatialHash
 {
     private int _cellSize {get; set;}
