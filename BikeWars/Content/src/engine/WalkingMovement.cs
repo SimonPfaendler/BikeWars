@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using BikeWars.Content.components;
+using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework;
 
-namespace BikeWars.Content.engine.interfaces;
+namespace BikeWars.Content.engine;
 public class WalkingMovement : IMoveable
 {
     private Vector2 _direction { get; set; }

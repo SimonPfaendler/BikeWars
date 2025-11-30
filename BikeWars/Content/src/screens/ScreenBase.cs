@@ -24,8 +24,6 @@ namespace BikeWars.Content.screens
             _backgroundTexture = background;
             _font = font;
             _buttons = new List<MenuButton>();
-            
-            InitializeButtons();
         }
         
         protected abstract void InitializeButtons();
@@ -65,6 +63,17 @@ namespace BikeWars.Content.screens
             }
             
             spriteBatch.End();
+        }
+        
+        // CreateSimpleTexture might be changed for a better graphic later
+        protected Texture2D CreateSimpleTexture(GraphicsDevice graphicsDevice, int width, int height)
+        {
+            Texture2D texture = new Texture2D(graphicsDevice, width, height);
+            Color[] data = new Color[width * height];
+            for (int i = 0; i < data.Length; i++) 
+                data[i] = Color.White;
+            texture.SetData(data);
+            return texture;
         }
         
         // Every screen has to handle their own button clicks

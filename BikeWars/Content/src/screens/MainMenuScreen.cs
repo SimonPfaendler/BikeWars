@@ -5,20 +5,24 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
+using BikeWars.Content.engine.Audio;
 using BikeWars.Content.managers;
 
 namespace BikeWars.Content.screens
 {
     public class MainMenuScreen : MenuScreenBase, IScreen
     {
-        
-        public MainMenuScreen(Texture2D background, SpriteFont font)
+        private readonly AudioService _audioService;
+        public string DesiredMusic => AudioAssets.MenuMusic;
+        public float MusicVolume => 1f;
+        public MainMenuScreen(Texture2D background, SpriteFont font, AudioService audioService)
             : base(background, font)
         {
-            
+            _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
+            InitializeButtons();
         }
         
-        protected override void InitializeButtons()
+        protected sealed override void InitializeButtons()
         {
             Game1 game = Game1.Instance;
             int screenWidth = game.GraphicsDevice.Viewport.Width;
@@ -40,7 +44,8 @@ namespace BikeWars.Content.screens
                 texture: _buttonTexture,
                 bounds: new Rectangle(horizontalSpacing, leftStartY, buttonWidth, buttonHeight),
                 text: "Neues Spiel",
-                font: _font
+                font: _font,
+                audioService: _audioService
             ));
 
             _buttons.Add(new MenuButton(
@@ -48,7 +53,8 @@ namespace BikeWars.Content.screens
                 texture: _buttonTexture,
                 bounds: new Rectangle(horizontalSpacing, leftStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
                 text: "Spiel laden", 
-                font: _font
+                font: _font,
+                audioService: _audioService
             ));
 
             _buttons.Add(new MenuButton(
@@ -56,7 +62,8 @@ namespace BikeWars.Content.screens
                 texture: _buttonTexture,
                 bounds: new Rectangle(horizontalSpacing, leftStartY + 2 * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
                 text: "Statistiken",
-                font: _font
+                font: _font,
+                audioService: _audioService
             ));
 
             _buttons.Add(new MenuButton(
@@ -64,7 +71,8 @@ namespace BikeWars.Content.screens
                 texture: _buttonTexture,
                 bounds: new Rectangle(horizontalSpacing, leftStartY + 3 * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
                 text: "Tech Demo",
-                font: _font
+                font: _font,
+                audioService: _audioService
             ));
 
             // Buttons on the right side
@@ -73,7 +81,8 @@ namespace BikeWars.Content.screens
                 texture: _buttonTexture,
                 bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY, buttonWidth, buttonHeight),
                 text: "Profil",
-                font: _font
+                font: _font,
+                audioService: _audioService
             ));
 
             _buttons.Add(new MenuButton(
@@ -81,7 +90,8 @@ namespace BikeWars.Content.screens
                 texture: _buttonTexture,
                 bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
                 text: "Optionen",
-                font: _font
+                font: _font,
+                audioService: _audioService
             ));
 
             _buttons.Add(new MenuButton(
@@ -89,27 +99,18 @@ namespace BikeWars.Content.screens
                 texture: _buttonTexture,
                 bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY + 2 * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
                 text: "Beenden",
-                font: _font
+                font: _font,
+                audioService: _audioService
             ));
         }
         
-        // CreateSimpleTexture might be changed for a better graphic later
-        private Texture2D CreateSimpleTexture(GraphicsDevice graphicsDevice, int width, int height)
-        {
-            Texture2D texture = new Texture2D(graphicsDevice, width, height);
-            Color[] data = new Color[width * height];
-            for (int i = 0; i < data.Length; i++) 
-                data[i] = Color.White;
-            texture.SetData(data);
-            return texture;
-        }
         
         protected override void HandleButtonClick(MenuButton button)
         {
             switch ((ButtonAction)button.Id)
             {
                 case ButtonAction.NewGame:
-                    GameConfigScreen gameConfigScreen = new GameConfigScreen(_backgroundTexture, _font);
+                    GameConfigScreen gameConfigScreen = new GameConfigScreen(_backgroundTexture, _font, _audioService);
                     ScreenManager.AddScreen(gameConfigScreen);
                     break;
             
@@ -118,7 +119,7 @@ namespace BikeWars.Content.screens
                     break;
             
                 case ButtonAction.Profile:
-                    ProfileScreen profileScreen = new ProfileScreen(_backgroundTexture, _font);
+                    ProfileScreen profileScreen = new ProfileScreen(_backgroundTexture, _font, _audioService);
                     ScreenManager.AddScreen(profileScreen);
                     break;
 
@@ -128,10 +129,11 @@ namespace BikeWars.Content.screens
 
                 case ButtonAction.TechDemo:
                     // TODO: Open Tech Demo Screen
+                    ScreenManager.AddScreen(new TechDemoScreen(_audioService));
                     break;
 
                 case ButtonAction.Options:
-                    OptionScreen optionScreen = new OptionScreen(_font);
+                    OptionScreen optionScreen = new OptionScreen(_font, _audioService);
                     ScreenManager.AddScreen(optionScreen);
                     break;
             
@@ -139,7 +141,8 @@ namespace BikeWars.Content.screens
                     ConfirmationDialogScreen confirmDialog = new ConfirmationDialogScreen(
                         _font, 
                         "Bist Du Dir sicher?", 
-                        this
+                        this,
+                        _audioService
                     );
                     ScreenManager.AddScreen(confirmDialog);
                     break;

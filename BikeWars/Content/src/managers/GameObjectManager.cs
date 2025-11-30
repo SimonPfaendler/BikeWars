@@ -1,0 +1,196 @@
+using System.Collections.Generic;
+using BikeWars.Content.engine;
+using BikeWars.Content.entities.interfaces;
+using BikeWars.Content.entities.items;
+using BikeWars.Entities.Characters;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
+using BikeWars.Content.engine.Audio;
+using BikeWars.Content.engine.interfaces;
+
+namespace BikeWars.Content.managers;
+public class GameObjectManager
+{
+    private Player _player1 {get; set;}
+    public Player Player1{get => _player1; set => _player1 = value;}
+    private Player _player2 {get; set;}
+    public Player Player2{get => _player2; set => _player2 = value;}
+
+    private List<CharacterBase> _characters {get; set;}
+    public List<CharacterBase> Characters {get => _characters;}
+
+    private List<ItemBase> _items {get; set;}
+    public List<ItemBase> Items {get => _items; set => _items = value;}
+
+    private List<BoxCollider> _statics {get; set;}
+    public List<BoxCollider> Statics {get => _statics;}
+
+    private List<ProjectileBase> _projectiles {get; set;}
+    public List<ProjectileBase> Projectiles {get => _projectiles;}
+
+    public ContentManager _contentManager {get; set;} // TODO do we need this one?
+    
+    private WorldAudioManager _worldAudioManager;
+
+    public GameObjectManager(ContentManager content)
+    {
+        _contentManager = content;
+
+        _characters = new List<CharacterBase>();
+        _items = new List<ItemBase>();
+        _statics = new List<BoxCollider>();
+        _projectiles = new List<ProjectileBase>();
+    }
+    public GameObjectManager(ContentManager content, Player player1, Player player2)
+    {
+        Player1 = player1;
+        Player2 = player2;
+        _contentManager = content;
+
+        _contentManager = content;
+        _characters = new List<CharacterBase>();
+        _items = new List<ItemBase>();
+        _statics = new List<BoxCollider>();
+        _projectiles = new List<ProjectileBase>();
+
+        Player1.ShotBullet += OnPlayerShotBullet;
+
+    }
+    public GameObjectManager(ContentManager content, List<CharacterBase> characters, List<ItemBase> items, List<BoxCollider> statics, List<ProjectileBase> projectiles) // TODO
+    {
+        _contentManager = content;
+        _characters = characters;
+        _items = items;
+        _statics = statics;
+        _projectiles = projectiles;
+    }
+    public void AddCharacter(CharacterBase character)
+    {
+        if (_worldAudioManager != null && character is IWorldAudioAware wa)
+            wa.SetWorldAudioManager(_worldAudioManager);
+
+        Characters.Add(character);
+    }
+    
+
+    public void AddItem(ItemBase item)
+    {
+        Items.Add(item);
+    }
+
+    public void AddStatic(BoxCollider stat)
+    {
+        Statics.Add(stat);
+    }
+
+    public void AddProjectile(ProjectileBase proj)
+    {
+        Projectiles.Add(proj);
+    }
+
+    public void LoadContent(ContentManager content)
+    {
+        Player1.LoadContent(content);
+        foreach (CharacterBase c in Characters)
+        {
+            c.LoadContent(content);
+        }
+        foreach (ItemBase i in Items)
+        {
+            i.LoadContent(content);
+        }
+        foreach (ProjectileBase p in Projectiles)
+        {
+            p.LoadContent(content);
+        }
+        foreach (BoxCollider s in Statics)
+        {
+            // s.LoadContent();
+        }
+    }
+
+    public void Draw(SpriteBatch spriteBatch)
+    {
+        Player1.Draw(spriteBatch); // Maybe put it in characters too?
+        // Player2.Draw(spriteBatch);
+        foreach (CharacterBase c in Characters)
+        {
+            c.Draw(spriteBatch);
+        }
+        foreach (ItemBase i in Items)
+        {
+            i.Draw(spriteBatch);
+        }
+        foreach (ProjectileBase p in Projectiles)
+        {
+            p.Draw(spriteBatch);
+        }
+        foreach (BoxCollider s in Statics)
+        {
+            // s.LoadContent();
+        }
+    }
+
+    public void Update(GameTime gameTime, Vector2 mouseWorldPos)
+    {
+        Player1.Update(gameTime, mouseWorldPos);
+        foreach (ProjectileBase p in Projectiles)
+        {
+            p.Update(gameTime);
+        }
+        foreach (CharacterBase c in Characters)
+        {
+            c.Update(gameTime);
+            if (c is Hobo h)
+            {
+                h.Movement.PlayerPosition = Player1.Transform.Position;
+                h.Movement.EnemyPosition = h.Transform.Position;
+            }
+            if (c is BikeThief b)
+            {
+                b.Movement.PlayerPosition = Player1.Transform.Position;
+                b.Movement.EnemyPosition = b.Transform.Position;
+            }
+            c.UpdateCollider();
+        }
+        foreach (ItemBase i in Items)
+        {
+            i.Update(gameTime);
+        }
+        foreach (ProjectileBase p in Projectiles)
+        {
+            p.Update(gameTime);
+        }
+        foreach (BoxCollider s in Statics)
+        {
+            // s.LoadContent();
+        }
+    }
+
+    private void OnPlayerShotBullet()
+    {
+        Vector2 spawnPos = Player1.Transform.Position;
+        Vector2 direction = Player1.GazeDirection;
+
+        Bullet b = new Bullet(spawnPos, new Point(8, 8), Player1);
+        b.Movement.Direction = direction; // Set the movement direction
+        b.LoadContent(_contentManager);
+        AddProjectile(b);
+    }
+    
+    public void SetWorldAudioManager(WorldAudioManager worldAudioManager)
+    {
+        _worldAudioManager = worldAudioManager;
+        
+        if (Player1 is IWorldAudioAware pa)
+            pa.SetWorldAudioManager(worldAudioManager);
+        
+        foreach (var c in Characters)
+        {
+            if (c is IWorldAudioAware wa)
+                wa.SetWorldAudioManager(worldAudioManager);
+        }
+    }
+
+}

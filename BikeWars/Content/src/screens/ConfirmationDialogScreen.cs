@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
+using BikeWars.Content.engine.Audio;
 using BikeWars.Content.managers;
 
 namespace BikeWars.Content.screens
@@ -11,16 +12,21 @@ namespace BikeWars.Content.screens
     public class ConfirmationDialogScreen : MenuScreenBase, IScreen
     {
         private readonly string _message;
-        private IScreen _previousScreen;
+        private readonly IScreen _previousScreen;
+        private readonly AudioService _audioService;
+        public float MusicVolume => 0.5f;
+        private Texture2D _overlayTexture;
 
-        public ConfirmationDialogScreen(SpriteFont font, string message, IScreen previousScreen)
-            :base(null, font)
+        public ConfirmationDialogScreen(SpriteFont font, string message, IScreen previousScreen, AudioService audioService)
+            : base(null, font)
         {
             _message = message;
             _previousScreen = previousScreen;
+            _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
+            InitializeButtons();
         }
 
-        protected override void InitializeButtons()
+        protected sealed override void InitializeButtons()
         {
             Game1 game = Game1.Instance;
             int screenWidth = game.GraphicsDevice.Viewport.Width;
@@ -40,7 +46,8 @@ namespace BikeWars.Content.screens
                 texture: _buttonTexture,
                 bounds: new Rectangle(startX, screenHeight / 2 + 80, buttonWidth, buttonHeight),
                 text: "Ja",
-                font: _font
+                font: _font,
+                audioService: _audioService
             ));
 
             _buttons.Add(new MenuButton(
@@ -48,18 +55,11 @@ namespace BikeWars.Content.screens
                 texture: _buttonTexture,
                 bounds: new Rectangle(startX + buttonWidth + buttonSpacing, screenHeight / 2 + 80, buttonWidth, buttonHeight),
                 text: "Nein",
-                font: _font
+                font: _font,
+                audioService: _audioService
             ));
-        }
-
-        private Texture2D CreateSimpleTexture(GraphicsDevice graphicsDevice, int width, int height)
-        {
-            Texture2D texture = new Texture2D(graphicsDevice, width, height);
-            Color[] data = new Color[width * height];
-            for (int i = 0; i < data.Length; i++)
-                data[i] = Color.White;
-            texture.SetData(data);
-            return texture;
+            
+            _overlayTexture = CreateOverlayTexture(game.GraphicsDevice, screenWidth, screenHeight);
         }
 
         protected override void HandleButtonClick(MenuButton button)
@@ -82,11 +82,8 @@ namespace BikeWars.Content.screens
             SpriteBatch spriteBatch = game.SpriteBatch;
 
             spriteBatch.Begin();
-
-            Texture2D overlay = CreateOverlayTexture(game.GraphicsDevice,
-                game.GraphicsDevice.Viewport.Width,
-                game.GraphicsDevice.Viewport.Height);
-            spriteBatch.Draw(overlay, Vector2.Zero, Color.Black * 0.7f);
+            
+            spriteBatch.Draw(_overlayTexture, Vector2.Zero, Color.Black * 0.7f);
 
             float messageScale = 2.0f;
             Vector2 messageSize = _font.MeasureString(_message) * messageScale;
@@ -115,6 +112,7 @@ namespace BikeWars.Content.screens
             texture.SetData(data);
             return texture;
         }
+
         public override bool DrawLower => true;
         public override bool UpdateLower => false;
     }

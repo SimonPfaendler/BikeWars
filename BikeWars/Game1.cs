@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using BikeWars.Content.managers;
 using BikeWars.Content.screens;
 using BikeWars.Content.engine;
+using BikeWars.Content.engine.Audio;
 
 namespace BikeWars;
 
@@ -12,9 +13,9 @@ public class Game1 : Game
     private GraphicsDeviceManager _graphics;
     public SpriteBatch SpriteBatch { get; private set; }
     public ScreenManager ScreenManager;
+    private AudioService _audioService;
+    public static AudioService Audio => Instance._audioService;
     public static Game1 Instance { get; private set; }
-    
-    public static SoundHandler SoundHandler { get; private set; }
 
 
     public Game1()
@@ -26,6 +27,7 @@ public class Game1 : Game
 
         _graphics.PreferredBackBufferWidth = 1280;
         _graphics.PreferredBackBufferHeight = 720;
+
     }
 
     protected override void Initialize()
@@ -39,21 +41,22 @@ public class Game1 : Game
     {
         Texture2D background = Content.Load<Texture2D>("assets/images/Startbildschirm");
         SpriteFont font = Content.Load<SpriteFont>("assets/fonts/Arial");
-        MainMenuScreen mainMenu = new MainMenuScreen(background, font);
+        MainMenuScreen mainMenu = new MainMenuScreen(background, font, _audioService);
         ScreenManager.AddScreen(mainMenu);
     }
 
     protected override void LoadContent()
     {
         this.SpriteBatch = new SpriteBatch(GraphicsDevice);
+        
+        _audioService = new AudioService();
+        _audioService.LoadContent(Content);
 
         Texture2D background = Content.Load<Texture2D>("assets/images/Startbildschirm");
         Texture2D button = Content.Load<Texture2D>("assets/images/StartButton");
-        StartScreen startScreen = new StartScreen(background);
+        StartScreen startScreen = new StartScreen(background, _audioService);
         ScreenManager.AddScreen(startScreen);
-        
-        SoundHandler = new SoundHandler();
-        SoundHandler.LoadContent(Content);
+        ScreenManager.SetAudio(_audioService);
     }
 
     protected override void Update(GameTime gameTime)
@@ -62,6 +65,8 @@ public class Game1 : Game
 
         if (InputHandler.IsPressed(GameAction.ESC))
             Exit();
+        
+        _audioService.Update(gameTime);
 
         base.Update(gameTime);
     }

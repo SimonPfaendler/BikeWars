@@ -1,28 +1,17 @@
 using System.Collections.Generic;
 using BikeWars.Content.engine;
-using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using BikeWars.Content.entities.items;
 using BikeWars.Entities.Characters;
 namespace BikeWars.Content.managers;
 public class ItemManager
 {
     private readonly List<ItemBase> _items = new();
-    public IReadOnlyList<ItemBase> Items => _items;
+    public List<ItemBase> Items => _items;
     public void AddItem(ItemBase item)
     {
         _items.Add(item);
-    }
-
-    public void LoadContent(ContentManager content)
-    {
-        foreach (var item in _items)
-        {
-            item.LoadContent(content);
-        }
     }
 
     public void Update(GameTime gameTime, Player player)
@@ -33,15 +22,6 @@ public class ItemManager
         {
             var item = _items[i];
             bool collision = player.Intersects(item.Collider);
-            
-            if (!item.InventoryItem && item is IPickable)
-            {
-                if (collision)
-                {
-                    _items.RemoveAt(i);
-                    continue;
-                }
-            }
 
             if (item.InventoryItem)
             {
@@ -54,7 +34,6 @@ public class ItemManager
                     }
                 }
             }
-
             item.Update(gameTime);
         }
     }
@@ -65,5 +44,10 @@ public class ItemManager
         {
             item.Draw(spriteBatch);
         }
+    }
+
+    public void Remove(ItemBase item)
+    {
+        _items.Remove(item);
     }
 }

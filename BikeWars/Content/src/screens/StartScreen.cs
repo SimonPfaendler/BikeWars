@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
+using BikeWars.Content.engine.Audio;
 
 namespace BikeWars.Content.screens;
 // the first screen that pops up when the Game is started
@@ -15,13 +16,18 @@ public class StartScreen : IScreen
     private MenuButton _startButton;
     private MouseState _previousMouseState;
     private SpriteFont _font;
+    private readonly AudioService _audioService;
+    public string DesiredMusic => AudioAssets.MenuMusic;
+    public float MusicVolume => 1f;
+
     
     public ScreenManager ScreenManager { get; set; }
     
-    public StartScreen(Texture2D background)
+    public StartScreen(Texture2D background, AudioService audioService)
     {
         _backgroundTexture = background;
         _font = Game1.Instance.Content.Load<SpriteFont>("assets/fonts/Arial");
+        _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
         
         InitializeButton();
     }
@@ -48,7 +54,8 @@ public class StartScreen : IScreen
             bounds: buttonBounds,
             text: "Start",
             font: _font,
-            textColor: Color.Black
+            textColor: Color.Black,
+            audioService: _audioService
         );
     }
     
@@ -70,7 +77,7 @@ public class StartScreen : IScreen
         
         if (_startButton.IsClicked(currentMouseState, _previousMouseState))
         {
-            MainMenuScreen mainMenu = new MainMenuScreen(_backgroundTexture, _font);
+            MainMenuScreen mainMenu = new MainMenuScreen(_backgroundTexture, _font, _audioService);
             ScreenManager.RemoveScreen(this);
             ScreenManager.AddScreen(mainMenu);
         }

@@ -1,6 +1,8 @@
+using BikeWars.Content.engine.Audio;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+
 
 namespace BikeWars.Content.components
 {
@@ -18,8 +20,9 @@ namespace BikeWars.Content.components
         private bool _isHovered;
         private const float HOVER_SCALE = 1.2f;
         public int Id { get; private set; }
+        private readonly AudioService _audioService;
         
-        public MenuButton(int id, Texture2D texture, Rectangle bounds, string text, SpriteFont font, Color? textColor = null)
+        public MenuButton(int id, Texture2D texture, Rectangle bounds, string text, SpriteFont font, AudioService audioService, Color? textColor = null)
         {
             Id = id;
             _texture = texture;
@@ -32,6 +35,7 @@ namespace BikeWars.Content.components
             
             CalculateHoverBounds();
             _drawBounds = _originalBounds;
+            _audioService = audioService;
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -66,7 +70,10 @@ namespace BikeWars.Content.components
            
             if (isClicked)
             {
-                Game1.SoundHandler.PlayButtonClick((ButtonAction)Id);
+                if (Id == (int)ButtonAction.StartGame)
+                    _audioService.Sounds.Play(AudioAssets.HandgunClick);
+                else
+                    _audioService.Sounds.Play(AudioAssets.SoftClick);
             }
     
             return isClicked;

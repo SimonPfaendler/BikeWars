@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
+using BikeWars.Content.engine.Audio;
 using BikeWars.Content.managers;
 using BikeWars.Content.src.screens.Overlay;
 
@@ -12,14 +13,18 @@ namespace BikeWars.Content.screens
     public class PauseMenuScreen : MenuScreenBase, IScreen
     {
         private Overlay _overlay; 
-        
-        public PauseMenuScreen(SpriteFont font)
+        private readonly AudioService _audioService;
+        public string DesiredMusic => AudioAssets.GameMusic;
+        public float MusicVolume => 0.5f;
+
+        public PauseMenuScreen(SpriteFont font, AudioService audioService)
             :base(null, font)
         {
-
+            _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
+            InitializeButtons();
         }
         
-        protected override void InitializeButtons()
+        protected sealed override void InitializeButtons()
         {
             Game1 game = Game1.Instance;
             int screenWidth = game.GraphicsDevice.Viewport.Width;
@@ -50,22 +55,11 @@ namespace BikeWars.Content.screens
                     texture: _buttonTexture,
                     bounds: new Rectangle((screenWidth - buttonWidth) / 2, startY + i * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
                     text: buttonDefinitions[i].text,
-                    font: _font
+                    font: _font,
+                    audioService: _audioService
                 ));
             }
         }
-        
-        private Texture2D CreateSimpleTexture(GraphicsDevice graphicsDevice, int width, int height)
-        {
-            // screen gets darker when game is paused
-            Texture2D texture = new Texture2D(graphicsDevice, width, height);
-            Color[] data = new Color[width * height];
-            for (int i = 0; i < data.Length; i++) 
-                data[i] = Color.DarkGray;
-            texture.SetData(data);
-            return texture;
-        }
-        
         
         protected override void HandleButtonClick(MenuButton button)
         {
@@ -73,6 +67,7 @@ namespace BikeWars.Content.screens
             switch ((ButtonAction)button.Id)
             {
                 case ButtonAction.Resume:
+                    _audioService.Sounds.ResumeAll();
                     ScreenManager.RemoveScreen(this);
                     break;
             
@@ -85,11 +80,13 @@ namespace BikeWars.Content.screens
                     break;
             
                 case ButtonAction.MainMenu:
+                    _audioService.Sounds.StopAll();
+                    _audioService.Sounds.Play(AudioAssets.SoftClick);
                     ScreenManager.ReturnToMainMenu();
                     break;
             
                 case ButtonAction.Options:
-                    OptionScreen optionScreen = new OptionScreen(_font);
+                    OptionScreen optionScreen = new OptionScreen(_font, _audioService);
                     ScreenManager.AddScreen(optionScreen);
                     break;
             
@@ -97,7 +94,8 @@ namespace BikeWars.Content.screens
                     ConfirmationDialogScreen confirmDialog = new ConfirmationDialogScreen(
                         _font, 
                         "Bist Du Dir sicher?", 
-                        this
+                        this,
+                        _audioService
                     );
                     ScreenManager.AddScreen(confirmDialog);
                     break;

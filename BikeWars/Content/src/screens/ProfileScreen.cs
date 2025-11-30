@@ -5,19 +5,24 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
+using BikeWars.Content.engine.Audio;
 using BikeWars.Content.managers;
 
 namespace BikeWars.Content.screens;
 
 public class ProfileScreen: MenuScreenBase, IScreen
 {
-    public ProfileScreen(Texture2D background, SpriteFont font)
+    private readonly AudioService _audioService;
+    public string DesiredMusic => AudioAssets.MenuMusic;
+    public float MusicVolume => 1f;
+    public ProfileScreen(Texture2D background, SpriteFont font, AudioService audioService)
         : base(background, font)
     {
-
+        _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
+        InitializeButtons();
     }
     
-    protected override void InitializeButtons()
+    protected sealed override void InitializeButtons()
         {
             Game1 game = Game1.Instance;
             int screenWidth = game.GraphicsDevice.Viewport.Width;
@@ -39,7 +44,8 @@ public class ProfileScreen: MenuScreenBase, IScreen
                 texture: _buttonTexture,
                 bounds: new Rectangle(horizontalSpacing, leftStartY, buttonWidth, buttonHeight),
                 text: "Neues Profil",
-                font: _font
+                font: _font,
+                audioService: _audioService
             ));
 
             _buttons.Add(new MenuButton(
@@ -47,7 +53,8 @@ public class ProfileScreen: MenuScreenBase, IScreen
                 texture: _buttonTexture,
                 bounds: new Rectangle(horizontalSpacing, leftStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
                 text: "Back", 
-                font: _font
+                font: _font,
+                audioService: _audioService
             ));
 
             // Buttons on the right side
@@ -56,7 +63,8 @@ public class ProfileScreen: MenuScreenBase, IScreen
                 texture: _buttonTexture,
                 bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY, buttonWidth, buttonHeight),
                 text: "Achievements",
-                font: _font
+                font: _font,
+                audioService: _audioService
             ));
 
             _buttons.Add(new MenuButton(
@@ -64,20 +72,11 @@ public class ProfileScreen: MenuScreenBase, IScreen
                 texture: _buttonTexture,
                 bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
                 text: "Achievements",
-                font: _font
+                font: _font,
+                audioService: _audioService
             ));
         }
-        
-        // CreateSimpleTexture might be changed for a better graphic later
-        private Texture2D CreateSimpleTexture(GraphicsDevice graphicsDevice, int width, int height)
-        {
-            Texture2D texture = new Texture2D(graphicsDevice, width, height);
-            Color[] data = new Color[width * height];
-            for (int i = 0; i < data.Length; i++) 
-                data[i] = Color.White;
-            texture.SetData(data);
-            return texture;
-        }
+    
         
         protected override void HandleButtonClick(MenuButton button)
         {
