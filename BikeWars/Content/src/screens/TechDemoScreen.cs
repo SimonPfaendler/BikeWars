@@ -8,6 +8,10 @@ using BikeWars.Entities.Characters;
 using BikeWars.Content.components;
 using BikeWars.Content.entities.interfaces;
 
+// adds debugging tools for testing
+// like allowing the dev to spawn a large groups of enemies
+// the final tech demo should allow the dev to spawn 1000 enemies on the screen 
+
 namespace BikeWars.Content.screens
 {
     
@@ -41,11 +45,11 @@ namespace BikeWars.Content.screens
             
             _font = content.Load<SpriteFont>("assets/fonts/Arial");
 
-            // Create simple button texture
+            // creates simple button texture
             _buttonTex = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
             _buttonTex.SetData(new[] { Color.White });
             
-            // Make the 2 tech-demo buttons
+            // makes the 2 tech-demo buttons
             _spawnHoboBtn = new MenuButton(
                 id: 1,
                 texture: _buttonTex,
@@ -85,6 +89,7 @@ namespace BikeWars.Content.screens
             _prevMouse = mouse;
         }
 
+        // spawns enemies when you click their button
         private void SpawnEnemies(EnemyType type, int amount)
         {
             var playerPos = GameObjectManager.Player1.Transform.Position;
@@ -117,7 +122,7 @@ namespace BikeWars.Content.screens
             }
         }
         
-        // draw buttons
+        // draws the buttons
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);

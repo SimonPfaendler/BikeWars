@@ -57,13 +57,13 @@ namespace BikeWars.Content.screens
         public bool DrawLower => false;
         public bool UpdateLower => false;
         
+        // bool that checks if you're in the tech demo or normal gameplay
         private readonly bool _isTechDemo;
         private bool _showStaticHitboxes = false;
 
         public GameScreen(AudioService audioService, bool isTechDemo = false)
         {
             
-            // check if you are in tech demo mode or just gameplay mode
             _isTechDemo = isTechDemo;
             
             worldBounds = new Rectangle(0, 0, 11200, 11200);
@@ -78,7 +78,7 @@ namespace BikeWars.Content.screens
             _collisionManager = new CollisionManager(CELL_SIZE, SEARCH_RADIUS);
             Player player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(32, 32), _audioService);
             
-            // if we are in the techdemo it transforms the player in god mode
+            // if we are in the tech demo it transforms the player in god mode
             if (_isTechDemo)
             {
                 player.IsGodMode = true; 
@@ -233,11 +233,26 @@ namespace BikeWars.Content.screens
 
             if (InputHandler.IsPressed(GameAction.RESET))
             {
-                _counter = 0;
-                _counterTimer = 0;
+                // if R is pressed while in tech demo remove all characters exept the player
+                if (_isTechDemo)
+                {
+                    _gameObjectManager.Characters.RemoveAll(
+                        ch => ch != _gameObjectManager.Player1);
 
-                _gameObjectManager.Player1.Transform.Position = new Vector2(worldBounds.Width / 2, worldBounds.Height / 2);
-                Console.WriteLine("Reset counter and player position.");
+                    _gameObjectManager.Projectiles.Clear();
+
+                    Console.WriteLine("Tech demo reset: removed all enemies and projectiles.");
+                }
+                
+                else
+                {
+                    _counter = 0;
+                    _counterTimer = 0;
+
+                    _gameObjectManager.Player1.Transform.Position =
+                        new Vector2(worldBounds.Width / 2, worldBounds.Height / 2);
+                    Console.WriteLine("Reset counter and player position.");
+                }
             }
         }
 
@@ -262,8 +277,13 @@ namespace BikeWars.Content.screens
 
             _debugger.Draw(spriteBatch);
             _overlay.DrawOnScreen(spriteBatch, gameTime);
-            spriteBatch.DrawString(_debugFont, $"Counter: {_counter}", new Vector2(20, 160), Color.Black);
-            spriteBatch.DrawString(_debugFont, "T=Save  L=Load  R=Reset counter", new Vector2(20, 185), Color.Black);
+            
+            if (!_isTechDemo)
+            {
+                spriteBatch.DrawString(_debugFont, $"Counter: {_counter}", new Vector2(20, 160), Color.Black);
+                spriteBatch.DrawString(_debugFont, "T=Save  L=Load  R=Reset counter", new Vector2(20, 185),
+                    Color.Black);
+            }
             _gameObjectManager.Player1.Inventory.Draw(spriteBatch, _pixel);
             hud.Draw(spriteBatch, _gameObjectManager.Player1);
 

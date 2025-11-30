@@ -235,6 +235,7 @@ public class CollisionManager
         }
     }
 
+    // makes the hitboxes visible for when in the tech demo
     public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel)
     {
         // BoxCollider stores position + width/height, we convert to a Rectangle
@@ -249,7 +250,7 @@ public class CollisionManager
             DrawRectOutline(spriteBatch, pixel, rect, Color.Red * 0.7f);
         }
     }
-
+    
     private void DrawRectOutline(SpriteBatch spriteBatch, Texture2D pixel, Rectangle rect, Color color)
     {
         // top
