@@ -28,6 +28,7 @@ namespace BikeWars.Entities.Characters
         public Vector2 GazeDirection { get; private set; }
         public Vector2 AimTarget { get; private set; }
         private Vector2 _facingDirection = Vector2.UnitX; // Default to Right to match initial animation
+        public float TerrainSpeedMultiplier = 1.0f;
         // public bool IsGodMode { get; set; }
 
         public event Action ShotBullet;
@@ -213,11 +214,11 @@ namespace BikeWars.Entities.Characters
                 _facingDirection = direction; // Update facing direction
                 if (sprint.IsActive)
                 {
-                    Transform.Position += direction * CurrentSpeed * delta;
+                    Transform.Position += direction * CurrentSpeed * delta * TerrainSpeedMultiplier;
                 }
                 else
                 {
-                    Transform.Position += direction * movement.CurrentMovement.Speed * delta;
+                    Transform.Position += direction * movement.CurrentMovement.Speed * delta * TerrainSpeedMultiplier;
                 }
                 _currentAnimation = _walkUpAnimation;
                 // choose animation based on main direction

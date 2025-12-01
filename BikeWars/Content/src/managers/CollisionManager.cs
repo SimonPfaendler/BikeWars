@@ -31,6 +31,8 @@ public class CollisionManager
     public TiledMap TiledMap {get => _tiledMap; set => _tiledMap = value;}
     private List<BoxCollider> _collisionBoxes {get; set;} // Mainly used for the static layout
     public List<BoxCollider> CollisionBoxes {get => _collisionBoxes; set => _collisionBoxes = value;}
+    private HashSet<Point> _streetTiles = new HashSet<Point>();
+
     public CollisionManager(int cellSize, float insertRadius)
     {
         DynamicHash = new SpatialHash(cellSize, insertRadius);
@@ -56,6 +58,16 @@ public class CollisionManager
             BoxCollider box = new BoxCollider(new Vector2(x, y), CELL_SIZE, CELL_SIZE, CollisionLayer.WALL, this);
             CollisionBoxes.Add(box);
             StaticHash.Insert(box);
+        }
+        var streetLayer = TiledMap.GetLayer<TiledMapTileLayer>("Streets");
+        if (streetLayer != null)
+        {
+            foreach (var tile in streetLayer.Tiles)
+            {
+                if (tile.GlobalIdentifier == 0) 
+                    continue;
+                _streetTiles.Add(new Point(tile.X, tile.Y));
+            }
         }
     }
 
@@ -263,63 +275,68 @@ public class CollisionManager
         spriteBatch.Draw(pixel, new Rectangle(rect.Right - 1, rect.Top, 1, rect.Height), color);
     }
     
-    
+    public bool IsPlayerOnStreet(Player player)
+    {
+        Point tilePos = new Point((int)(player.Transform.Position.X / TiledMap.TileWidth), (int)(player.Transform.Position.Y / TiledMap.TileHeight));
+        return _streetTiles.Contains(tilePos);
+    }
+
     // This is old code to have some logic movement for the units
     // If the hobo hits a wall, push him back/sideways and start sidestepping.
-            // foreach (var box in _collisionManager.CollisionBoxes)
-            // {
-            //     if (hobo.Intersects(box))
-            //     {
-            //         var dir = hobo.Movement.Direction;
+    // foreach (var box in _collisionManager.CollisionBoxes)
+    // {
+    //     if (hobo.Intersects(box))
+    //     {
+    //         var dir = hobo.Movement.Direction;
 
-            //         if (dir != Vector2.Zero)
-            //         {
-            //             Vector2 rightNudge = new Vector2(dir.Y, -dir.X);
+    //         if (dir != Vector2.Zero)
+    //         {
+    //             Vector2 rightNudge = new Vector2(dir.Y, -dir.X);
 
-            //             if (rightNudge != Vector2.Zero)
-            //             {
-            //                 rightNudge.Normalize();
-            //                 hobo.Transform.Position += rightNudge * SideNudgeStrength;
-            //             }
-            //         }
+    //             if (rightNudge != Vector2.Zero)
+    //             {
+    //                 rightNudge.Normalize();
+    //                 hobo.Transform.Position += rightNudge * SideNudgeStrength;
+    //             }
+    //         }
 
-            //         hobo.UpdateCollider();
+    //         hobo.UpdateCollider();
 
-            //         if (hobo.Movement.State == EnemyState.Chasing)
-            //         {
-            //             hobo.Movement.StartSidestepping(hobo.Movement.Direction);
-            //         }
+    //         if (hobo.Movement.State == EnemyState.Chasing)
+    //         {
+    //             hobo.Movement.StartSidestepping(hobo.Movement.Direction);
+    //         }
 
-            //         break;
-            //     }
-            // }
+    //         break;
+    //     }
+    // }
 
-            // If the BikeThief hits a wall, push him back/sideways and start sidestepping.
-            // foreach (var box in _collisionManager.CollisionBoxes)
-            // {
-            //     if (bikethief.Intersects(box))
-            //     {
-            //         var dir = bikethief.Movement.Direction;
+    // If the BikeThief hits a wall, push him back/sideways and start sidestepping.
+    // foreach (var box in _collisionManager.CollisionBoxes)
+    // {
+    //     if (bikethief.Intersects(box))
+    //     {
+    //         var dir = bikethief.Movement.Direction;
 
-            //         if (dir != Vector2.Zero)
-            //         {
-            //             Vector2 rightNudge = new Vector2(dir.Y, -dir.X);
+    //         if (dir != Vector2.Zero)
+    //         {
+    //             Vector2 rightNudge = new Vector2(dir.Y, -dir.X);
 
-            //             if (rightNudge != Vector2.Zero)
-            //             {
-            //                 rightNudge.Normalize();
-            //                 bikethief.Transform.Position += rightNudge * SideNudgeStrength;
-            //             }
-            //         }
+    //             if (rightNudge != Vector2.Zero)
+    //             {
+    //                 rightNudge.Normalize();
+    //                 bikethief.Transform.Position += rightNudge * SideNudgeStrength;
+    //             }
+    //         }
 
-            //         bikethief.UpdateCollider();
+    //         bikethief.UpdateCollider();
 
-            //         if (bikethief.Movement.State == EnemyState.Chasing)
-            //         {
-            //             bikethief.Movement.StartSidestepping(bikethief.Movement.Direction);
-            //         }
+    //         if (bikethief.Movement.State == EnemyState.Chasing)
+    //         {
+    //             bikethief.Movement.StartSidestepping(bikethief.Movement.Direction);
+    //         }
 
-            //         break;
-            //     }
-            // }
+    //         break;
+    //     }
+    // }
 }

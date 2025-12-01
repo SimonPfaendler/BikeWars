@@ -62,7 +62,7 @@ namespace BikeWars.Content.screens
                 scaledHeight
             );
 
-            sb.Draw(_pixel, dest, Color.Black);
+            sb.Draw(_pixel, dest, Color.Gray);
         }
         private void DrawSprintIcon(SpriteBatch sb, Player player)
         {
