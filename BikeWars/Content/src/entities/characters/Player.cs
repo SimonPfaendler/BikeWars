@@ -125,7 +125,7 @@ namespace BikeWars.Entities.Characters
 
         public Player(Vector2 start, Point size, AudioService audio)
         {
-            MaxHealth = 1000;
+            MaxHealth = 300;
             Health = MaxHealth;
             AttackDamage = 10;
             AttackCooldown = 2f;

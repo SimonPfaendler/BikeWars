@@ -170,5 +170,12 @@ namespace BikeWars.Entities.Characters
                 movement.CanMove = true;
             }
         }
+        public override void Attack(ICombat target)
+        {
+            if (!CanAttack()) return;
+            target.TakeDamage(AttackDamage);
+            ResetAttackCooldown(); 
+            _audio.Sounds.Play(AudioAssets.Punch);
+        }
     }
 }

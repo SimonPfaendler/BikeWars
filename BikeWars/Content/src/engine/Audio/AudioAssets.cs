@@ -11,6 +11,7 @@ namespace BikeWars.Content.engine.Audio
         public const string Driving = "bike_driving";
         public const string GunShot = "gun_shot";
         public const string BulletHit = "bullet_hit";
+        public const string Punch = "boxing_punch";
         public const string CarCrash = "car_crash";
 
         // Mapping ID -> Content-Path
@@ -22,6 +23,7 @@ namespace BikeWars.Content.engine.Audio
             { Driving, "assets/sounds/Bike_Driving" },
             { GunShot, "assets/sounds/gun_shot" },
             { BulletHit, "assets/sounds/bullet_hit" },
+            { Punch, "assets/sounds/boxing_punch" },
             {CarCrash, "assets/sounds/CarCrash"}
         };
 

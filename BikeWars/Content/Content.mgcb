@@ -103,11 +103,11 @@
 /processorParam:Quality=Best
 /build:assets/sounds/Bike_Driving.mp3
 
-#begin assets/sounds/CarCrash.mp3
-/importer:Mp3Importer
+#begin assets/sounds/boxing_punch.wav
+/importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:assets/sounds/CarCrash.mp3
+/build:assets/sounds/boxing_punch.wav
 
 #begin assets/sounds/bullet_hit.wav
 /importer:WavImporter
