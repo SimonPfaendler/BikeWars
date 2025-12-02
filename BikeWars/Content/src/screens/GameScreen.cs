@@ -173,6 +173,15 @@ namespace BikeWars.Content.screens
                 _showStaticHitboxes = !_showStaticHitboxes;
             }
 
+            if ((_gameObjectManager.Player1 != null) && _gameObjectManager.Player1.IsDead)
+            {
+                _audioService.Sounds.PauseAll();
+                _audioService.Music.Stop();
+                _overlay.SetPaused(true, gameTime);
+                _audioService.Sounds.Play(AudioAssets.CarCrash);
+                ScreenManager.AddScreen(new GameOverScreen(_font, _audioService));
+            }
+
 
             _debugger.Update(gameTime);
             // Needs to be implemented elsewhere.
