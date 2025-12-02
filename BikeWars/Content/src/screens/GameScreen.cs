@@ -175,7 +175,11 @@ namespace BikeWars.Content.screens
 
             if ((_gameObjectManager.Player1 != null) && _gameObjectManager.Player1.IsDead)
             {
-                // TODO: implement transition to GameOverScreen
+                _audioService.Sounds.PauseAll();
+                _audioService.Music.Stop();
+                _overlay.SetPaused(true, gameTime);
+                _audioService.Sounds.Play(AudioAssets.CarCrash);
+                ScreenManager.AddScreen(new GameOverScreen(_font, _audioService));
             }
 
 
