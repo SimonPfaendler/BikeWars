@@ -173,6 +173,11 @@ namespace BikeWars.Content.screens
                 _showStaticHitboxes = !_showStaticHitboxes;
             }
 
+            if ((_gameObjectManager.Player1 != null) && _gameObjectManager.Player1.IsDead)
+            {
+                // TODO: implement transition to GameOverScreen
+            }
+
 
             _debugger.Update(gameTime);
             // Needs to be implemented elsewhere.

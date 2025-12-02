@@ -9,6 +9,7 @@ namespace BikeWars.Content.engine.Audio
         public const string HandgunClick = "button_handgun_click";
         public const string Walking = "player_walking";
         public const string Driving = "bike_driving";
+        public const string CarCrash = "car_crash";
 
         // Mapping ID -> Content-Path
         public static readonly IReadOnlyDictionary<string, string> SoundEffectPaths = new Dictionary<string, string>
@@ -16,7 +17,8 @@ namespace BikeWars.Content.engine.Audio
             { SoftClick, "assets/sounds/SoftClick" },
             { HandgunClick, "assets/sounds/HandgunClick" },
             { Walking, "assets/sounds/Walking" },
-            { Driving, "assets/sounds/Bike_Driving" }
+            { Driving, "assets/sounds/Bike_Driving" },
+            {CarCrash, "assets/sounds/CarCrash"}
         };
 
         // Song IDs to be used in the code
