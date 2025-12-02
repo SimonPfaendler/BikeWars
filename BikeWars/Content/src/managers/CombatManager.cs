@@ -7,6 +7,7 @@ using BikeWars.Content.entities.interfaces;
 using BikeWars.Entities.Characters;
 using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
+using BikeWars.Content.engine.Audio;
 
 namespace BikeWars.Content.managers;
 
@@ -14,8 +15,12 @@ namespace BikeWars.Content.managers;
 /// Reacts to events from collision manager
 public class CombatManager
 {
-    public CombatManager()
+
+    private readonly AudioService _audio;
+
+    public CombatManager(AudioService audio)
     {
+        _audio = audio ?? throw new ArgumentNullException(nameof(audio));
     }
 
     // Projectile hits a character
@@ -31,7 +36,8 @@ public class CombatManager
         // Apply Damage
         target.TakeDamage(projectile.Damage);
         projectile.HasHit = true;
-
+        
+        _audio.Sounds.Play(AudioAssets.BulletHit);
         // if (target.Health <= 0) HandleDeath(target);
     }
 

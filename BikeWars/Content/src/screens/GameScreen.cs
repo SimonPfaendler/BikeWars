@@ -119,7 +119,7 @@ namespace BikeWars.Content.screens
             _tiledMapRenderer = new TiledMapRenderer(Game1.Instance.GraphicsDevice, _collisionManager.TiledMap);
 
             // Create Combat Manager
-            _combatManager = new CombatManager();
+            _combatManager = new CombatManager(_audioService);
 
             // Combat Manager subcribes to Events from Collision Manager:  Collision → Combat
             _collisionManager.OnProjectileHit += _combatManager.HandleProjectileHit;
