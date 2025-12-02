@@ -118,6 +118,8 @@ namespace BikeWars.Entities.Characters
             if (GazeDirection != Vector2.Zero)
             {
                 ShotBullet?.Invoke();
+
+                _audio.Sounds.Play(AudioAssets.GunShot);
             }
         }
 

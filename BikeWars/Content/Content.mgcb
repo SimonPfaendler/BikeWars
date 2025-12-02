@@ -103,6 +103,12 @@
 /processorParam:Quality=Best
 /build:assets/sounds/Bike_Driving.mp3
 
+#begin assets/sounds/bullet_hit.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/bullet_hit.wav
+
 #begin assets/sounds/CarCrash.mp3
 /importer:Mp3Importer
 /processor:SoundEffectProcessor
@@ -114,6 +120,12 @@
 /processor:SongProcessor
 /processorParam:Quality=Best
 /build:assets/sounds/Game_music.mp3
+
+#begin assets/sounds/gun_shot.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/gun_shot.wav
 
 #begin assets/sounds/HandgunClick.mp3
 /importer:Mp3Importer
