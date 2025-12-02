@@ -1,10 +1,14 @@
 using System;
+using System.IO;
+using System.Text.Json;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
+using System.Linq;
+using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.managers;
 using BikeWars.Content.src.screens.Overlay;
@@ -20,12 +24,67 @@ namespace BikeWars.Content.screens
         
         private float _musicDelayTimer = 2.5f;
         private bool _musicStarted = false;
+        
+        private Texture2D _crashSheet;
+        private List<AnimationFrame> _frames;
+        private float _animTotalTime = 0f;
+        private const float _frameRate = 1f / 6f;
+        private int _currentFrameIndex = 0;
+        private bool _isAnimationLoaded = false;
 
         public GameOverScreen(SpriteFont font, AudioService audioService)
             :base(null, font)
         {
             _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
             InitializeButtons();
+            
+            LoadAnimationAssets();
+        }
+        
+        private void LoadAnimationAssets()
+        {
+            try 
+            {
+                _crashSheet = Game1.Instance.Content.Load<Texture2D>("assets/sprites/videos/BikeCrash");
+                
+                string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content", "sprites", "BikeCrash.json");
+
+                if (File.Exists(jsonPath))
+                {
+                    string jsonString = File.ReadAllText(jsonPath);
+                    var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                    
+                    var root = JsonSerializer.Deserialize<TexturePackerRoot>(jsonString, options);
+                    
+                    var rawFrames = root?.frames;
+                    
+                    if (rawFrames != null && rawFrames.Count > 0)
+                    {
+                        _frames = rawFrames.Select(f => new AnimationFrame 
+                        {
+                            SourceRectangle = new Rectangle(f.Frame.X, f.Frame.Y, f.Frame.W, f.Frame.H),
+                            Filename = f.Filename
+                        }).ToList();
+                
+                        _isAnimationLoaded = true;
+                        System.Diagnostics.Debug.WriteLine($"Animation geladen: {_frames.Count} Frames.");
+                    }
+                    
+                    if (_frames != null && _frames.Count > 0)
+                    {
+                        _isAnimationLoaded = true;
+                        System.Diagnostics.Debug.WriteLine($"Animation geladen: {_frames.Count} Frames.");
+                    }
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"WARNUNG: JSON nicht gefunden unter {jsonPath}");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"FEHLER beim Laden der Animation: {ex.Message}");
+            }
         }
         
         protected sealed override void InitializeButtons()
@@ -36,8 +95,10 @@ namespace BikeWars.Content.screens
     
             int buttonWidth = 380;
             int buttonHeight = 80;
+            
+            const int horizontalMargin = 10;
 
-            int startY = screenHeight / 2 + 10;
+            int startY = screenHeight / 2 + 50;
 
             int verticalSpacing = 20;
 
@@ -45,17 +106,28 @@ namespace BikeWars.Content.screens
             
             var buttonDefinitions = new[]
             {
-                (id: ButtonAction.MainMenu, text: "Hauptmenu"),
-                (id: ButtonAction.Exit, text: "Spiel beenden")
+                (id: ButtonAction.MainMenu, text: "Hauptmenu", isLeft: true),
+                (id: ButtonAction.Exit, text: "Spiel beenden", isLeft: false)
             };
     
-            for (int i = 0; i < buttonDefinitions.Length; i++)
+            foreach (var definition in buttonDefinitions)
             {
+                int buttonX;
+        
+                if (definition.isLeft)
+                {
+                    buttonX = horizontalMargin;
+                }
+                else
+                {
+                    buttonX = screenWidth - buttonWidth - horizontalMargin;
+                }
+
                 _buttons.Add(new MenuButton(
-                    id: (int)buttonDefinitions[i].id,
+                    id: (int)definition.id,
                     texture: _buttonTexture,
-                    bounds: new Rectangle((screenWidth - buttonWidth) / 2, startY + i * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
-                    text: buttonDefinitions[i].text,
+                    bounds: new Rectangle(buttonX, startY, buttonWidth, buttonHeight), 
+                    text: definition.text,
                     font: _font,
                     audioService: _audioService
                 ));
@@ -90,10 +162,40 @@ namespace BikeWars.Content.screens
             Game1 game = Game1.Instance;
             SpriteBatch spriteBatch = game.SpriteBatch;
             
+            int screenWidth = game.GraphicsDevice.Viewport.Width;
+            int screenHeight = game.GraphicsDevice.Viewport.Height;
+            
             spriteBatch.Begin();
             
             Texture2D overlay = CreateOverlayTexture(game.GraphicsDevice, game.GraphicsDevice.Viewport.Width, game.GraphicsDevice.Viewport.Height);
             spriteBatch.Draw(overlay, Vector2.Zero, Color.White * 0.7f);
+            
+            if (_isAnimationLoaded)
+            {
+                if (_currentFrameIndex >= _frames.Count) _currentFrameIndex = 0;
+
+                AnimationFrame currentFrame = _frames[_currentFrameIndex];
+                Rectangle sourceRect = currentFrame.SourceRectangle;
+                
+                float scaleAnimation = 1.0f; 
+
+                Vector2 videoPos = new Vector2(
+                    (screenWidth - (sourceRect.Width * scaleAnimation)) / 2,
+                    (screenHeight - (sourceRect.Height * scaleAnimation)) / 2
+                );
+
+                spriteBatch.Draw(
+                    _crashSheet,
+                    videoPos,
+                    sourceRect,
+                    Color.White,
+                    0f,
+                    Vector2.Zero,
+                    scaleAnimation,
+                    SpriteEffects.None,
+                    0f
+                );
+            }
             
             // GAME OVER Text
             string title = "GAME OVER";
@@ -166,6 +268,14 @@ namespace BikeWars.Content.screens
                     _audioService.Music.Play(AudioAssets.MenuMusic);
                     _musicStarted = true;
                 }
+            }
+            
+            if (_isAnimationLoaded)
+            {
+                _animTotalTime += delta;
+                
+                int frameCount = _frames.Count;
+                _currentFrameIndex = (int)(_animTotalTime / _frameRate) % frameCount;
             }
 
             base.Update(gameTime);
