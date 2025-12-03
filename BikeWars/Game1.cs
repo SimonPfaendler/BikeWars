@@ -51,7 +51,9 @@ public class Game1 : Game
         
         _audioService = new AudioService();
         _audioService.LoadContent(Content);
-
+        
+        SpriteManager.LoadContent(Content);
+        
         Texture2D background = Content.Load<Texture2D>("assets/images/Startbildschirm");
         Texture2D button = Content.Load<Texture2D>("assets/images/StartButton");
         StartScreen startScreen = new StartScreen(background, _audioService);

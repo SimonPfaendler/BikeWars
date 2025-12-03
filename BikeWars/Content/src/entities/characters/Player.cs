@@ -35,7 +35,6 @@ namespace BikeWars.Entities.Characters
         // public bool IsGodMode { get; set; }
 
         public event Action ShotBullet;
-        private Texture2D _characterAtlas;
 
         private SpriteAnimation _walkDownAnimation;
         private SpriteAnimation _walkUpAnimation;
@@ -65,44 +64,16 @@ namespace BikeWars.Entities.Characters
 
         public override void LoadContent(ContentManager content)
         {
-            _characterAtlas = content.Load<Texture2D>("assets/sprites/characters/character_atlas");
             if (pixel == null)
             {
                 pixel = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
                 pixel.SetData(new[] { Color.White });
             }
 
-            // Down – c1_move_down_1x2.png: x=270, y=0, w=64, h=128
-            var downFrames = new List<Rectangle>
-            {
-                new Rectangle(270, 0, 64, 64),
-                new Rectangle(270, 64, 64, 64)
-            };
-            _walkDownAnimation = new SpriteAnimation(_characterAtlas, downFrames, 0.16f);
-
-            // Left – c1_move_left_1x2.png: x=334, y=0, w=64, h=128
-            var leftFrames = new List<Rectangle>
-            {
-                new Rectangle(334, 0, 64, 64),
-                new Rectangle(334, 64, 64, 64)
-            };
-            _walkLeftAnimation = new SpriteAnimation(_characterAtlas, leftFrames, 0.16f);
-
-            // Right – c1_move_right_1x2.png: x=398, y=0, w=64, h=128
-            var rightFrames = new List<Rectangle>
-            {
-                new Rectangle(398, 0, 64, 64),
-                new Rectangle(398, 64, 64, 64)
-            };
-            _walkRightAnimation = new SpriteAnimation(_characterAtlas, rightFrames, 0.16f);
-
-            // Up – c1_move_up_1x2.png: x=0, y=128, w=64, h=128
-            var upFrames = new List<Rectangle>
-            {
-                new Rectangle(0, 128, 64, 64),
-                new Rectangle(0, 192, 64, 64)
-            };
-            _walkUpAnimation = new SpriteAnimation(_characterAtlas, upFrames, 0.16f);
+            _walkDownAnimation = SpriteManager.GetAnimation("Character1_WalkDown");
+            _walkLeftAnimation = SpriteManager.GetAnimation("Character1_WalkLeft");
+            _walkRightAnimation = SpriteManager.GetAnimation("Character1_WalkRight");
+            _walkUpAnimation = SpriteManager.GetAnimation("Character1_WalkUp");
 
             _currentAnimation = _walkRightAnimation;
         }
@@ -325,7 +296,7 @@ namespace BikeWars.Entities.Characters
 
                     _ghostTrail.Add(new GhostFrame
                     {
-                        Texture = _characterAtlas,
+                        Texture = SpriteManager.GetCharacterAtlas(),
                         Position = Transform.Position,
                         Source = source,
                         TimeLeft = GhostLifeTime

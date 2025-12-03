@@ -19,9 +19,6 @@ namespace BikeWars.Entities.Characters
 
         public EnemyMovement Movement => movement;
 
-        // Animation mit SpriteManager
-        private Texture2D _characterAtlas;
-
         private SpriteAnimation _idleAnimation;
         private SpriteAnimation _walkLeftAnimation;
         private SpriteAnimation _walkRightAnimation;
@@ -30,21 +27,9 @@ namespace BikeWars.Entities.Characters
 
         public override void LoadContent(ContentManager content)
         {
-            // Atlas laden (Pfad ggf. anpassen)
-            _characterAtlas = content.Load<Texture2D>("assets/sprites/characters/character_atlas");
-
-            // IDLE
-            var idleFrames = SpriteFrameDictionary.GetFrames("BikeThief_Idle");
-            _idleAnimation = new SpriteAnimation(_characterAtlas, idleFrames, 0.6f);
-
-
-            // e2_bikethief_walking_left.png
-            var leftFrames = SpriteFrameDictionary.GetFrames("BikeThief_WalkLeft");
-            _walkLeftAnimation = new SpriteAnimation(_characterAtlas, leftFrames, 0.15f);
-
-            // e2_bikethief_walking_right.png
-            var rightFrames = SpriteFrameDictionary.GetFrames("BikeThief_WalkRight");
-            _walkRightAnimation = new SpriteAnimation(_characterAtlas, rightFrames, 0.15f);
+            _idleAnimation = SpriteManager.GetAnimation("BikeThief_Idle"); 
+            _walkLeftAnimation = SpriteManager.GetAnimation("BikeThief_WalkLeft"); 
+            _walkRightAnimation = SpriteManager.GetAnimation("BikeThief_WalkRight"); 
 
             // Startzustand: Idle
             _currentAnimation = _idleAnimation;

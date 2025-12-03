@@ -21,9 +21,6 @@ namespace BikeWars.Entities.Characters
 
         public EnemyMovement Movement => movement;
 
-        // Animation mit SpriteManager
-        private Texture2D _characterAtlas;
-
         private SpriteAnimation _idleAnimation;
         private SpriteAnimation _walkLeftAnimation;
         private SpriteAnimation _walkRightAnimation;
@@ -33,29 +30,11 @@ namespace BikeWars.Entities.Characters
 
         public override void LoadContent(ContentManager content)
         {
-            // Atlas laden
-            _characterAtlas = content.Load<Texture2D>("assets/sprites/characters/character_atlas");
-
-            // idle
-            // e1_drunkdude_standing.png
-            var idleFrames = SpriteFrameDictionary.GetFrames("Hobo_Idle");
-            _idleAnimation = new SpriteAnimation(_characterAtlas, idleFrames, 0.4f);
-
-            // e1_drunkdude_walking_left.png
-            var leftFrames = SpriteFrameDictionary.GetFrames("Hobo_WalkLeft");
-            _walkLeftAnimation = new SpriteAnimation(_characterAtlas, leftFrames, 0.15f);
-
-            // e1_drunkdude_walking_right.png
-            var rightFrames = SpriteFrameDictionary.GetFrames("Hobo_WalkRight");
-            _walkRightAnimation = new SpriteAnimation(_characterAtlas, rightFrames, 0.15f);
-
-            // e1_drunkdude_walking_down.png
-            var downFrames = SpriteFrameDictionary.GetFrames("Hobo_WalkDown");
-            _walkDownAnimation = new SpriteAnimation(_characterAtlas, downFrames, 0.15f);
-
-            // e1_drunkdude_walking_up.png
-            var upFrames = SpriteFrameDictionary.GetFrames("Hobo_WalkUp");
-            _walkUpAnimation = new SpriteAnimation(_characterAtlas, upFrames, 0.15f);
+            _idleAnimation = SpriteManager.GetAnimation("Hobo_Idle");
+            _walkLeftAnimation = SpriteManager.GetAnimation("Hobo_WalkLeft");
+            _walkRightAnimation = SpriteManager.GetAnimation("Hobo_WalkRight");
+            _walkDownAnimation = SpriteManager.GetAnimation("Hobo_WalkDown");
+            _walkUpAnimation = SpriteManager.GetAnimation("Hobo_WalkUp");
 
             // Startzustand: Idle
             _currentAnimation = _idleAnimation;
