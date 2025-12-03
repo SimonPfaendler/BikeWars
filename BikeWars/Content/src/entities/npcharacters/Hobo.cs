@@ -1,5 +1,4 @@
 using Microsoft.Xna.Framework;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
@@ -70,12 +69,12 @@ namespace BikeWars.Entities.Characters
                 Transform.Position.X - Transform.Size.X / 2f,
                 Transform.Position.Y - Transform.Size.Y / 2f
             );
-    
+
             Collider = new BoxCollider(
-                colliderPosition, 
-                Transform.Size.X, 
-                Transform.Size.Y, 
-                CollisionLayer.CHARACTER, 
+                colliderPosition,
+                Transform.Size.X,
+                Transform.Size.Y,
+                CollisionLayer.CHARACTER,
                 this
             );
         }

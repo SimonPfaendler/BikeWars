@@ -2,10 +2,11 @@
 using System.IO;
 using System.Text.Json;
 using Microsoft.Xna.Framework;
-using BikeWars.Content.engine;
 using System.Collections.Generic;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.entities.items;
+using BikeWars.Content.managers;
+using BikeWars.Entities.Characters;
 
 namespace BikeWars.Content.src.utils.SaveLoadExample;
 
@@ -14,7 +15,10 @@ public static class SaveLoad
     private static int _worldBounds = 11200 / 2;
     public enum TYPES
     {
-        BULLET
+        BULLET,
+        HOBO,
+        BIKETHIEF,
+        CHEST
     }
     // save file path in the user's Documents folder
     private static readonly string SAVE_PATH = Path.Combine(
@@ -29,12 +33,8 @@ public static class SaveLoad
         public float PlayerX { get; set; } = _worldBounds;
         public float PlayerY { get; set; } = _worldBounds;
         public List<ProjectileSaveModel> Projectiles {get; set;}
-
-        public float HoboX { get; set; } = _worldBounds - 60;
-        public float HoboY { get; set; } = _worldBounds + 30;
-
-        public float BikeThiefX { get; set; } = _worldBounds + 100;
-        public float BikeThiefY { get; set; } = _worldBounds - 70;
+        public List<CharacterSaveModel> Characters {get; set;}
+        public List<ItemSaveModel> Items {get; set;}
     }
 
     public class ProjectileSaveModel
@@ -51,7 +51,42 @@ public static class SaveLoad
         {
             Type = type;
             Position = new Vector2Save(position);
-            // position;
+            Size = new PointSave(size);
+        }
+    }
+
+    public class CharacterSaveModel
+    {
+        public TYPES Type {get; set;} // Character Type Like Hobo
+
+        public Vector2Save Position {get;set;}
+
+        public PointSave Size {get;set;}
+
+        public CharacterSaveModel() {}
+
+        public CharacterSaveModel(TYPES type, Vector2 position, Point size)
+        {
+            Type = type;
+            Position = new Vector2Save(position);
+            Size = new PointSave(size);
+        }
+    }
+
+    public class ItemSaveModel
+    {
+        public TYPES Type {get; set;} // Item Type Like Chest
+
+        public Vector2Save Position {get;set;}
+
+        public PointSave Size {get;set;}
+
+        public ItemSaveModel() {}
+
+        public ItemSaveModel(TYPES type, Vector2 position, Point size)
+        {
+            Type = type;
+            Position = new Vector2Save(position);
             Size = new PointSave(size);
         }
     }
@@ -84,9 +119,9 @@ public static class SaveLoad
         public Vector2 ToVector2() => new Vector2(X, Y);
     }
 
-
     // save the counter in a JSON file
-    public static void SaveGame(int counter, Transform playerPosition, List<ProjectileBase> projectiles)
+    // public static void SaveGame(int counter, Transform playerPosition, List<ProjectileBase> projectiles)
+    public static void SaveGame(int counter, GameObjectManager gameObjectManager)
     {
         try
         {
@@ -94,9 +129,11 @@ public static class SaveLoad
             GameState state = new GameState
             {
                 Counter = counter,
-                PlayerX = playerPosition.Position.X,
-                PlayerY = playerPosition.Position.Y,
-                Projectiles = MakeProjectileSaveList(projectiles),
+                PlayerX = gameObjectManager.Player1.Transform.Position.X,
+                PlayerY = gameObjectManager.Player1.Transform.Position.Y,
+                Projectiles = MakeProjectileSaveList(gameObjectManager.Projectiles),
+                Characters = MakeCharacterSaveList(gameObjectManager.Characters),
+                // Items = MakeItemSaveList(gameObjectManager.Items),
             };
             string json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
 
@@ -139,8 +176,6 @@ public static class SaveLoad
 
         Console.WriteLine("Loaded. Counter=" + state.Counter);
         Console.WriteLine("Loaded. Player Position=" + state.PlayerX + " " + state.PlayerY);
-        Console.WriteLine("Loaded. Player Position=" + state.HoboX + " " + state.HoboY);
-        Console.WriteLine("Loaded. Player Position=" + state.BikeThiefX + " " + state.BikeThiefY);
         return state;
     }
 
@@ -151,12 +186,46 @@ public static class SaveLoad
             Bullet b => new ProjectileSaveModel(TYPES.BULLET, projectile.Transform.Position, projectile.Transform.Size),
         };
     }
+    private static ItemSaveModel MakeItemSaveModel(ItemBase item)
+    {
+        return item switch
+        {
+            Chest c => new ItemSaveModel(TYPES.CHEST, item.Transform.Position, item.Transform.Size)
+        };
+    }
+    private static CharacterSaveModel MakeCharacterSaveModel(CharacterBase character)
+    {
+        return character switch
+        {
+            Hobo h => new CharacterSaveModel(TYPES.HOBO, character.Transform.Position, character.Transform.Size),
+            BikeThief bt => new CharacterSaveModel(TYPES.BIKETHIEF, character.Transform.Position, character.Transform.Size)
+        };
+    }
     private static List<ProjectileSaveModel> MakeProjectileSaveList(List<ProjectileBase> pList)
     {
         List<ProjectileSaveModel> crtList = [];
         foreach (var p in pList)
         {
             crtList.Add(MakeProjectileSaveModel(p));
+        }
+        return crtList;
+    }
+    private static List<CharacterSaveModel> MakeCharacterSaveList(List<CharacterBase> pList)
+    {
+        List<CharacterSaveModel> crtList = [];
+        foreach (var p in pList)
+        {
+            crtList.Add(MakeCharacterSaveModel(p));
+        }
+        return crtList;
+    }
+
+    private static List<ItemSaveModel> MakeItemSaveList(List<ItemBase> pList)
+    {
+        List<ItemSaveModel> crtList = [];
+        foreach (var p in pList)
+        {
+            crtList.Add(MakeItemSaveModel(p));
         }
         return crtList;
     }

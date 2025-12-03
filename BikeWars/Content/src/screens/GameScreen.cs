@@ -108,6 +108,7 @@ namespace BikeWars.Content.screens
         public virtual void LoadContent(ContentManager content)
         {
             // Font and Debugger
+
             _debugFont = content.Load<SpriteFont>("assets/fonts/Arial");
             _debugger = new Debugger(_debugFont, _gameObjectManager.Player1);
 
@@ -215,7 +216,8 @@ namespace BikeWars.Content.screens
         private void HandleSaveLoadInput()
         {
             if (InputHandler.IsPressed(GameAction.SAVE))
-                SaveLoad.SaveGame(_counter, _gameObjectManager.Player1.Transform, _gameObjectManager.Projectiles);
+                // SaveLoad.SaveGame(_counter, _gameObjectManager.Player1.Transform, _gameObjectManager.Projectiles);
+                SaveLoad.SaveGame(_counter, _gameObjectManager);
 
             if (InputHandler.IsPressed(GameAction.LOAD))
             {
@@ -226,11 +228,27 @@ namespace BikeWars.Content.screens
                 _gameObjectManager.Projectiles.Clear();
                 foreach (var p in state.Projectiles)
                 {
-                    if (p.Type == SaveLoad.TYPES.BULLET)
+                    if (p.Type == SaveLoad.TYPES.BULLET) // Hier könnte man noch was machen.
                     {
                         Bullet b = new Bullet(p.Position.ToVector2(), p.Size.ToPoint(), _gameObjectManager.Player1); // TODO player doesn't make sense here
                         b.LoadContent(_contentManager);
                         _gameObjectManager.AddProjectile(b);
+                    }
+                }
+                _gameObjectManager.Characters.Clear();
+                foreach (var p in state.Characters)
+                {
+                    if (p.Type == SaveLoad.TYPES.HOBO) // Hier könnte man noch was machen.
+                    {
+                        Hobo b = new Hobo(p.Position.ToVector2(), p.Size.ToPoint(), _audioService);
+                        b.LoadContent(_contentManager);
+                        _gameObjectManager.AddCharacter(b);
+                    }
+                    if (p.Type == SaveLoad.TYPES.BIKETHIEF) // Hier könnte man noch was machen.
+                    {
+                        BikeThief b = new BikeThief(p.Position.ToVector2(), p.Size.ToPoint(), _audioService);
+                        b.LoadContent(_contentManager);
+                        _gameObjectManager.AddCharacter(b);
                     }
                 }
                 Console.WriteLine("Game loaded.");
@@ -274,7 +292,7 @@ namespace BikeWars.Content.screens
             if (_isTechDemo && _showStaticHitboxes)
             {
                 _collisionManager.DrawHitboxes(
-                    spriteBatch, 
+                    spriteBatch,
                     _pixel,
                     _gameObjectManager.Player1,
                     _gameObjectManager.Characters,
