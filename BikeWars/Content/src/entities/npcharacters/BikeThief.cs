@@ -54,11 +54,16 @@ namespace BikeWars.Entities.Characters
 
         public override void UpdateCollider()
         {
+            Vector2 colliderPosition = new Vector2(
+                Transform.Position.X - Transform.Size.X / 2f,
+                Transform.Position.Y - Transform.Size.Y / 2f
+            );
+    
             Collider = new BoxCollider(
-                new Vector2(Transform.Position.X, Transform.Position.Y),
-                Transform.Size.X,
-                Transform.Size.Y,
-                CollisionLayer.CHARACTER,
+                colliderPosition, 
+                Transform.Size.X, 
+                Transform.Size.Y, 
+                CollisionLayer.PLAYER, 
                 this
             );
         }

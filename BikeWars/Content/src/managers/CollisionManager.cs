@@ -296,7 +296,7 @@ public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
     if (player?.Collider != null)
     {
         var playerRect = GetColliderRectangle(player.Collider);
-        DrawRectOutline(spriteBatch, pixel, playerRect, Color.Green * 0.7f);
+        DrawRectOutline(spriteBatch, pixel, playerRect, Color.Red * 0.7f);
         
         // Draw a small indicator for player position
         spriteBatch.Draw(pixel, 
@@ -311,7 +311,7 @@ public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
         if (character?.Collider != null)
         {
             var charRect = GetColliderRectangle(character.Collider);
-            DrawRectOutline(spriteBatch, pixel, charRect, Color.Yellow * 0.7f);
+            DrawRectOutline(spriteBatch, pixel, charRect, Color.Red * 0.7f);
         }
     }
 
@@ -321,7 +321,7 @@ public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
         if (item?.Collider != null)
         {
             var itemRect = GetColliderRectangle(item.Collider);
-            DrawRectOutline(spriteBatch, pixel, itemRect, Color.Blue * 0.7f);
+            DrawRectOutline(spriteBatch, pixel, itemRect, Color.Red * 0.7f);
         }
     }
 
@@ -331,7 +331,7 @@ public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
         if (projectile?.Collider != null)
         {
             var projRect = GetColliderRectangle(projectile.Collider);
-            DrawRectOutline(spriteBatch, pixel, projRect, Color.Magenta * 0.7f);
+            DrawRectOutline(spriteBatch, pixel, projRect, Color.Red * 0.7f);
         }
     }   
 }
