@@ -292,23 +292,86 @@ public class CollisionManager
     }
 
     // makes the hitboxes visible for when in the tech demo
-    public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel)
+    // makes the hitboxes visible for when in the tech demo
+public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel, 
+                         Player player, List<CharacterBase> characters, 
+                         List<ItemBase> items, List<ProjectileBase> projectiles)
+{
+    // Static collision boxes
+    foreach (var box in _collisionBoxes)
     {
-        // BoxCollider stores position + width/height, we convert to a Rectangle
-        foreach (var box in _collisionBoxes)
+        var rect = new Rectangle(
+            (int)box.Position.X,
+            (int)box.Position.Y,
+            box.Width,
+            box.Height
+        );
+        DrawRectOutline(spriteBatch, pixel, rect, Color.Red * 0.7f);
+    }
+
+    // Player hitbox
+    if (player?.Collider != null)
+    {
+        var playerRect = GetColliderRectangle(player.Collider);
+        DrawRectOutline(spriteBatch, pixel, playerRect, Color.Red * 0.7f);
+        
+        // Draw a small indicator for player position
+        spriteBatch.Draw(pixel, 
+            new Rectangle((int)player.Transform.Position.X - 2, 
+                         (int)player.Transform.Position.Y - 2, 4, 4), 
+            Color.Lime);
+    }
+
+    // NPC/Character hitboxes
+    foreach (var character in characters)
+    {
+        if (character?.Collider != null)
         {
-            var rect = new Rectangle(
+            var charRect = GetColliderRectangle(character.Collider);
+            DrawRectOutline(spriteBatch, pixel, charRect, Color.Red * 0.7f);
+        }
+    }
+
+    // Item hitboxes
+    foreach (var item in items)
+    {
+        if (item?.Collider != null)
+        {
+            var itemRect = GetColliderRectangle(item.Collider);
+            DrawRectOutline(spriteBatch, pixel, itemRect, Color.Red * 0.7f);
+        }
+    }
+
+    // Projectile hitboxes
+    foreach (var projectile in projectiles)
+    {
+        if (projectile?.Collider != null)
+        {
+            var projRect = GetColliderRectangle(projectile.Collider);
+            DrawRectOutline(spriteBatch, pixel, projRect, Color.Red * 0.7f);
+        }
+    }   
+}
+
+    // Helper method to convert ICollider to Rectangle
+    private Rectangle GetColliderRectangle(ICollider collider)
+    {
+        if (collider is BoxCollider box)
+        {
+            return new Rectangle(
                 (int)box.Position.X,
                 (int)box.Position.Y,
                 box.Width,
                 box.Height
             );
-            DrawRectOutline(spriteBatch, pixel, rect, Color.Red * 0.7f);
         }
+        return Rectangle.Empty;
     }
 
     private void DrawRectOutline(SpriteBatch spriteBatch, Texture2D pixel, Rectangle rect, Color color)
     {
+        if (rect.Width <= 0 || rect.Height <= 0) return;
+        
         // top
         spriteBatch.Draw(pixel, new Rectangle(rect.Left, rect.Top, rect.Width, 1), color);
         // bottom

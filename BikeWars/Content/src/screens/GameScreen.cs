@@ -273,7 +273,14 @@ namespace BikeWars.Content.screens
 
             if (_isTechDemo && _showStaticHitboxes)
             {
-                _collisionManager.DrawHitboxes(spriteBatch, _pixel);
+                _collisionManager.DrawHitboxes(
+                    spriteBatch, 
+                    _pixel,
+                    _gameObjectManager.Player1,
+                    _gameObjectManager.Characters,
+                    _itemManager.Items,
+                    _gameObjectManager.Projectiles
+                );
             }
 
             spriteBatch.End();
