@@ -8,5 +8,6 @@ public enum CollisionLayer
     PROJECTILE,
     ITEM,
     WALL,
-    WATER
+    WATER,
+    TERRAIN
 }

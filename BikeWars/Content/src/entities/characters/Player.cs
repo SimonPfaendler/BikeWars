@@ -29,6 +29,8 @@ namespace BikeWars.Entities.Characters
         public Vector2 GazeDirection { get; private set; }
         public Vector2 AimTarget { get; private set; }
         private Vector2 _facingDirection = Vector2.UnitX; // Default to Right to match initial animation
+        
+        public TerrainCollider CurrentTerrain { get; set; }
         public float TerrainSpeedMultiplier = 1.0f;
         // public bool IsGodMode { get; set; }
 
@@ -211,6 +213,8 @@ namespace BikeWars.Entities.Characters
 
             if (Transform.Position.X != LastTransform.Position.X || Transform.Position.Y != LastTransform.Position.Y)
                 LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
+
+            TerrainSpeedMultiplier = GetTerrainMultiplier();
 
 
             bool isMoving = movement.IsMoving();
@@ -418,6 +422,27 @@ namespace BikeWars.Entities.Characters
         {
             return sprint.GetRemainingCooldown();
         }
+
+        private float GetTerrainMultiplier()
+        {
+            if (CurrentTerrain == null)
+                return 1.0f;
+
+            switch (CurrentTerrain.TerrainType)
+            {
+                case TerrainType.ROAD:
+                    return 1.10f;
+
+                case TerrainType.GRASS:
+                    return 0.90f;
+
+                default:
+                    return 1.0f;
+            }
+        }
+
+
+
         // Helper function to draw a line
         private void DrawLine(SpriteBatch spriteBatch, Vector2 start, Vector2 end, Color color)
         {

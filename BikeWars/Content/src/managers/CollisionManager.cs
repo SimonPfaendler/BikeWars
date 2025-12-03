@@ -59,16 +59,8 @@ public class CollisionManager
             CollisionBoxes.Add(box);
             StaticHash.Insert(box);
         }
-        var streetLayer = TiledMap.GetLayer<TiledMapTileLayer>("Streets");
-        if (streetLayer != null)
-        {
-            foreach (var tile in streetLayer.Tiles)
-            {
-                if (tile.GlobalIdentifier == 0)
-                    continue;
-                _streetTiles.Add(new Point(tile.X, tile.Y));
-            }
-        }
+        LoadTerrainLayer("Streets", TerrainType.ROAD);
+        LoadTerrainLayer("Background_graas", TerrainType.GRASS);
     }
 
     public Vector2 GetPenetrationVector(ICollider a, ICollider b)
@@ -243,6 +235,30 @@ public class CollisionManager
         }
     }
 
+    private void HandleTerrain(ICollider c, List<ICollider> statics)
+    {
+        if (c.Layer != CollisionLayer.PLAYER)
+            return;
+
+        Player player = (Player)c.Owner;
+        player.CurrentTerrain = null; // default für "kein Terrain"
+
+        foreach (var s in statics)
+        {
+            if (s.Layer == CollisionLayer.TERRAIN)
+            {
+                // WICHTIG: Terrain fragt, ob es den Player berührt
+                if (s.Intersects(c))
+                {
+                    player.CurrentTerrain = (TerrainCollider)s;
+                    return; // erstes Terrain gewinnt
+                }
+            }
+        }
+    }
+
+
+
     public void Update(Player player, List<ItemBase> items, List<ProjectileBase> projectiles, List<CharacterBase> characters)
     {
         DynamicHash.Clear();
@@ -258,6 +274,7 @@ public class CollisionManager
                 List<ICollider> statics = StaticHash.QueryNearby(c.Position);
                 HandleDynamics(c, dynamics, toRemoveItems, toRemoveProjectiles, toRemoveCharacters);
                 HandleStatics(c, statics, toRemoveProjectiles);
+                HandleTerrain(c, statics);
             }
         }
         foreach (ProjectileBase p in toRemoveProjectiles)
@@ -301,9 +318,29 @@ public class CollisionManager
         // right
         spriteBatch.Draw(pixel, new Rectangle(rect.Right - 1, rect.Top, 1, rect.Height), color);
     }
-    public bool IsPlayerOnStreet(Player player)
+    private void LoadTerrainLayer(string layerName, TerrainType type)
     {
-        Point tilePos = new Point((int)(player.Transform.Position.X / TiledMap.TileWidth), (int)(player.Transform.Position.Y / TiledMap.TileHeight));
-        return _streetTiles.Contains(tilePos);
+        var layer = TiledMap.GetLayer<TiledMapTileLayer>(layerName);
+        if (layer == null)
+            return;
+
+        foreach (var tile in layer.Tiles)
+        {
+            if (tile.GlobalIdentifier == 0)
+                continue;
+
+            int x = tile.X * _cellSize;
+            int y = tile.Y * _cellSize;
+
+            TerrainCollider tc = new TerrainCollider(
+                new Vector2(x, y),
+                _cellSize,
+                _cellSize,
+                type
+            );
+
+            StaticHash.Insert(tc);
+        }
     }
+
 }

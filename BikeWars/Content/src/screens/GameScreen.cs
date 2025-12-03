@@ -191,8 +191,6 @@ namespace BikeWars.Content.screens
             HandleCounter(gameTime);
             HandleSaveLoadInput();
 
-            bool onStreet = _collisionManager.IsPlayerOnStreet(_gameObjectManager.Player1);
-            _gameObjectManager.Player1.TerrainSpeedMultiplier = onStreet ? 1.10f : 1.0f;
 
             if (InputHandler.IsPressed(GameAction.PAUSE))
             {
