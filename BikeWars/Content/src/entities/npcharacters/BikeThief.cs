@@ -63,7 +63,7 @@ namespace BikeWars.Entities.Characters
                 colliderPosition, 
                 Transform.Size.X, 
                 Transform.Size.Y, 
-                CollisionLayer.PLAYER, 
+                CollisionLayer.CHARACTER, 
                 this
             );
         }
