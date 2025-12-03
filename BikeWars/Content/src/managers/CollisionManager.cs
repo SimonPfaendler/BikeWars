@@ -237,10 +237,10 @@ public class CollisionManager
 
     private void HandleTerrain(ICollider c, List<ICollider> statics)
     {
-        if (c.Layer != CollisionLayer.PLAYER)
+        if (c.Owner is not Player player)
             return;
 
-        Player player = (Player)c.Owner;
+
         player.CurrentTerrain = null;
 
         foreach (var s in statics)
