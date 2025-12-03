@@ -28,10 +28,7 @@ namespace BikeWars.Content.screens
         private float _counterTimer = 0;
         private SpriteFont _font;
         private Texture2D _pixel;
-        private const float SideNudgeStrength = 0.8f;
-        private const float BackwardPushStrength = 3f;
-        private const int CELL_SIZE = 32;
-        private const float SEARCH_RADIUS = 20f;
+        private const int CELL_SIZE = 16;
         public ScreenManager ScreenManager { get; set; }
         private WorldAudioManager _worldAudioManager;
 
@@ -56,16 +53,16 @@ namespace BikeWars.Content.screens
 
         public bool DrawLower => false;
         public bool UpdateLower => false;
-        
+
         // bool that checks if you're in the tech demo or normal gameplay
         private readonly bool _isTechDemo;
-        private bool _showStaticHitboxes = false;
+        private bool _showStaticHitboxes = true;
 
         public GameScreen(AudioService audioService, bool isTechDemo = false)
         {
-            
+
             _isTechDemo = isTechDemo;
-            
+
             worldBounds = new Rectangle(0, 0, 11200, 11200);
 
             _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
@@ -75,19 +72,19 @@ namespace BikeWars.Content.screens
             _itemManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
             _itemManager.AddItem(new Xp_Beer(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
             _itemManager.AddItem(new Xp_Money(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
-            _collisionManager = new CollisionManager(CELL_SIZE, SEARCH_RADIUS);
+            _collisionManager = new CollisionManager(CELL_SIZE, worldBounds.Height);
             Player player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(32, 32), _audioService);
-            
+
             // if we are in the tech demo it transforms the player in god mode
             if (_isTechDemo)
             {
-                player.IsGodMode = true; 
+                player.IsGodMode = true;
             }
-            
+
             _gameObjectManager = new GameObjectManager(_contentManager, player, null);
-            for (int i = 0; i < 50; i++)
+            for (int i = 0; i < 5; i++)
             {
-                _gameObjectManager.AddCharacter(new Hobo(new Vector2(worldBounds.Width / 2 + i*10, worldBounds.Height / 2 -500), new Point(32, 32), _audioService));
+                _gameObjectManager.AddCharacter(new Hobo(new Vector2(worldBounds.Width / 2 + i*40, worldBounds.Height / 2 -500 + i), new Point(32, 32), _audioService));
             }
             _gameObjectManager.AddCharacter(new BikeThief(new Vector2(worldBounds.Width / 2 - 100, worldBounds.Height / 2 - 80), new Point(32, 32), _audioService));
             _gameObjectManager.Items = _itemManager.Items;
@@ -125,7 +122,6 @@ namespace BikeWars.Content.screens
             _collisionManager.OnProjectileHit += _combatManager.HandleProjectileHit;
             _collisionManager.OnCharacterCollision += _combatManager.HandleCharacterCollision;
 
-
             // Overlay
             _overlay = new Overlay(_debugFont, Game1.Instance.GraphicsDevice);
 
@@ -162,12 +158,12 @@ namespace BikeWars.Content.screens
 
             if (InputHandler.IsPressed(GameAction.DEBUG_HEAL))
                 _gameObjectManager.Player1.Health = _gameObjectManager.Player1.MaxHealth;
-            
+
             if (InputHandler.IsPressed(GameAction.TECH_DEMO))
             {
                 ScreenManager.AddScreen(new TechDemoScreen(_audioService));
             }
-            
+
             if (InputHandler.IsPressed(GameAction.DEBUG_HITBOXES) && _isTechDemo)
             {
                 _showStaticHitboxes = !_showStaticHitboxes;
@@ -181,7 +177,6 @@ namespace BikeWars.Content.screens
                 _audioService.Sounds.Play(AudioAssets.CarCrash);
                 ScreenManager.AddScreen(new GameOverScreen(_font, _audioService));
             }
-
 
             _debugger.Update(gameTime);
             // Needs to be implemented elsewhere.
@@ -198,7 +193,6 @@ namespace BikeWars.Content.screens
 
             bool onStreet = _collisionManager.IsPlayerOnStreet(_gameObjectManager.Player1);
             _gameObjectManager.Player1.TerrainSpeedMultiplier = onStreet ? 1.10f : 1.0f;
-
 
             if (InputHandler.IsPressed(GameAction.PAUSE))
             {
@@ -256,7 +250,6 @@ namespace BikeWars.Content.screens
 
                     Console.WriteLine("Tech demo reset: removed all enemies and projectiles.");
                 }
-                
                 else
                 {
                     _counter = 0;
@@ -279,7 +272,7 @@ namespace BikeWars.Content.screens
             spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.GetTransform());
             _gameObjectManager.Draw(spriteBatch);
             _overlay.DrawOnWorld(spriteBatch, _gameObjectManager.Player1);
-            
+
             if (_isTechDemo && _showStaticHitboxes)
             {
                 _collisionManager.DrawHitboxes(spriteBatch, _pixel);
@@ -290,7 +283,7 @@ namespace BikeWars.Content.screens
 
             _debugger.Draw(spriteBatch);
             _overlay.DrawOnScreen(spriteBatch, gameTime);
-            
+
             if (!_isTechDemo)
             {
                 spriteBatch.DrawString(_debugFont, $"Counter: {_counter}", new Vector2(20, 160), Color.Black);
@@ -302,7 +295,7 @@ namespace BikeWars.Content.screens
 
             spriteBatch.End();
         }
-        
+
         private Rectangle GetCameraWorldRect()
         {
             var game = Game1.Instance;

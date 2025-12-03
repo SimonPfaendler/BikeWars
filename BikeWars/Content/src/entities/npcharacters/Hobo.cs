@@ -37,22 +37,22 @@ namespace BikeWars.Entities.Characters
             _characterAtlas = content.Load<Texture2D>("assets/sprites/characters/character_atlas");
 
             // idle
-            // e1_drunkdude_standing.png 
+            // e1_drunkdude_standing.png
             var idleFrames = SpriteFrameDictionary.GetFrames("Hobo_Idle");
             _idleAnimation = new SpriteAnimation(_characterAtlas, idleFrames, 0.4f);
 
             // e1_drunkdude_walking_left.png
             var leftFrames = SpriteFrameDictionary.GetFrames("Hobo_WalkLeft");
             _walkLeftAnimation = new SpriteAnimation(_characterAtlas, leftFrames, 0.15f);
-            
-            // e1_drunkdude_walking_right.png 
+
+            // e1_drunkdude_walking_right.png
             var rightFrames = SpriteFrameDictionary.GetFrames("Hobo_WalkRight");
             _walkRightAnimation = new SpriteAnimation(_characterAtlas, rightFrames, 0.15f);
-            
+
             // e1_drunkdude_walking_down.png
             var downFrames = SpriteFrameDictionary.GetFrames("Hobo_WalkDown");
-            _walkDownAnimation = new SpriteAnimation(_characterAtlas, downFrames, 0.15f); 
-    
+            _walkDownAnimation = new SpriteAnimation(_characterAtlas, downFrames, 0.15f);
+
             // e1_drunkdude_walking_up.png
             var upFrames = SpriteFrameDictionary.GetFrames("Hobo_WalkUp");
             _walkUpAnimation = new SpriteAnimation(_characterAtlas, upFrames, 0.15f);
@@ -115,15 +115,15 @@ namespace BikeWars.Entities.Characters
                 direction.Normalize();
                 Transform.Position += direction * Speed * delta;
 
-                
+
                 if (System.Math.Abs(direction.X) > System.Math.Abs(direction.Y))
                 {
-                    
+
                     _currentAnimation = (direction.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
                 }
-                else 
+                else
                 {
-                    
+
                     _currentAnimation = (direction.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
                 }
             }
@@ -132,7 +132,7 @@ namespace BikeWars.Entities.Characters
                 _currentAnimation = _idleAnimation;
             }
 
-            
+
             if (_currentAnimation != null)
             {
                 _currentAnimation.Update(gameTime, isMoving);
@@ -149,12 +149,12 @@ namespace BikeWars.Entities.Characters
                 return;
             _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, 0f);
         }
-        
+
         public void SetWorldAudioManager(WorldAudioManager manager)
         {
             _worldAudioManager = manager;
         }
-        
+
         private bool CanPlaySound()
         {
             return _worldAudioManager != null &&
@@ -174,7 +174,7 @@ namespace BikeWars.Entities.Characters
         {
             if (!CanAttack()) return;
             target.TakeDamage(AttackDamage);
-            ResetAttackCooldown(); 
+            ResetAttackCooldown();
             _audio.Sounds.Play(AudioAssets.Punch);
         }
     }

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.entities.Inventory;
 using BikeWars.Content.managers;
+using System.Diagnostics.Metrics;
 
 // ============================================================
 // Player.cs
@@ -207,7 +208,10 @@ namespace BikeWars.Entities.Characters
 
             CurrentSpeed = sprint.IsActive ? SprintSpeed : movement.CurrentMovement.Speed;
             Vector2 direction = movement.CurrentMovement.Direction;
-            LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
+
+            if (Transform.Position.X != LastTransform.Position.X || Transform.Position.Y != LastTransform.Position.Y)
+                LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
+
 
             bool isMoving = movement.IsMoving();
             if (isMoving)
@@ -429,7 +433,7 @@ namespace BikeWars.Entities.Characters
                 SpriteEffects.None,
                 0);
         }
-        
+
         public void SetWorldAudioManager(WorldAudioManager manager)
         {
             _worldAudioManager = manager;

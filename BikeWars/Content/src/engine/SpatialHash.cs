@@ -1,96 +1,126 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
+using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework;
 
-// public class SpatialHash2D<T>
-namespace BikeWars.Content.engine;
+public class CellData
+{
+    public HashSet<CollisionLayer> Layers = new();
+    public int Count = 0;
+    public List<ICollider>? Colliders = null;
+}
+
 public class SpatialHash
 {
-    private int _cellSize {get; set;}
-    public int CellSize {get => _cellSize; set => _cellSize = value;}
-    private readonly Dictionary<(int, int), List<ICollider>> _cells;
-    public Dictionary<(int, int), List<ICollider>> Cells {get => _cells;}
-    private readonly float _insertRadius;
+    private readonly int _cellSize;
+    private readonly int _worldWidthInCells;
+    private readonly int _xOffset;
+    private readonly int _yOffset;
 
-    public SpatialHash(int cellSize, float insertRadius)
+    public Dictionary<int, CellData> _cells = new();
+
+    public SpatialHash(int cellSize, int worldWidthInCells, int xOffset = 0, int yOffset = 0)
     {
         _cellSize = cellSize;
-        _insertRadius = insertRadius;
-        _cells = new Dictionary<(int, int), List<ICollider>>();
+        _worldWidthInCells = worldWidthInCells;
+        _xOffset = xOffset;
+        _yOffset = yOffset;
     }
 
     private (int, int) ToCellCoords(Vector2 pos)
     {
-        return (
-            (int)Math.Floor(pos.X / CellSize),
-            (int)Math.Floor(pos.Y / CellSize)
-        );
+        return ((int)MathF.Floor(pos.X / _cellSize),
+                (int)MathF.Floor(pos.Y / _cellSize));
     }
 
-    public void Insert(ICollider collider)
+    private int To1DKey(int x, int y)
     {
-        Vector2 pos = collider.Position;
-        (int, int) center = ToCellCoords(pos);
+        return (y + _yOffset) * _worldWidthInCells + (x + _xOffset);
+    }
 
-        // Falls das Objekt einen Radius hat, trage es in mehrere Zellen ein
-        int radius = (int)Math.Ceiling(_insertRadius / CellSize);
+    public void Insert(ICollider c)
+    {
+        int minX = (int)MathF.Floor(c.Position.X / _cellSize);
+        int maxX = (int)MathF.Floor(c.Position.X / _cellSize);
+        int minY = (int)MathF.Floor(c.Position.Y / _cellSize);
+        int maxY = (int)MathF.Floor(c.Position.Y / _cellSize);
 
-        for (int x = -radius; x <= radius; x++)
+        for (int x = minX; x <= maxX; x++)
         {
-            for (int y = -radius; y <= radius; y++)
+            for (int y = minY; y <= maxY; y++)
             {
-                (int, int) key = (center.Item1 + x, center.Item2 + y);
+                int key = To1DKey(x, y);
 
-                if (!_cells.TryGetValue(key, out List<ICollider> list))
+                if (!_cells.TryGetValue(key, out var cell))
                 {
-                    list = new List<ICollider>();
-                    _cells[key] = list;
+                    cell = new CellData();
+                    _cells[key] = cell;
                 }
 
-                list.Add(collider);
+                cell.Count++;
+                cell.Layers.Add(c.Layer); // Layer speichern
+                cell.Colliders ??= new List<ICollider>();
+                cell.Colliders.Add(c);
             }
         }
     }
 
-    public void Clear()
+    public void Remove(ICollider c)
     {
-        _cells.Clear();
+        int minX = (int)MathF.Floor(c.Position.X / _cellSize);
+        int maxX = (int)MathF.Floor(c.Position.X / _cellSize);
+        int minY = (int)MathF.Floor(c.Position.Y / _cellSize);
+        int maxY = (int)MathF.Floor(c.Position.Y / _cellSize);
+
+        for (int x = minX; x <= maxX; x++)
+        {
+            for (int y = minY; y <= maxY; y++)
+            {
+                int key = To1DKey(x, y);
+
+                if (_cells.TryGetValue(key, out var cell))
+                {
+                    cell.Colliders!.Remove(c);
+                    cell.Count--;
+
+                    if (cell.Count == 0)
+                    {
+                        _cells.Remove(key);
+                        continue;
+                    }
+
+                    cell.Layers.Clear();
+                    foreach (var col in cell.Colliders)
+                        cell.Layers.Add(col.Layer);
+                }
+            }
+        }
     }
 
     public List<ICollider> QueryNearby(Vector2 pos)
     {
-        (int, int) center = ToCellCoords(pos);
-        List<ICollider> results = new List<ICollider>();
+        var (cellX, cellY) = ToCellCoords(pos);
+        List<ICollider> results = new();
 
-        // Suche in Nachbarzellen
-        for (int x = -1; x <= 1; x++)
+        for (int x = cellX - 1; x <= cellX + 1; x++)
         {
-            for (int y = -1; y <= 1; y++)
+            for (int y = cellY - 1; y <= cellY + 1; y++)
             {
-                (int, int) key = (center.Item1 + x, center.Item2 + y);
-                if (_cells.TryGetValue(key, out var list))
-                {
-                    results.AddRange(list);
-                }
+                int key = To1DKey(x, y);
+
+                if (_cells.TryGetValue(key, out var cell) == false)
+                    continue;
+                results.AddRange(cell.Colliders!);
             }
         }
 
         return results;
     }
 
-    public List<ICollider> AllColliders()
+    public void Clear()
     {
-        List<ICollider> allColliders = new List<ICollider>();
-        foreach (var cell in _cells)
-        {
-            {
-                foreach(ICollider collider in cell.Value)
-                {
-                    allColliders.Add(collider);
-                }
-            }
-        }
-        return allColliders;
+        _cells.Clear();
     }
 }

@@ -5,12 +5,6 @@ using Microsoft.Xna.Framework;
 namespace BikeWars.Content.engine;
 public class BoxCollider : ColliderBase
 {
-    private int _width { get; set; }
-    private int _height { get; set; }
-
-    public int Height {get => _height; set => _height = value;}
-    public int Width {get => _width; set => _width = value;}
-
     private EnhancedRectangle _collisionShape { get; set; }
     public EnhancedRectangle CollisionShape
     {

@@ -14,6 +14,12 @@ public abstract class ColliderBase : ICollider
         }
     }
 
+    private int _width { get; set; }
+    private int _height { get; set; }
+
+    public int Height {get => _height; set => _height = value;}
+    public int Width {get => _width; set => _width = value;}
+
     // Necessary to calculate with Spatial Hashing and even configure which layer interacts with which
     private float _radius {get; set;}
     public float Radius {get => _radius; set => _radius = value;}

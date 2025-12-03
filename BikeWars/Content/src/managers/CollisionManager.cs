@@ -19,9 +19,8 @@ public class CollisionManager
 
     private const string MAP = "assets/Map/Bike_Wars_Map";
     private const string TILED_MAP_LAYER = "Collision";
-    private const int CELL_SIZE = 16;
-    private const float BOUNCE = 0.001f;
 
+    private int _cellSize {get; set;}
     private SpatialHash _dynamicHash {get; set;}
     public SpatialHash DynamicHash {get => _dynamicHash; set => _dynamicHash = value;}
     private SpatialHash _staticHash {get; set;}
@@ -33,10 +32,11 @@ public class CollisionManager
     public List<BoxCollider> CollisionBoxes {get => _collisionBoxes; set => _collisionBoxes = value;}
     private HashSet<Point> _streetTiles = new HashSet<Point>();
 
-    public CollisionManager(int cellSize, float insertRadius)
+    public CollisionManager(int cellSize, int worldBounds)
     {
-        DynamicHash = new SpatialHash(cellSize, insertRadius);
-        StaticHash = new SpatialHash(cellSize, insertRadius);
+        _cellSize = cellSize;
+        DynamicHash = new SpatialHash(cellSize, worldBounds);
+        StaticHash = new SpatialHash(cellSize, worldBounds);
         CollisionBoxes = new List<BoxCollider>();
     }
     public bool isColliding(ICollider collisionBox1, ICollider collisionBox2)
@@ -52,10 +52,10 @@ public class CollisionManager
         {
             if(tile.GlobalIdentifier == 0) continue;
 
-            int x = tile.X * CELL_SIZE;
-            int y = tile.Y * CELL_SIZE;
+            int x = tile.X * _cellSize;
+            int y = tile.Y * _cellSize;
 
-            BoxCollider box = new BoxCollider(new Vector2(x, y), CELL_SIZE, CELL_SIZE, CollisionLayer.WALL, this);
+            BoxCollider box = new BoxCollider(new Vector2(x, y), _cellSize, _cellSize, CollisionLayer.WALL, this);
             CollisionBoxes.Add(box);
             StaticHash.Insert(box);
         }
@@ -64,48 +64,43 @@ public class CollisionManager
         {
             foreach (var tile in streetLayer.Tiles)
             {
-                if (tile.GlobalIdentifier == 0) 
+                if (tile.GlobalIdentifier == 0)
                     continue;
                 _streetTiles.Add(new Point(tile.X, tile.Y));
             }
         }
     }
 
-    // Should be helpful to make two colliders bounce away in a good distance so it doesn't stuck together
     public Vector2 GetPenetrationVector(ICollider a, ICollider b)
     {
-
-        // TODO if we want to use Circle too we need to implement it
-        if (a is BoxCollider bca && b is BoxCollider bcb)
+        const float SEPARATION = 1.5f; // fixed Push
+        if (a is BoxCollider A && b is BoxCollider B)
         {
-            // Calculate center to center
-            float aWidthHalf = bca.Width / 2f;
-            float aHeightHalf = bca.Height / 2f;
-            float bWidthHalf = bcb.Width / 2f;
-            float bHeightHalf = bcb.Height / 2f;
-
-            Vector2 aCenter = new Vector2(a.Position.X + aWidthHalf, a.Position.Y + aHeightHalf);
-            Vector2 bCenter = new Vector2(b.Position.X + bWidthHalf, b.Position.Y + bHeightHalf);
+            Vector2 aCenter = A.Position + new Vector2(A.Width / 2f, A.Height / 2f);
+            Vector2 bCenter = B.Position + new Vector2(B.Width / 2f, B.Height / 2f);
 
             float dx = bCenter.X - aCenter.X;
             float dy = bCenter.Y - aCenter.Y;
-            float px = aWidthHalf  + bWidthHalf  - Math.Abs(dx);
-            float py = aHeightHalf  + bHeightHalf  - Math.Abs(dy);
 
-            if (px <= 0 || py <= 0) {
-                return Vector2.Zero; // No collision
-            }
+            float px = (A.Width / 2f + B.Width / 2f) - Math.Abs(dx);
+            float py = (A.Height / 2f + B.Height / 2f) - Math.Abs(dy);
+
+            if (px <= 0 || py <= 0)
+                return Vector2.Zero;
 
             if (px < py)
             {
-                return new Vector2(dx < 0 ? -px : px, 0);
+                // horizontal push
+                return new Vector2(Math.Sign(dx) * SEPARATION, 0);
             }
             else
             {
-                return new Vector2(0, dy < 0 ? -py : py);
+                // vertical push
+                return new Vector2(0, Math.Sign(dy) * SEPARATION);
             }
         }
-        return new Vector2(0,0);
+
+        return Vector2.Zero;
     }
 
     private void Insertions(List<ItemBase> items, Player player, List<ProjectileBase> projectiles, List<CharacterBase> characters)
@@ -125,97 +120,126 @@ public class CollisionManager
         }
     }
 
+    private void HandleCharacterWithStatic(ICollider b, ICollider c)
+    {
+        if (c.Layer == CollisionLayer.CHARACTER || c.Layer == CollisionLayer.PLAYER)
+        {
+            if (c.Intersects(b))
+            {
+                CharacterBase ch = (CharacterBase)c.Owner;
+                ch.SetLastTransform();
+                ch.UpdateCollider();
+            }
+        }
+    }
+    private void HandleProjectileWithStatic(ICollider b, ICollider c, List<ProjectileBase> toRemoveProjectiles)
+    {
+        if (b.Layer == CollisionLayer.WALL && c.Layer == CollisionLayer.PROJECTILE)
+        {
+            if (c.Intersects(b))
+            {
+                ProjectileBase p = (ProjectileBase)c.Owner;
+                toRemoveProjectiles.Add(p);
+            }
+        }
+    }
+
     private void HandleStatics(ICollider c, List<ICollider> statics, List<ProjectileBase> toRemoveProjectiles)
     {
         foreach (var b in statics)
         {
-            if (c.Layer == CollisionLayer.CHARACTER || c.Layer == CollisionLayer.PLAYER)
-            {
-                if (c.Intersects(b))
-                {
-                    CharacterBase ch = (CharacterBase)c.Owner;
-                    ch.SetLastTransform();
-                    ch.UpdateCollider();
-                }
-            }
+            HandleCharacterWithStatic(b, c);
+            HandleProjectileWithStatic(b, c, toRemoveProjectiles);
+        }
+    }
+    private void HandleDynamics(ICollider c, List<ICollider> dynamics, List<ItemBase> toRemoveItems, List<ProjectileBase> toRemoveProjectiles, List<CharacterBase> toRemoveCharacters)
+    {
+        foreach (var d in dynamics)
+        {
+            PickingUpItem(c, d, toRemoveItems);
+            HandleCharacters(c, d, toRemoveProjectiles, toRemoveCharacters);
+        }
+    }
 
-            if (c.Layer == CollisionLayer.PROJECTILE)
+    private void PickingUpItem(ICollider c, ICollider d, List<ItemBase> toRemoveItems)
+    {
+        if (c.Layer == CollisionLayer.PLAYER)
+        {
+            if (d.Layer == CollisionLayer.ITEM)
             {
-                if (c.Intersects(b))
+                if (c.Intersects(d))
                 {
-                    ProjectileBase p = (ProjectileBase)c.Owner;
-                    toRemoveProjectiles.Add(p);
+                    // Event for picking up items
+                    OnItemPickup?.Invoke((Player)c.Owner, (ItemBase)d.Owner);
+                    toRemoveItems.Add((ItemBase)d.Owner);
                 }
             }
         }
     }
-    private void HandleDynamics(ICollider c, List<ICollider> dynamics, List<ItemBase> toRemoveItems, List<ProjectileBase> toRemoveProjectils, List<CharacterBase> toRemoveCharacters)
+
+    private void HandleCharacterCollision(ICollider c, ICollider d)
     {
-        foreach (var d in dynamics)
+        if (d.Layer == CollisionLayer.CHARACTER || d.Layer == CollisionLayer.PLAYER)
         {
-            if (c.Layer == CollisionLayer.PLAYER)
+            if (c.Intersects(d) && c.Owner != d.Owner)
             {
-                if (d.Layer == CollisionLayer.ITEM)
-                {
-                    if (c.Intersects(d))
-                    {
-                        // Event for picking up items
-                        OnItemPickup?.Invoke((Player)c.Owner, (ItemBase)d.Owner);
+                // Event for two Characters directly colliding (Close combat)
+                OnCharacterCollision?.Invoke((CharacterBase)c.Owner, (CharacterBase)d.Owner);
 
-                        toRemoveItems.Add((ItemBase)d.Owner);
-                    }
-                }
+                CharacterBase ch = (CharacterBase)c.Owner;
+                CharacterBase chd = (CharacterBase)d.Owner;
+                Vector2 t = GetPenetrationVector(c, d);
+
+                ch.SetLastTransform();
+                ch.Transform.Position -= t;
+                ch.UpdateCollider();
+                chd.SetLastTransform();
+                chd.Transform.Position += t;
+                chd.UpdateCollider();
             }
-            if (c.Layer == CollisionLayer.CHARACTER || c.Layer == CollisionLayer.PLAYER)
+        }
+    }
+
+    private void HandleCharacterProjectiles(ICollider c, ICollider d, List<ProjectileBase> toRemoveProjectiles, List<CharacterBase> toRemoveCharacters)
+    {
+        if (d.Layer == CollisionLayer.PROJECTILE)
+        {
+            if (c.Intersects(d))
             {
-                if (d.Layer == CollisionLayer.CHARACTER || d.Layer == CollisionLayer.PLAYER)
-                {
-                    if (c.Intersects(d) && c.Owner != d.Owner)
-                    {
-                        // Event for two Characters directly colliding (Close combat)
-                        OnCharacterCollision?.Invoke((CharacterBase)c.Owner, (CharacterBase)d.Owner);
+            ProjectileBase p = (ProjectileBase)d.Owner;
 
-                        CharacterBase ch = (CharacterBase)c.Owner;
-                        CharacterBase chd = (CharacterBase)d.Owner;
-                        Vector2 t = GetPenetrationVector(c, d);
-                        ch.Transform.Position -= t * BOUNCE;
-                        chd.Transform.Position += t * BOUNCE;
-                        ch.UpdateCollider();
-                        chd.UpdateCollider();
-                    }
-                }
-                if (d.Layer == CollisionLayer.PROJECTILE)
-                {
-                    if (c.Intersects(d))
-                    {
-                        ProjectileBase p = (ProjectileBase)d.Owner;
-
-                        // Make sure projectile cannot hit more than once
-                        if (p.HasHit)
-                        {
-                            toRemoveProjectils.Add(p);
-                            break;
-                        }
-
-                        // Ignore self-hit
-                        if (c.Owner == p.Owner)
-                        {
-                            break;
-                        }
-
-                        // Event for a character or player gets hit by projectile
-                        OnProjectileHit?.Invoke((CharacterBase)c.Owner, (ProjectileBase)d.Owner);
-
-                        CharacterBase ch = (CharacterBase)c.Owner;
-
-                        if(ch.IsDead)
-                            toRemoveCharacters.Add(ch);
-
-                        p.HasHit = true;
-                        toRemoveProjectils.Add(p);
-                    }
-                }
+            // Make sure projectile cannot hit more than once
+            if (p.HasHit)
+            {
+                toRemoveProjectiles.Add(p);
+                return;
             }
+
+            // Ignore self-hit
+            if (c.Owner == p.Owner)
+            {
+                return;
+            }
+
+            // Event for a character or player gets hit by projectile
+            OnProjectileHit?.Invoke((CharacterBase)c.Owner, (ProjectileBase)d.Owner);
+
+            CharacterBase ch = (CharacterBase)c.Owner;
+            if(ch.IsDead)
+                toRemoveCharacters.Add(ch);
+
+                p.HasHit = true;
+                toRemoveProjectiles.Add(p);
+            }
+        }
+    }
+
+    private void HandleCharacters(ICollider c, ICollider d, List<ProjectileBase> toRemoveProjectiles, List<CharacterBase> toRemoveCharacters)
+    {
+        if (c.Layer == CollisionLayer.CHARACTER || c.Layer == CollisionLayer.PLAYER)
+        {
+            HandleCharacterCollision(c, d);
+            HandleCharacterProjectiles(c, d, toRemoveProjectiles, toRemoveCharacters);
         }
     }
 
@@ -226,12 +250,15 @@ public class CollisionManager
         List<ProjectileBase> toRemoveProjectiles = new List<ProjectileBase>();
         List<ItemBase> toRemoveItems = new List<ItemBase>();
         List<CharacterBase> toRemoveCharacters = new List<CharacterBase>();
-        foreach (ICollider c in DynamicHash.AllColliders())
+        foreach (KeyValuePair<int, CellData> cell in DynamicHash._cells)
         {
-            List<ICollider> statics = StaticHash.QueryNearby(c.Position);
-            List<ICollider> dynamics = DynamicHash.QueryNearby(c.Position);
-            HandleStatics(c, statics, toRemoveProjectiles);
-            HandleDynamics(c, dynamics, toRemoveItems, toRemoveProjectiles, toRemoveCharacters);
+            foreach(var c in cell.Value.Colliders)
+            {
+                List<ICollider> dynamics = DynamicHash.QueryNearby(c.Position);
+                List<ICollider> statics = StaticHash.QueryNearby(c.Position);
+                HandleDynamics(c, dynamics, toRemoveItems, toRemoveProjectiles, toRemoveCharacters);
+                HandleStatics(c, statics, toRemoveProjectiles);
+            }
         }
         foreach (ProjectileBase p in toRemoveProjectiles)
         {
@@ -256,13 +283,13 @@ public class CollisionManager
             var rect = new Rectangle(
                 (int)box.Position.X,
                 (int)box.Position.Y,
-                (int)box.Width,
-                (int)box.Height
+                box.Width,
+                box.Height
             );
             DrawRectOutline(spriteBatch, pixel, rect, Color.Red * 0.7f);
         }
     }
-    
+
     private void DrawRectOutline(SpriteBatch spriteBatch, Texture2D pixel, Rectangle rect, Color color)
     {
         // top
@@ -274,69 +301,9 @@ public class CollisionManager
         // right
         spriteBatch.Draw(pixel, new Rectangle(rect.Right - 1, rect.Top, 1, rect.Height), color);
     }
-    
     public bool IsPlayerOnStreet(Player player)
     {
         Point tilePos = new Point((int)(player.Transform.Position.X / TiledMap.TileWidth), (int)(player.Transform.Position.Y / TiledMap.TileHeight));
         return _streetTiles.Contains(tilePos);
     }
-
-    // This is old code to have some logic movement for the units
-    // If the hobo hits a wall, push him back/sideways and start sidestepping.
-    // foreach (var box in _collisionManager.CollisionBoxes)
-    // {
-    //     if (hobo.Intersects(box))
-    //     {
-    //         var dir = hobo.Movement.Direction;
-
-    //         if (dir != Vector2.Zero)
-    //         {
-    //             Vector2 rightNudge = new Vector2(dir.Y, -dir.X);
-
-    //             if (rightNudge != Vector2.Zero)
-    //             {
-    //                 rightNudge.Normalize();
-    //                 hobo.Transform.Position += rightNudge * SideNudgeStrength;
-    //             }
-    //         }
-
-    //         hobo.UpdateCollider();
-
-    //         if (hobo.Movement.State == EnemyState.Chasing)
-    //         {
-    //             hobo.Movement.StartSidestepping(hobo.Movement.Direction);
-    //         }
-
-    //         break;
-    //     }
-    // }
-
-    // If the BikeThief hits a wall, push him back/sideways and start sidestepping.
-    // foreach (var box in _collisionManager.CollisionBoxes)
-    // {
-    //     if (bikethief.Intersects(box))
-    //     {
-    //         var dir = bikethief.Movement.Direction;
-
-    //         if (dir != Vector2.Zero)
-    //         {
-    //             Vector2 rightNudge = new Vector2(dir.Y, -dir.X);
-
-    //             if (rightNudge != Vector2.Zero)
-    //             {
-    //                 rightNudge.Normalize();
-    //                 bikethief.Transform.Position += rightNudge * SideNudgeStrength;
-    //             }
-    //         }
-
-    //         bikethief.UpdateCollider();
-
-    //         if (bikethief.Movement.State == EnemyState.Chasing)
-    //         {
-    //             bikethief.Movement.StartSidestepping(bikethief.Movement.Direction);
-    //         }
-
-    //         break;
-    //     }
-    // }
 }
