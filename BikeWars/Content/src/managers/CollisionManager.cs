@@ -241,17 +241,17 @@ public class CollisionManager
             return;
 
         Player player = (Player)c.Owner;
-        player.CurrentTerrain = null; // default für "kein Terrain"
+        player.CurrentTerrain = null;
 
         foreach (var s in statics)
         {
             if (s.Layer == CollisionLayer.TERRAIN)
             {
-                // WICHTIG: Terrain fragt, ob es den Player berührt
+
                 if (s.Intersects(c))
                 {
                     player.CurrentTerrain = (TerrainCollider)s;
-                    return; // erstes Terrain gewinnt
+                    return;
                 }
             }
         }

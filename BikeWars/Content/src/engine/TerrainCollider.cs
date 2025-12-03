@@ -9,14 +9,12 @@ namespace BikeWars.Content.engine
         public Rectangle Bounds { get; private set; }
         public TerrainType TerrainType { get; private set; }
 
-        private int _width;
-        private int _height;
 
         public TerrainCollider(Vector2 position, int width, int height, TerrainType type)
         {
             TerrainType = type;
-            _width = width;
-            _height = height;
+            Width = width;
+            Height = height;
 
             Position = position;
             Layer = CollisionLayer.TERRAIN;
@@ -31,8 +29,8 @@ namespace BikeWars.Content.engine
             Bounds = new Rectangle(
                 (int)Position.X,
                 (int)Position.Y,
-                _width,
-                _height
+                Width,
+                Height
             );
         }
 
@@ -50,7 +48,7 @@ namespace BikeWars.Content.engine
                 return Bounds.Intersects(otherRect);
             }
 
-            return false; // Terrain collides with NOTHING ELSE
+            return false;
         }
     }
 }
