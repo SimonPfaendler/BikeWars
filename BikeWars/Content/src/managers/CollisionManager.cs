@@ -30,7 +30,6 @@ public class CollisionManager
     public TiledMap TiledMap {get => _tiledMap; set => _tiledMap = value;}
     private List<BoxCollider> _collisionBoxes {get; set;} // Mainly used for the static layout
     public List<BoxCollider> CollisionBoxes {get => _collisionBoxes; set => _collisionBoxes = value;}
-    private HashSet<Point> _streetTiles = new HashSet<Point>();
 
     public CollisionManager(int cellSize, int worldBounds)
     {
@@ -237,10 +236,10 @@ public class CollisionManager
 
     private void HandleTerrain(ICollider c, List<ICollider> statics)
     {
-        if (c.Layer != CollisionLayer.PLAYER)
+        if (c.Owner is not Player player)
             return;
 
-        Player player = (Player)c.Owner;
+
         player.CurrentTerrain = null;
 
         foreach (var s in statics)

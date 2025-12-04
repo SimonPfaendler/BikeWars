@@ -169,6 +169,7 @@ namespace BikeWars.Entities.Characters
                 if (movement.CurrentMovement.GetType() == typeof(BicycleMovement))
                 {
                     movement.CurrentMovement = new WalkingMovement(true, true);
+                    TerrainSpeedMultiplier = 1.0f;
                 } else
                 {
                     movement.CurrentMovement = new BicycleMovement(true, true, movement.RotationAcceleration);
@@ -436,19 +437,26 @@ namespace BikeWars.Entities.Characters
 
         private float GetTerrainMultiplier()
         {
-            if (CurrentTerrain == null)
-                return 1.0f;
-
-            switch (CurrentTerrain.TerrainType)
+            if (movement.CurrentMovement.GetType() == typeof(BicycleMovement))
             {
-                case TerrainType.ROAD:
-                    return 1.10f;
-
-                case TerrainType.GRASS:
-                    return 0.90f;
-
-                default:
+                if (CurrentTerrain == null)
                     return 1.0f;
+
+                switch (CurrentTerrain.TerrainType)
+                {
+                    case TerrainType.ROAD:
+                        return 1.10f;
+
+                    case TerrainType.GRASS:
+                        return 0.90f;
+
+                    default:
+                        return 1.0f;
+                }
+            }
+            else
+            {
+                return 1f;
             }
         }
 
