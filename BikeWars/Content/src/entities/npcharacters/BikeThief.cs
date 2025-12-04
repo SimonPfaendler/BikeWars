@@ -85,11 +85,10 @@
                 Movement.HandleMovement(gameTime);
 
                 UpdateAttackCooldown(gameTime);
-
-                float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
+                
 
                 // Sound-Control
-                HandleMovementAndSound(gameTime, Movement);
+                HandleSound(Movement.IsMoving);
 
                 Vector2 direction = Movement.Direction;
                 LastTransform = new Transform(
@@ -97,10 +96,13 @@
                     Transform.Size
                 );
 
-                bool isMoving = direction != Vector2.Zero;
+                //bool isMoving = direction != Vector2.Zero;
 
-                if (isMoving)
+                if (Movement.IsMoving)
                 {
+                    float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    direction.Normalize();
+                    Transform.Position += direction * Speed * delta;
 
                     // Animation anhand der horizontalen Richtung wählen
                     if (direction.X > 0.1f)
@@ -125,7 +127,7 @@
                 // SpriteAnimation updaten (setzt intern FrameIndex usw.)
                 if (_currentAnimation != null)
                 {
-                    _currentAnimation.Update(gameTime, isMoving);
+                    _currentAnimation.Update(gameTime, Movement.IsMoving);
                 }
 
                 UpdateCollider();
