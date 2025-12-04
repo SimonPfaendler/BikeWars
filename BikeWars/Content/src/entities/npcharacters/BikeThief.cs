@@ -107,8 +107,6 @@
 
                 if (isMoving)
                 {
-                    direction.Normalize();
-                    Transform.Position += direction * Speed * delta;
 
                     // Animation anhand der horizontalen Richtung wählen
                     if (direction.X > 0.1f)

@@ -101,7 +101,6 @@ public abstract class CharacterBase : ICharacter, ICombat
 
         float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
         bool isMoving = movement.Direction != Vector2.Zero && movement.CanMove;
-        Console.WriteLine($"Hobo moving: {isMoving}, Direction: {movement.Direction}, Audible: {_worldAudioManager?.IsAudible(Transform.Position)}");
 
         if (isMoving && _worldAudioManager != null && _worldAudioManager.IsAudible(Transform.Position))
             _audio.Sounds.ResumeLoop(WalkingSound);
