@@ -14,8 +14,6 @@ namespace BikeWars.Entities.Characters
     public class Hobo: CharacterBase, IWorldAudioAware
     {
         private EnemyMovement movement { get; set; }
-
-        private readonly AudioService _audio;
         private WorldAudioManager _worldAudioManager;
 
 
@@ -30,6 +28,8 @@ namespace BikeWars.Entities.Characters
         private SpriteAnimation _walkUpAnimation;
         private SpriteAnimation _walkDownAnimation;
         private SpriteAnimation _currentAnimation;
+        
+        protected override string WalkingSound => AudioAssets.Walking;
 
         public override void LoadContent(ContentManager content)
         {
@@ -103,19 +103,9 @@ namespace BikeWars.Entities.Characters
             movement.HandleMovement(gameTime);
 
             UpdateAttackCooldown(gameTime);
-
-            float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            // Sound-Control
-            bool hoboIsMoving = movement.Direction != Vector2.Zero && movement.CanMove;
-
-            if (hoboIsMoving && CanPlaySound())
-            {
-                _audio.Sounds.ResumeLoop(AudioAssets.Walking);
-            }
-            else
-            {
-                _audio.Sounds.PauseLoop(AudioAssets.Walking);
-            }
+            
+            // Sound- and Movement-Control
+            HandleMovementAndSound(gameTime, movement);
 
             Vector2 direction = movement.Direction;
             LastTransform = new Transform(new Vector2(Transform.Position.X - direction.X, Transform.Position.Y - direction.Y), Transform.Size);
@@ -123,10 +113,6 @@ namespace BikeWars.Entities.Characters
 
             if (isMoving)
             {
-                direction.Normalize();
-                Transform.Position += direction * Speed * delta;
-
-
                 if (System.Math.Abs(direction.X) > System.Math.Abs(direction.Y))
                 {
 
@@ -164,12 +150,6 @@ namespace BikeWars.Entities.Characters
         public void SetWorldAudioManager(WorldAudioManager manager)
         {
             _worldAudioManager = manager;
-        }
-
-        private bool CanPlaySound()
-        {
-            return _worldAudioManager != null &&
-                   _worldAudioManager.IsAudible(Transform.Position);
         }
 
         public void Immobalize(bool value)

@@ -27,6 +27,8 @@ namespace BikeWars.Entities.Characters
         private SpriteAnimation _walkRightAnimation;
 
         private SpriteAnimation _currentAnimation;
+        
+        protected override string WalkingSound => AudioAssets.Walking;
 
         public override void LoadContent(ContentManager content)
         {
@@ -95,16 +97,7 @@ namespace BikeWars.Entities.Characters
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             // Sound-Control
-            bool thiefIsMoving = movement.Direction != Vector2.Zero && movement.CanMove;
-
-            if (thiefIsMoving && CanPlaySound())
-            {
-                _audio.Sounds.ResumeLoop(AudioAssets.Walking);
-            }
-            else
-            {
-                _audio.Sounds.PauseLoop(AudioAssets.Walking);
-            }
+            HandleMovementAndSound(gameTime, movement);
 
             Vector2 direction = movement.Direction;
             LastTransform = new Transform(
@@ -161,12 +154,6 @@ namespace BikeWars.Entities.Characters
         public void SetWorldAudioManager(WorldAudioManager manager)
         {
             _worldAudioManager = manager;
-        }
-        
-        private bool CanPlaySound()
-        {
-            return _worldAudioManager != null &&
-                   _worldAudioManager.IsAudible(Transform.Position);
         }
 
         public void Immobalize(bool value)
