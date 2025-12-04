@@ -80,15 +80,9 @@ namespace BikeWars.Content.screens
             {
                 player.IsGodMode = true;
             }
-
+            
             _gameObjectManager = new GameObjectManager(_contentManager, player, null);
-            for (int i = 0; i < 5; i++)
-            {
-                _gameObjectManager.AddCharacter(new Hobo(new Vector2(worldBounds.Width / 2 + i*40, worldBounds.Height / 2 -500 + i), new Point(32, 32), _audioService));
-            }
-            _gameObjectManager.AddCharacter(new BikeThief(new Vector2(worldBounds.Width / 2 - 100, worldBounds.Height / 2 - 80), new Point(32, 32), _audioService));
-            _gameObjectManager.Items = _itemManager.Items;
-
+            
             Game1 game = Game1.Instance;
             camera = new Camera2D(
                 game.GraphicsDevice.Viewport.Width,
@@ -97,6 +91,13 @@ namespace BikeWars.Content.screens
             );
             _freelook = false;
             camera.Position = _gameObjectManager.Player1.Transform.Position;
+            
+            for (int i = 0; i < 5; i++)
+            {
+                _gameObjectManager.AddCharacter(new Hobo(new Vector2(worldBounds.Width / 2 + i*40, worldBounds.Height / 2 -500 + i), new Point(32, 32), _audioService));
+            }
+            _gameObjectManager.AddCharacter(new BikeThief(new Vector2(worldBounds.Width / 2 - 100, worldBounds.Height / 2 - 80), new Point(32, 32), _audioService));
+            _gameObjectManager.Items = _itemManager.Items;
 
             // Create SaveLoad and load saved data
             var state = SaveLoad.LoadGame();
@@ -137,10 +138,20 @@ namespace BikeWars.Content.screens
 
             _pixel = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
             _pixel.SetData(new[] { Color.White });
-             // sound control
+            
             Rectangle initialView = GetCameraWorldRect();
             _worldAudioManager = new WorldAudioManager(initialView);
             _gameObjectManager.SetWorldAudioManager(_worldAudioManager);
+            
+            foreach (var ch in _gameObjectManager.Characters)
+            {
+                if (ch is IWorldAudioAware audioAware)
+                    audioAware.SetWorldAudioManager(_worldAudioManager);
+            }
+
+            if (_gameObjectManager.Player1 is IWorldAudioAware playerAudio)
+                playerAudio.SetWorldAudioManager(_worldAudioManager);
+
 
         }
         public virtual void Update(GameTime gameTime)
