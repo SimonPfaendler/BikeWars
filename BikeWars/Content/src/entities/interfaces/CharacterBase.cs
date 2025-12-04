@@ -93,26 +93,14 @@ public abstract class CharacterBase : ICharacter, ICombat
         return Collider.Intersects(other);
     }
     
-    protected void HandleMovementAndSound(GameTime gameTime, EnemyMovement movement)
+    protected void HandleSound(bool isMoving)
     {
-        movement.HandleMovement(gameTime);
-        
         if (_audio == null)
             return;
-
-        float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
-        bool isMoving = movement.Direction != Vector2.Zero && movement.CanMove;
 
         if (isMoving && _worldAudioManager != null && _worldAudioManager.IsAudible(Transform.Position))
             _audio.Sounds.ResumeLoop(WalkingSound);
         else
             _audio.Sounds.PauseLoop(WalkingSound);
-
-        if (isMoving)
-        {
-            Vector2 dir = movement.Direction;
-            dir.Normalize();
-            Transform.Position += dir * Speed * delta;
-        }
     }
 }
