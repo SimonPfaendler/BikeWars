@@ -93,12 +93,12 @@ namespace BikeWars.Entities.Characters
         public override void Update(GameTime gameTime)
         {
             UpdateAttackCooldown(gameTime);
-            LastTransform = new Transform(Transform.Position, Transform.Size);
             // Sound- and Movement-Control
             Movement.HandleMovement(gameTime);
             HandleSound(Movement.IsMoving);
 
             Vector2 direction = Movement.Direction;
+            LastTransform = new Transform(new Vector2(Transform.Position.X - direction.X, Transform.Position.Y - direction.Y), Transform.Size);
             //bool isMoving = direction != Vector2.Zero;
 
             if (Movement.IsMoving)
