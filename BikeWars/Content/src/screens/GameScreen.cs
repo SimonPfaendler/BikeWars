@@ -92,20 +92,11 @@ namespace BikeWars.Content.screens
             _freelook = false;
             camera.Position = _gameObjectManager.Player1.Transform.Position;
             
-            Rectangle initialView = GetCameraWorldRect();
-            _worldAudioManager = new WorldAudioManager(initialView);
-            _gameObjectManager.SetWorldAudioManager(_worldAudioManager);
-            
             for (int i = 0; i < 5; i++)
             {
                 _gameObjectManager.AddCharacter(new Hobo(new Vector2(worldBounds.Width / 2 + i*40, worldBounds.Height / 2 -500 + i), new Point(32, 32), _audioService));
             }
             _gameObjectManager.AddCharacter(new BikeThief(new Vector2(worldBounds.Width / 2 - 100, worldBounds.Height / 2 - 80), new Point(32, 32), _audioService));
-            foreach (var ch in _gameObjectManager.Characters)
-            {
-                if (ch is IWorldAudioAware audioAware)
-                    audioAware.SetWorldAudioManager(_worldAudioManager);
-            }
             _gameObjectManager.Items = _itemManager.Items;
 
             // Create SaveLoad and load saved data
@@ -146,6 +137,20 @@ namespace BikeWars.Content.screens
 
             _pixel = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
             _pixel.SetData(new[] { Color.White });
+            
+            Rectangle initialView = GetCameraWorldRect();
+            _worldAudioManager = new WorldAudioManager(initialView);
+            _gameObjectManager.SetWorldAudioManager(_worldAudioManager);
+            
+            foreach (var ch in _gameObjectManager.Characters)
+            {
+                if (ch is IWorldAudioAware audioAware)
+                    audioAware.SetWorldAudioManager(_worldAudioManager);
+            }
+
+            if (_gameObjectManager.Player1 is IWorldAudioAware playerAudio)
+                playerAudio.SetWorldAudioManager(_worldAudioManager);
+
 
         }
         public virtual void Update(GameTime gameTime)

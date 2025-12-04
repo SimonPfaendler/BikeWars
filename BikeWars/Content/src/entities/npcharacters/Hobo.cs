@@ -14,8 +14,6 @@ namespace BikeWars.Entities.Characters
     public class Hobo: CharacterBase, IWorldAudioAware
     {
         private EnemyMovement movement { get; set; }
-        private WorldAudioManager _worldAudioManager;
-
 
         public EnemyMovement Movement => movement;
 
@@ -100,8 +98,6 @@ namespace BikeWars.Entities.Characters
 
         public override void Update(GameTime gameTime)
         {
-            movement.HandleMovement(gameTime);
-
             UpdateAttackCooldown(gameTime);
             
             // Sound- and Movement-Control
