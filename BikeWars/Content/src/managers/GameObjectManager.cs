@@ -142,15 +142,10 @@ public class GameObjectManager
         foreach (CharacterBase c in Characters)
         {
             c.Update(gameTime);
-            if (c is Hobo h)
+            if (c.Movement != null)
             {
-                h.Movement.PlayerPosition = Player1.Transform.Position;
-                h.Movement.EnemyPosition = h.Transform.Position;
-            }
-            if (c is BikeThief b)
-            {
-                b.Movement.PlayerPosition = Player1.Transform.Position;
-                b.Movement.EnemyPosition = b.Transform.Position;
+                c.Movement.PlayerPosition = Player1.Transform.Position;
+                c.Movement.EnemyPosition = c.Transform.Position;
             }
             c.UpdateCollider();
         }

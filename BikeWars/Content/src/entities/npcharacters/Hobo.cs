@@ -13,14 +13,6 @@ namespace BikeWars.Entities.Characters
 {
     public class Hobo: CharacterBase, IWorldAudioAware
     {
-        private EnemyMovement movement { get; set; }
-
-        private readonly AudioService _audio;
-        private WorldAudioManager _worldAudioManager;
-
-
-        public EnemyMovement Movement => movement;
-
         // Animation mit SpriteManager
         private Texture2D _characterAtlas;
 
@@ -30,6 +22,8 @@ namespace BikeWars.Entities.Characters
         private SpriteAnimation _walkUpAnimation;
         private SpriteAnimation _walkDownAnimation;
         private SpriteAnimation _currentAnimation;
+        
+        protected override string WalkingSound => AudioAssets.Walking;
 
         public override void LoadContent(ContentManager content)
         {
@@ -59,9 +53,7 @@ namespace BikeWars.Entities.Characters
 
             // Startzustand: Idle
             _currentAnimation = _idleAnimation;
-
-            // sounds
-
+            
         }
 
         public override void UpdateCollider()
@@ -94,39 +86,23 @@ namespace BikeWars.Entities.Characters
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 100f;
-            movement = new EnemyMovement(canMove: true, isMoving: false);
+            Movement = new EnemyMovement(canMove: true, isMoving: false);
             UpdateCollider();
         }
 
         public override void Update(GameTime gameTime)
         {
-            movement.HandleMovement(gameTime);
-
             UpdateAttackCooldown(gameTime);
+            
+            // Sound- and Movement-Control
+            HandleMovementAndSound(gameTime, Movement);
 
-            float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            // Sound-Control
-            bool hoboIsMoving = movement.Direction != Vector2.Zero && movement.CanMove;
-
-            if (hoboIsMoving && CanPlaySound())
-            {
-                _audio.Sounds.ResumeLoop(AudioAssets.Walking);
-            }
-            else
-            {
-                _audio.Sounds.PauseLoop(AudioAssets.Walking);
-            }
-
-            Vector2 direction = movement.Direction;
+            Vector2 direction = Movement.Direction;
             LastTransform = new Transform(new Vector2(Transform.Position.X - direction.X, Transform.Position.Y - direction.Y), Transform.Size);
             bool isMoving = direction != Vector2.Zero;
 
             if (isMoving)
             {
-                direction.Normalize();
-                Transform.Position += direction * Speed * delta;
-
-
                 if (System.Math.Abs(direction.X) > System.Math.Abs(direction.Y))
                 {
 
@@ -166,19 +142,13 @@ namespace BikeWars.Entities.Characters
             _worldAudioManager = manager;
         }
 
-        private bool CanPlaySound()
-        {
-            return _worldAudioManager != null &&
-                   _worldAudioManager.IsAudible(Transform.Position);
-        }
-
         public void Immobalize(bool value)
         {
             if (value) {
-                movement.CanMove = false;
+                Movement.CanMove = false;
             } else
             {
-                movement.CanMove = true;
+                Movement.CanMove = true;
             }
         }
         public override void Attack(ICombat target)
