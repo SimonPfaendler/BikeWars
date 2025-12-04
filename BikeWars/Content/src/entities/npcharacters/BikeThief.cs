@@ -13,10 +13,6 @@
     {
         public class BikeThief : CharacterBase, IWorldAudioAware
         {
-            private EnemyMovement movement { get; set; }
-
-            public EnemyMovement Movement => movement;
-
             // Animation mit SpriteManager
             private Texture2D _characterAtlas;
 
@@ -48,8 +44,6 @@
 
                 // Startzustand: Idle
                 _currentAnimation = _idleAnimation;
-
-                // sounds
             }
 
             public override void UpdateCollider()
@@ -82,22 +76,22 @@
                 Transform = new Transform(start, size);
                 LastTransform = new Transform(start, size);
                 Speed = 100f;
-                movement = new EnemyMovement(canMove: true, isMoving: false);
+                Movement = new EnemyMovement(canMove: true, isMoving: false);
                 UpdateCollider();
             }
 
             public override void Update(GameTime gameTime)
             {
-                movement.HandleMovement(gameTime);
+                Movement.HandleMovement(gameTime);
 
                 UpdateAttackCooldown(gameTime);
 
                 float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
                 // Sound-Control
-                HandleMovementAndSound(gameTime, movement);
+                HandleMovementAndSound(gameTime, Movement);
 
-                Vector2 direction = movement.Direction;
+                Vector2 direction = Movement.Direction;
                 LastTransform = new Transform(
                     new Vector2(Transform.Position.X - direction.X, Transform.Position.Y - direction.Y),
                     Transform.Size
@@ -156,11 +150,11 @@
             {
                 if (value)
                 {
-                    movement.CanMove = false;
+                    Movement.CanMove = false;
                 }
                 else
                 {
-                    movement.CanMove = true;
+                    Movement.CanMove = true;
                 }
             }
 

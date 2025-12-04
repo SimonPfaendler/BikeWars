@@ -27,7 +27,8 @@ public abstract class CharacterBase : ICharacter, ICombat
     public bool IsDead => Health <= 0;
     public bool IsGodMode { get; set; } = false;
     
-    protected EnemyMovement Movement;
+    public EnemyMovement Movement { get; protected set; }
+
     protected SpriteAnimation CurrentAnimation;
     protected AudioService _audio;
     protected WorldAudioManager _worldAudioManager;

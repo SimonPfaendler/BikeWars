@@ -13,10 +13,6 @@ namespace BikeWars.Entities.Characters
 {
     public class Hobo: CharacterBase, IWorldAudioAware
     {
-        private EnemyMovement movement { get; set; }
-
-        public EnemyMovement Movement => movement;
-
         // Animation mit SpriteManager
         private Texture2D _characterAtlas;
 
@@ -57,9 +53,7 @@ namespace BikeWars.Entities.Characters
 
             // Startzustand: Idle
             _currentAnimation = _idleAnimation;
-
-            // sounds
-
+            
         }
 
         public override void UpdateCollider()
@@ -92,7 +86,7 @@ namespace BikeWars.Entities.Characters
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 100f;
-            movement = new EnemyMovement(canMove: true, isMoving: false);
+            Movement = new EnemyMovement(canMove: true, isMoving: false);
             UpdateCollider();
         }
 
@@ -101,9 +95,9 @@ namespace BikeWars.Entities.Characters
             UpdateAttackCooldown(gameTime);
             
             // Sound- and Movement-Control
-            HandleMovementAndSound(gameTime, movement);
+            HandleMovementAndSound(gameTime, Movement);
 
-            Vector2 direction = movement.Direction;
+            Vector2 direction = Movement.Direction;
             LastTransform = new Transform(new Vector2(Transform.Position.X - direction.X, Transform.Position.Y - direction.Y), Transform.Size);
             bool isMoving = direction != Vector2.Zero;
 
@@ -151,10 +145,10 @@ namespace BikeWars.Entities.Characters
         public void Immobalize(bool value)
         {
             if (value) {
-                movement.CanMove = false;
+                Movement.CanMove = false;
             } else
             {
-                movement.CanMove = true;
+                Movement.CanMove = true;
             }
         }
         public override void Attack(ICombat target)
