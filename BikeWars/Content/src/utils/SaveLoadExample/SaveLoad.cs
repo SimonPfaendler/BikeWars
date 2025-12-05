@@ -7,6 +7,8 @@ using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.entities.items;
 using BikeWars.Content.managers;
 using BikeWars.Entities.Characters;
+using System.Reflection.Metadata;
+using BikeWars.Content.engine.interfaces;
 
 namespace BikeWars.Content.src.utils.SaveLoadExample;
 
@@ -18,7 +20,9 @@ public static class SaveLoad
         BULLET,
         HOBO,
         BIKETHIEF,
-        CHEST
+        CHEST,
+        BEER,
+        MONEY
     }
     // save file path in the user's Documents folder
     private static readonly string SAVE_PATH = Path.Combine(
@@ -37,7 +41,7 @@ public static class SaveLoad
         public List<ItemSaveModel> Items {get; set;}
     }
 
-    public class ProjectileSaveModel
+    public class BasicSaveModel
     {
         public TYPES Type {get; set;} // Type of the projectile. Like bullet
 
@@ -45,13 +49,39 @@ public static class SaveLoad
 
         public PointSave Size {get;set;}
 
-        public ProjectileSaveModel() {}
+        public BasicSaveModel()
+        {
 
-        public ProjectileSaveModel(TYPES type, Vector2 position, Point size)
+        }
+        public BasicSaveModel(TYPES type, Vector2 position, Point size)
         {
             Type = type;
             Position = new Vector2Save(position);
             Size = new PointSave(size);
+        }
+    }
+    public class ProjectileSaveModel
+    {
+        public BasicSaveModel Basic {get;set;}
+        public ProjectileSaveModel() {}
+
+        public int Damage {get; set;}
+        public bool HasHit {get; set;}
+
+        public Vector2Save Direction {get; set;}
+        public bool IsMoving {get; set;}
+        public bool CanMove {get; set;}
+        public float Rotation {get; set;}
+
+        public ProjectileSaveModel(BasicSaveModel b, int damage, bool hasHit, Vector2 direction, bool isMoving, bool canMove, float rotation)
+        {
+            Basic = b;
+            Damage = damage;
+            HasHit = hasHit;
+            Direction = new Vector2Save(direction);
+            IsMoving = isMoving;
+            CanMove = canMove;
+            Rotation = rotation;
         }
     }
 
@@ -133,7 +163,7 @@ public static class SaveLoad
                 PlayerY = gameObjectManager.Player1.Transform.Position.Y,
                 Projectiles = MakeProjectileSaveList(gameObjectManager.Projectiles),
                 Characters = MakeCharacterSaveList(gameObjectManager.Characters),
-                // Items = MakeItemSaveList(gameObjectManager.Items),
+                Items = MakeItemSaveList(gameObjectManager.Items),
             };
             string json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
 
@@ -183,14 +213,16 @@ public static class SaveLoad
     {
         return projectile switch
         {
-            Bullet b => new ProjectileSaveModel(TYPES.BULLET, projectile.Transform.Position, projectile.Transform.Size),
+            Bullet b => new ProjectileSaveModel(new BasicSaveModel(TYPES.BULLET, projectile.Transform.Position, projectile.Transform.Size), b.Damage, b.HasHit, b.Movement.Direction, b.Movement.IsMoving, b.Movement.CanMove, b.Movement.Rotation),
         };
     }
     private static ItemSaveModel MakeItemSaveModel(ItemBase item)
     {
         return item switch
         {
-            Chest c => new ItemSaveModel(TYPES.CHEST, item.Transform.Position, item.Transform.Size)
+            Chest c => new ItemSaveModel(TYPES.CHEST, item.Transform.Position, item.Transform.Size),
+            Xp_Beer b => new ItemSaveModel(TYPES.BEER, item.Transform.Position, item.Transform.Size),
+            Xp_Money b => new ItemSaveModel(TYPES.MONEY, item.Transform.Position, item.Transform.Size)
         };
     }
     private static CharacterSaveModel MakeCharacterSaveModel(CharacterBase character)
@@ -203,7 +235,7 @@ public static class SaveLoad
     }
     private static List<ProjectileSaveModel> MakeProjectileSaveList(List<ProjectileBase> pList)
     {
-        List<ProjectileSaveModel> crtList = [];
+        List<ProjectileSaveModel> crtList = new List<ProjectileSaveModel>();
         foreach (var p in pList)
         {
             crtList.Add(MakeProjectileSaveModel(p));
@@ -212,7 +244,7 @@ public static class SaveLoad
     }
     private static List<CharacterSaveModel> MakeCharacterSaveList(List<CharacterBase> pList)
     {
-        List<CharacterSaveModel> crtList = [];
+        List<CharacterSaveModel> crtList = new List<CharacterSaveModel>();
         foreach (var p in pList)
         {
             crtList.Add(MakeCharacterSaveModel(p));
@@ -222,7 +254,7 @@ public static class SaveLoad
 
     private static List<ItemSaveModel> MakeItemSaveList(List<ItemBase> pList)
     {
-        List<ItemSaveModel> crtList = [];
+        List<ItemSaveModel> crtList = new List<ItemSaveModel>();
         foreach (var p in pList)
         {
             crtList.Add(MakeItemSaveModel(p));

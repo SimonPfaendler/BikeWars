@@ -21,7 +21,7 @@ namespace BikeWars.Entities.Characters
         private SpriteAnimation _walkUpAnimation;
         private SpriteAnimation _walkDownAnimation;
         private SpriteAnimation _currentAnimation;
-        
+
         protected override string WalkingSound => AudioAssets.Walking;
 
         public override void LoadContent(ContentManager content)
@@ -52,7 +52,7 @@ namespace BikeWars.Entities.Characters
 
             // Startzustand: Idle
             _currentAnimation = _idleAnimation;
-            
+
         }
 
         public override void UpdateCollider()
@@ -98,8 +98,6 @@ namespace BikeWars.Entities.Characters
 
             Vector2 direction = Movement.Direction;
             LastTransform = new Transform(new Vector2(Transform.Position.X - direction.X, Transform.Position.Y - direction.Y), Transform.Size);
-            //bool isMoving = direction != Vector2.Zero;
-
             if (Movement.IsMoving)
             {
                 float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;

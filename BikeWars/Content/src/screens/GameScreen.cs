@@ -68,8 +68,8 @@ namespace BikeWars.Content.screens
             _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
 
             _itemManager = new ItemManager();
-            _itemManager.AddItem(new Item(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
             _itemManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
+            _itemManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 70), new Point(32, 32)));
             _itemManager.AddItem(new Xp_Beer(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
             _itemManager.AddItem(new Xp_Money(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
             _collisionManager = new CollisionManager(CELL_SIZE, worldBounds.Height);
@@ -97,12 +97,6 @@ namespace BikeWars.Content.screens
             );
             _freelook = false;
             camera.Position = _gameObjectManager.Player1.Transform.Position;
-
-            // Create SaveLoad and load saved data
-            var state = SaveLoad.LoadGame();
-            _counter = state.Counter;
-            _gameObjectManager.Player1.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
-            Console.WriteLine("Loaded saved position (or default if no file).");
         }
 
         public virtual void LoadContent(ContentManager content)
@@ -122,6 +116,8 @@ namespace BikeWars.Content.screens
             // Combat Manager subcribes to Events from Collision Manager:  Collision → Combat
             _collisionManager.OnProjectileHit += _combatManager.HandleProjectileHit;
             _collisionManager.OnCharacterCollision += _combatManager.HandleCharacterCollision;
+            _collisionManager.OnItemPickup += _gameObjectManager.Player1.OnPickUpItem;
+            _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
 
             // Overlay
             _overlay = new Overlay(_debugFont, Game1.Instance.GraphicsDevice);
@@ -154,7 +150,7 @@ namespace BikeWars.Content.screens
             _collisionManager.Update(_gameObjectManager.Player1, _itemManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.Characters);
 
             _gameObjectManager.Update(gameTime, InputHandler.MakeMouseWorldPosByCamera(camera));
-            _itemManager.Update(gameTime, _gameObjectManager.Player1);
+            _itemManager.Update(gameTime);
             hpTestTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             if (InputHandler.IsPressed(GameAction.DEBUG_HEAL))
@@ -213,45 +209,77 @@ namespace BikeWars.Content.screens
             }
         }
 
+        private void HandleLoadGame()
+        {
+            var state = SaveLoad.LoadGame();
+            _counter = state.Counter;
+            _counterTimer = 0;
+            _gameObjectManager.Player1.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
+
+            _gameObjectManager.Projectiles.Clear();
+            foreach (var p in state.Projectiles)
+            {
+                if (p.Basic.Type == SaveLoad.TYPES.BULLET)
+                {
+                    Bullet b = new Bullet(p.Basic.Position.ToVector2(), p.Basic.Size.ToPoint(), _gameObjectManager.Player1); // TODO player doesn't make sense here
+                    b.HasHit = p.HasHit;
+                    b.Movement.IsMoving = p.IsMoving;
+                    b.Movement.CanMove = p.CanMove;
+                    b.Movement.Direction = p.Direction.ToVector2();
+                    b.Movement.Rotation = p.Rotation;
+                    b.LoadContent(_contentManager);
+                    _gameObjectManager.AddProjectile(b);
+                }
+            }
+            _gameObjectManager.Characters.Clear();
+            foreach (var p in state.Characters)
+            {
+                if (p.Type == SaveLoad.TYPES.HOBO)
+                {
+                    Hobo b = new Hobo(p.Position.ToVector2(), p.Size.ToPoint(), _audioService);
+                    b.LoadContent(_contentManager);
+                    _gameObjectManager.AddCharacter(b);
+                }
+                if (p.Type == SaveLoad.TYPES.BIKETHIEF)
+                {
+                    BikeThief b = new BikeThief(p.Position.ToVector2(), p.Size.ToPoint(), _audioService);
+                    b.LoadContent(_contentManager);
+                    _gameObjectManager.AddCharacter(b);
+                }
+            }
+
+            _gameObjectManager.Items.Clear();
+            foreach (var p in state.Items)
+            {
+                if (p.Type == SaveLoad.TYPES.CHEST)
+                {
+                    Chest b = new Chest(p.Position.ToVector2(), p.Size.ToPoint());
+                    b.LoadContent(_contentManager);
+                    _gameObjectManager.AddItem(b);
+                }
+                if (p.Type == SaveLoad.TYPES.BEER)
+                {
+                    Xp_Beer b = new Xp_Beer(p.Position.ToVector2(), p.Size.ToPoint());
+                    b.LoadContent(_contentManager);
+                    _gameObjectManager.AddItem(b);
+                }
+                if (p.Type == SaveLoad.TYPES.MONEY)
+                {
+                    Xp_Money b = new Xp_Money(p.Position.ToVector2(), p.Size.ToPoint());
+                    b.LoadContent(_contentManager);
+                    _gameObjectManager.AddItem(b);
+                }
+            }
+            Console.WriteLine("Game loaded.");
+        }
         private void HandleSaveLoadInput()
         {
             if (InputHandler.IsPressed(GameAction.SAVE))
-                // SaveLoad.SaveGame(_counter, _gameObjectManager.Player1.Transform, _gameObjectManager.Projectiles);
                 SaveLoad.SaveGame(_counter, _gameObjectManager);
 
             if (InputHandler.IsPressed(GameAction.LOAD))
             {
-                var state = SaveLoad.LoadGame();
-                _counter = state.Counter;
-                _counterTimer = 0;
-                _gameObjectManager.Player1.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
-                _gameObjectManager.Projectiles.Clear();
-                foreach (var p in state.Projectiles)
-                {
-                    if (p.Type == SaveLoad.TYPES.BULLET) // Hier könnte man noch was machen.
-                    {
-                        Bullet b = new Bullet(p.Position.ToVector2(), p.Size.ToPoint(), _gameObjectManager.Player1); // TODO player doesn't make sense here
-                        b.LoadContent(_contentManager);
-                        _gameObjectManager.AddProjectile(b);
-                    }
-                }
-                _gameObjectManager.Characters.Clear();
-                foreach (var p in state.Characters)
-                {
-                    if (p.Type == SaveLoad.TYPES.HOBO) // Hier könnte man noch was machen.
-                    {
-                        Hobo b = new Hobo(p.Position.ToVector2(), p.Size.ToPoint(), _audioService);
-                        b.LoadContent(_contentManager);
-                        _gameObjectManager.AddCharacter(b);
-                    }
-                    if (p.Type == SaveLoad.TYPES.BIKETHIEF) // Hier könnte man noch was machen.
-                    {
-                        BikeThief b = new BikeThief(p.Position.ToVector2(), p.Size.ToPoint(), _audioService);
-                        b.LoadContent(_contentManager);
-                        _gameObjectManager.AddCharacter(b);
-                    }
-                }
-                Console.WriteLine("Game loaded.");
+                HandleLoadGame();
             }
 
             if (InputHandler.IsPressed(GameAction.RESET))

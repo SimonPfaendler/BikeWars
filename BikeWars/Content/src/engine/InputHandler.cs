@@ -177,7 +177,7 @@ namespace BikeWars.Content.engine
             { GameAction.INTERACT, new[] {Keys.Q } },
             { GameAction.SWITCH, new[] {Keys.X } },
             { GameAction.DEBUG_HEAL, new[] {Keys.M } },
-            {GameAction.TECH_DEMO, new[] {Keys.B}},
+            { GameAction.TECH_DEMO, new[] {Keys.B}},
             { GameAction.DEBUG_HITBOXES, new[] {Keys.Z} }
         };
         public static Dictionary<GameAction, MouseButton[]> MouseMapping { get; } = new()

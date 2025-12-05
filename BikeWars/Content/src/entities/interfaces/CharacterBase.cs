@@ -26,13 +26,13 @@ public abstract class CharacterBase : ICharacter, ICombat
     private float _attackCooldownTimer = 0f;
     public bool IsDead => Health <= 0;
     public bool IsGodMode { get; set; } = false;
-    
+
     public EnemyMovement Movement { get; protected set; }
 
     protected SpriteAnimation CurrentAnimation;
     protected AudioService _audio;
     protected WorldAudioManager _worldAudioManager;
-    
+
     protected virtual string WalkingSound => AudioAssets.Walking;
 
     public void UpdateAttackCooldown(GameTime gameTime)
@@ -44,13 +44,13 @@ public abstract class CharacterBase : ICharacter, ICombat
                 _attackCooldownTimer = 0f;
         }
     }
-    
+
     public virtual void TakeDamage(int amount)
     {
-        
+
         if (IsGodMode)
-            return; 
-        
+            return;
+
         if (IsDead) return;
 
         Health -= amount;
@@ -65,14 +65,14 @@ public abstract class CharacterBase : ICharacter, ICombat
     {
         return _attackCooldownTimer <= 0f;
     }
-    
+
     public virtual void Attack(ICombat target)
     {
         if (!CanAttack()) return;
         target.TakeDamage(AttackDamage);
-        ResetAttackCooldown(); 
+        ResetAttackCooldown();
     }
-    
+
     // Is Helpful for example with colliders to set the original position back.
     public virtual void SetLastTransform()
     {
@@ -83,7 +83,7 @@ public abstract class CharacterBase : ICharacter, ICombat
     {
         _attackCooldownTimer = AttackCooldown;
     }
-    
+
     public abstract void UpdateCollider();
     public abstract void Update(GameTime gameTime); // Use this to update the logic like where the position is or resize the collision box
     public abstract void Draw(SpriteBatch spriteBatch);
@@ -92,12 +92,11 @@ public abstract class CharacterBase : ICharacter, ICombat
     {
         return Collider.Intersects(other);
     }
-    
+
     protected void HandleSound(bool isMoving)
     {
         if (_audio == null)
             return;
-
         if (isMoving && _worldAudioManager != null && _worldAudioManager.IsAudible(Transform.Position))
             _audio.Sounds.ResumeLoop(WalkingSound);
         else

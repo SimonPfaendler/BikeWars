@@ -30,6 +30,7 @@ public class CollisionManager
     public TiledMap TiledMap {get => _tiledMap; set => _tiledMap = value;}
     private List<BoxCollider> _collisionBoxes {get; set;} // Mainly used for the static layout
     public List<BoxCollider> CollisionBoxes {get => _collisionBoxes; set => _collisionBoxes = value;}
+    private List<ICollider> _toRemoveColliders {get; set;}
 
     public CollisionManager(int cellSize, int worldBounds)
     {
@@ -37,6 +38,7 @@ public class CollisionManager
         DynamicHash = new SpatialHash(cellSize, worldBounds);
         StaticHash = new SpatialHash(cellSize, worldBounds);
         CollisionBoxes = new List<BoxCollider>();
+        _toRemoveColliders = new List<ICollider>();
     }
     public bool isColliding(ICollider collisionBox1, ICollider collisionBox2)
     {
@@ -123,36 +125,36 @@ public class CollisionManager
             }
         }
     }
-    private void HandleProjectileWithStatic(ICollider b, ICollider c, List<ProjectileBase> toRemoveProjectiles)
+    private void HandleProjectileWithStatic(ICollider b, ICollider c)
     {
         if (b.Layer == CollisionLayer.WALL && c.Layer == CollisionLayer.PROJECTILE)
         {
             if (c.Intersects(b))
             {
                 ProjectileBase p = (ProjectileBase)c.Owner;
-                toRemoveProjectiles.Add(p);
+                _toRemoveColliders.Add(p.Collider);
             }
         }
     }
 
-    private void HandleStatics(ICollider c, List<ICollider> statics, List<ProjectileBase> toRemoveProjectiles)
+    private void HandleStatics(ICollider c, List<ICollider> statics)
     {
         foreach (var b in statics)
         {
             HandleCharacterWithStatic(b, c);
-            HandleProjectileWithStatic(b, c, toRemoveProjectiles);
+            HandleProjectileWithStatic(b, c);
         }
     }
-    private void HandleDynamics(ICollider c, List<ICollider> dynamics, List<ItemBase> toRemoveItems, List<ProjectileBase> toRemoveProjectiles, List<CharacterBase> toRemoveCharacters)
+    private void HandleDynamics(ICollider c, List<ICollider> dynamics)
     {
         foreach (var d in dynamics)
         {
-            PickingUpItem(c, d, toRemoveItems);
-            HandleCharacters(c, d, toRemoveProjectiles, toRemoveCharacters);
+            PickingUpItem(c, d);
+            HandleCharacters(c, d);
         }
     }
 
-    private void PickingUpItem(ICollider c, ICollider d, List<ItemBase> toRemoveItems)
+    private void PickingUpItem(ICollider c, ICollider d)
     {
         if (c.Layer == CollisionLayer.PLAYER)
         {
@@ -162,10 +164,13 @@ public class CollisionManager
                 {
                     // Event for picking up items
                     OnItemPickup?.Invoke((Player)c.Owner, (ItemBase)d.Owner);
-                    toRemoveItems.Add((ItemBase)d.Owner);
                 }
             }
         }
+    }
+    public void OnRemoveItem(ItemBase item)
+    {
+        _toRemoveColliders.Add(item.Collider);
     }
 
     private void HandleCharacterCollision(ICollider c, ICollider d)
@@ -191,7 +196,8 @@ public class CollisionManager
         }
     }
 
-    private void HandleCharacterProjectiles(ICollider c, ICollider d, List<ProjectileBase> toRemoveProjectiles, List<CharacterBase> toRemoveCharacters)
+    // private void HandleCharacterProjectiles(ICollider c, ICollider d, List<ProjectileBase> toRemoveProjectiles, List<CharacterBase> toRemoveCharacters)
+    private void HandleCharacterProjectiles(ICollider c, ICollider d)
     {
         if (d.Layer == CollisionLayer.PROJECTILE)
         {
@@ -202,7 +208,7 @@ public class CollisionManager
             // Make sure projectile cannot hit more than once
             if (p.HasHit)
             {
-                toRemoveProjectiles.Add(p);
+                _toRemoveColliders.Add(p.Collider);
                 return;
             }
 
@@ -217,20 +223,19 @@ public class CollisionManager
 
             CharacterBase ch = (CharacterBase)c.Owner;
             if(ch.IsDead)
-                toRemoveCharacters.Add(ch);
-
+                _toRemoveColliders.Add(ch.Collider);
                 p.HasHit = true;
-                toRemoveProjectiles.Add(p);
+                _toRemoveColliders.Add(p.Collider);
             }
         }
     }
 
-    private void HandleCharacters(ICollider c, ICollider d, List<ProjectileBase> toRemoveProjectiles, List<CharacterBase> toRemoveCharacters)
+    private void HandleCharacters(ICollider c, ICollider d)
     {
         if (c.Layer == CollisionLayer.CHARACTER || c.Layer == CollisionLayer.PLAYER)
         {
             HandleCharacterCollision(c, d);
-            HandleCharacterProjectiles(c, d, toRemoveProjectiles, toRemoveCharacters);
+            HandleCharacterProjectiles(c, d);
         }
     }
 
@@ -262,38 +267,39 @@ public class CollisionManager
     {
         DynamicHash.Clear();
         Insertions(items, player, projectiles, characters);
-        List<ProjectileBase> toRemoveProjectiles = new List<ProjectileBase>();
-        List<ItemBase> toRemoveItems = new List<ItemBase>();
-        List<CharacterBase> toRemoveCharacters = new List<CharacterBase>();
         foreach (KeyValuePair<int, CellData> cell in DynamicHash._cells)
         {
             foreach(var c in cell.Value.Colliders)
             {
                 List<ICollider> dynamics = DynamicHash.QueryNearby(c.Position);
                 List<ICollider> statics = StaticHash.QueryNearby(c.Position);
-                HandleDynamics(c, dynamics, toRemoveItems, toRemoveProjectiles, toRemoveCharacters);
-                HandleStatics(c, statics, toRemoveProjectiles);
+                HandleDynamics(c, dynamics);
+                HandleStatics(c, statics);
                 HandleTerrain(c, statics);
             }
         }
-        foreach (ProjectileBase p in toRemoveProjectiles)
+        foreach(ICollider c in _toRemoveColliders)
         {
-            projectiles.Remove(p);
-        }
-        foreach (ItemBase i in toRemoveItems)
-        {
-            items.Remove(i);
-        }
-        foreach (CharacterBase c in toRemoveCharacters)
-        {
-            characters.Remove(c);
+            switch (c.Owner) {
+                case ProjectileBase p:
+                    projectiles.Remove(p);
+                    break;
+                case ItemBase i:
+                    items.Remove(i);
+                    break;
+                case CharacterBase ch:
+                    characters.Remove(ch);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
     // makes the hitboxes visible for when in the tech demo
     // makes the hitboxes visible for when in the tech demo
-public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel, 
-                         Player player, List<CharacterBase> characters, 
+public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
+                         Player player, List<CharacterBase> characters,
                          List<ItemBase> items, List<ProjectileBase> projectiles)
 {
     // Static collision boxes
@@ -313,11 +319,11 @@ public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
     {
         var playerRect = GetColliderRectangle(player.Collider);
         DrawRectOutline(spriteBatch, pixel, playerRect, Color.Red * 0.7f);
-        
+
         // Draw a small indicator for player position
-        spriteBatch.Draw(pixel, 
-            new Rectangle((int)player.Transform.Position.X - 2, 
-                         (int)player.Transform.Position.Y - 2, 4, 4), 
+        spriteBatch.Draw(pixel,
+            new Rectangle((int)player.Transform.Position.X - 2,
+                         (int)player.Transform.Position.Y - 2, 4, 4),
             Color.Lime);
     }
 
@@ -349,7 +355,7 @@ public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
             var projRect = GetColliderRectangle(projectile.Collider);
             DrawRectOutline(spriteBatch, pixel, projRect, Color.Red * 0.7f);
         }
-    }   
+    }
 }
 
     // Helper method to convert ICollider to Rectangle
@@ -370,7 +376,7 @@ public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
     private void DrawRectOutline(SpriteBatch spriteBatch, Texture2D pixel, Rectangle rect, Color color)
     {
         if (rect.Width <= 0 || rect.Height <= 0) return;
-        
+
         // top
         spriteBatch.Draw(pixel, new Rectangle(rect.Left, rect.Top, rect.Width, 1), color);
         // bottom

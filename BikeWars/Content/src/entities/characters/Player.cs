@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.entities.Inventory;
 using BikeWars.Content.managers;
-using System.Diagnostics.Metrics;
 
 // ============================================================
 // Player.cs
@@ -29,12 +28,13 @@ namespace BikeWars.Entities.Characters
         public Vector2 GazeDirection { get; private set; }
         public Vector2 AimTarget { get; private set; }
         private Vector2 _facingDirection = Vector2.UnitX; // Default to Right to match initial animation
-        
+
         public TerrainCollider CurrentTerrain { get; set; }
         public float TerrainSpeedMultiplier = 1.0f;
         // public bool IsGodMode { get; set; }
 
         public event Action ShotBullet;
+        public event Action<ItemBase> ItemPickedUp;
         private Texture2D _characterAtlas;
 
         private SpriteAnimation _walkDownAnimation;
@@ -113,12 +113,12 @@ namespace BikeWars.Entities.Characters
                 Transform.Position.X - Transform.Size.X / 2f,
                 Transform.Position.Y - Transform.Size.Y / 2f
             );
-    
+
             Collider = new BoxCollider(
-                colliderPosition, 
-                Transform.Size.X, 
-                Transform.Size.Y, 
-                CollisionLayer.PLAYER, 
+                colliderPosition,
+                Transform.Size.X,
+                Transform.Size.Y,
+                CollisionLayer.PLAYER,
                 this
             );
         }
@@ -132,9 +132,26 @@ namespace BikeWars.Entities.Characters
             if (GazeDirection != Vector2.Zero)
             {
                 ShotBullet?.Invoke();
-
                 _audio.Sounds.Play(AudioAssets.GunShot);
             }
+        }
+
+        public void OnPickUpItem(Player player, ItemBase item)
+        {
+            if (player != this)
+            {
+                return;
+            }
+
+            if (item.InventoryItem)
+            {
+                if (InputHandler.IsPressed(GameAction.INTERACT) && Inventory.AddItem(item))
+                {
+                    ItemPickedUp?.Invoke(item);
+                }
+                return;
+            }
+            ItemPickedUp?.Invoke(item);
         }
 
         public Player(Vector2 start, Point size, AudioService audio)
@@ -180,6 +197,7 @@ namespace BikeWars.Entities.Characters
             {
                 Shooting();
             }
+
             movement.Update();
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
             // Sound-Control

@@ -30,7 +30,7 @@ public class GameObjectManager
     public List<ProjectileBase> Projectiles {get => _projectiles;}
 
     public ContentManager _contentManager {get; set;} // TODO do we need this one?
-    
+
     private WorldAudioManager _worldAudioManager;
 
     public GameObjectManager(ContentManager content)
@@ -55,7 +55,6 @@ public class GameObjectManager
         _projectiles = new List<ProjectileBase>();
 
         Player1.ShotBullet += OnPlayerShotBullet;
-
     }
     public GameObjectManager(ContentManager content, List<CharacterBase> characters, List<ItemBase> items, List<BoxCollider> statics, List<ProjectileBase> projectiles) // TODO
     {
@@ -72,7 +71,7 @@ public class GameObjectManager
 
         Characters.Add(character);
     }
-    
+
 
     public void AddItem(ItemBase item)
     {
@@ -173,14 +172,14 @@ public class GameObjectManager
         b.LoadContent(_contentManager);
         AddProjectile(b);
     }
-    
+
     public void SetWorldAudioManager(WorldAudioManager worldAudioManager)
     {
         _worldAudioManager = worldAudioManager;
-        
+
         if (Player1 is IWorldAudioAware pa)
             pa.SetWorldAudioManager(worldAudioManager);
-        
+
         foreach (var c in Characters)
         {
             if (c is IWorldAudioAware wa)

@@ -23,7 +23,6 @@ public abstract class ItemBase : IItem
     public Texture2D TexRight {get => _texRight; set => _texRight = value;}
     public Texture2D CurrentTex {get => _currentTex; set => _currentTex = value;}
 
-
     public abstract void Update(GameTime gameTime);
     public abstract void Draw(SpriteBatch spriteBatch);
     public abstract bool Intersects(ICollider other);

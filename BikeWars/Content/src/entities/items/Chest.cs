@@ -4,14 +4,13 @@ using BikeWars.Content.engine;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework.Content;
-using System;
 
 namespace BikeWars.Content.entities.items;
 public class Chest: ItemBase, IPickable
 {
     public override bool InventoryItem => true;
 
-    private const String TEXTURE_PATH = "assets/sprites/chest_texture";
+    private const string TEXTURE_PATH = "assets/sprites/chest_texture";
     private BoxCollider _collider { get; set; }
     public override BoxCollider Collider
     {
