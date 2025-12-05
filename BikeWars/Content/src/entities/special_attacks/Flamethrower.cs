@@ -66,7 +66,7 @@ namespace BikeWars.Content.entities.items
             Vector2 flameBottomCenter = playerCenter + offset;
 
             // Location where sprite is drawn (bottom center)
-            _spritePos = flameBottomCenter - new Vector2(_frameWidth / 2f, _frameHeight);
+            _spritePos = flameBottomCenter - new Vector2(_frameWidth, _frameHeight);
 
             // ANIMATION
             _frameTimer += dt;
@@ -89,7 +89,7 @@ namespace BikeWars.Content.entities.items
                 float dist = segLength * (i + 0.5f);
                 Vector2 center = flameBottomCenter + _dir * dist;
 
-                Vector2 topLeft = center - new Vector2(segWidth / 2f, segLength / 2f);
+                Vector2 topLeft = center - new Vector2(segWidth, segLength / 2f);
 
                 _hitboxes.Add(new BoxCollider(
                     topLeft,
@@ -114,7 +114,7 @@ namespace BikeWars.Content.entities.items
 
             spriteBatch.Draw(
                 _spriteSheet,
-                _spritePos + origin,   // <-- CORRECT POSITION
+                _spritePos + origin,
                 src,
                 Color.White,
                 _rotation,
