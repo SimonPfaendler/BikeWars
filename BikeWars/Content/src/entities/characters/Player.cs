@@ -26,6 +26,8 @@ namespace BikeWars.Entities.Characters
         private CooldownWithDuration sprint { get; }
 
         public Vector2 GazeDirection { get; private set; }
+        public int XpCounter { get; private set; } = 15;
+        public int XpLevelUp = 20;
         public Vector2 AimTarget { get; private set; }
         private Vector2 _facingDirection = Vector2.UnitX; // Default to Right to match initial animation
 
@@ -547,5 +549,22 @@ namespace BikeWars.Entities.Characters
                 DrawLine(spriteBatch, p1, p2, color);
             }
         }
+        public void AddXp(int XpAmount)
+        {
+            XpCounter += XpAmount;
+
+            if (XpCounter >= XpLevelUp)
+            {
+                LevelUp();
+            }
+        }
+
+        private void LevelUp()
+        {
+            XpCounter = XpCounter - XpLevelUp;
+            XpLevelUp = XpLevelUp * 2;
+            //TODO implementation for issue 163
+        }
+        
     }
 }

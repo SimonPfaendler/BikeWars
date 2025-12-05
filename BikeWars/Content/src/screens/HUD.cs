@@ -11,6 +11,7 @@ namespace BikeWars.Content.screens
         //private readonly Rectangle _xpFill;
         private readonly Rectangle _hpfill;
         private readonly Rectangle _sprintIcon;
+        private readonly Rectangle _xpfill;
 
 
         public Vector2 Position;
@@ -21,7 +22,7 @@ namespace BikeWars.Content.screens
             _sheet = sheet;
             _pixel = new Texture2D(sheet.GraphicsDevice, 1, 1);
             _pixel.SetData(new[] { Color.White });
-            //_xpFill = new Rectangle(37, 30, 91, 2);
+            _xpfill = new Rectangle(37, 30, 91, 2);
             _hpfill = new Rectangle(27, 37, 108, 10);
             _sprintIcon = new Rectangle(32, 58, 11, 9);
             Position = new Vector2(0, 0);
@@ -34,6 +35,8 @@ namespace BikeWars.Content.screens
 
             float hpPercent = (float)player.Health / player.MaxHealth;
             DrawCover(sb, _hpfill, hpPercent);
+            float xpPercent = (float)player.XpCounter / player.XpLevelUp;
+            DrawCover(sb, _xpfill, xpPercent);
             DrawSprintIcon(sb, player);
         }
 
@@ -64,6 +67,7 @@ namespace BikeWars.Content.screens
 
             sb.Draw(_pixel, dest, Color.Gray);
         }
+        
         private void DrawSprintIcon(SpriteBatch sb, Player player)
         {
             // Icon position (scaled)
