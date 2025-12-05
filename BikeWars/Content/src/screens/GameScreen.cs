@@ -36,6 +36,7 @@ namespace BikeWars.Content.screens
         public ContentManager ContentManager => _contentManager;
         private readonly AudioService _audioService;
         public AudioService AudioService => _audioService;
+
         public string DesiredMusic => AudioAssets.GameMusic;
         public float MusicVolume => 1f;
 
@@ -111,7 +112,7 @@ namespace BikeWars.Content.screens
             _tiledMapRenderer = new TiledMapRenderer(Game1.Instance.GraphicsDevice, _collisionManager.TiledMap);
 
             // Create Combat Manager
-            _combatManager = new CombatManager(_audioService);
+            _combatManager = new CombatManager(_audioService, _gameObjectManager);
 
             // Combat Manager subcribes to Events from Collision Manager:  Collision → Combat
             _collisionManager.OnProjectileHit += _combatManager.HandleProjectileHit;
