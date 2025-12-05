@@ -64,6 +64,16 @@ namespace BikeWars.Entities.Characters
         private const float GhostSpawnInterval = 0.05f; // alle 0,05s ein neues Ghost
         private const float GhostLifeTime = 0.1f;
 
+        public enum WeaponType
+        {
+            Gun,
+            Flamethrower
+        }
+
+        public WeaponType CurrentWeapon { get; private set; } = WeaponType.Gun;
+
+
+
         public override void LoadContent(ContentManager content)
         {
             _characterAtlas = content.Load<Texture2D>("assets/sprites/characters/character_atlas");
@@ -130,14 +140,20 @@ namespace BikeWars.Entities.Characters
         private void Shooting()
         {
             // Only shoot if we have a valid gaze direction
-            if (GazeDirection != Vector2.Zero)
+            if (GazeDirection == Vector2.Zero)
+                return;
+
+            switch (CurrentWeapon)
             {
-                ShotBullet?.Invoke();
-                //ShotBullet?.Invoke();
+                case WeaponType.Gun:
+                    ShotBullet?.Invoke();
+                    _audio.Sounds.Play(AudioAssets.GunShot);
+                    break;
 
-                Flamethrower?.Invoke();
-
-                _audio.Sounds.Play(AudioAssets.GunShot);
+                case WeaponType.Flamethrower:
+                    Flamethrower?.Invoke();
+                    _audio.Sounds.Play(AudioAssets.Flamethrower);
+                    break;
             }
         }
 
@@ -196,6 +212,15 @@ namespace BikeWars.Entities.Characters
                 {
                     movement.CurrentMovement = new BicycleMovement(true, true, movement.RotationAcceleration);
                 }
+            }
+
+            if (InputHandler.IsPressed(GameAction.SWITCH_WEAPON))
+            {
+                // Toggle between the two weapons
+                if (CurrentWeapon == WeaponType.Gun)
+                    CurrentWeapon = WeaponType.Flamethrower;
+                else
+                    CurrentWeapon = WeaponType.Gun;
             }
 
             if (InputHandler.IsPressed(GameAction.SHOOT))

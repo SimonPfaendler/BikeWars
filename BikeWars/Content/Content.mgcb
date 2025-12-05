@@ -121,6 +121,12 @@
 /processorParam:Quality=Best
 /build:assets/sounds/CarCrash.mp3
 
+#begin assets/sounds/flamethrower.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/flamethrower.wav
+
 #begin assets/sounds/Game_music.mp3
 /importer:Mp3Importer
 /processor:SongProcessor
