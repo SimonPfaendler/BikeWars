@@ -259,7 +259,7 @@ public class CollisionManager
                     OnAOEHit?.Invoke(ch, aoe);
 
                     if (ch.IsDead)
-                        toRemoveColliders.Add(ch);
+                        _toRemoveColliders.Add(ch.Collider);
                 }
 
                 return; // don't run projectile logic
