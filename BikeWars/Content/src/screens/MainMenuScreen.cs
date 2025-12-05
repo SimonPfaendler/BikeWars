@@ -133,7 +133,8 @@ namespace BikeWars.Content.screens
                     break;
 
                 case ButtonAction.Options:
-                    OptionScreen optionScreen = new OptionScreen(_font, _audioService);
+                    _audioService.Sounds.StopAll();
+                    OptionScreen optionScreen = new OptionScreen(_backgroundTexture, _font, _audioService);
                     ScreenManager.AddScreen(optionScreen);
                     break;
             

@@ -16,6 +16,7 @@ public class Game1 : Game
     private AudioService _audioService;
     public static AudioService Audio => Instance._audioService;
     public static Game1 Instance { get; private set; }
+    public static Texture2D background;
 
 
     public Game1()
@@ -39,7 +40,6 @@ public class Game1 : Game
     
     private void CreateMainMenu()
     {
-        Texture2D background = Content.Load<Texture2D>("assets/images/Startbildschirm");
         SpriteFont font = Content.Load<SpriteFont>("assets/fonts/Arial");
         MainMenuScreen mainMenu = new MainMenuScreen(background, font, _audioService);
         ScreenManager.AddScreen(mainMenu);
@@ -52,7 +52,7 @@ public class Game1 : Game
         _audioService = new AudioService();
         _audioService.LoadContent(Content);
 
-        Texture2D background = Content.Load<Texture2D>("assets/images/Startbildschirm");
+        background = Content.Load<Texture2D>("assets/images/Startbildschirm");
         Texture2D button = Content.Load<Texture2D>("assets/images/StartButton");
         StartScreen startScreen = new StartScreen(background, _audioService);
         ScreenManager.AddScreen(startScreen);
