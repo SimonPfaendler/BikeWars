@@ -86,7 +86,7 @@ namespace BikeWars.Content.screens
                     break;
             
                 case ButtonAction.Options:
-                    OptionScreen optionScreen = new OptionScreen(_font, _audioService);
+                    OptionScreen optionScreen = new OptionScreen(Game1.background, _font, _audioService);
                     ScreenManager.AddScreen(optionScreen);
                     break;
             

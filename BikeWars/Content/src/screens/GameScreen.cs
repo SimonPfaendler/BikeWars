@@ -161,6 +161,7 @@ namespace BikeWars.Content.screens
 
             if (InputHandler.IsPressed(GameAction.TECH_DEMO))
             {
+                _audioService.Sounds.StopAll();
                 ScreenManager.AddScreen(new TechDemoScreen(_audioService));
             }
 
