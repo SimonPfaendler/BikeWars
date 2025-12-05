@@ -16,6 +16,7 @@ public class CollisionManager
     public event Action<Player, ItemBase> OnItemPickup;
     public event Action<CharacterBase, ProjectileBase> OnProjectileHit;
     public event Action<CharacterBase, CharacterBase> OnCharacterCollision;
+    public event Action<CharacterBase, AreaOfEffectBase> OnAOEHit;
 
     private const string MAP = "assets/Map/Bike_Wars_Map";
     private const string TILED_MAP_LAYER = "Collision";
@@ -96,7 +97,7 @@ public class CollisionManager
         return Vector2.Zero;
     }
 
-    private void Insertions(List<ItemBase> items, Player player, List<ProjectileBase> projectiles, List<CharacterBase> characters)
+    private void Insertions(List<ItemBase> items, Player player, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters)
     {
         foreach (var c in items)
         {
@@ -106,6 +107,11 @@ public class CollisionManager
         foreach(ProjectileBase p in projectiles)
         {
             DynamicHash.Insert(p.Collider);
+        }
+        foreach (var aoe in aoeAttacks)
+        {
+            foreach (var hitbox in aoe.GetHitboxes())
+                DynamicHash.Insert(hitbox);
         }
         foreach(CharacterBase c in characters)
         {
@@ -236,6 +242,29 @@ public class CollisionManager
         {
             HandleCharacterCollision(c, d);
             HandleCharacterProjectiles(c, d);
+            // AOE damage handling
+            if (d.Layer == CollisionLayer.AOE)
+            {
+                AreaOfEffectBase aoe = (AreaOfEffectBase)d.Owner;
+
+                // prevent hitting yourself
+                if (aoe.Owner == c.Owner)
+                    return;
+
+                if (c.Intersects(d))
+                {
+                    CharacterBase ch = (CharacterBase)c.Owner;
+
+                    // Call proper AOE damage event
+                    OnAOEHit?.Invoke(ch, aoe);
+
+                    if (ch.IsDead)
+                        toRemoveColliders.Add(ch);
+                }
+
+                return; // don't run projectile logic
+            }
+
         }
     }
 
@@ -263,15 +292,25 @@ public class CollisionManager
 
 
 
-    public void Update(Player player, List<ItemBase> items, List<ProjectileBase> projectiles, List<CharacterBase> characters)
+    public void Update(Player player, List<ItemBase> items, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters)
     {
         DynamicHash.Clear();
-        Insertions(items, player, projectiles, characters);
+        Insertions(items, player, projectiles, aoeAttacks, characters);
         foreach (KeyValuePair<int, CellData> cell in DynamicHash._cells)
         {
             foreach(var c in cell.Value.Colliders)
             {
-                List<ICollider> dynamics = DynamicHash.QueryNearby(c.Position);
+                List<ICollider> dynamics;
+                if (c.Owner is AreaOfEffectBase aoe)
+                {
+                    dynamics = new List<ICollider>();
+                    foreach (var hitbox in aoe.GetHitboxes())
+                        dynamics.AddRange(DynamicHash.QueryNearby(hitbox.Position));
+                }
+                else
+                {
+                    dynamics = DynamicHash.QueryNearby(c.Position);
+                }
                 List<ICollider> statics = StaticHash.QueryNearby(c.Position);
                 HandleDynamics(c, dynamics);
                 HandleStatics(c, statics);
@@ -294,13 +333,18 @@ public class CollisionManager
                     break;
             }
         }
+        foreach (var aoe in aoeAttacks)
+        {
+            if (aoe.IsExpired)
+                aoeAttacks.Remove(aoe);
+        }
     }
 
     // makes the hitboxes visible for when in the tech demo
     // makes the hitboxes visible for when in the tech demo
-public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
-                         Player player, List<CharacterBase> characters,
-                         List<ItemBase> items, List<ProjectileBase> projectiles)
+public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel, 
+                         Player player, List<CharacterBase> characters, 
+                         List<ItemBase> items, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks)
 {
     // Static collision boxes
     foreach (var box in _collisionBoxes)
@@ -312,6 +356,15 @@ public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
             box.Height
         );
         DrawRectOutline(spriteBatch, pixel, rect, Color.Red * 0.7f);
+    }
+    // AOE hitboxes
+    foreach (var aoe in aoeAttacks)
+    {
+        foreach (var hitbox in aoe.GetHitboxes())
+        {
+            Rectangle rect = GetColliderRectangle(hitbox);
+            DrawRectOutline(spriteBatch, pixel, rect, Color.Red * 0.7f);
+        }
     }
 
     // Player hitbox

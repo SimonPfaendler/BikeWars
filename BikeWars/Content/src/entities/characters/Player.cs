@@ -35,6 +35,7 @@ namespace BikeWars.Entities.Characters
 
         public event Action ShotBullet;
         public event Action<ItemBase> ItemPickedUp;
+        public event Action Flamethrower;
         private Texture2D _characterAtlas;
 
         private SpriteAnimation _walkDownAnimation;
@@ -132,6 +133,10 @@ namespace BikeWars.Entities.Characters
             if (GazeDirection != Vector2.Zero)
             {
                 ShotBullet?.Invoke();
+                //ShotBullet?.Invoke();
+
+                Flamethrower?.Invoke();
+
                 _audio.Sounds.Play(AudioAssets.GunShot);
             }
         }

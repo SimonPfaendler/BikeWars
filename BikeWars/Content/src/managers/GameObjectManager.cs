@@ -29,6 +29,10 @@ public class GameObjectManager
     private List<ProjectileBase> _projectiles {get; set;}
     public List<ProjectileBase> Projectiles {get => _projectiles;}
 
+    private List<AreaOfEffectBase> _aoeAttacks = new();
+    public List<AreaOfEffectBase> AOEAttacks => _aoeAttacks;
+
+
     public ContentManager _contentManager {get; set;} // TODO do we need this one?
 
     private WorldAudioManager _worldAudioManager;
@@ -55,6 +59,8 @@ public class GameObjectManager
         _projectiles = new List<ProjectileBase>();
 
         Player1.ShotBullet += OnPlayerShotBullet;
+        Player1.Flamethrower += OnPlayerFlamethrower;
+
     }
     public GameObjectManager(ContentManager content, List<CharacterBase> characters, List<ItemBase> items, List<BoxCollider> statics, List<ProjectileBase> projectiles) // TODO
     {
@@ -88,6 +94,11 @@ public class GameObjectManager
         Projectiles.Add(proj);
     }
 
+    public void AddAOE(AreaOfEffectBase aoe)
+    {
+        _aoeAttacks.Add(aoe);
+    }
+
     public void LoadContent(ContentManager content)
     {
         Player1.LoadContent(content);
@@ -102,6 +113,10 @@ public class GameObjectManager
         foreach (ProjectileBase p in Projectiles)
         {
             p.LoadContent(content);
+        }
+        foreach (AreaOfEffectBase a in _aoeAttacks)
+        {
+            a.LoadContent(content);
         }
         foreach (BoxCollider s in Statics)
         {
@@ -124,6 +139,10 @@ public class GameObjectManager
         foreach (ProjectileBase p in Projectiles)
         {
             p.Draw(spriteBatch);
+        }
+        foreach (AreaOfEffectBase aoe in _aoeAttacks)
+        {
+            aoe.Draw(spriteBatch);
         }
         foreach (BoxCollider s in Statics)
         {
@@ -156,6 +175,14 @@ public class GameObjectManager
         {
             p.Update(gameTime);
         }
+        for (int i = _aoeAttacks.Count - 1; i >= 0; i--)
+        {
+            var aoe = _aoeAttacks[i];
+            aoe.Update(gameTime);
+
+            if (aoe.IsExpired)
+                _aoeAttacks.Remove(aoe);
+        }
         foreach (BoxCollider s in Statics)
         {
             // s.LoadContent();
@@ -173,6 +200,16 @@ public class GameObjectManager
         AddProjectile(b);
     }
 
+        private void OnPlayerFlamethrower()
+    {
+        Vector2 spawnPos = Player1.Transform.Position;
+        Vector2 direction = Player1.GazeDirection;
+
+        Flamethrower f = new Flamethrower(Player1, direction);
+        f.LoadContent(_contentManager);
+        AddAOE(f);
+    }
+    
     public void SetWorldAudioManager(WorldAudioManager worldAudioManager)
     {
         _worldAudioManager = worldAudioManager;
