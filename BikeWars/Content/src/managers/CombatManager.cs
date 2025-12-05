@@ -41,6 +41,22 @@ public class CombatManager
         // if (target.Health <= 0) HandleDeath(target);
     }
 
+        public void HandleAOEHit(CharacterBase target, AreaOfEffectBase aoe)
+    {
+        if (target.IsDead) return;
+        if (target.IsGodMode)
+        {
+            return;
+        }
+        if (target == aoe.Owner) return;
+
+        // Apply Damage
+        target.TakeDamage(aoe.Damage);
+        
+        _audio.Sounds.Play(AudioAssets.BulletHit);
+        // if (target.Health <= 0) HandleDeath(target);
+    }
+
     // Two Characters collide (Close combat / Melee attack)
     public void HandleCharacterCollision(CharacterBase a, CharacterBase b)
     {

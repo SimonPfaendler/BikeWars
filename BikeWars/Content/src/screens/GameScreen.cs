@@ -115,6 +115,7 @@ namespace BikeWars.Content.screens
 
             // Combat Manager subcribes to Events from Collision Manager:  Collision → Combat
             _collisionManager.OnProjectileHit += _combatManager.HandleProjectileHit;
+            _collisionManager.OnAOEHit += _combatManager.HandleAOEHit;       
             _collisionManager.OnCharacterCollision += _combatManager.HandleCharacterCollision;
             _collisionManager.OnItemPickup += _gameObjectManager.Player1.OnPickUpItem;
             _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
@@ -147,7 +148,7 @@ namespace BikeWars.Content.screens
             }
             _overlay.SetPaused(false, gameTime);
             InputHandler.Update();
-            _collisionManager.Update(_gameObjectManager.Player1, _itemManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.Characters);
+            _collisionManager.Update(_gameObjectManager.Player1, _itemManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters);
 
             _gameObjectManager.Update(gameTime, InputHandler.MakeMouseWorldPosByCamera(camera));
             _itemManager.Update(gameTime);
@@ -326,7 +327,8 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.Player1,
                     _gameObjectManager.Characters,
                     _itemManager.Items,
-                    _gameObjectManager.Projectiles
+                    _gameObjectManager.Projectiles,
+                    _gameObjectManager.AOEAttacks
                 );
             }
 
