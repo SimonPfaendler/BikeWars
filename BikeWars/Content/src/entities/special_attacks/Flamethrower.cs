@@ -31,7 +31,7 @@ namespace BikeWars.Content.entities.items
         private Vector2 _spritePos;
 
         public Flamethrower(Player player, Vector2 dir)
-            : base(owner: player, damage: 1, duration: 2.0f) // AOE base constructor
+            : base(owner: player, damage: 1, duration: 3.0f) // AOE base constructor
         {
             _player = player;
             _dir = Vector2.Normalize(dir);
