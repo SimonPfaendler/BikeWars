@@ -174,7 +174,10 @@ namespace BikeWars.Content.screens
             _overlay.SetPaused(false, gameTime);
             _collisionManager.Update(_gameObjectManager.Player1, _itemManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters);
 
-            _spawnManager.Update(gameTime);
+            if (!_isTechDemo)
+            {
+                _spawnManager.Update(gameTime);
+            }
 
             _gameObjectManager.Update(gameTime, InputHandler.MakeMouseWorldPosByCamera(camera));
             _itemManager.Update(gameTime);
