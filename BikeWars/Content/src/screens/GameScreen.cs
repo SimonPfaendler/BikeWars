@@ -17,6 +17,7 @@ namespace BikeWars.Content.screens
 {
     public class GameScreen : IScreen
     {
+        private LevelUpScreen _levelUpScreen;
         private readonly ItemManager _itemManager;
         private readonly Camera2D camera;
         private Rectangle worldBounds;
@@ -137,18 +138,40 @@ namespace BikeWars.Content.screens
             Rectangle initialView = GetCameraWorldRect();
             _worldAudioManager = new WorldAudioManager(initialView);
             _gameObjectManager.SetWorldAudioManager(_worldAudioManager);
+            
+            _levelUpScreen = new LevelUpScreen();
+            // checks if the event OnLevelUp is triggered if it is LevelUpSreen gets active
+            _gameObjectManager.Player1.OnLevelUp += () =>
+            {
+                _levelUpScreen.Open();
+            };
+            _levelUpScreen.OnOptionLeftSelected += () =>
+            {
+                // TODO:
+            };
+
+            _levelUpScreen.OnOptionRightSelected += () =>
+            {
+            };
 
             // Spawn Manager
             _spawnManager = new SpawnManager(_gameObjectManager, _contentManager, _collisionManager, _audioService);
         }
         public virtual void Update(GameTime gameTime)
         {
+            // if the LevelUp is Open only the LevelUpMenu gets Updated all the other stuff is basically paused
+            // if you want to add something before or change order this please double-check
+            InputHandler.Update();
+            if (_levelUpScreen.IsOpen)
+            {
+                _levelUpScreen.Update(gameTime);
+                return;
+            }
             if (_worldAudioManager != null && _gameObjectManager.Player1 != null)
             {
                 _worldAudioManager.UpdateListenerPosition(_gameObjectManager.Player1.Transform.Position);
             }
             _overlay.SetPaused(false, gameTime);
-            InputHandler.Update();
             _collisionManager.Update(_gameObjectManager.Player1, _itemManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters);
 
             _spawnManager.Update(gameTime);
@@ -349,6 +372,11 @@ namespace BikeWars.Content.screens
             }
             _gameObjectManager.Player1.Inventory.Draw(spriteBatch, _pixel);
             hud.Draw(spriteBatch, _gameObjectManager.Player1);
+            
+            if (_levelUpScreen.IsOpen)
+            {
+                _levelUpScreen.Draw(spriteBatch);
+            }
 
             spriteBatch.End();
         }
