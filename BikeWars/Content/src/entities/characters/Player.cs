@@ -8,6 +8,7 @@ using BikeWars.Content.entities.interfaces;
 using System.Collections.Generic;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.entities.Inventory;
+using BikeWars.Content.entities.items;
 using BikeWars.Content.managers;
 
 // ============================================================
@@ -26,8 +27,8 @@ namespace BikeWars.Entities.Characters
         private CooldownWithDuration sprint { get; }
 
         public Vector2 GazeDirection { get; private set; }
-        public int XpCounter { get; private set; } = 15;
-        public int XpLevelUp = 20;
+        public int XpCounter { get; private set; } = 0;
+        public int XpLevelUp = 10;
         public Vector2 AimTarget { get; private set; }
         private Vector2 _facingDirection = Vector2.UnitX; // Default to Right to match initial animation
 
@@ -164,6 +165,15 @@ namespace BikeWars.Entities.Characters
             if (player != this)
             {
                 return;
+            }
+
+            if (item is Xp xp)
+            {
+                AddXp(xp.xp_value);
+                if (XpCounter >= XpLevelUp)
+                {
+                    LevelUp();
+                }
             }
 
             if (item.InventoryItem)
