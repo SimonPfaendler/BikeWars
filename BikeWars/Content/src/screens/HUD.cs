@@ -23,7 +23,7 @@ namespace BikeWars.Content.screens
             _sheet = sheet;
             _pixel = new Texture2D(sheet.GraphicsDevice, 1, 1);
             _pixel.SetData(new[] { Color.White });
-            _xpfill = new Rectangle(37, 30, 91, 2);
+            _xpfill = new Rectangle(37, 30, 92, 2);
             _hpfill = new Rectangle(27, 37, 108, 10);
             _sprintIcon = new Rectangle(32, 58, 11, 9);
             _font = Game1.Instance.Content.Load<SpriteFont>("assets/fonts/Arial");
