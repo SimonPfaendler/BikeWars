@@ -122,7 +122,7 @@ namespace BikeWars.Content.screens
 
             // Combat Manager subcribes to Events from Collision Manager:  Collision → Combat
             _collisionManager.OnProjectileHit += _combatManager.HandleProjectileHit;
-            _collisionManager.OnAOEHit += _combatManager.HandleAOEHit;       
+            _collisionManager.OnAOEHit += _combatManager.HandleAOEHit;
             _collisionManager.OnCharacterCollision += _combatManager.HandleCharacterCollision;
             _collisionManager.OnItemPickup += _gameObjectManager.Player1.OnPickUpItem;
             _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
@@ -131,7 +131,7 @@ namespace BikeWars.Content.screens
             _overlay = new Overlay(_debugFont, Game1.Instance.GraphicsDevice);
 
             // HUD
-            hudTexture = managers.SpriteManager.GetTexture("HUD_Sheet"); 
+            hudTexture = managers.SpriteManager.GetTexture("HUD_Sheet");
             hud = new HUD(hudTexture);
 
             _gameObjectManager.LoadContent(content);
@@ -145,7 +145,7 @@ namespace BikeWars.Content.screens
             Rectangle initialView = GetCameraWorldRect();
             _worldAudioManager = new WorldAudioManager(initialView);
             _gameObjectManager.SetWorldAudioManager(_worldAudioManager);
-            
+
             _levelUpScreen = new LevelUpScreen();
             // checks if the event OnLevelUp is triggered if it is LevelUpSreen gets active
             _gameObjectManager.Player1.OnLevelUp += () =>
@@ -265,7 +265,6 @@ namespace BikeWars.Content.screens
                     b.Movement.CanMove = p.CanMove;
                     b.Movement.Direction = p.Direction.ToVector2();
                     b.Movement.Rotation = p.Rotation;
-                    // b.LoadContent(_contentManager);
                     _gameObjectManager.AddProjectile(b);
                 }
             }
@@ -275,13 +274,11 @@ namespace BikeWars.Content.screens
                 if (p.Type == SaveLoad.TYPES.HOBO)
                 {
                     Hobo b = new Hobo(p.Position.ToVector2(), p.Size.ToPoint(), _audioService);
-                    // b.LoadContent(_contentManager);
                     _gameObjectManager.AddCharacter(b);
                 }
                 if (p.Type == SaveLoad.TYPES.BIKETHIEF)
                 {
                     BikeThief b = new BikeThief(p.Position.ToVector2(), p.Size.ToPoint(), _audioService);
-                    b.LoadContent(_contentManager);
                     _gameObjectManager.AddCharacter(b);
                 }
             }
@@ -292,19 +289,16 @@ namespace BikeWars.Content.screens
                 if (p.Type == SaveLoad.TYPES.CHEST)
                 {
                     Chest b = new Chest(p.Position.ToVector2(), p.Size.ToPoint());
-                    b.LoadContent(_contentManager);
                     _gameObjectManager.AddItem(b);
                 }
                 if (p.Type == SaveLoad.TYPES.BEER)
                 {
                     Xp_Beer b = new Xp_Beer(p.Position.ToVector2(), p.Size.ToPoint());
-                    b.LoadContent(_contentManager);
                     _gameObjectManager.AddItem(b);
                 }
                 if (p.Type == SaveLoad.TYPES.MONEY)
                 {
                     Xp_Money b = new Xp_Money(p.Position.ToVector2(), p.Size.ToPoint());
-                    b.LoadContent(_contentManager);
                     _gameObjectManager.AddItem(b);
                 }
             }
@@ -382,7 +376,7 @@ namespace BikeWars.Content.screens
             }
             _gameObjectManager.Player1.Inventory.Draw(spriteBatch, _pixel);
             hud.Draw(spriteBatch, _gameObjectManager.Player1);
-            
+
             if (_levelUpScreen.IsOpen)
             {
                 _levelUpScreen.Draw(spriteBatch);
