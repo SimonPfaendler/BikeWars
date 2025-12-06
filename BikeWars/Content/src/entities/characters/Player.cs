@@ -29,6 +29,7 @@ namespace BikeWars.Entities.Characters
         public Vector2 GazeDirection { get; private set; }
         public int XpCounter { get; private set; } = 0;
         public int XpLevelUp = 10;
+        public int CurrentLevel { get; private set; } = 1;
         public Vector2 AimTarget { get; private set; }
         private Vector2 _facingDirection = Vector2.UnitX; // Default to Right to match initial animation
 
@@ -51,6 +52,7 @@ namespace BikeWars.Entities.Characters
         private readonly AudioService _audio;
         private WorldAudioManager _worldAudioManager;
         private string _currentMovementSound = null;
+        public event Action OnLevelUp;
 
 
         private struct GhostFrame
@@ -573,7 +575,9 @@ namespace BikeWars.Entities.Characters
         {
             XpCounter = XpCounter - XpLevelUp;
             XpLevelUp = XpLevelUp * 2;
-            //TODO implementation for issue 163
+            CurrentLevel++;
+            // level upscreen is triggered:
+            OnLevelUp?.Invoke();
         }
         
     }
