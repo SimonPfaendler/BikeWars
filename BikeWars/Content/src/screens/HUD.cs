@@ -8,10 +8,11 @@ namespace BikeWars.Content.screens
     {
         private readonly Texture2D _sheet;
         private readonly Texture2D _pixel;
-        //private readonly Rectangle _xpFill;
         private readonly Rectangle _hpfill;
         private readonly Rectangle _sprintIcon;
         private readonly Rectangle _xpfill;
+        private SpriteFont _font;
+
 
 
         public Vector2 Position;
@@ -25,6 +26,7 @@ namespace BikeWars.Content.screens
             _xpfill = new Rectangle(37, 30, 91, 2);
             _hpfill = new Rectangle(27, 37, 108, 10);
             _sprintIcon = new Rectangle(32, 58, 11, 9);
+            _font = Game1.Instance.Content.Load<SpriteFont>("assets/fonts/Arial");
             Position = new Vector2(0, 0);
         }
         private const float Scale = 2f;
@@ -37,6 +39,12 @@ namespace BikeWars.Content.screens
             DrawCover(sb, _hpfill, hpPercent);
             float xpPercent = (float)player.XpCounter / player.XpLevelUp;
             DrawCover(sb, _xpfill, xpPercent);
+            sb.DrawString(
+                _font,
+                $"Lvl {player.CurrentLevel}",
+                Position + new Vector2(140,30),
+                Color.Black
+            );
             DrawSprintIcon(sb, player);
         }
 
@@ -67,6 +75,7 @@ namespace BikeWars.Content.screens
 
             sb.Draw(_pixel, dest, Color.Gray);
         }
+        
         
         private void DrawSprintIcon(SpriteBatch sb, Player player)
         {
