@@ -28,7 +28,7 @@ namespace BikeWars.Content.managers
         {
             if (_characterAtlas == null)
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("character atlas is null");
             }
             return _characterAtlas;
         }
@@ -122,15 +122,15 @@ namespace BikeWars.Content.managers
         {
             if (_animationCache == null)
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("animation cache is null");
             }
             
             if (_animationCache.TryGetValue(name, out var animation))
             {
-                return animation;
+                return animation.Clone(); 
             }
             
-            throw new KeyNotFoundException($"animation '{name}' nicht gefunden");
+            throw new KeyNotFoundException("animation '" + name + "' not found");
         }
         
         public static Texture2D GetTexture(string name)
@@ -145,7 +145,7 @@ namespace BikeWars.Content.managers
                 return texture;
             }
     
-            throw new KeyNotFoundException($"texture '{name}' not found");
+            throw new KeyNotFoundException("texture '" + name + "' not found");
         }
     }
     
@@ -200,6 +200,11 @@ namespace BikeWars.Content.managers
                 size.Y
             );
             spriteBatch.Draw(_sheet, dest, source, Color.White, rotation: rotation, new Vector2(source.Width / 2f, source.Height / 2f), SpriteEffects.None, layerDepth:0f);
+        }
+        
+        public SpriteAnimation Clone()
+        {
+            return new SpriteAnimation(_sheet, _frames, _secondsPerFrame);
         }
     }
 }
