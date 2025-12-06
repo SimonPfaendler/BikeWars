@@ -50,6 +50,8 @@ namespace BikeWars.Content.screens
 
         private CombatManager _combatManager;
 
+        private SpawnManager _spawnManager;
+
         private bool _freelook; // Has to be optimized
 
         public bool DrawLower => false;
@@ -83,11 +85,7 @@ namespace BikeWars.Content.screens
             }
 
             _gameObjectManager = new GameObjectManager(_contentManager, player, null);
-            for (int i = 0; i < 5; i++)
-            {
-                _gameObjectManager.AddCharacter(new Hobo(new Vector2(worldBounds.Width / 2 + i*40, worldBounds.Height / 2 -500 + i), new Point(32, 32), _audioService));
-            }
-            _gameObjectManager.AddCharacter(new BikeThief(new Vector2(worldBounds.Width / 2 - 100, worldBounds.Height / 2 - 80), new Point(32, 32), _audioService));
+            // Initial spawning is now handled by SpawnManager
             _gameObjectManager.Items = _itemManager.Items;
 
             Game1 game = Game1.Instance;
@@ -140,6 +138,8 @@ namespace BikeWars.Content.screens
             _worldAudioManager = new WorldAudioManager(initialView);
             _gameObjectManager.SetWorldAudioManager(_worldAudioManager);
 
+            // Spawn Manager
+            _spawnManager = new SpawnManager(_gameObjectManager, _contentManager, _collisionManager, _audioService);
         }
         public virtual void Update(GameTime gameTime)
         {
@@ -150,6 +150,8 @@ namespace BikeWars.Content.screens
             _overlay.SetPaused(false, gameTime);
             InputHandler.Update();
             _collisionManager.Update(_gameObjectManager.Player1, _itemManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters);
+
+            _spawnManager.Update(gameTime);
 
             _gameObjectManager.Update(gameTime, InputHandler.MakeMouseWorldPosByCamera(camera));
             _itemManager.Update(gameTime);

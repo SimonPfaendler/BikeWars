@@ -62,7 +62,7 @@ public class CollisionManager
             StaticHash.Insert(box);
         }
         LoadTerrainLayer("Streets", TerrainType.ROAD);
-        LoadTerrainLayer("Background_graas", TerrainType.GRASS);
+        LoadTerrainLayer("Floor", TerrainType.GRASS);
     }
 
     public Vector2 GetPenetrationVector(ICollider a, ICollider b)
