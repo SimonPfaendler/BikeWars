@@ -140,7 +140,24 @@ namespace BikeWars.Content.utils
                     new Rectangle(281, 507, 64, 62),
                     new Rectangle(345, 507, 64, 62)
                 }
-            }
+            },
+
+            // Flamethrower_Attack: 10 Frames, 32x112 each, single row spritesheet
+            {
+                "Flamethrower_Attack", new List<Rectangle>
+                {
+                    new Rectangle(0 * 32, 112, 32, 23),   // Frame 1
+                    new Rectangle(1 * 32, 112, 32, 47),   // Frame 2
+                    new Rectangle(2 * 32, 112, 32, 66),   // Frame 3
+                    new Rectangle(3 * 32, 112, 32, 88),   // Frame 4
+                    new Rectangle(4 * 32, 112, 32, 98),   // Frame 5
+                    new Rectangle(5 * 32, 112, 32, 104),   // Frame 6
+                    new Rectangle(6 * 32, 112, 32, 104),   // Frame 7
+                    new Rectangle(7 * 32, 112, 32, 104),   // Frame 8
+                    new Rectangle(8 * 32, 112, 32, 104),   // Frame 9
+                    new Rectangle(9 * 32, 112, 32, 104)    // Frame 10
+                }
+            },
         };
         
         // ZUGRUFFMETHODE

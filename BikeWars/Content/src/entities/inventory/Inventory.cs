@@ -29,13 +29,13 @@ public class Inventory
         int slotGap = 8;
 
         int screenWidth = spriteBatch.GraphicsDevice.Viewport.Width;
-        
+
         // total width of all slots combined
         int totalWidth = MaxSlots * slotSize + (MaxSlots - 1) * slotGap;
-        
+
         // position inventory row in the top-right corner of the screen
         Vector2 startPos = new Vector2(screenWidth - totalWidth - 20, 40);
-        
+
         // draws the background of the inventory
         Rectangle backgroundRect = new Rectangle(
             (int)startPos.X - 10,
@@ -51,17 +51,17 @@ public class Inventory
         {
             int x = (int)(startPos.X + i * (slotSize + slotGap));
             int y = (int)startPos.Y;
-            
+
             Rectangle slotRect = new Rectangle(x, y, slotSize, slotSize);
             spriteBatch.Draw(pixel, slotRect, Color.White);
-            
+
             if (i >= _items.Count)
                 continue;
 
             var item = _items[i];
             if (item == null)
                 continue;
-            
+
             Rectangle iconRect = new Rectangle(
                 x + 4,
                 y + 4,

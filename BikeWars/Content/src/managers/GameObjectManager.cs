@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 
+
 namespace BikeWars.Content.managers;
 public class GameObjectManager
 {
@@ -29,8 +30,12 @@ public class GameObjectManager
     private List<ProjectileBase> _projectiles {get; set;}
     public List<ProjectileBase> Projectiles {get => _projectiles;}
 
+    private List<AreaOfEffectBase> _aoeAttacks = new();
+    public List<AreaOfEffectBase> AOEAttacks => _aoeAttacks;
+
+
     public ContentManager _contentManager {get; set;} // TODO do we need this one?
-    
+
     private WorldAudioManager _worldAudioManager;
 
     public GameObjectManager(ContentManager content)
@@ -55,6 +60,7 @@ public class GameObjectManager
         _projectiles = new List<ProjectileBase>();
 
         Player1.ShotBullet += OnPlayerShotBullet;
+        Player1.Flamethrower += OnPlayerFlamethrower;
 
     }
     public GameObjectManager(ContentManager content, List<CharacterBase> characters, List<ItemBase> items, List<BoxCollider> statics, List<ProjectileBase> projectiles) // TODO
@@ -72,7 +78,7 @@ public class GameObjectManager
 
         Characters.Add(character);
     }
-    
+
 
     public void AddItem(ItemBase item)
     {
@@ -89,6 +95,11 @@ public class GameObjectManager
         Projectiles.Add(proj);
     }
 
+    public void AddAOE(AreaOfEffectBase aoe)
+    {
+        _aoeAttacks.Add(aoe);
+    }
+
     public void LoadContent(ContentManager content)
     {
         Player1.LoadContent(content);
@@ -103,6 +114,10 @@ public class GameObjectManager
         foreach (ProjectileBase p in Projectiles)
         {
             p.LoadContent(content);
+        }
+        foreach (AreaOfEffectBase a in _aoeAttacks)
+        {
+            a.LoadContent(content);
         }
         foreach (BoxCollider s in Statics)
         {
@@ -126,6 +141,10 @@ public class GameObjectManager
         {
             p.Draw(spriteBatch);
         }
+        foreach (AreaOfEffectBase aoe in _aoeAttacks)
+        {
+            aoe.Draw(spriteBatch);
+        }
         foreach (BoxCollider s in Statics)
         {
             // s.LoadContent();
@@ -142,15 +161,10 @@ public class GameObjectManager
         foreach (CharacterBase c in Characters)
         {
             c.Update(gameTime);
-            if (c is Hobo h)
+            if (c.Movement != null)
             {
-                h.Movement.PlayerPosition = Player1.Transform.Position;
-                h.Movement.EnemyPosition = h.Transform.Position;
-            }
-            if (c is BikeThief b)
-            {
-                b.Movement.PlayerPosition = Player1.Transform.Position;
-                b.Movement.EnemyPosition = b.Transform.Position;
+                c.Movement.PlayerPosition = Player1.Transform.Position;
+                c.Movement.EnemyPosition = c.Transform.Position;
             }
             c.UpdateCollider();
         }
@@ -161,6 +175,14 @@ public class GameObjectManager
         foreach (ProjectileBase p in Projectiles)
         {
             p.Update(gameTime);
+        }
+        for (int i = _aoeAttacks.Count - 1; i >= 0; i--)
+        {
+            var aoe = _aoeAttacks[i];
+            aoe.Update(gameTime);
+
+            if (aoe.IsExpired)
+                _aoeAttacks.Remove(aoe);
         }
         foreach (BoxCollider s in Statics)
         {
@@ -178,19 +200,45 @@ public class GameObjectManager
         // b.LoadContent(_contentManager);
         AddProjectile(b);
     }
+
+        private void OnPlayerFlamethrower()
+    {
+        Vector2 spawnPos = Player1.Transform.Position;
+        Vector2 direction = Player1.GazeDirection;
+
+        Flamethrower f = new Flamethrower(Player1, direction);
+        f.LoadContent(_contentManager);
+        AddAOE(f);
+    }
     
     public void SetWorldAudioManager(WorldAudioManager worldAudioManager)
     {
         _worldAudioManager = worldAudioManager;
-        
+
         if (Player1 is IWorldAudioAware pa)
             pa.SetWorldAudioManager(worldAudioManager);
-        
+
         foreach (var c in Characters)
         {
             if (c is IWorldAudioAware wa)
                 wa.SetWorldAudioManager(worldAudioManager);
         }
+    }
+    
+    public void SpawnXp(CharacterBase character)
+    {
+        ItemBase xp; 
+        // spawns Xp_Item at the location of character
+        // function is used in CharacterBase.cs
+        Vector2 pos = character.Transform.Position;
+
+        if (character is Hobo)
+            xp = new Xp_Beer(pos, new Point(16, 16));
+        // other cases will be added later
+        else
+            xp = new Xp_Money(pos, new Point(16, 16));
+        xp.LoadContent(_contentManager);
+        AddItem(xp);
     }
 
 }

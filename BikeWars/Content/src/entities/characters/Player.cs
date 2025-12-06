@@ -8,6 +8,7 @@ using BikeWars.Content.entities.interfaces;
 using System.Collections.Generic;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.entities.Inventory;
+using BikeWars.Content.entities.items;
 using BikeWars.Content.managers;
 using System.Diagnostics.Metrics;
 
@@ -27,14 +28,19 @@ namespace BikeWars.Entities.Characters
         private CooldownWithDuration sprint { get; }
 
         public Vector2 GazeDirection { get; private set; }
+        public int XpCounter { get; private set; } = 0;
+        public int XpLevelUp = 10;
+        public int CurrentLevel { get; private set; } = 1;
         public Vector2 AimTarget { get; private set; }
         private Vector2 _facingDirection = Vector2.UnitX; // Default to Right to match initial animation
-        
+
         public TerrainCollider CurrentTerrain { get; set; }
         public float TerrainSpeedMultiplier = 1.0f;
         // public bool IsGodMode { get; set; }
 
         public event Action ShotBullet;
+        public event Action<ItemBase> ItemPickedUp;
+        public event Action Flamethrower;
 
         private SpriteAnimation _walkDownAnimation;
         private SpriteAnimation _walkUpAnimation;
@@ -46,6 +52,7 @@ namespace BikeWars.Entities.Characters
         private readonly AudioService _audio;
         private WorldAudioManager _worldAudioManager;
         private string _currentMovementSound = null;
+        public event Action OnLevelUp;
 
 
         private struct GhostFrame
@@ -61,6 +68,16 @@ namespace BikeWars.Entities.Characters
         private float _ghostSpawnTimer = 0f;
         private const float GhostSpawnInterval = 0.05f; // alle 0,05s ein neues Ghost
         private const float GhostLifeTime = 0.1f;
+
+        public enum WeaponType
+        {
+            Gun,
+            Flamethrower
+        }
+
+        public WeaponType CurrentWeapon { get; private set; } = WeaponType.Gun;
+
+
 
         public override void LoadContent(ContentManager content)
         {
@@ -84,12 +101,12 @@ namespace BikeWars.Entities.Characters
                 Transform.Position.X - Transform.Size.X / 2f,
                 Transform.Position.Y - Transform.Size.Y / 2f
             );
-    
+
             Collider = new BoxCollider(
-                colliderPosition, 
-                Transform.Size.X, 
-                Transform.Size.Y, 
-                CollisionLayer.PLAYER, 
+                colliderPosition,
+                Transform.Size.X,
+                Transform.Size.Y,
+                CollisionLayer.PLAYER,
                 this
             );
         }
@@ -100,12 +117,48 @@ namespace BikeWars.Entities.Characters
         private void Shooting()
         {
             // Only shoot if we have a valid gaze direction
-            if (GazeDirection != Vector2.Zero)
-            {
-                ShotBullet?.Invoke();
+            if (GazeDirection == Vector2.Zero)
+                return;
 
-                _audio.Sounds.Play(AudioAssets.GunShot);
+            switch (CurrentWeapon)
+            {
+                case WeaponType.Gun:
+                    ShotBullet?.Invoke();
+                    _audio.Sounds.Play(AudioAssets.GunShot);
+                    break;
+
+                case WeaponType.Flamethrower:
+                    Flamethrower?.Invoke();
+                    _audio.Sounds.Play(AudioAssets.Flamethrower);
+                    break;
             }
+        }
+
+        public void OnPickUpItem(Player player, ItemBase item)
+        {
+            if (player != this)
+            {
+                return;
+            }
+
+            if (item is Xp xp)
+            {
+                AddXp(xp.xp_value);
+                if (XpCounter >= XpLevelUp)
+                {
+                    LevelUp();
+                }
+            }
+
+            if (item.InventoryItem)
+            {
+                if (InputHandler.IsPressed(GameAction.INTERACT) && Inventory.AddItem(item))
+                {
+                    ItemPickedUp?.Invoke(item);
+                }
+                return;
+            }
+            ItemPickedUp?.Invoke(item);
         }
 
         public Player(Vector2 start, Point size, AudioService audio)
@@ -147,10 +200,20 @@ namespace BikeWars.Entities.Characters
                 }
             }
 
+            if (InputHandler.IsPressed(GameAction.SWITCH_WEAPON))
+            {
+                // Toggle between the two weapons
+                if (CurrentWeapon == WeaponType.Gun)
+                    CurrentWeapon = WeaponType.Flamethrower;
+                else
+                    CurrentWeapon = WeaponType.Gun;
+            }
+
             if (InputHandler.IsPressed(GameAction.SHOOT))
             {
                 Shooting();
             }
+
             movement.Update();
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
             // Sound-Control
@@ -470,5 +533,24 @@ namespace BikeWars.Entities.Characters
                 DrawLine(spriteBatch, p1, p2, color);
             }
         }
+        public void AddXp(int XpAmount)
+        {
+            XpCounter += XpAmount;
+
+            if (XpCounter >= XpLevelUp)
+            {
+                LevelUp();
+            }
+        }
+
+        private void LevelUp()
+        {
+            XpCounter = XpCounter - XpLevelUp;
+            XpLevelUp = XpLevelUp * 2;
+            CurrentLevel++;
+            // level upscreen is triggered:
+            OnLevelUp?.Invoke();
+        }
+        
     }
 }

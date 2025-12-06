@@ -17,6 +17,7 @@ namespace BikeWars.Content.screens
 {
     public class GameScreen : IScreen
     {
+        private LevelUpScreen _levelUpScreen;
         private readonly ItemManager _itemManager;
         private readonly Camera2D camera;
         private Rectangle worldBounds;
@@ -36,6 +37,7 @@ namespace BikeWars.Content.screens
         public ContentManager ContentManager => _contentManager;
         private readonly AudioService _audioService;
         public AudioService AudioService => _audioService;
+
         public string DesiredMusic => AudioAssets.GameMusic;
         public float MusicVolume => 1f;
 
@@ -48,6 +50,8 @@ namespace BikeWars.Content.screens
         public GameObjectManager GameObjectManager => _gameObjectManager;
 
         private CombatManager _combatManager;
+
+        private SpawnManager _spawnManager;
 
         private bool _freelook; // Has to be optimized
 
@@ -70,6 +74,7 @@ namespace BikeWars.Content.screens
             _itemManager = new ItemManager();
             _itemManager.AddItem(new Item(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
             _itemManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
+            _itemManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 70), new Point(32, 32)));
             _itemManager.AddItem(new Xp_Beer(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
             _itemManager.AddItem(new Xp_Money(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
             _collisionManager = new CollisionManager(CELL_SIZE, worldBounds.Height);
@@ -82,11 +87,7 @@ namespace BikeWars.Content.screens
             }
 
             _gameObjectManager = new GameObjectManager(_contentManager, player, null);
-            for (int i = 0; i < 5; i++)
-            {
-                _gameObjectManager.AddCharacter(new Hobo(new Vector2(worldBounds.Width / 2 + i*40, worldBounds.Height / 2 -500 + i), new Point(32, 32), _audioService));
-            }
-            _gameObjectManager.AddCharacter(new BikeThief(new Vector2(worldBounds.Width / 2 - 100, worldBounds.Height / 2 - 80), new Point(32, 32), _audioService));
+            // Initial spawning is now handled by SpawnManager
             _gameObjectManager.Items = _itemManager.Items;
 
             Game1 game = Game1.Instance;
@@ -108,6 +109,7 @@ namespace BikeWars.Content.screens
         public virtual void LoadContent(ContentManager content)
         {
             // Font and Debugger
+
             _debugFont = content.Load<SpriteFont>("assets/fonts/Arial");
             _debugger = new Debugger(_debugFont, _gameObjectManager.Player1);
 
@@ -116,11 +118,14 @@ namespace BikeWars.Content.screens
             _tiledMapRenderer = new TiledMapRenderer(Game1.Instance.GraphicsDevice, _collisionManager.TiledMap);
 
             // Create Combat Manager
-            _combatManager = new CombatManager(_audioService);
+            _combatManager = new CombatManager(_audioService, _gameObjectManager);
 
             // Combat Manager subcribes to Events from Collision Manager:  Collision → Combat
             _collisionManager.OnProjectileHit += _combatManager.HandleProjectileHit;
+            _collisionManager.OnAOEHit += _combatManager.HandleAOEHit;       
             _collisionManager.OnCharacterCollision += _combatManager.HandleCharacterCollision;
+            _collisionManager.OnItemPickup += _gameObjectManager.Player1.OnPickUpItem;
+            _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
 
             // Overlay
             _overlay = new Overlay(_debugFont, Game1.Instance.GraphicsDevice);
@@ -140,20 +145,49 @@ namespace BikeWars.Content.screens
             Rectangle initialView = GetCameraWorldRect();
             _worldAudioManager = new WorldAudioManager(initialView);
             _gameObjectManager.SetWorldAudioManager(_worldAudioManager);
+            
+            _levelUpScreen = new LevelUpScreen();
+            // checks if the event OnLevelUp is triggered if it is LevelUpSreen gets active
+            _gameObjectManager.Player1.OnLevelUp += () =>
+            {
+                _levelUpScreen.Open();
+            };
+            _levelUpScreen.OnOptionLeftSelected += () =>
+            {
+                // TODO:
+            };
 
+            _levelUpScreen.OnOptionRightSelected += () =>
+            {
+            };
+
+            // Spawn Manager
+            _spawnManager = new SpawnManager(_gameObjectManager, _contentManager, _collisionManager, _audioService);
         }
         public virtual void Update(GameTime gameTime)
         {
+            // if the LevelUp is Open only the LevelUpMenu gets Updated all the other stuff is basically paused
+            // if you want to add something before or change order this please double-check
+            InputHandler.Update();
+            if (_levelUpScreen.IsOpen)
+            {
+                _levelUpScreen.Update(gameTime);
+                return;
+            }
             if (_worldAudioManager != null && _gameObjectManager.Player1 != null)
             {
                 _worldAudioManager.UpdateListenerPosition(_gameObjectManager.Player1.Transform.Position);
             }
             _overlay.SetPaused(false, gameTime);
-            InputHandler.Update();
-            _collisionManager.Update(_gameObjectManager.Player1, _itemManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.Characters);
+            _collisionManager.Update(_gameObjectManager.Player1, _itemManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters);
+
+            if (!_isTechDemo)
+            {
+                _spawnManager.Update(gameTime);
+            }
 
             _gameObjectManager.Update(gameTime, InputHandler.MakeMouseWorldPosByCamera(camera));
-            _itemManager.Update(gameTime, _gameObjectManager.Player1);
+            _itemManager.Update(gameTime);
             hpTestTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             if (InputHandler.IsPressed(GameAction.DEBUG_HEAL))
@@ -161,6 +195,7 @@ namespace BikeWars.Content.screens
 
             if (InputHandler.IsPressed(GameAction.TECH_DEMO))
             {
+                _audioService.Sounds.StopAll();
                 ScreenManager.AddScreen(new TechDemoScreen(_audioService));
             }
 
@@ -212,28 +247,77 @@ namespace BikeWars.Content.screens
             }
         }
 
+        private void HandleLoadGame()
+        {
+            var state = SaveLoad.LoadGame();
+            _counter = state.Counter;
+            _counterTimer = 0;
+            _gameObjectManager.Player1.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
+
+            _gameObjectManager.Projectiles.Clear();
+            foreach (var p in state.Projectiles)
+            {
+                if (p.Basic.Type == SaveLoad.TYPES.BULLET)
+                {
+                    Bullet b = new Bullet(p.Basic.Position.ToVector2(), p.Basic.Size.ToPoint(), _gameObjectManager.Player1); // TODO player doesn't make sense here
+                    b.HasHit = p.HasHit;
+                    b.Movement.IsMoving = p.IsMoving;
+                    b.Movement.CanMove = p.CanMove;
+                    b.Movement.Direction = p.Direction.ToVector2();
+                    b.Movement.Rotation = p.Rotation;
+                    // b.LoadContent(_contentManager);
+                    _gameObjectManager.AddProjectile(b);
+                }
+            }
+            _gameObjectManager.Characters.Clear();
+            foreach (var p in state.Characters)
+            {
+                if (p.Type == SaveLoad.TYPES.HOBO)
+                {
+                    Hobo b = new Hobo(p.Position.ToVector2(), p.Size.ToPoint(), _audioService);
+                    // b.LoadContent(_contentManager);
+                    _gameObjectManager.AddCharacter(b);
+                }
+                if (p.Type == SaveLoad.TYPES.BIKETHIEF)
+                {
+                    BikeThief b = new BikeThief(p.Position.ToVector2(), p.Size.ToPoint(), _audioService);
+                    b.LoadContent(_contentManager);
+                    _gameObjectManager.AddCharacter(b);
+                }
+            }
+
+            _gameObjectManager.Items.Clear();
+            foreach (var p in state.Items)
+            {
+                if (p.Type == SaveLoad.TYPES.CHEST)
+                {
+                    Chest b = new Chest(p.Position.ToVector2(), p.Size.ToPoint());
+                    b.LoadContent(_contentManager);
+                    _gameObjectManager.AddItem(b);
+                }
+                if (p.Type == SaveLoad.TYPES.BEER)
+                {
+                    Xp_Beer b = new Xp_Beer(p.Position.ToVector2(), p.Size.ToPoint());
+                    b.LoadContent(_contentManager);
+                    _gameObjectManager.AddItem(b);
+                }
+                if (p.Type == SaveLoad.TYPES.MONEY)
+                {
+                    Xp_Money b = new Xp_Money(p.Position.ToVector2(), p.Size.ToPoint());
+                    b.LoadContent(_contentManager);
+                    _gameObjectManager.AddItem(b);
+                }
+            }
+            Console.WriteLine("Game loaded.");
+        }
         private void HandleSaveLoadInput()
         {
             if (InputHandler.IsPressed(GameAction.SAVE))
-                SaveLoad.SaveGame(_counter, _gameObjectManager.Player1.Transform, _gameObjectManager.Projectiles);
+                SaveLoad.SaveGame(_counter, _gameObjectManager);
 
             if (InputHandler.IsPressed(GameAction.LOAD))
             {
-                var state = SaveLoad.LoadGame();
-                _counter = state.Counter;
-                _counterTimer = 0;
-                _gameObjectManager.Player1.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
-                _gameObjectManager.Projectiles.Clear();
-                foreach (var p in state.Projectiles)
-                {
-                    if (p.Type == SaveLoad.TYPES.BULLET)
-                    {
-                        Bullet b = new Bullet(p.Position.ToVector2(), p.Size.ToPoint(), _gameObjectManager.Player1); // TODO player doesn't make sense here
-                        // b.LoadContent(_contentManager); -> SpriteManager
-                        _gameObjectManager.AddProjectile(b);
-                    }
-                }
-                Console.WriteLine("Game loaded.");
+                HandleLoadGame();
             }
 
             if (InputHandler.IsPressed(GameAction.RESET))
@@ -274,12 +358,13 @@ namespace BikeWars.Content.screens
             if (_isTechDemo && _showStaticHitboxes)
             {
                 _collisionManager.DrawHitboxes(
-                    spriteBatch, 
+                    spriteBatch,
                     _pixel,
                     _gameObjectManager.Player1,
                     _gameObjectManager.Characters,
                     _itemManager.Items,
-                    _gameObjectManager.Projectiles
+                    _gameObjectManager.Projectiles,
+                    _gameObjectManager.AOEAttacks
                 );
             }
 
@@ -297,6 +382,11 @@ namespace BikeWars.Content.screens
             }
             _gameObjectManager.Player1.Inventory.Draw(spriteBatch, _pixel);
             hud.Draw(spriteBatch, _gameObjectManager.Player1);
+            
+            if (_levelUpScreen.IsOpen)
+            {
+                _levelUpScreen.Draw(spriteBatch);
+            }
 
             spriteBatch.End();
         }

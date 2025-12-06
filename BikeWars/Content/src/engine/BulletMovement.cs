@@ -1,7 +1,5 @@
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework;
-using BikeWars.Content.components;
-using System;
 
 namespace BikeWars.Content.engine;
 public class BulletMovement: MovementBase, IMoveable

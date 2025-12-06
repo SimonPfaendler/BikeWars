@@ -71,8 +71,8 @@ namespace BikeWars.Content.src.screens.Overlay
                 effectiveTime = frameTime.TotalGameTime - _timeOffset;
             }
             
-            // transform 30 min in seconds
-            int totalSeconds = (int)Math.Max(0, (30 * 60 - effectiveTime.TotalSeconds));
+            // transform 15 min in seconds
+            int totalSeconds = (int)Math.Max(0, (15 * 60 - effectiveTime.TotalSeconds));
             int minutes = totalSeconds / 60;
             int seconds = totalSeconds % 60;
             

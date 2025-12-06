@@ -37,7 +37,8 @@ namespace BikeWars.Content.engine
         SWITCH,
         DEBUG_HEAL,
         TECH_DEMO,
-        DEBUG_HITBOXES
+        DEBUG_HITBOXES,
+        SWITCH_WEAPON
     }
 
     public enum MouseButton
@@ -177,8 +178,9 @@ namespace BikeWars.Content.engine
             { GameAction.INTERACT, new[] {Keys.Q } },
             { GameAction.SWITCH, new[] {Keys.X } },
             { GameAction.DEBUG_HEAL, new[] {Keys.M } },
-            {GameAction.TECH_DEMO, new[] {Keys.B}},
-            { GameAction.DEBUG_HITBOXES, new[] {Keys.Z} }
+            { GameAction.TECH_DEMO, new[] {Keys.B}},
+            { GameAction.DEBUG_HITBOXES, new[] {Keys.Z} },
+            { GameAction.SWITCH_WEAPON, new[] {Keys.Tab} },            
         };
         public static Dictionary<GameAction, MouseButton[]> MouseMapping { get; } = new()
         {

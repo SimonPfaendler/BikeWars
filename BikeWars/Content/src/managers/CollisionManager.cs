@@ -16,6 +16,7 @@ public class CollisionManager
     public event Action<Player, ItemBase> OnItemPickup;
     public event Action<CharacterBase, ProjectileBase> OnProjectileHit;
     public event Action<CharacterBase, CharacterBase> OnCharacterCollision;
+    public event Action<CharacterBase, AreaOfEffectBase> OnAOEHit;
 
     private const string MAP = "assets/Map/Bike_Wars_Map";
     private const string TILED_MAP_LAYER = "Collision";
@@ -30,6 +31,7 @@ public class CollisionManager
     public TiledMap TiledMap {get => _tiledMap; set => _tiledMap = value;}
     private List<BoxCollider> _collisionBoxes {get; set;} // Mainly used for the static layout
     public List<BoxCollider> CollisionBoxes {get => _collisionBoxes; set => _collisionBoxes = value;}
+    private List<ICollider> _toRemoveColliders {get; set;}
 
     public CollisionManager(int cellSize, int worldBounds)
     {
@@ -37,6 +39,7 @@ public class CollisionManager
         DynamicHash = new SpatialHash(cellSize, worldBounds);
         StaticHash = new SpatialHash(cellSize, worldBounds);
         CollisionBoxes = new List<BoxCollider>();
+        _toRemoveColliders = new List<ICollider>();
     }
     public bool isColliding(ICollider collisionBox1, ICollider collisionBox2)
     {
@@ -59,7 +62,7 @@ public class CollisionManager
             StaticHash.Insert(box);
         }
         LoadTerrainLayer("Streets", TerrainType.ROAD);
-        LoadTerrainLayer("Background_graas", TerrainType.GRASS);
+        LoadTerrainLayer("Floor", TerrainType.GRASS);
     }
 
     public Vector2 GetPenetrationVector(ICollider a, ICollider b)
@@ -94,7 +97,7 @@ public class CollisionManager
         return Vector2.Zero;
     }
 
-    private void Insertions(List<ItemBase> items, Player player, List<ProjectileBase> projectiles, List<CharacterBase> characters)
+    private void Insertions(List<ItemBase> items, Player player, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters)
     {
         foreach (var c in items)
         {
@@ -104,6 +107,11 @@ public class CollisionManager
         foreach(ProjectileBase p in projectiles)
         {
             DynamicHash.Insert(p.Collider);
+        }
+        foreach (var aoe in aoeAttacks)
+        {
+            foreach (var hitbox in aoe.GetHitboxes())
+                DynamicHash.Insert(hitbox);
         }
         foreach(CharacterBase c in characters)
         {
@@ -123,36 +131,36 @@ public class CollisionManager
             }
         }
     }
-    private void HandleProjectileWithStatic(ICollider b, ICollider c, List<ProjectileBase> toRemoveProjectiles)
+    private void HandleProjectileWithStatic(ICollider b, ICollider c)
     {
         if (b.Layer == CollisionLayer.WALL && c.Layer == CollisionLayer.PROJECTILE)
         {
             if (c.Intersects(b))
             {
                 ProjectileBase p = (ProjectileBase)c.Owner;
-                toRemoveProjectiles.Add(p);
+                _toRemoveColliders.Add(p.Collider);
             }
         }
     }
 
-    private void HandleStatics(ICollider c, List<ICollider> statics, List<ProjectileBase> toRemoveProjectiles)
+    private void HandleStatics(ICollider c, List<ICollider> statics)
     {
         foreach (var b in statics)
         {
             HandleCharacterWithStatic(b, c);
-            HandleProjectileWithStatic(b, c, toRemoveProjectiles);
+            HandleProjectileWithStatic(b, c);
         }
     }
-    private void HandleDynamics(ICollider c, List<ICollider> dynamics, List<ItemBase> toRemoveItems, List<ProjectileBase> toRemoveProjectiles, List<CharacterBase> toRemoveCharacters)
+    private void HandleDynamics(ICollider c, List<ICollider> dynamics)
     {
         foreach (var d in dynamics)
         {
-            PickingUpItem(c, d, toRemoveItems);
-            HandleCharacters(c, d, toRemoveProjectiles, toRemoveCharacters);
+            PickingUpItem(c, d);
+            HandleCharacters(c, d);
         }
     }
 
-    private void PickingUpItem(ICollider c, ICollider d, List<ItemBase> toRemoveItems)
+    private void PickingUpItem(ICollider c, ICollider d)
     {
         if (c.Layer == CollisionLayer.PLAYER)
         {
@@ -162,10 +170,13 @@ public class CollisionManager
                 {
                     // Event for picking up items
                     OnItemPickup?.Invoke((Player)c.Owner, (ItemBase)d.Owner);
-                    toRemoveItems.Add((ItemBase)d.Owner);
                 }
             }
         }
+    }
+    public void OnRemoveItem(ItemBase item)
+    {
+        _toRemoveColliders.Add(item.Collider);
     }
 
     private void HandleCharacterCollision(ICollider c, ICollider d)
@@ -191,7 +202,8 @@ public class CollisionManager
         }
     }
 
-    private void HandleCharacterProjectiles(ICollider c, ICollider d, List<ProjectileBase> toRemoveProjectiles, List<CharacterBase> toRemoveCharacters)
+    // private void HandleCharacterProjectiles(ICollider c, ICollider d, List<ProjectileBase> toRemoveProjectiles, List<CharacterBase> toRemoveCharacters)
+    private void HandleCharacterProjectiles(ICollider c, ICollider d)
     {
         if (d.Layer == CollisionLayer.PROJECTILE)
         {
@@ -202,7 +214,7 @@ public class CollisionManager
             // Make sure projectile cannot hit more than once
             if (p.HasHit)
             {
-                toRemoveProjectiles.Add(p);
+                _toRemoveColliders.Add(p.Collider);
                 return;
             }
 
@@ -217,20 +229,42 @@ public class CollisionManager
 
             CharacterBase ch = (CharacterBase)c.Owner;
             if(ch.IsDead)
-                toRemoveCharacters.Add(ch);
-
+                _toRemoveColliders.Add(ch.Collider);
                 p.HasHit = true;
-                toRemoveProjectiles.Add(p);
+                _toRemoveColliders.Add(p.Collider);
             }
         }
     }
 
-    private void HandleCharacters(ICollider c, ICollider d, List<ProjectileBase> toRemoveProjectiles, List<CharacterBase> toRemoveCharacters)
+    private void HandleCharacters(ICollider c, ICollider d)
     {
         if (c.Layer == CollisionLayer.CHARACTER || c.Layer == CollisionLayer.PLAYER)
         {
             HandleCharacterCollision(c, d);
-            HandleCharacterProjectiles(c, d, toRemoveProjectiles, toRemoveCharacters);
+            HandleCharacterProjectiles(c, d);
+            // AOE damage handling
+            if (d.Layer == CollisionLayer.AOE)
+            {
+                AreaOfEffectBase aoe = (AreaOfEffectBase)d.Owner;
+
+                // prevent hitting yourself
+                if (aoe.Owner == c.Owner)
+                    return;
+
+                if (c.Intersects(d))
+                {
+                    CharacterBase ch = (CharacterBase)c.Owner;
+
+                    // Call proper AOE damage event
+                    OnAOEHit?.Invoke(ch, aoe);
+
+                    if (ch.IsDead)
+                        _toRemoveColliders.Add(ch.Collider);
+                }
+
+                return; // don't run projectile logic
+            }
+
         }
     }
 
@@ -258,35 +292,51 @@ public class CollisionManager
 
 
 
-    public void Update(Player player, List<ItemBase> items, List<ProjectileBase> projectiles, List<CharacterBase> characters)
+    public void Update(Player player, List<ItemBase> items, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters)
     {
         DynamicHash.Clear();
-        Insertions(items, player, projectiles, characters);
-        List<ProjectileBase> toRemoveProjectiles = new List<ProjectileBase>();
-        List<ItemBase> toRemoveItems = new List<ItemBase>();
-        List<CharacterBase> toRemoveCharacters = new List<CharacterBase>();
+        Insertions(items, player, projectiles, aoeAttacks, characters);
         foreach (KeyValuePair<int, CellData> cell in DynamicHash._cells)
         {
             foreach(var c in cell.Value.Colliders)
             {
-                List<ICollider> dynamics = DynamicHash.QueryNearby(c.Position);
+                List<ICollider> dynamics;
+                if (c.Owner is AreaOfEffectBase aoe)
+                {
+                    dynamics = new List<ICollider>();
+                    foreach (var hitbox in aoe.GetHitboxes())
+                        dynamics.AddRange(DynamicHash.QueryNearby(hitbox.Position));
+                }
+                else
+                {
+                    dynamics = DynamicHash.QueryNearby(c.Position);
+                }
                 List<ICollider> statics = StaticHash.QueryNearby(c.Position);
-                HandleDynamics(c, dynamics, toRemoveItems, toRemoveProjectiles, toRemoveCharacters);
-                HandleStatics(c, statics, toRemoveProjectiles);
+                HandleDynamics(c, dynamics);
+                HandleStatics(c, statics);
                 HandleTerrain(c, statics);
             }
         }
-        foreach (ProjectileBase p in toRemoveProjectiles)
+        foreach(ICollider c in _toRemoveColliders)
         {
-            projectiles.Remove(p);
+            switch (c.Owner) {
+                case ProjectileBase p:
+                    projectiles.Remove(p);
+                    break;
+                case ItemBase i:
+                    items.Remove(i);
+                    break;
+                case CharacterBase ch:
+                    characters.Remove(ch);
+                    break;
+                default:
+                    break;
+            }
         }
-        foreach (ItemBase i in toRemoveItems)
+        foreach (var aoe in aoeAttacks)
         {
-            items.Remove(i);
-        }
-        foreach (CharacterBase c in toRemoveCharacters)
-        {
-            characters.Remove(c);
+            if (aoe.IsExpired)
+                aoeAttacks.Remove(aoe);
         }
     }
 
@@ -294,7 +344,7 @@ public class CollisionManager
     // makes the hitboxes visible for when in the tech demo
 public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel, 
                          Player player, List<CharacterBase> characters, 
-                         List<ItemBase> items, List<ProjectileBase> projectiles)
+                         List<ItemBase> items, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks)
 {
     // Static collision boxes
     foreach (var box in _collisionBoxes)
@@ -307,17 +357,26 @@ public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
         );
         DrawRectOutline(spriteBatch, pixel, rect, Color.Red * 0.7f);
     }
+    // AOE hitboxes
+    foreach (var aoe in aoeAttacks)
+    {
+        foreach (var hitbox in aoe.GetHitboxes())
+        {
+            Rectangle rect = GetColliderRectangle(hitbox);
+            DrawRectOutline(spriteBatch, pixel, rect, Color.Red * 0.7f);
+        }
+    }
 
     // Player hitbox
     if (player?.Collider != null)
     {
         var playerRect = GetColliderRectangle(player.Collider);
         DrawRectOutline(spriteBatch, pixel, playerRect, Color.Red * 0.7f);
-        
+
         // Draw a small indicator for player position
-        spriteBatch.Draw(pixel, 
-            new Rectangle((int)player.Transform.Position.X - 2, 
-                         (int)player.Transform.Position.Y - 2, 4, 4), 
+        spriteBatch.Draw(pixel,
+            new Rectangle((int)player.Transform.Position.X - 2,
+                         (int)player.Transform.Position.Y - 2, 4, 4),
             Color.Lime);
     }
 
@@ -349,7 +408,7 @@ public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
             var projRect = GetColliderRectangle(projectile.Collider);
             DrawRectOutline(spriteBatch, pixel, projRect, Color.Red * 0.7f);
         }
-    }   
+    }
 }
 
     // Helper method to convert ICollider to Rectangle
@@ -370,7 +429,7 @@ public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
     private void DrawRectOutline(SpriteBatch spriteBatch, Texture2D pixel, Rectangle rect, Color color)
     {
         if (rect.Width <= 0 || rect.Height <= 0) return;
-        
+
         // top
         spriteBatch.Draw(pixel, new Rectangle(rect.Left, rect.Top, rect.Width, 1), color);
         // bottom

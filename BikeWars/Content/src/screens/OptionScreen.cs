@@ -15,10 +15,10 @@ public class OptionScreen : MenuScreenBase, IScreen
     private readonly AudioService _audioService;
     public string DesiredMusic => AudioAssets.MenuMusic;
     public float MusicVolume => 1f;
-    public OptionScreen(SpriteFont font, AudioService audioService)
-        :base(Game1.Instance.Content.Load<Texture2D>("assets/images/Startbildschirm"), font)
+    public OptionScreen(Texture2D background, SpriteFont font, AudioService audioService)
+        : base(background, font)
     {
-        _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
+        _audioService = audioService;
         InitializeButtons();
     }
     
