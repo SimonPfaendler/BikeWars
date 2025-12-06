@@ -20,7 +20,8 @@ namespace BikeWars.Content.managers
         private static Texture2D _characterAtlas;
         // caching_construct, speichert fertig geladene animationen
         private static Dictionary<string, SpriteAnimation> _animationCache;
-        
+        // für nicht animierte Sprites: Kugel, Geld, etc.
+        private static Dictionary<string, Texture2D> _textureCache;
         
         // Stellt gecachten Character Atlas zur verfügung für ghosttrail unteranderem
         public static Texture2D GetCharacterAtlas()
@@ -31,7 +32,23 @@ namespace BikeWars.Content.managers
             }
             return _characterAtlas;
         }
-
+        
+        // nicht animierte textures 
+        private static readonly IReadOnlyDictionary<string, string> SimpleTexturePaths = new Dictionary<string, string>
+        {
+            // PROJEKTILE
+            { "Bullet", "assets/sprites/projectiles/bullet" }, 
+    
+            // HUD
+            { "HUD_Sheet", "assets/sprites/HUD/HUD_sheet" }, 
+    
+            // ITEMS
+            { "Chest", "assets/sprites/chest_texture" }, 
+            { "XP_Beer", "assets/sprites/XP/xp_beer_texture" }, 
+            { "XP_Money", "assets/sprites/XP/xp_money_texture" },
+        };
+        // hier sollte irgendwann auch auf atlas strukturen gewechselt werden
+        
         // liste aller animationen, die beim start gecached werden
         private static readonly List<string> AnimationKeys = new List<string>
         {
@@ -68,6 +85,8 @@ namespace BikeWars.Content.managers
 
             _animationCache = new Dictionary<string, SpriteAnimation>();
             
+            _textureCache = new Dictionary<string, Texture2D>();
+            
             // animationen laden und cachen
             foreach (var key in AnimationKeys)
             {
@@ -88,6 +107,12 @@ namespace BikeWars.Content.managers
                 var animation = new SpriteAnimation(_characterAtlas, frames, speed);
                 _animationCache.Add(key, animation);
             }
+            
+            foreach (var kv in SimpleTexturePaths)
+            {
+                var texture = content.Load<Texture2D>(kv.Value);
+                _textureCache.Add(kv.Key, texture);
+            }
         }
 
         /// <summary>
@@ -106,6 +131,21 @@ namespace BikeWars.Content.managers
             }
             
             throw new KeyNotFoundException($"animation '{name}' nicht gefunden");
+        }
+        
+        public static Texture2D GetTexture(string name)
+        {
+            if (_textureCache == null)
+            {
+                throw new InvalidOperationException("texture cache is null");
+            }
+    
+            if (_textureCache.TryGetValue(name, out var texture))
+            {
+                return texture;
+            }
+    
+            throw new KeyNotFoundException($"texture '{name}' not found");
         }
     }
     

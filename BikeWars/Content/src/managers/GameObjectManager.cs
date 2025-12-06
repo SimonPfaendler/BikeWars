@@ -175,7 +175,7 @@ public class GameObjectManager
 
         Bullet b = new Bullet(spawnPos, new Point(8, 8), Player1);
         b.Movement.Direction = direction; // Set the movement direction
-        b.LoadContent(_contentManager);
+        // b.LoadContent(_contentManager);
         AddProjectile(b);
     }
     

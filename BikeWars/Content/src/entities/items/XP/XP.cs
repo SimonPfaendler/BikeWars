@@ -16,7 +16,6 @@ public abstract class Xp: ItemBase, IPickable
         get { return _collider; }
     }
     public int xp_value { get; protected set; }
-    protected abstract string TEXTURE_PATH { get; }
     private float _pulseTimer = 0f;
     private Color _currentColor;
 
@@ -24,13 +23,16 @@ public abstract class Xp: ItemBase, IPickable
     private static readonly Color PulseColorB = Color.LimeGreen;
     private const float PULSE_SPEED = 4f;
 
-    public Xp(Vector2 start, Point size, int xp_value)
+    public Xp(Vector2 start, Point size, int xp_value, string textureKey)
     {
         Transform = new Transform(start, size);
         _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X,
             Transform.Size.Y, CollisionLayer.ITEM, this);
         this.xp_value = xp_value;
         _currentColor = PulseColorA;
+        
+        TexRight = managers.SpriteManager.GetTexture(textureKey); 
+        CurrentTex = TexRight;
     }
 
     public override void Draw(SpriteBatch spriteBatch)
@@ -44,13 +46,14 @@ public abstract class Xp: ItemBase, IPickable
         float t = (float)(Math.Sin(_pulseTimer * PULSE_SPEED) * 0.5f + 0.5f);
         _currentColor = Color.Lerp(PulseColorA, PulseColorB, t);
     }
-    public override void LoadContent(ContentManager content)
-    {
-        TexRight = content.Load<Texture2D>(TEXTURE_PATH);
-        CurrentTex = TexRight;
-    }
+    
     public override bool Intersects(ICollider collider)
     {
         return _collider.Intersects(collider);
+    }
+    
+    public override void LoadContent(ContentManager content)
+    {
+        // Platzhalter damit abstrakte Anforderung der Basisklasse korrekt ist, sollte irgendwann entfernt werden
     }
 }

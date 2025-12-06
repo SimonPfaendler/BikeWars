@@ -126,7 +126,7 @@ namespace BikeWars.Content.screens
             _overlay = new Overlay(_debugFont, Game1.Instance.GraphicsDevice);
 
             // HUD
-            hudTexture = content.Load<Texture2D>("assets/sprites/HUD/HUD_sheet");
+            hudTexture = managers.SpriteManager.GetTexture("HUD_Sheet"); 
             hud = new HUD(hudTexture);
 
             _gameObjectManager.LoadContent(content);
@@ -229,7 +229,7 @@ namespace BikeWars.Content.screens
                     if (p.Type == SaveLoad.TYPES.BULLET)
                     {
                         Bullet b = new Bullet(p.Position.ToVector2(), p.Size.ToPoint(), _gameObjectManager.Player1); // TODO player doesn't make sense here
-                        b.LoadContent(_contentManager);
+                        // b.LoadContent(_contentManager); -> SpriteManager
                         _gameObjectManager.AddProjectile(b);
                     }
                 }

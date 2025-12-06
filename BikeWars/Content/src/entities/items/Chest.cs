@@ -11,7 +11,6 @@ public class Chest: ItemBase, IPickable
 {
     public override bool InventoryItem => true;
 
-    private const String TEXTURE_PATH = "assets/sprites/chest_texture";
     private BoxCollider _collider { get; set; }
     public override BoxCollider Collider
     {
@@ -22,6 +21,9 @@ public class Chest: ItemBase, IPickable
     {
         Transform = new Transform(start, size);
         _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.ITEM, this);
+        
+        TexRight = managers.SpriteManager.GetTexture("Chest");
+        CurrentTex = TexRight;
     }
 
     public override void Draw(SpriteBatch spriteBatch)
@@ -32,13 +34,13 @@ public class Chest: ItemBase, IPickable
     public override void Update(GameTime gameTime)
     {
     }
-    public override void LoadContent(ContentManager content)
-    {
-        TexRight = content.Load<Texture2D>(TEXTURE_PATH);
-        CurrentTex = TexRight;
-    }
     public override bool Intersects(ICollider collider)
     {
         return _collider.Intersects(collider);
+    }
+    
+    public override void LoadContent(ContentManager content)
+    {
+        // Platzhalter damit abstrakte Anforderung der Basisklasse korrekt ist, sollte irgendwann entfernt werden
     }
 }
