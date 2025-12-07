@@ -33,12 +33,12 @@ public class LevelUpScreen : IScreen
     public void Open()
     {
         IsOpen = true;
-        
+        // here different options can be listed, for example depending on which level it is or which where chosen before
         _option1 = SkillTree.SkillId.MoreHp;
         _option2 = SkillTree.SkillId.MoreDamage;
         _option3 = SkillTree.SkillId.LongerSprintDuration;
     }
-    public void Close() => IsOpen = false;
+    public void Close() => IsOpen = false; // Game runs again and LevelUpScreen is closed
     
     public void Update(GameTime gameTime)
     {

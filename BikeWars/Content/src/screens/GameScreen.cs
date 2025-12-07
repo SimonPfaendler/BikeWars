@@ -148,6 +148,7 @@ namespace BikeWars.Content.screens
             {
                 _levelUpScreen.Open();
             };
+            // the Option selected gets upgraded
             _levelUpScreen.OnOptionSelected += skillId =>
             {
                 _gameObjectManager.Player1.UpgradeSkill(skillId);
