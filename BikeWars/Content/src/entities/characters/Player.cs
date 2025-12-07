@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.entities.Inventory;
 using BikeWars.Content.entities.items;
+using BikeWars.Content.entities.levelup;
 using BikeWars.Content.managers;
 
 // ============================================================
@@ -578,6 +579,26 @@ namespace BikeWars.Entities.Characters
             CurrentLevel++;
             // level upscreen is triggered:
             OnLevelUp?.Invoke();
+        }
+
+        // the Upgrades from LevelUpScreen are applied here
+        /*TODO these Upgrades are just a suggestion i can imagine, that the game crashes or has unsuspected
+        behaviour, if for example the player is currently sprinting and the Sprint Time changes*/
+        //TODO its not working properly yet
+        public void UpgradeSkill(SkillTree.SkillId skill)
+        {
+            if (skill is SkillTree.SkillId.MoreDamage)
+            {
+                Health += 30;
+            }
+            else if (skill is SkillTree.SkillId.MoreDamage)
+            {
+                AttackDamage += 2;
+            }
+            else if (skill is SkillTree.SkillId.LongerSprintDuration)
+            {
+                sprint.Duration += 0.5f;
+            }
         }
         
     }

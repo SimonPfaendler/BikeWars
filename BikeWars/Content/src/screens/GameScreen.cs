@@ -7,6 +7,7 @@ using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
 using BikeWars.Utilities;
 using BikeWars.Content.engine.Audio;
+using BikeWars.Content.entities.levelup;
 using BikeWars.Content.src.screens.Overlay;
 using BikeWars.Content.src.utils.SaveLoadExample;
 using Microsoft.Xna.Framework.Content;
@@ -147,20 +148,16 @@ namespace BikeWars.Content.screens
             {
                 _levelUpScreen.Open();
             };
-            _levelUpScreen.OnOptionLeftSelected += () =>
+            _levelUpScreen.OnOptionSelected += skillId =>
             {
-                // TODO:
-            };
-
-            _levelUpScreen.OnOptionRightSelected += () =>
-            {
+                _gameObjectManager.Player1.UpgradeSkill(skillId);
             };
 
         }
         public virtual void Update(GameTime gameTime)
         {
             // if the LevelUp is Open only the LevelUpMenu gets Updated all the other stuff is basically paused
-            // if you want to add something before or change order this please double-check
+            // if you want to add something before this or change order please double-check
             InputHandler.Update();
             if (_levelUpScreen.IsOpen)
             {
