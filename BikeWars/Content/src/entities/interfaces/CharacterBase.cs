@@ -26,7 +26,7 @@ public abstract class CharacterBase : ICharacter, ICombat
     private float _attackCooldownTimer = 0f;
     public bool IsDead => Health <= 0;
     public bool IsGodMode { get; set; } = false;
-    
+
     public bool _XpDropped { get; set; } = false; // for making sure each enemy only drops XP once
 
     public EnemyMovement Movement { get; protected set; }
@@ -89,7 +89,6 @@ public abstract class CharacterBase : ICharacter, ICombat
     public abstract void UpdateCollider();
     public abstract void Update(GameTime gameTime); // Use this to update the logic like where the position is or resize the collision box
     public abstract void Draw(SpriteBatch spriteBatch);
-    public abstract void LoadContent(ContentManager contentManager);
     public bool Intersects(ICollider other)
     {
         return Collider.Intersects(other);

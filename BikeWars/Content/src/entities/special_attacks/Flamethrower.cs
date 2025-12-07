@@ -2,9 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 using System;
-using System.Collections.Generic;
 using BikeWars.Content.entities.interfaces;
-using BikeWars.Content.engine.interfaces;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
 

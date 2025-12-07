@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.engine.interfaces;
-using Microsoft.Xna.Framework.Content;
 using System;
 
 namespace BikeWars.Content.entities.items;
@@ -30,8 +29,8 @@ public abstract class Xp: ItemBase, IPickable
             Transform.Size.Y, CollisionLayer.ITEM, this);
         this.xp_value = xp_value;
         _currentColor = PulseColorA;
-        
-        TexRight = managers.SpriteManager.GetTexture(textureKey); 
+
+        TexRight = managers.SpriteManager.GetTexture(textureKey);
         CurrentTex = TexRight;
     }
 
@@ -46,14 +45,9 @@ public abstract class Xp: ItemBase, IPickable
         float t = (float)(Math.Sin(_pulseTimer * PULSE_SPEED) * 0.5f + 0.5f);
         _currentColor = Color.Lerp(PulseColorA, PulseColorB, t);
     }
-    
+
     public override bool Intersects(ICollider collider)
     {
         return _collider.Intersects(collider);
-    }
-    
-    public override void LoadContent(ContentManager content)
-    {
-        // Platzhalter damit abstrakte Anforderung der Basisklasse korrekt ist, sollte irgendwann entfernt werden
     }
 }

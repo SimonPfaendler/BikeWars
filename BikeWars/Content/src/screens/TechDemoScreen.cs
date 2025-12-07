@@ -114,8 +114,6 @@ namespace BikeWars.Content.screens
                     default:
                         return;
                 }
-
-                enemy.LoadContent(this.ContentManager);
                 GameObjectManager.AddCharacter(enemy);
             }
         }

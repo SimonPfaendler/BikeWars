@@ -26,5 +26,4 @@ public abstract class ItemBase : IItem
     public abstract void Update(GameTime gameTime);
     public abstract void Draw(SpriteBatch spriteBatch);
     public abstract bool Intersects(ICollider other);
-    public abstract void LoadContent(ContentManager contentManager);
 }

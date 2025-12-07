@@ -22,21 +22,6 @@ namespace BikeWars.Entities.Characters
 
         protected override string WalkingSound => AudioAssets.Walking;
 
-        public override void LoadContent(ContentManager content)
-        {
-            _idleAnimation = SpriteManager.GetAnimation("Hobo_Idle");
-            _walkLeftAnimation = SpriteManager.GetAnimation("Hobo_WalkLeft");
-            _walkRightAnimation = SpriteManager.GetAnimation("Hobo_WalkRight");
-            _walkDownAnimation = SpriteManager.GetAnimation("Hobo_WalkDown");
-            _walkUpAnimation = SpriteManager.GetAnimation("Hobo_WalkUp");
-
-            // Startzustand: Idle
-            _currentAnimation = _idleAnimation;
-
-            // sounds
-
-        }
-
         public override void UpdateCollider()
         {
             Vector2 colliderPosition = new Vector2(
@@ -68,6 +53,12 @@ namespace BikeWars.Entities.Characters
             LastTransform = new Transform(start, size);
             Speed = 100f;
             Movement = new EnemyMovement(canMove: true, isMoving: false);
+            _idleAnimation = SpriteManager.GetAnimation("Hobo_Idle");
+            _walkLeftAnimation = SpriteManager.GetAnimation("Hobo_WalkLeft");
+            _walkRightAnimation = SpriteManager.GetAnimation("Hobo_WalkRight");
+            _walkDownAnimation = SpriteManager.GetAnimation("Hobo_WalkDown");
+            _walkUpAnimation = SpriteManager.GetAnimation("Hobo_WalkUp");
+            _currentAnimation = _idleAnimation;
             UpdateCollider();
         }
 

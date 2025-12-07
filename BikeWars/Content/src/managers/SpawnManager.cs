@@ -4,24 +4,22 @@ using BikeWars.Content.engine.Audio;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.entities.interfaces;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.managers
 {
     public class SpawnManager
     {
         private readonly GameObjectManager _gameObjectManager;
-        private readonly ContentManager _contentManager;
         private readonly CollisionManager _collisionManager;
         private readonly AudioService _audioService;
-        
+
         private double _totalTime;
         private double _timeSinceLastSpawn;
         private double _timeSinceLastSwarm;
         private double _timeSinceLastCircle;
-        private const double SWARM_INTERVAL = 45.0; 
+        private const double SWARM_INTERVAL = 45.0;
         private const double CIRCLE_SPAWN_INTERVAL = 60.0;
-        
+
         private const double GAME_DURATION = 15 * 60; // 15 minutes in seconds
         private const double START_SPAWN_INTERVAL = 4; // Start with 4 seconds
         private const double END_SPAWN_INTERVAL = 0.5;   // End with 0.5 seconds
@@ -31,10 +29,9 @@ namespace BikeWars.Content.managers
 
         private Random _random;
 
-        public SpawnManager(GameObjectManager gameObjectManager, ContentManager contentManager,CollisionManager collisionManager, AudioService audioService)
+        public SpawnManager(GameObjectManager gameObjectManager, CollisionManager collisionManager, AudioService audioService)
         {
             _gameObjectManager = gameObjectManager;
-            _contentManager = contentManager;
             _collisionManager = collisionManager;
             _audioService = audioService;
             _random = new Random();
@@ -60,7 +57,7 @@ namespace BikeWars.Content.managers
                 _timeSinceLastSpawn = 0;
             }
 
-            
+
 
             if (_timeSinceLastSwarm >= SWARM_INTERVAL)
             {
@@ -78,17 +75,17 @@ namespace BikeWars.Content.managers
 
         private void SpawnSwarm(double progress)
         {
-            
+
             // Spawn 10-15 Hobos
             int count = _random.Next(10, 16);
-            
+
 
             float speedMultiplier = 1.5f + (0.5f * (float)progress); // Start fast, get faster
             float difficultyMultiplier = 1.0f + (2.0f * (float)progress);
 
             // Spawn them in a cluster
             Vector2 clusterCenter = GetRandomSpawnPosition();
-            
+
 
              for (int i = 0; i < count; i++)
              {
@@ -103,10 +100,9 @@ namespace BikeWars.Content.managers
 
                  var hobo = new Hobo(spawnPos, new Point(32, 32), _audioService);
                  ApplyScaling(hobo, difficultyMultiplier, speedMultiplier); // Apply extra speed
-                 hobo.LoadContent(_contentManager);
                  _gameObjectManager.AddCharacter(hobo);
              }
-             
+
 
         }
 
@@ -114,11 +110,11 @@ namespace BikeWars.Content.managers
         {
             // Determine type of enemy
             // As time progresses, higher chance for stronger enemies (BikeThief vs Hobo)
-            
+
             bool spawnHobo = _random.NextDouble() > (0.2 + 0.3 * progress); // Chance of BikeThief increases from 20% to 50%
 
             Vector2 spawnPos = GetRandomSpawnPosition();
-            
+
             // Difficulty scaling
             // Health and Damage multiplier: 1.0 to 3.0 over 15 mins
             float difficultyMultiplier = 1.0f + (2.0f * (float)progress);
@@ -129,14 +125,12 @@ namespace BikeWars.Content.managers
             {
                 var hobo = new Hobo(spawnPos, new Point(32, 32), _audioService);
                 ApplyScaling(hobo, difficultyMultiplier, speedMultiplier);
-                hobo.LoadContent(_contentManager);
                 _gameObjectManager.AddCharacter(hobo);
             }
             else
             {
                 var thief = new BikeThief(spawnPos, new Point(32, 32), _audioService);
                 ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
-                thief.LoadContent(_contentManager);
                 _gameObjectManager.AddCharacter(thief);
             }
         }
@@ -154,10 +148,8 @@ namespace BikeWars.Content.managers
             // Create a temporary collider for check
             // Use 32x32 size (enemy size)
             BoxCollider checkCollider = new BoxCollider(pos, 32, 32, CollisionLayer.CHARACTER, null);
-            
+
             var nearby = _collisionManager.StaticHash.QueryNearby(pos);
-            
-            bool hitTerrain = false;
 
             foreach (var col in nearby)
             {
@@ -195,7 +187,6 @@ namespace BikeWars.Content.managers
                 CharacterBase enemy = new Hobo(pos, new Point(32, 32), _audioService);
 
                 ApplyScaling(enemy, difficultyMultiplier, speedMultiplier);
-                enemy.LoadContent(_contentManager);
                 _gameObjectManager.AddCharacter(enemy);
             }
         }
@@ -205,14 +196,14 @@ namespace BikeWars.Content.managers
             if (_gameObjectManager.Player1 == null) return Vector2.Zero;
 
             Vector2 playerPos = _gameObjectManager.Player1.Transform.Position;
-            
+
             for (int i = 0; i < 20; i++) // Try 20 times to find a valid position
             {
                 // Random angle
                 float angle = (float)(_random.NextDouble() * Math.PI * 2);
                 // Random distance
                 float distance = MIN_SPAWN_RADIUS + (float)(_random.NextDouble() * (MAX_SPAWN_RADIUS - MIN_SPAWN_RADIUS));
-                
+
                 Vector2 offset = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * distance;
                 Vector2 pos = playerPos + offset;
 
@@ -221,9 +212,9 @@ namespace BikeWars.Content.managers
                     return pos;
                 }
             }
-            
+
             // Fallback
-            return playerPos + new Vector2(MIN_SPAWN_RADIUS, 0); 
+            return playerPos + new Vector2(MIN_SPAWN_RADIUS, 0);
         }
     }
 }

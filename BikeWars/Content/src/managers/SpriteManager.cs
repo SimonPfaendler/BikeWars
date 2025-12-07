@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
-using BikeWars.Content.utils; 
+using BikeWars.Content.utils;
 
 namespace BikeWars.Content.managers
 {
@@ -16,13 +16,13 @@ namespace BikeWars.Content.managers
     /// </summary>
     public static class SpriteManager
     {
-        // caching_construct, einmalig laden 
+        // caching_construct, einmalig laden
         private static Texture2D _characterAtlas;
         // caching_construct, speichert fertig geladene animationen
         private static Dictionary<string, SpriteAnimation> _animationCache;
         // für nicht animierte Sprites: Kugel, Geld, etc.
         private static Dictionary<string, Texture2D> _textureCache;
-        
+
         // Stellt gecachten Character Atlas zur verfügung für ghosttrail unteranderem
         public static Texture2D GetCharacterAtlas()
         {
@@ -32,39 +32,40 @@ namespace BikeWars.Content.managers
             }
             return _characterAtlas;
         }
-        
-        // nicht animierte textures 
+
+        // nicht animierte textures
         private static readonly IReadOnlyDictionary<string, string> SimpleTexturePaths = new Dictionary<string, string>
         {
             // PROJEKTILE
-            { "Bullet", "assets/sprites/projectiles/bullet" }, 
-    
+            { "Bullet", "assets/sprites/projectiles/bullet" },
+
+
             // HUD
-            { "HUD_Sheet", "assets/sprites/HUD/HUD_sheet" }, 
-    
+            { "HUD_Sheet", "assets/sprites/HUD/HUD_sheet" },
+
             // ITEMS
-            { "Chest", "assets/sprites/chest_texture" }, 
-            { "XP_Beer", "assets/sprites/XP/xp_beer_texture" }, 
+            { "Chest", "assets/sprites/chest_texture" },
+            { "XP_Beer", "assets/sprites/XP/xp_beer_texture" },
             { "XP_Money", "assets/sprites/XP/xp_money_texture" },
         };
         // hier sollte irgendwann auch auf atlas strukturen gewechselt werden
-        
+
         // liste aller animationen, die beim start gecached werden
         private static readonly List<string> AnimationKeys = new List<string>
         {
-            // SPIELER 1 
-            "Character1_WalkDown", 
-            "Character1_WalkLeft", 
-            "Character1_WalkRight", 
+            // SPIELER 1
+            "Character1_WalkDown",
+            "Character1_WalkLeft",
+            "Character1_WalkRight",
             "Character1_WalkUp",
-            
-            // HOBO 
-            "Hobo_Idle", 
-            "Hobo_WalkLeft", 
-            "Hobo_WalkRight", 
+
+            // HOBO
+            "Hobo_Idle",
+            "Hobo_WalkLeft",
+            "Hobo_WalkRight",
             "Hobo_WalkDown",
-            "Hobo_WalkUp",   
-            
+            "Hobo_WalkUp",
+
             // BIKE THIEF
             "BikeThief_Idle",
             "BikeThief_WalkLeft",
@@ -72,42 +73,42 @@ namespace BikeWars.Content.managers
         };
 
         /// <summary>
-        /// Lädt Texture Atlas einmalig, caching 
+        /// Lädt Texture Atlas einmalig, caching
         /// </summary>
         public static void LoadContent(ContentManager content)
         {
             if (_animationCache != null)
             {
-                return; 
+                return;
             }
-            
+
             _characterAtlas = content.Load<Texture2D>("assets/sprites/characters/character_atlas");
 
             _animationCache = new Dictionary<string, SpriteAnimation>();
-            
+
             _textureCache = new Dictionary<string, Texture2D>();
-            
+
             // animationen laden und cachen
             foreach (var key in AnimationKeys)
             {
-                var frames = SpriteFrameDictionary.GetFrames(key); 
-                
-                float speed = 0.15f; 
-                
-                // "ausnahmen", kann man später evtl abändern um die zyklomatische komplexität zu verringern 
-                if (key.Contains("Hobo_Idle")) 
+                var frames = SpriteFrameDictionary.GetFrames(key);
+
+                float speed = 0.15f;
+
+                // "ausnahmen", kann man später evtl abändern um die zyklomatische komplexität zu verringern
+                if (key.Contains("Hobo_Idle"))
                 {
-                    speed = 0.4f; 
+                    speed = 0.4f;
                 }
-                if (key.Contains("Character1_Walk")) 
+                if (key.Contains("Character1_Walk"))
                 {
-                    speed = 0.16f; 
+                    speed = 0.16f;
                 }
 
                 var animation = new SpriteAnimation(_characterAtlas, frames, speed);
                 _animationCache.Add(key, animation);
             }
-            
+
             foreach (var kv in SimpleTexturePaths)
             {
                 var texture = content.Load<Texture2D>(kv.Value);
@@ -116,7 +117,7 @@ namespace BikeWars.Content.managers
         }
 
         /// <summary>
-        /// SpriteAnimation aus Cache 
+        /// SpriteAnimation aus Cache
         /// </summary>
         public static SpriteAnimation GetAnimation(string name)
         {
@@ -124,32 +125,32 @@ namespace BikeWars.Content.managers
             {
                 throw new InvalidOperationException("animation cache is null");
             }
-            
+
             if (_animationCache.TryGetValue(name, out var animation))
             {
-                return animation.Clone(); 
+                return animation.Clone();
             }
-            
+
             throw new KeyNotFoundException("animation '" + name + "' not found");
         }
-        
+
         public static Texture2D GetTexture(string name)
         {
             if (_textureCache == null)
             {
                 throw new InvalidOperationException("texture cache is null");
             }
-    
+
             if (_textureCache.TryGetValue(name, out var texture))
             {
                 return texture;
             }
-    
+
             throw new KeyNotFoundException("texture '" + name + "' not found");
         }
     }
-    
-    //  abspielen Sprite-Animation 
+
+    //  abspielen Sprite-Animation
     public class SpriteAnimation
     {
         private readonly Texture2D _sheet;
@@ -201,7 +202,7 @@ namespace BikeWars.Content.managers
             );
             spriteBatch.Draw(_sheet, dest, source, Color.White, rotation: rotation, new Vector2(source.Width / 2f, source.Height / 2f), SpriteEffects.None, layerDepth:0f);
         }
-        
+
         public SpriteAnimation Clone()
         {
             return new SpriteAnimation(_sheet, _frames, _secondsPerFrame);

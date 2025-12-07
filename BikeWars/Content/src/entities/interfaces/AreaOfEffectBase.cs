@@ -44,8 +44,8 @@ namespace BikeWars.Content.entities.interfaces
             timeAlive += (float)gameTime.ElapsedGameTime.TotalSeconds;
         }
 
-        public abstract void LoadContent(ContentManager content);
         public abstract void Draw(SpriteBatch spriteBatch);
+        public abstract void LoadContent(ContentManager content);
 
         /// Returns list of colliders for the AOE
         public virtual List<ICollider> GetHitboxes() => _hitboxes;

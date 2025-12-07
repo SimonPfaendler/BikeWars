@@ -73,11 +73,8 @@ namespace BikeWars.Content.screens
             _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
 
             _itemManager = new ItemManager();
-            _itemManager.AddItem(new Item(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
             _itemManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
-            _itemManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 70), new Point(32, 32)));
-            _itemManager.AddItem(new Xp_Beer(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
-            _itemManager.AddItem(new Xp_Money(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 - 50), new Point(32, 32)));
+            _itemManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 90), new Point(32, 32)));
             _collisionManager = new CollisionManager(CELL_SIZE, worldBounds.Height);
             Player player = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(32, 32), _audioService);
 
@@ -160,7 +157,7 @@ namespace BikeWars.Content.screens
             };
 
             // Spawn Manager
-            _spawnManager = new SpawnManager(_gameObjectManager, _contentManager, _collisionManager, _audioService);
+            _spawnManager = new SpawnManager(_gameObjectManager, _collisionManager, _audioService);
         }
         public virtual void Update(GameTime gameTime)
         {

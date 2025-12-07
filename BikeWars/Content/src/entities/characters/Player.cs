@@ -78,24 +78,6 @@ namespace BikeWars.Entities.Characters
 
         public WeaponType CurrentWeapon { get; private set; } = WeaponType.Gun;
 
-
-
-        public override void LoadContent(ContentManager content)
-        {
-            if (pixel == null)
-            {
-                pixel = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
-                pixel.SetData(new[] { Color.White });
-            }
-
-            _walkDownAnimation = SpriteManager.GetAnimation("Character1_WalkDown");
-            _walkLeftAnimation = SpriteManager.GetAnimation("Character1_WalkLeft");
-            _walkRightAnimation = SpriteManager.GetAnimation("Character1_WalkRight");
-            _walkUpAnimation = SpriteManager.GetAnimation("Character1_WalkUp");
-
-            _currentAnimation = _walkRightAnimation;
-        }
-
         public override void UpdateCollider()
         {
             Vector2 colliderPosition = new Vector2(
@@ -176,6 +158,18 @@ namespace BikeWars.Entities.Characters
             sprint = new CooldownWithDuration(1f, 5f);
             Inventory = new Inventory();
             _audio = audio;
+            if (pixel == null)
+            {
+                pixel = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
+                pixel.SetData(new[] { Color.White });
+            }
+
+            _walkDownAnimation = SpriteManager.GetAnimation("Character1_WalkDown");
+            _walkLeftAnimation = SpriteManager.GetAnimation("Character1_WalkLeft");
+            _walkRightAnimation = SpriteManager.GetAnimation("Character1_WalkRight");
+            _walkUpAnimation = SpriteManager.GetAnimation("Character1_WalkUp");
+
+            _currentAnimation = _walkRightAnimation;
             UpdateCollider();
         }
 
@@ -572,6 +566,6 @@ namespace BikeWars.Entities.Characters
                 sprint.Duration += 0.5f;
             }
         }
-        
+
     }
 }

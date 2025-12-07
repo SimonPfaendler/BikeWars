@@ -102,26 +102,9 @@ public class GameObjectManager
 
     public void LoadContent(ContentManager content)
     {
-        Player1.LoadContent(content);
-        foreach (CharacterBase c in Characters)
-        {
-            c.LoadContent(content);
-        }
-        foreach (ItemBase i in Items)
-        {
-            i.LoadContent(content);
-        }
-        foreach (ProjectileBase p in Projectiles)
-        {
-            p.LoadContent(content);
-        }
         foreach (AreaOfEffectBase a in _aoeAttacks)
         {
             a.LoadContent(content);
-        }
-        foreach (BoxCollider s in Statics)
-        {
-            // s.LoadContent();
         }
     }
 
@@ -197,20 +180,17 @@ public class GameObjectManager
 
         Bullet b = new Bullet(spawnPos, new Point(8, 8), Player1);
         b.Movement.Direction = direction; // Set the movement direction
-        // b.LoadContent(_contentManager);
         AddProjectile(b);
     }
 
         private void OnPlayerFlamethrower()
     {
-        Vector2 spawnPos = Player1.Transform.Position;
         Vector2 direction = Player1.GazeDirection;
-
         Flamethrower f = new Flamethrower(Player1, direction);
         f.LoadContent(_contentManager);
         AddAOE(f);
     }
-    
+
     public void SetWorldAudioManager(WorldAudioManager worldAudioManager)
     {
         _worldAudioManager = worldAudioManager;
@@ -224,10 +204,10 @@ public class GameObjectManager
                 wa.SetWorldAudioManager(worldAudioManager);
         }
     }
-    
+
     public void SpawnXp(CharacterBase character)
     {
-        ItemBase xp; 
+        ItemBase xp;
         // spawns Xp_Item at the location of character
         // function is used in CharacterBase.cs
         Vector2 pos = character.Transform.Position;
@@ -237,7 +217,6 @@ public class GameObjectManager
         // other cases will be added later
         else
             xp = new Xp_Money(pos, new Point(16, 16));
-        xp.LoadContent(_contentManager);
         AddItem(xp);
     }
 
