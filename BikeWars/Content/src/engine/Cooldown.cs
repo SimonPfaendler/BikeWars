@@ -7,6 +7,18 @@ public class CooldownWithDuration
     private float _cooldown;
     private float _durationTimer;
     private float _cooldownTimer;
+    
+    public float Duration
+    {
+        get => _duration;
+        set => _duration = value;
+    }
+
+    public float Cooldown
+    {
+        get => _cooldown;
+        set => _cooldown = value;
+    }
 
     public bool IsActive => _durationTimer > 0;
     public bool IsOnCooldown => _cooldownTimer > 0;
