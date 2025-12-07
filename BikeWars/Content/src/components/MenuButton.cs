@@ -8,11 +8,11 @@ namespace BikeWars.Content.components
 {
     public class MenuButton
     {
-        private Texture2D _texture;
+        private readonly Texture2D _texture;
         private Rectangle _drawBounds;
         private Rectangle _collisionBounds;
-        private string _text;
-        private SpriteFont _font;
+        private readonly string _text;
+        private readonly SpriteFont _font;
         private Color _textColor;
         
         private Rectangle _originalBounds;

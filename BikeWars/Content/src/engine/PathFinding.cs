@@ -1,22 +1,19 @@
 using System;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
-using BikeWars.Content.engine;
-using BikeWars.Content.engine.interfaces;
 
 namespace BikeWars.Content.engine.PathFinding
 {
     public class Node
     {
-        public int X;
-        public int Y;
+        public int X { get; }
+        public int Y { get; }
         
-        public bool Walkable;
+        public bool Walkable { get; set; }
         
-        public int G_cost;
-        public int H_cost;
+        public int G_cost { get; set; }
+        public int H_cost { get; set; }
         public int F_cost => G_cost + H_cost;
-        public Node Parent_node;
+        public Node Parent_node { get; set; }
         
         // constructor
         public Node(int x, int y, bool walkable)
@@ -30,58 +27,76 @@ namespace BikeWars.Content.engine.PathFinding
 
     public class PathFinding
     {
-        private Node[,] _grid;
-        private int width;
-        private int height;
+        private readonly Node[,] _grid;
+        private readonly int _width;
+        private readonly int _height;
 
         public PathFinding(Node[,] grid)
         {
-            this._grid = grid;
-            width = grid.GetLength(0);
-            height = grid.GetLength(1);
+            _grid = grid;
+            _width = grid.GetLength(0);
+            _height = grid.GetLength(1);
         }
+        
+        // checks whether a tile position is inside the grid and not outside the map
+        private bool IsInsideGrid(int x, int y) =>
+            x >= 0 && x < _width && y >= 0 && y < _height;
+        
+        // checks if the movement direction is diagonal.
+        private bool IsDiagonal(int dx, int dy) =>
+            dx != 0 && dy != 0;
+        
+        // checks whether a diagonal move is allowed by verifying the two side tiles
+        private bool IsDiagonalPassable(Node node, int dx, int dy)
+        {
+            var side1 = _grid[node.X + dx, node.Y];
+            var side2 = _grid[node.X, node.Y + dy];
 
+            return side1.Walkable && side2.Walkable;
+        }
+        
+        // checks whether a tile next to the current node is a valid neighbor for A* pathfinding
+        private bool IsValidNeighbour(Node node, int dx, int dy, out int nx, out int ny)
+        {
+            nx = node.X + dx;
+            ny = node.Y + dy;
+
+            // skip center
+            if (dx == 0 && dy == 0)
+                return false;
+
+            if (!IsInsideGrid(nx, ny))
+                return false;
+
+            var neighbour = _grid[nx, ny];
+            if (!neighbour.Walkable)
+                return false;
+
+            if (IsDiagonal(dx, dy) && !IsDiagonalPassable(node, dx, dy))
+                return false;
+
+            return true;
+        }
+        
+        // gets the neighbours of a node
         public List<Node> GetNeighbours(Node node)
         {
-            List <Node> neighbours = new List<Node>();
+            var neighbours = new List<Node>();
 
             for (int dx = -1; dx <= 1; dx++)
             {
                 for (int dy = -1; dy <= 1; dy++)
                 {
-                    if (dx == 0 && dy == 0)
-                        continue;
-                    
-                    int nx =  node.X + dx;
-                    int ny =  node.Y + dy;
-
-                    if (nx < 0 || nx >= width || ny < 0 || ny >= height)
-                        continue;
-
-                    Node neighbour = _grid[nx, ny];
-                    
-                    if (!neighbour.Walkable)
-                        continue;
-                    
-                    bool isDiagonal = dx != 0 && dy != 0;
-                    
-                    if (isDiagonal)
+                    if (IsValidNeighbour(node, dx, dy, out int nx, out int ny))
                     {
-                        Node side1 = _grid[node.X + dx, node.Y];    
-                        Node side2 = _grid[node.X, node.Y + dy];    
-
-                        // if either side is blocked, don't allow the diagonal
-                        if (!side1.Walkable || !side2.Walkable)
-                            continue;
+                        neighbours.Add(_grid[nx, ny]);
                     }
-                    
-                    neighbours.Add(_grid[nx, ny]);  
                 }
             }
             return neighbours;
         }
 
-        private void CalculateCosts(Node currentNode, Node neighbour, Node targetNode)
+        private static void CalculateCosts(Node currentNode, Node neighbour, Node targetNode)
         {
             int movementCost;
 
@@ -105,7 +120,7 @@ namespace BikeWars.Content.engine.PathFinding
             }
         }
 
-        private Node GetLowestFCostNode(List<Node> openList)
+        private static Node GetLowestFCostNode(List<Node> openList)
         {
             Node best = openList[0];
 
@@ -121,7 +136,7 @@ namespace BikeWars.Content.engine.PathFinding
             return best;
         }
 
-        private List<Node> ReconstructPath(Node startNode, Node endNode)
+        private static List<Node> ReconstructPath(Node startNode, Node endNode)
         {
             List<Node> path = new List<Node>();
             
@@ -141,28 +156,13 @@ namespace BikeWars.Content.engine.PathFinding
             path.Reverse();
             return path;
         }
-
-        public List<Node> FindPath(int startX, int startY, int endX, int endY)
+        
+        // Resets G_cost, H_cost, and Parent_node for every node in the grid
+        private void ResetAllNodes()
         {
-            
-            // check that start and target are inside the grid
-            if (startX < 0 || startX >= width || startY < 0 || startY >= height)
-                return new List<Node>();
-
-            if (endX < 0 || endX >= width || endY < 0 || endY >= height)
-                return new List<Node>();
-            
-            Node startNode = _grid[startX, startY];
-            Node targetNode = _grid[endX, endY];
-            
-            // if start node or target node are not walkable then we have no path
-            if (!startNode.Walkable || !targetNode.Walkable)
-                return new List<Node>();
-            
-            // reset all node costs and parents
-            for (int x = 0; x < width; x++)
+            for (int x = 0; x < _width; x++)
             {
-                for (int y = 0; y < height; y++)
+                for (int y = 0; y < _height; y++)
                 {
                     Node node = _grid[x, y];
                     node.G_cost = int.MaxValue;
@@ -170,49 +170,79 @@ namespace BikeWars.Content.engine.PathFinding
                     node.Parent_node = null;
                 }
             }
-            
-            // create the OPEN/CLOSED lists
-            List<Node> openList = new List<Node>();
-            HashSet<Node> closedSet = new HashSet<Node>();
-            
-            // initialize the start node
+        }
+        
+        // Initializes the starting node with G = 0 and heuristic (H-cost)
+        private static void InitializeStartNode(Node startNode, Node targetNode)
+        {
             startNode.G_cost = 0;
-            
-            int startDistX = Math.Abs(startX - endX);
-            int startDistY = Math.Abs(startY - endY);
-            startNode.H_cost = (startDistX + startDistY) * 10;
-            
+
+            int dx = Math.Abs(startNode.X - targetNode.X);
+            int dy = Math.Abs(startNode.Y - targetNode.Y);
+
+            startNode.H_cost = (dx + dy) * 10;
+        }
+        
+        // Processes all valid neighbours of the current node (updates costs and open list)
+        private void ProcessNeighbours(
+            Node currentNode,
+            Node targetNode,
+            List<Node> openList,
+            HashSet<Node> closedSet)
+        {
+            foreach (Node neighbour in GetNeighbours(currentNode))
+            {
+                if (closedSet.Contains(neighbour))
+                    continue;
+
+                int oldGCost = neighbour.G_cost;
+
+                CalculateCosts(currentNode, neighbour, targetNode);
+
+                if (neighbour.G_cost < oldGCost && !openList.Contains(neighbour))
+                {
+                    openList.Add(neighbour);
+                }
+            }
+        }
+
+        // Main A* pathfinding method
+        public List<Node> FindPath(int startX, int startY, int endX, int endY)
+        {
+            // Validate that start and end positions are inside the map
+            if (!IsInsideGrid(startX, startY) || !IsInsideGrid(endX, endY))
+                return new List<Node>();
+
+            Node startNode = _grid[startX, startY];
+            Node targetNode = _grid[endX, endY];
+
+            // If either start or end is blocked, no path exists
+            if (!startNode.Walkable || !targetNode.Walkable)
+                return new List<Node>();
+
+            ResetAllNodes();
+
+            var openList = new List<Node>();
+            var closedSet = new HashSet<Node>();
+
+            InitializeStartNode(startNode, targetNode);
             openList.Add(startNode);
-            
-            // main A* loop
+
             while (openList.Count > 0)
             {
                 Node currentNode = GetLowestFCostNode(openList);
-                
-                // returns the whole path from the enemy to the player
+
+                // Path found → reconstruct and return it
                 if (currentNode == targetNode)
                     return ReconstructPath(startNode, targetNode);
-                
+
                 openList.Remove(currentNode);
                 closedSet.Add(currentNode);
-                
-                // check all neighbours from the current node
-                foreach (Node neighbour in GetNeighbours(currentNode))
-                {
-                    if (closedSet.Contains(neighbour))
-                        continue;
-                    
-                    // remember the old g cost to see if it improves
-                    int oldGCost = neighbour.G_cost;
-                    
-                    CalculateCosts(currentNode, neighbour, targetNode);
 
-                    if (neighbour.G_cost < oldGCost && !openList.Contains(neighbour))
-                    {
-                        openList.Add(neighbour);
-                    }
-                }
+                ProcessNeighbours(currentNode, targetNode, openList, closedSet);
             }
+
+            // No path found
             return new List<Node>();
         }
     }
