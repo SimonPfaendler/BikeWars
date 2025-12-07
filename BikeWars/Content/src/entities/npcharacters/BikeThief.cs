@@ -45,7 +45,7 @@ namespace BikeWars.Entities.Characters
         {
             // Werte kannst du anpassen, wenn der BikeThief z.B. stärker/schneller sein soll
             _audio = audio;
-            // _pathFinding = pathFinding;
+            _pathFinding = pathFinding;
             _collisionManager = collisionManager;
             MaxHealth = 40;
             Health = MaxHealth;

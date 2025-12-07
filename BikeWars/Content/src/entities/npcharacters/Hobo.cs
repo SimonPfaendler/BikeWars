@@ -51,7 +51,7 @@ namespace BikeWars.Entities.Characters
             CollisionManager collisionManager)
         {
             _audio = audio;
-            // _pathFinding = pathFinding;
+            _pathFinding = pathFinding;
             _collisionManager = collisionManager;
 
             MaxHealth = 40;

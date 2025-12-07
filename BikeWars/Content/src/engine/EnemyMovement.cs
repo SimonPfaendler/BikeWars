@@ -54,7 +54,7 @@ public class EnemyMovement : MovementBase
         CanMove = canMove;
         IsMoving = isMoving;
 
-        // _pathFinding = pathFinding;
+        _pathFinding = pathFinding;
         _gridMapper = gridMapper;
     }
 
@@ -105,10 +105,10 @@ public class EnemyMovement : MovementBase
     // asks A* for a new path to the player and resets the path index.
     private void RecalculatePath(Point enemyGrid, Point playerGrid)
     {
-        // _currentPath = _pathFinding.FindPath(
-        //     enemyGrid.X, enemyGrid.Y,
-        //     playerGrid.X, playerGrid.Y
-        // );
+        _currentPath = _pathFinding.FindPath(
+            enemyGrid.X, enemyGrid.Y,
+            playerGrid.X, playerGrid.Y
+        );
         _pathIndex = 0;
         _lastPlayerGrid = playerGrid;
     }
