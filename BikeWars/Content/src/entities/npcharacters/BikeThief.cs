@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
+using BikeWars.Content.engine.PathFinding;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.managers;
 using BikeWars.Content.utils;
@@ -18,6 +19,9 @@ using BikeWars.Content.utils;
             private SpriteAnimation _walkRightAnimation;
 
             private SpriteAnimation _currentAnimation;
+            
+            private readonly PathFinding _pathFinding;
+            private readonly CollisionManager _collisionManager;
             
             protected override string WalkingSound => AudioAssets.Walking;
 
@@ -50,10 +54,13 @@ using BikeWars.Content.utils;
             // 1x1 Texture to represent the enemy
             public static Texture2D pixel;
 
-            public BikeThief(Vector2 start, Point size, AudioService audio)
+            public BikeThief(Vector2 start, Point size, AudioService audio, PathFinding pathFinding,
+                CollisionManager collisionManager)
             {
                 // Werte kannst du anpassen, wenn der BikeThief z.B. stärker/schneller sein soll
                 _audio = audio;
+                _pathFinding = pathFinding;
+                _collisionManager = collisionManager;
                 MaxHealth = 40;
                 Health = MaxHealth;
                 AttackDamage = 5;
@@ -61,7 +68,8 @@ using BikeWars.Content.utils;
                 Transform = new Transform(start, size);
                 LastTransform = new Transform(start, size);
                 Speed = 100f;
-                Movement = new EnemyMovement(canMove: true, isMoving: false);
+                Movement = new EnemyMovement(canMove: true, isMoving: false, pathFinding: _pathFinding,
+                    gridMapper: _collisionManager);
                 UpdateCollider();
             }
 

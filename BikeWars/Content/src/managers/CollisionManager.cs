@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using BikeWars.Content.engine.PathFinding;
 
 namespace BikeWars.Content.managers;
 public class CollisionManager
@@ -32,6 +33,9 @@ public class CollisionManager
     private List<BoxCollider> _collisionBoxes {get; set;} // Mainly used for the static layout
     public List<BoxCollider> CollisionBoxes {get => _collisionBoxes; set => _collisionBoxes = value;}
     private List<ICollider> _toRemoveColliders {get; set;}
+    
+    // the grid for the pathfinding
+    public Node[,] PathGrid { get; private set; }
 
     public CollisionManager(int cellSize, int worldBounds)
     {
@@ -61,8 +65,44 @@ public class CollisionManager
             CollisionBoxes.Add(box);
             StaticHash.Insert(box);
         }
+        
+        // build pathfinding grid based on collision layer
+        int gridWidth = collisionLayer.Width;
+        int gridHeight = collisionLayer.Height;
+        PathGrid = new Node[gridWidth, gridHeight];
+
+        for (int y = 0; y < gridHeight; y++)
+        {
+            for (int x = 0; x < gridWidth; x++)
+            {
+                var tile = collisionLayer.GetTile((ushort) x, (ushort) y);
+                
+                bool walkable = tile.GlobalIdentifier == 0;
+                PathGrid[x, y] = new Node(x, y, walkable);
+            }
+        }
+        
         LoadTerrainLayer("Streets", TerrainType.ROAD);
         LoadTerrainLayer("Floor", TerrainType.GRASS);
+    }
+
+    // takes a world position in pixels (Vector2) and returns which tile that position is inside
+    public Point WorldToGrid(Vector2 worldPos)
+    {
+        int gridX = (int) (worldPos.X / _cellSize);
+        int gridY = (int) (worldPos.Y / _cellSize);
+        
+        return new Point(gridX, gridY);
+    }
+
+    // takes a Node (which stores grid X/Y tile coordinates)
+    // and returns the world-space pixel position at the center of that tile.
+    public Vector2 GridToWorldCenter(Node node)
+    {
+        return new Vector2(
+            node.X * _cellSize + _cellSize / 2f,
+            node.Y * _cellSize + _cellSize / 2f
+        );
     }
 
     public Vector2 GetPenetrationVector(ICollider a, ICollider b)

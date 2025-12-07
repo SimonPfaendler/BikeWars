@@ -5,6 +5,7 @@ using BikeWars.Entities.Characters;
 using BikeWars.Content.entities.interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
+using BikeWars.Content.engine.PathFinding;
 
 namespace BikeWars.Content.managers
 {
@@ -14,6 +15,7 @@ namespace BikeWars.Content.managers
         private readonly ContentManager _contentManager;
         private readonly CollisionManager _collisionManager;
         private readonly AudioService _audioService;
+        private readonly PathFinding _pathFinding;
         
         private double _totalTime;
         private double _timeSinceLastSpawn;
@@ -31,7 +33,7 @@ namespace BikeWars.Content.managers
 
         private Random _random;
 
-        public SpawnManager(GameObjectManager gameObjectManager, ContentManager contentManager,CollisionManager collisionManager, AudioService audioService)
+        public SpawnManager(GameObjectManager gameObjectManager, ContentManager contentManager,CollisionManager collisionManager, AudioService audioService, PathFinding pathFinding)
         {
             _gameObjectManager = gameObjectManager;
             _contentManager = contentManager;
@@ -39,6 +41,7 @@ namespace BikeWars.Content.managers
             _audioService = audioService;
             _random = new Random();
             _spawnInterval = START_SPAWN_INTERVAL;
+            _pathFinding = pathFinding;
         }
 
         public void Update(GameTime gameTime)
@@ -101,7 +104,8 @@ namespace BikeWars.Content.managers
                      spawnPos = clusterCenter;
                  }
 
-                 var hobo = new Hobo(spawnPos, new Point(32, 32), _audioService);
+                 var hobo = new Hobo(spawnPos, new Point(32, 32), _audioService, _pathFinding,
+                     _collisionManager);
                  ApplyScaling(hobo, difficultyMultiplier, speedMultiplier); // Apply extra speed
                  hobo.LoadContent(_contentManager);
                  _gameObjectManager.AddCharacter(hobo);
@@ -127,14 +131,16 @@ namespace BikeWars.Content.managers
 
             if (spawnHobo)
             {
-                var hobo = new Hobo(spawnPos, new Point(32, 32), _audioService);
+                var hobo = new Hobo(spawnPos, new Point(32, 32), _audioService, _pathFinding,
+                    _collisionManager);
                 ApplyScaling(hobo, difficultyMultiplier, speedMultiplier);
                 hobo.LoadContent(_contentManager);
                 _gameObjectManager.AddCharacter(hobo);
             }
             else
             {
-                var thief = new BikeThief(spawnPos, new Point(32, 32), _audioService);
+                var thief = new BikeThief(spawnPos, new Point(32, 32), _audioService, _pathFinding,
+                    _collisionManager);
                 ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
                 thief.LoadContent(_contentManager);
                 _gameObjectManager.AddCharacter(thief);
@@ -157,20 +163,20 @@ namespace BikeWars.Content.managers
             
             var nearby = _collisionManager.StaticHash.QueryNearby(pos);
             
-            bool hitTerrain = false;
+            // bool hitTerrain = false;
 
             foreach (var col in nearby)
             {
-                if (col.Layer == CollisionLayer.TERRAIN)
+                if (col.Layer == CollisionLayer.TERRAIN || col.Layer == CollisionLayer.WALL)
                 {
                     if (col.Intersects(checkCollider))
                     {
-                        return true;
+                        return false;
                     }
                 }
             }
 
-            return false;
+            return true;
         }
 
         private void SpawnCircle(double progress)
@@ -192,7 +198,8 @@ namespace BikeWars.Content.managers
                 if (!IsValidSpawnPosition(pos)) continue;
 
                 // Alternate between Hobo and BikeThief
-                CharacterBase enemy = new Hobo(pos, new Point(32, 32), _audioService);
+                CharacterBase enemy = new Hobo(pos, new Point(32, 32), _audioService, _pathFinding,
+                    _collisionManager);
 
                 ApplyScaling(enemy, difficultyMultiplier, speedMultiplier);
                 enemy.LoadContent(_contentManager);

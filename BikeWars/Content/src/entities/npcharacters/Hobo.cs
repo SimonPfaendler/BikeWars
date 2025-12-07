@@ -7,6 +7,8 @@ using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.managers;
+using BikeWars.Content.engine.PathFinding;
+
 using BikeWars.Content.utils;
 
 namespace BikeWars.Entities.Characters
@@ -19,6 +21,9 @@ namespace BikeWars.Entities.Characters
         private SpriteAnimation _walkUpAnimation;
         private SpriteAnimation _walkDownAnimation;
         private SpriteAnimation _currentAnimation;
+        
+        private readonly PathFinding _pathFinding;
+        private readonly CollisionManager _collisionManager;
 
         protected override string WalkingSound => AudioAssets.Walking;
 
@@ -57,9 +62,13 @@ namespace BikeWars.Entities.Characters
         public static Texture2D pixel;
 
 
-        public Hobo(Vector2 start, Point size, AudioService audio)
+        public Hobo(Vector2 start, Point size, AudioService audio, PathFinding pathFinding,
+            CollisionManager collisionManager)
         {
             _audio = audio;
+            _pathFinding = pathFinding;
+            _collisionManager = collisionManager;
+            
             MaxHealth = 40;
             Health = MaxHealth;
             AttackDamage = 5;
@@ -67,7 +76,8 @@ namespace BikeWars.Entities.Characters
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 100f;
-            Movement = new EnemyMovement(canMove: true, isMoving: false);
+            Movement = new EnemyMovement(canMove: true, isMoving: false, pathFinding: _pathFinding,
+                gridMapper: _collisionManager);
             UpdateCollider();
         }
 
