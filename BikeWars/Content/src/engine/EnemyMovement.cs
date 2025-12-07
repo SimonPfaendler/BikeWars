@@ -26,7 +26,7 @@ public class EnemyMovement : MovementBase
 
     private Point _lastPlayerGrid = new Point(-1, -1);
     private float _repathTimer = 0f;
-    private const float RepathInterval = 0.3f;
+    private const float RepathInterval = 1f;
 
     private const float NodeReachDistance = 8f;
     private const float StopRadius = 10f;
