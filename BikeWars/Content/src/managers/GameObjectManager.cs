@@ -143,12 +143,12 @@ public class GameObjectManager
         }
         foreach (CharacterBase c in Characters)
         {
-            c.Update(gameTime);
             if (c.Movement != null)
             {
                 c.Movement.PlayerPosition = Player1.Transform.Position;
                 c.Movement.EnemyPosition = c.Transform.Position;
             }
+            c.Update(gameTime);
             c.UpdateCollider();
         }
         foreach (ItemBase i in Items)

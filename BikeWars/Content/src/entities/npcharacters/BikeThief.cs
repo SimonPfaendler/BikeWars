@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
+using BikeWars.Content.engine.PathFinding;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.managers;
 
@@ -13,10 +14,11 @@ namespace BikeWars.Entities.Characters
         private SpriteAnimation _idleAnimation;
         private SpriteAnimation _walkLeftAnimation;
         private SpriteAnimation _walkRightAnimation;
-
         private SpriteAnimation _currentAnimation;
-
         protected override string WalkingSound => AudioAssets.Walking;
+
+        private readonly PathFinding _pathFinding;
+        private readonly CollisionManager _collisionManager;
 
         public override void UpdateCollider()
         {
@@ -37,10 +39,14 @@ namespace BikeWars.Entities.Characters
         // 1x1 Texture to represent the enemy
         public static Texture2D pixel;
 
-        public BikeThief(Vector2 start, Point size, AudioService audio)
+        // 1x1 Texture to represent the enemy
+        public BikeThief(Vector2 start, Point size, AudioService audio, PathFinding pathFinding,
+            CollisionManager collisionManager)
         {
             // Werte kannst du anpassen, wenn der BikeThief z.B. stärker/schneller sein soll
             _audio = audio;
+            // _pathFinding = pathFinding;
+            _collisionManager = collisionManager;
             MaxHealth = 40;
             Health = MaxHealth;
             AttackDamage = 5;
@@ -48,12 +54,11 @@ namespace BikeWars.Entities.Characters
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 100f;
-            Movement = new EnemyMovement(canMove: true, isMoving: false);
+            Movement = new EnemyMovement(canMove: true, isMoving: false, pathFinding: _pathFinding,
+                gridMapper: _collisionManager);
             _idleAnimation = SpriteManager.GetAnimation("BikeThief_Idle");
             _walkLeftAnimation = SpriteManager.GetAnimation("BikeThief_WalkLeft");
             _walkRightAnimation = SpriteManager.GetAnimation("BikeThief_WalkRight");
-
-            // Startzustand: Idle
             _currentAnimation = _idleAnimation;
             UpdateCollider();
         }
@@ -63,8 +68,6 @@ namespace BikeWars.Entities.Characters
             Movement.HandleMovement(gameTime);
 
             UpdateAttackCooldown(gameTime);
-
-
             // Sound-Control
             HandleSound(Movement.IsMoving);
 
@@ -80,7 +83,6 @@ namespace BikeWars.Entities.Characters
                 direction.Normalize();
                 Transform.Position += direction * Speed * delta;
 
-                // Animation anhand der horizontalen Richtung wählen
                 if (direction.X > 0.1f)
                 {
                     _currentAnimation = _walkRightAnimation;

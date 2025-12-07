@@ -7,12 +7,12 @@ using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
 using BikeWars.Utilities;
 using BikeWars.Content.engine.Audio;
-using BikeWars.Content.entities.levelup;
 using BikeWars.Content.src.screens.Overlay;
 using BikeWars.Content.src.utils.SaveLoadExample;
 using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled.Renderers;
 using BikeWars.Content.managers;
+using BikeWars.Content.engine.PathFinding;
 
 namespace BikeWars.Content.screens
 {
@@ -54,7 +54,12 @@ namespace BikeWars.Content.screens
 
         private SpawnManager _spawnManager;
 
+        private PathFinding _pathFinding;
+
         private bool _freelook; // Has to be optimized
+
+        protected CollisionManager CollisionManager => _collisionManager;
+        protected PathFinding PathFinding => _pathFinding;
 
         public bool DrawLower => false;
         public bool UpdateLower => false;
@@ -113,6 +118,9 @@ namespace BikeWars.Content.screens
 
             // Tiled Map
             _collisionManager.LoadContent(content);
+
+            // pathfinding object
+            _pathFinding = new PathFinding(_collisionManager.PathGrid);
             _tiledMapRenderer = new TiledMapRenderer(Game1.Instance.GraphicsDevice, _collisionManager.TiledMap);
 
             // Create Combat Manager
@@ -157,7 +165,7 @@ namespace BikeWars.Content.screens
             };
 
             // Spawn Manager
-            _spawnManager = new SpawnManager(_gameObjectManager, _collisionManager, _audioService);
+            _spawnManager = new SpawnManager(_gameObjectManager, _collisionManager, _audioService, _pathFinding);
         }
         public virtual void Update(GameTime gameTime)
         {
@@ -268,12 +276,14 @@ namespace BikeWars.Content.screens
             {
                 if (p.Type == SaveLoad.TYPES.HOBO)
                 {
-                    Hobo b = new Hobo(p.Position.ToVector2(), p.Size.ToPoint(), _audioService);
+                    Hobo b = new Hobo(p.Position.ToVector2(), p.Size.ToPoint(), _audioService, _pathFinding,
+                        _collisionManager);
                     _gameObjectManager.AddCharacter(b);
                 }
                 if (p.Type == SaveLoad.TYPES.BIKETHIEF)
                 {
-                    BikeThief b = new BikeThief(p.Position.ToVector2(), p.Size.ToPoint(), _audioService);
+                    BikeThief b = new BikeThief(p.Position.ToVector2(), p.Size.ToPoint(), _audioService, _pathFinding,
+                        _collisionManager);
                     _gameObjectManager.AddCharacter(b);
                 }
             }
@@ -333,6 +343,38 @@ namespace BikeWars.Content.screens
             }
         }
 
+        // draws the enemy path in the tech demo
+        private void DrawEnemyPaths(SpriteBatch spriteBatch)
+        {
+            // Need EnemyMovement + Node + GridToWorldCenter
+            foreach (var c in _gameObjectManager.Characters)
+            {
+                if (c.Movement is EnemyMovement em && em.CurrentPath != null)
+                {
+                    var path = em.CurrentPath;
+
+                    // draw every 2nd node to reduce overdraw
+                    for (int i = 0; i < path.Count; i += 2)
+                    {
+                        Node node = path[i];
+
+                        // convert grid coords -> world pixel center
+                        Vector2 worldPos = _collisionManager.GridToWorldCenter(node);
+
+                        // tiny 2x2 blue dot
+                        var rect = new Rectangle(
+                            (int)worldPos.X - 1,
+                            (int)worldPos.Y - 1,
+                            2,
+                            2
+                        );
+
+                        spriteBatch.Draw(_pixel, rect, Color.Blue);
+                    }
+                }
+            }
+        }
+
         public virtual void Draw(GameTime gameTime)
         {
             Game1 game = Game1.Instance;
@@ -355,6 +397,12 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.Projectiles,
                     _gameObjectManager.AOEAttacks
                 );
+            }
+
+            // draws A* paths for enemies in tech demo
+            if (_isTechDemo)
+            {
+                DrawEnemyPaths(spriteBatch);
             }
 
             spriteBatch.End();
