@@ -559,9 +559,9 @@ namespace BikeWars.Entities.Characters
         //TODO its not working properly yet
         public void UpgradeSkill(SkillTree.SkillId skill)
         {
-            if (skill is SkillTree.SkillId.MoreDamage)
+            if (skill is SkillTree.SkillId.MoreHp)
             {
-                Health += 30;
+                MaxHealth += 30;
             }
             else if (skill is SkillTree.SkillId.MoreDamage)
             {
