@@ -1,6 +1,9 @@
 using System;
-using BikeWars.Content.engine.interfaces;
+using System.Collections.Generic;
 using BikeWars.Content.components;
+using BikeWars.Content.engine.interfaces;
+using BikeWars.Content.engine.PathFinding;
+using BikeWars.Content.managers;
 using Microsoft.Xna.Framework;
 
 // Handles the enemy movement:
@@ -10,20 +13,23 @@ using Microsoft.Xna.Framework;
 
 namespace BikeWars.Content.engine;
 
-public enum EnemyState
-{
-    Chasing,
-    Sidestepping
-}
-
 public class EnemyMovement : MovementBase
 {
-    public EnemyState State { get; private set; } = EnemyState.Chasing;
+    // i dont understand why it gives me this error
+    private readonly BikeWars.Content.engine.PathFinding.PathFinding _pathFinding;
+    private readonly CollisionManager _gridMapper;
 
-    private float _sidestepTimeLeft = 0f;
-    private const float SidestepDuration = 0.4f;
+    private System.Collections.Generic.List<Node> _currentPath = new();
+    private int _pathIndex = 0;
+    public IReadOnlyList<Node> CurrentPath => _currentPath;
+    public int CurrentPathIndex => _pathIndex;
 
-    private Vector2 _sidestepDirection;
+    private Point _lastPlayerGrid = new Point(-1, -1);
+    private float _repathTimer = 0f;
+    private const float RepathInterval = 1f;
+
+    private const float NodeReachDistance = 8f;
+    private const float StopRadius = 10f;
 
     private Vector2 _playerPosition;
     public Vector2 PlayerPosition
@@ -40,44 +46,108 @@ public class EnemyMovement : MovementBase
         set => _enemyPosition =  value;
     }
 
-    private const float StopRadius = 10f;
-
-    private int _sidestepCount = 0;
-
-    public EnemyMovement(bool canMove, bool isMoving)
+    // sets up the enemy movement system and stores pathfinding + grid helpers.
+    public EnemyMovement(bool canMove, bool isMoving, BikeWars.Content.engine.PathFinding.PathFinding pathFinding,
+        CollisionManager gridMapper)
     {
         Direction = Vector2.Zero;
         CanMove = canMove;
         IsMoving = isMoving;
+
+        _pathFinding = pathFinding;
+        _gridMapper = gridMapper;
     }
 
-    // controls chasing and a timed sidestepping 
+    // runs every frame: updates path, chooses direction, and moves the enemy.
+    // A* doesn't run every frame
     public override void HandleMovement(GameTime gameTime)
     {
         if (!CanMove) return;
 
-        if (State == EnemyState.Chasing)
+        // Count down the pathfinding timer using the time passed since last frame.
+        float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        _repathTimer -= dt;
+        if (_repathTimer < 0f) _repathTimer = 0f;
+
+
+        var enemyGrid= _gridMapper.WorldToGrid(EnemyPosition);
+        var playerGrid= _gridMapper.WorldToGrid(PlayerPosition);
+
+        bool targetMoved = playerGrid != _lastPlayerGrid;
+        bool timeUp = _repathTimer <= 0f;
+
+        bool needNewPath =
+            _currentPath == null ||
+            _currentPath.Count == 0 ||
+            timeUp;
+
+
+        if (needNewPath)
         {
-            Direction = DirectionToTarget();
+            RecalculatePath(enemyGrid, playerGrid);
+            _repathTimer = RepathInterval;
         }
-        else if (State == EnemyState.Sidestepping)
+
+        Direction = DirectionAlongPath();
+
+        if (Direction == Vector2.Zero)
         {
-            Direction = _sidestepDirection;
+            // optional: clear path when done, then just chase directly
+            _currentPath.Clear();
+            _pathIndex = 0;
 
-            float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            _sidestepTimeLeft -= delta;
-
-            if (_sidestepTimeLeft <= 0)
-            {
-                State = EnemyState.Chasing;
-                _sidestepCount = 1; 
-            }
+            Direction = DirectionToTarget();
         }
 
         Update(gameTime);
     }
 
-    // calculates the length from the enemy to the player
+    // asks A* for a new path to the player and resets the path index.
+    private void RecalculatePath(Point enemyGrid, Point playerGrid)
+    {
+        _currentPath = _pathFinding.FindPath(
+            enemyGrid.X, enemyGrid.Y,
+            playerGrid.X, playerGrid.Y
+        );
+        _pathIndex = 0;
+        _lastPlayerGrid = playerGrid;
+    }
+
+    // returns the direction toward the next node in the path, or moves to next node.
+    private Vector2 DirectionAlongPath()
+    {
+        if (_currentPath == null || _currentPath.Count == 0)
+            return Vector2.Zero;
+
+        if (_pathIndex < 0 || _pathIndex >= _currentPath.Count)
+            return Vector2.Zero;
+
+        Node targetNode = _currentPath[_pathIndex];
+        Vector2 targetPos = _gridMapper.GridToWorldCenter(targetNode);
+
+        Vector2 toTarget = targetPos - EnemyPosition;
+
+        // If we’re close enough to this node, go to the next
+        if (toTarget.LengthSquared() < NodeReachDistance * NodeReachDistance)
+        {
+            _pathIndex++;
+
+            if (_pathIndex >= _currentPath.Count)
+                return Vector2.Zero;
+
+            targetNode = _currentPath[_pathIndex];
+            targetPos = _gridMapper.GridToWorldCenter(targetNode);
+            toTarget = targetPos - EnemyPosition;
+        }
+
+        if (toTarget == Vector2.Zero)
+            return Vector2.Zero;
+
+        toTarget.Normalize();
+        return toTarget;
+    }
+
+    // gives a direction pointing straight toward the player if not too close.
     private Vector2 DirectionToTarget()
     {
         Vector2 toTarget = PlayerPosition - EnemyPosition;
@@ -87,30 +157,6 @@ public class EnemyMovement : MovementBase
 
         toTarget.Normalize();
         return toTarget;
-    }
-
-    public void StartSidestepping(Vector2 currentDirection)
-    {
-
-        if (currentDirection == Vector2.Zero)
-            return;
-
-        currentDirection.Normalize();
-
-        // Rotate the current direction by 30° per sidestep to find the next escape direction.
-        _sidestepCount = (_sidestepCount + 1) % 6;
-        float angle = MathHelper.ToRadians(30 * (_sidestepCount));
-
-        Vector2 rotated = new Vector2(
-            currentDirection.X * (float)Math.Cos(angle) - currentDirection.Y * (float)Math.Sin(angle),
-            currentDirection.X * (float)Math.Sin(angle) + currentDirection.Y * (float)Math.Cos(angle)
-        );
-
-        rotated.Normalize();
-        _sidestepDirection = rotated;
-
-        _sidestepTimeLeft = SidestepDuration;
-        State = EnemyState.Sidestepping;
     }
 
     private bool UpdateMoving() => Direction != Vector2.Zero;

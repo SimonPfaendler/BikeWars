@@ -8,5 +8,7 @@ public enum CollisionLayer
     PROJECTILE,
     ITEM,
     WALL,
-    WATER
+    WATER,
+    TERRAIN,
+    AOE // area-of-affect damange
 }

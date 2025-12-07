@@ -19,6 +19,9 @@ namespace BikeWars.Content.screens
         protected GameTime _currentGameTime;
         public ScreenManager ScreenManager { get; set; }
         
+        protected double _clickCooldown = 300;
+        protected double _lastClickTime = -9999; 
+        
         protected MenuScreenBase(Texture2D background, SpriteFont font)
         {
             _backgroundTexture = background;
@@ -33,6 +36,7 @@ namespace BikeWars.Content.screens
             _currentGameTime = gameTime;
 
             MouseState currentMouseState = Mouse.GetState();
+            double now = gameTime.TotalGameTime.TotalMilliseconds;
             
             foreach (var button in _buttons)
             {
@@ -40,7 +44,11 @@ namespace BikeWars.Content.screens
                 
                 if (button.IsClicked(currentMouseState, _previousMouseState))
                 {
-                    HandleButtonClick(button);
+                    if (now - _lastClickTime >= _clickCooldown)
+                    {
+                        _lastClickTime = now;
+                        HandleButtonClick(button);
+                    }
                 }
             }
             

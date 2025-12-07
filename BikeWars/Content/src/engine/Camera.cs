@@ -28,7 +28,7 @@ namespace BikeWars.Content.engine
         private readonly Rectangle _worldBounds;
 
         // Parameters to manage camera movement speed
-        private int _prevScrollValue;
+        private readonly int _prevScrollValue;
         private const float ZoomSpeed = 0.001f;
         private const float MoveSpeed = 8f;
         private const float LerpFactor = 0.1f;

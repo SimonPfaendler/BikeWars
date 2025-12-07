@@ -38,7 +38,7 @@ namespace BikeWars.Utilities
             // Display player position, velocity and bounds, Sprint status
             // You can add more debug information as needed e.g. collider info, Bounds, FPS, etc.
             string debugInfo = $"Player Position: X: {(int)_player.Transform.Position.X} Y: {(int)_player.Transform.Position.Y}\n" +
-                               $"Player Velocity: {_player.CurrentSpeed}\n" +
+                               $"Player Velocity: {_player.CurrentSpeed * _player.TerrainSpeedMultiplier}\n" +
                                $"Player Bounds: {_player.Transform.Size}\n" +  
                                $"Player Sprint Cooldown: {(int)_player.CooldownTimer()}\n" +
                                $"Player Health: {_player.Health}";

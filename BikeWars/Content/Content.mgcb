@@ -103,11 +103,41 @@
 /processorParam:Quality=Best
 /build:assets/sounds/Bike_Driving.mp3
 
+#begin assets/sounds/boxing_punch.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/boxing_punch.wav
+
+#begin assets/sounds/bullet_hit.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/bullet_hit.wav
+
+#begin assets/sounds/CarCrash.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/CarCrash.mp3
+
+#begin assets/sounds/flamethrower.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/flamethrower.wav
+
 #begin assets/sounds/Game_music.mp3
 /importer:Mp3Importer
 /processor:SongProcessor
 /processorParam:Quality=Best
 /build:assets/sounds/Game_music.mp3
+
+#begin assets/sounds/gun_shot.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/gun_shot.wav
 
 #begin assets/sounds/HandgunClick.mp3
 /importer:Mp3Importer
@@ -180,6 +210,30 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:assets/sprites/projectiles/bullet.png
+
+#begin assets/sprites/projectiles/flamethrower.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/sprites/projectiles/flamethrower.png
+
+#begin assets/sprites/videos/BikeCrash.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/sprites/videos/BikeCrash.png
 
 #begin assets/sprites/XP/xp_beer_texture.png
 /importer:TextureImporter

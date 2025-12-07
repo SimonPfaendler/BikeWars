@@ -76,7 +76,11 @@ namespace BikeWars.Content.engine.Audio
                         oldest.Instance.Stop();
                         oldest.Instance.Dispose();
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        // Non-critical: if sound cleanup fails we just skip it.
+                        System.Diagnostics.Debug.WriteLine($"[SoundManager] Cleanup failed: {ex.Message}");
+                    }
                     _activeInstances.RemoveAt(0);
                 }
                 else
@@ -121,7 +125,16 @@ namespace BikeWars.Content.engine.Audio
             {
                 if (existing.State == SoundState.Stopped)
                 {
-                    try { existing.Dispose(); } catch { }
+                    try
+                    {
+                        existing.Dispose();
+
+                    }
+                    catch (Exception ex)
+                    {
+                        // Non-critical: disposing a stopped loop sound may fail on some platforms.
+                        System.Diagnostics.Debug.WriteLine($"[SoundManager] Failed to dispose loop instance: {ex.Message}");
+                    }
                     _loopInstances.Remove(id);
                 }
                 else
@@ -139,7 +152,17 @@ namespace BikeWars.Content.engine.Audio
         {
             if (_loopInstances.TryGetValue(id, out var inst))
             {
-                try { inst.Stop(); inst.Dispose(); } catch { }
+                try
+                {
+                    inst.Stop();
+                    inst.Dispose();
+
+                }
+                catch (Exception ex)
+                {
+                    // Non-critical: stopping or disposing a looped sound may fail safely.
+                    System.Diagnostics.Debug.WriteLine($"[SoundManager] Failed to stop/dispose loop sound '{id}': {ex.Message}");
+                }
                 _loopInstances.Remove(id);
             }
         }
@@ -175,7 +198,11 @@ namespace BikeWars.Content.engine.Audio
                     if (managed.Instance.State == SoundState.Playing)
                         managed.Instance.Pause();
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    // Non-critical: pausing a sound can fail safely.
+                    System.Diagnostics.Debug.WriteLine($"[SoundManager] Failed to pause sound: {ex.Message}");
+                }
             }
 
             // Loop sounds
@@ -186,7 +213,11 @@ namespace BikeWars.Content.engine.Audio
                     if (inst.State == SoundState.Playing)
                         inst.Pause();
                 }
-                catch { }
+                catch(Exception ex)
+                {
+                    // Non-critical: pausing a sound can fail safely.
+                    System.Diagnostics.Debug.WriteLine($"[SoundManager] Failed to pause sound: {ex.Message}");
+                }
             }
         }
         
@@ -200,7 +231,11 @@ namespace BikeWars.Content.engine.Audio
                     if (managed.Instance.State == SoundState.Paused)
                         managed.Instance.Resume();
                 }
-                catch { }
+                catch(Exception ex)
+                {
+                    // Non-critical: resuming a sound can fail safely.
+                    System.Diagnostics.Debug.WriteLine($"[SoundManager] Failed to resume sound: {ex.Message}");
+                }
             }
 
             // Loop sounds
@@ -211,7 +246,11 @@ namespace BikeWars.Content.engine.Audio
                     if (inst.State == SoundState.Paused)
                         inst.Resume();
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    // Non-critical: resuming a sound can fail safely.
+                    System.Diagnostics.Debug.WriteLine($"[SoundManager] Failed to resume sound: {ex.Message}");
+                }
             }
         }
 
@@ -228,7 +267,11 @@ namespace BikeWars.Content.engine.Audio
                         return true;
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    // Non-critical: disposing a stopped one-shot sound can fail safely.
+                    System.Diagnostics.Debug.WriteLine($"[SoundManager] Failed to dispose stopped sound: {ex.Message}");
+                }
                 return false;
             });
 
@@ -238,12 +281,29 @@ namespace BikeWars.Content.engine.Audio
                 var inst = kv.Value;
                 if (inst.State == SoundState.Stopped)
                 {
-                    try { inst.Dispose(); } catch { }
+                    try
+                    {
+                        inst.Dispose();
+
+                    }
+                    catch(Exception ex)
+                    {
+                        // Non-critical: disposing loop sound failed.
+                        System.Diagnostics.Debug.WriteLine($"[SoundManager] Failed to dispose loop sound: {ex.Message}");
+                    }
                     _loopInstances.Remove(kv.Key);
                 }
                 else
                 {
-                    try { inst.Volume = Math.Clamp(MasterVolume * SfxVolume, 0f, 1f); } catch { }
+                    try
+                    {
+                        inst.Volume = Math.Clamp(MasterVolume * SfxVolume, 0f, 1f);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Non-critical: volume update failed.
+                        System.Diagnostics.Debug.WriteLine($"[SoundManager] Failed to update volume: {ex.Message}");
+                    }
                 }
             }
         }
@@ -253,14 +313,32 @@ namespace BikeWars.Content.engine.Audio
             // Stop & dispose one-shot instances
             foreach (var managed in _activeInstances)
             {
-                try { managed.Instance.Stop(); managed.Instance.Dispose(); } catch { }
+                try
+                {
+                    managed.Instance.Stop();
+                    managed.Instance.Dispose();
+                }
+                catch(Exception ex)
+                {
+                    // Non-critical: stopping or disposing a sound may fail safely.
+                    System.Diagnostics.Debug.WriteLine($"[SoundManager] Failed to stop/dispose sound: {ex.Message}");
+                }
             }
             _activeInstances.Clear();
 
             // Stop & dispose loop instances
             foreach (var kv in _loopInstances.ToList())
             {
-                try { kv.Value.Stop(); kv.Value.Dispose(); } catch { }
+                try
+                {
+                    kv.Value.Stop();
+                    kv.Value.Dispose();
+                }
+                catch(Exception ex)
+                {
+                    // Non-critical: stopping or disposing a sound may fail safely.
+                    System.Diagnostics.Debug.WriteLine($"[SoundManager] Failed to stop/dispose sound: {ex.Message}");
+                }
             }
             _loopInstances.Clear();
         }

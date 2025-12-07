@@ -8,7 +8,10 @@ using BikeWars.Content.entities.interfaces;
 using System.Collections.Generic;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.entities.Inventory;
+using BikeWars.Content.entities.items;
+using BikeWars.Content.entities.levelup;
 using BikeWars.Content.managers;
+using System.Diagnostics.Metrics;
 
 // ============================================================
 // Player.cs
@@ -26,12 +29,19 @@ namespace BikeWars.Entities.Characters
         private CooldownWithDuration sprint { get; }
 
         public Vector2 GazeDirection { get; private set; }
+        public int XpCounter { get; private set; } = 0;
+        public int XpLevelUp = 10;
+        public int CurrentLevel { get; private set; } = 1;
         public Vector2 AimTarget { get; private set; }
         private Vector2 _facingDirection = Vector2.UnitX; // Default to Right to match initial animation
+
+        public TerrainCollider CurrentTerrain { get; set; }
+        public float TerrainSpeedMultiplier = 1.0f;
         // public bool IsGodMode { get; set; }
 
         public event Action ShotBullet;
-        private Texture2D _characterAtlas;
+        public event Action<ItemBase> ItemPickedUp;
+        public event Action Flamethrower;
 
         private SpriteAnimation _walkDownAnimation;
         private SpriteAnimation _walkUpAnimation;
@@ -43,6 +53,7 @@ namespace BikeWars.Entities.Characters
         private readonly AudioService _audio;
         private WorldAudioManager _worldAudioManager;
         private string _currentMovementSound = null;
+        public event Action OnLevelUp;
 
 
         private struct GhostFrame
@@ -59,53 +70,28 @@ namespace BikeWars.Entities.Characters
         private const float GhostSpawnInterval = 0.05f; // alle 0,05s ein neues Ghost
         private const float GhostLifeTime = 0.1f;
 
-        public override void LoadContent(ContentManager content)
+        public enum WeaponType
         {
-            _characterAtlas = content.Load<Texture2D>("assets/sprites/characters/character_atlas");
-            if (pixel == null)
-            {
-                pixel = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
-                pixel.SetData(new[] { Color.White });
-            }
-
-            // Down – c1_move_down_1x2.png: x=270, y=0, w=64, h=128
-            var downFrames = new List<Rectangle>
-            {
-                new Rectangle(270, 0, 64, 64),
-                new Rectangle(270, 64, 64, 64)
-            };
-            _walkDownAnimation = new SpriteAnimation(_characterAtlas, downFrames, 0.16f);
-
-            // Left – c1_move_left_1x2.png: x=334, y=0, w=64, h=128
-            var leftFrames = new List<Rectangle>
-            {
-                new Rectangle(334, 0, 64, 64),
-                new Rectangle(334, 64, 64, 64)
-            };
-            _walkLeftAnimation = new SpriteAnimation(_characterAtlas, leftFrames, 0.16f);
-
-            // Right – c1_move_right_1x2.png: x=398, y=0, w=64, h=128
-            var rightFrames = new List<Rectangle>
-            {
-                new Rectangle(398, 0, 64, 64),
-                new Rectangle(398, 64, 64, 64)
-            };
-            _walkRightAnimation = new SpriteAnimation(_characterAtlas, rightFrames, 0.16f);
-
-            // Up – c1_move_up_1x2.png: x=0, y=128, w=64, h=128
-            var upFrames = new List<Rectangle>
-            {
-                new Rectangle(0, 128, 64, 64),
-                new Rectangle(0, 192, 64, 64)
-            };
-            _walkUpAnimation = new SpriteAnimation(_characterAtlas, upFrames, 0.16f);
-
-            _currentAnimation = _walkRightAnimation;
+            Gun,
+            Flamethrower
         }
+
+        public WeaponType CurrentWeapon { get; private set; } = WeaponType.Gun;
 
         public override void UpdateCollider()
         {
-            Collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.PLAYER, this);
+            Vector2 colliderPosition = new Vector2(
+                Transform.Position.X - Transform.Size.X / 2f,
+                Transform.Position.Y - Transform.Size.Y / 2f
+            );
+
+            Collider = new BoxCollider(
+                colliderPosition,
+                Transform.Size.X,
+                Transform.Size.Y,
+                CollisionLayer.PLAYER,
+                this
+            );
         }
 
         // 1x1 Texture to represent the player
@@ -114,15 +100,53 @@ namespace BikeWars.Entities.Characters
         private void Shooting()
         {
             // Only shoot if we have a valid gaze direction
-            if (GazeDirection != Vector2.Zero)
+            if (GazeDirection == Vector2.Zero)
+                return;
+
+            switch (CurrentWeapon)
             {
-                ShotBullet?.Invoke();
+                case WeaponType.Gun:
+                    ShotBullet?.Invoke();
+                    _audio.Sounds.Play(AudioAssets.GunShot);
+                    break;
+
+                case WeaponType.Flamethrower:
+                    Flamethrower?.Invoke();
+                    _audio.Sounds.Play(AudioAssets.Flamethrower);
+                    break;
             }
+        }
+
+        public void OnPickUpItem(Player player, ItemBase item)
+        {
+            if (player != this)
+            {
+                return;
+            }
+
+            if (item is Xp xp)
+            {
+                AddXp(xp.xp_value);
+                if (XpCounter >= XpLevelUp)
+                {
+                    LevelUp();
+                }
+            }
+
+            if (item.InventoryItem)
+            {
+                if (InputHandler.IsPressed(GameAction.INTERACT) && Inventory.AddItem(item))
+                {
+                    ItemPickedUp?.Invoke(item);
+                }
+                return;
+            }
+            ItemPickedUp?.Invoke(item);
         }
 
         public Player(Vector2 start, Point size, AudioService audio)
         {
-            MaxHealth = 1000;
+            MaxHealth = 300;
             Health = MaxHealth;
             AttackDamage = 10;
             AttackCooldown = 2f;
@@ -134,6 +158,18 @@ namespace BikeWars.Entities.Characters
             sprint = new CooldownWithDuration(1f, 5f);
             Inventory = new Inventory();
             _audio = audio;
+            if (pixel == null)
+            {
+                pixel = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
+                pixel.SetData(new[] { Color.White });
+            }
+
+            _walkDownAnimation = SpriteManager.GetAnimation("Character1_WalkDown");
+            _walkLeftAnimation = SpriteManager.GetAnimation("Character1_WalkLeft");
+            _walkRightAnimation = SpriteManager.GetAnimation("Character1_WalkRight");
+            _walkUpAnimation = SpriteManager.GetAnimation("Character1_WalkUp");
+
+            _currentAnimation = _walkRightAnimation;
             UpdateCollider();
         }
 
@@ -152,16 +188,27 @@ namespace BikeWars.Entities.Characters
                 if (movement.CurrentMovement.GetType() == typeof(BicycleMovement))
                 {
                     movement.CurrentMovement = new WalkingMovement(true, true);
+                    TerrainSpeedMultiplier = 1.0f;
                 } else
                 {
                     movement.CurrentMovement = new BicycleMovement(true, true, movement.RotationAcceleration);
                 }
             }
 
+            if (InputHandler.IsPressed(GameAction.SWITCH_WEAPON))
+            {
+                // Toggle between the two weapons
+                if (CurrentWeapon == WeaponType.Gun)
+                    CurrentWeapon = WeaponType.Flamethrower;
+                else
+                    CurrentWeapon = WeaponType.Gun;
+            }
+
             if (InputHandler.IsPressed(GameAction.SHOOT))
             {
                 Shooting();
             }
+
             movement.Update();
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
             // Sound-Control
@@ -204,7 +251,12 @@ namespace BikeWars.Entities.Characters
 
             CurrentSpeed = sprint.IsActive ? SprintSpeed : movement.CurrentMovement.Speed;
             Vector2 direction = movement.CurrentMovement.Direction;
-            LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
+
+            if (Transform.Position.X != LastTransform.Position.X || Transform.Position.Y != LastTransform.Position.Y)
+                LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
+
+            TerrainSpeedMultiplier = GetTerrainMultiplier();
+
 
             bool isMoving = movement.IsMoving();
             if (isMoving)
@@ -213,11 +265,11 @@ namespace BikeWars.Entities.Characters
                 _facingDirection = direction; // Update facing direction
                 if (sprint.IsActive)
                 {
-                    Transform.Position += direction * CurrentSpeed * delta;
+                    Transform.Position += direction * CurrentSpeed * delta * TerrainSpeedMultiplier;
                 }
                 else
                 {
-                    Transform.Position += direction * movement.CurrentMovement.Speed * delta;
+                    Transform.Position += direction * movement.CurrentMovement.Speed * delta * TerrainSpeedMultiplier;
                 }
                 _currentAnimation = _walkUpAnimation;
                 // choose animation based on main direction
@@ -302,7 +354,7 @@ namespace BikeWars.Entities.Characters
 
                     _ghostTrail.Add(new GhostFrame
                     {
-                        Texture = _characterAtlas,
+                        Texture = SpriteManager.GetCharacterAtlas(),
                         Position = Transform.Position,
                         Source = source,
                         TimeLeft = GhostLifeTime
@@ -411,6 +463,34 @@ namespace BikeWars.Entities.Characters
         {
             return sprint.GetRemainingCooldown();
         }
+
+        private float GetTerrainMultiplier()
+        {
+            if (movement.CurrentMovement.GetType() == typeof(BicycleMovement))
+            {
+                if (CurrentTerrain == null)
+                    return 1.0f;
+
+                switch (CurrentTerrain.TerrainType)
+                {
+                    case TerrainType.ROAD:
+                        return 1.10f;
+
+                    case TerrainType.GRASS:
+                        return 0.90f;
+
+                    default:
+                        return 1.0f;
+                }
+            }
+            else
+            {
+                return 1f;
+            }
+        }
+
+
+
         // Helper function to draw a line
         private void DrawLine(SpriteBatch spriteBatch, Vector2 start, Vector2 end, Color color)
         {
@@ -426,7 +506,7 @@ namespace BikeWars.Entities.Characters
                 SpriteEffects.None,
                 0);
         }
-        
+
         public void SetWorldAudioManager(WorldAudioManager manager)
         {
             _worldAudioManager = manager;
@@ -448,5 +528,44 @@ namespace BikeWars.Entities.Characters
                 DrawLine(spriteBatch, p1, p2, color);
             }
         }
+        public void AddXp(int XpAmount)
+        {
+            XpCounter += XpAmount;
+
+            if (XpCounter >= XpLevelUp)
+            {
+                LevelUp();
+            }
+        }
+
+        private void LevelUp()
+        {
+            XpCounter = XpCounter - XpLevelUp;
+            XpLevelUp = XpLevelUp * 2;
+            CurrentLevel++;
+            // level upscreen is triggered:
+            OnLevelUp?.Invoke();
+        }
+
+        // the Upgrades from LevelUpScreen are applied here
+        /*TODO these Upgrades are just a suggestion i can imagine, that the game crashes or has unsuspected
+        behaviour, if for example the player is currently sprinting and the Sprint Time changes*/
+        //TODO its not working properly yet
+        public void UpgradeSkill(SkillTree.SkillId skill)
+        {
+            if (skill is SkillTree.SkillId.MoreHp)
+            {
+                MaxHealth += 30;
+            }
+            else if (skill is SkillTree.SkillId.MoreDamage)
+            {
+                AttackDamage += 2;
+            }
+            else if (skill is SkillTree.SkillId.LongerSprintDuration)
+            {
+                sprint.Duration += 0.5f;
+            }
+        }
+
     }
 }

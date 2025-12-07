@@ -26,12 +26,6 @@ public class Item: ItemBase
     {
 
     }
-
-    public override void LoadContent(ContentManager contentManager)
-    {
-
-    }
-
     public override void Draw(SpriteBatch spriteBatch)
     {
         if (pixel == null)

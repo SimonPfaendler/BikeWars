@@ -14,6 +14,12 @@ public abstract class ColliderBase : ICollider
         }
     }
 
+    private int _width { get; set; }
+    private int _height { get; set; }
+
+    public int Height {get => _height; set => _height = value;}
+    public int Width {get => _width; set => _width = value;}
+
     // Necessary to calculate with Spatial Hashing and even configure which layer interacts with which
     private float _radius {get; set;}
     public float Radius {get => _radius; set => _radius = value;}
@@ -23,7 +29,6 @@ public abstract class ColliderBase : ICollider
 
     private object _owner {get; set;}
     public object Owner {get => _owner; set => _owner = value;}
-
     protected abstract void Update(); // Use this to update the logic like where the position is or resize the collision box
     public abstract bool Intersects(ICollider other);
 }
