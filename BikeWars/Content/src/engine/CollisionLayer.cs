@@ -10,5 +10,6 @@ public enum CollisionLayer
     WALL,
     WATER,
     TERRAIN,
+    SPAWNENEMIES,
     AOE // area-of-affect damange
 }

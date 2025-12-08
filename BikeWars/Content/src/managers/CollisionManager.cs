@@ -84,6 +84,7 @@ public class CollisionManager
         
         LoadTerrainLayer("Streets", TerrainType.ROAD);
         LoadTerrainLayer("Floor", TerrainType.GRASS);
+        LoadSpawnLayer("Enemy_Spawn");
     }
 
     // takes a world position in pixels (Vector2) and returns which tile that position is inside
@@ -161,6 +162,9 @@ public class CollisionManager
 
     private void HandleCharacterWithStatic(ICollider b, ICollider c)
     {
+        // Ignore SPAWNENEMIES layer for characters
+        if (b.Layer == CollisionLayer.SPAWNENEMIES) return;
+
         if (c.Layer == CollisionLayer.CHARACTER || c.Layer == CollisionLayer.PLAYER)
         {
             if (c.Intersects(b))
@@ -503,5 +507,30 @@ public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
             StaticHash.Insert(tc);
         }
     }
+    private void LoadSpawnLayer(string layerName)
+    {
+        var layer = TiledMap.GetLayer<TiledMapTileLayer>(layerName);
+        if (layer == null)
+            return;
 
+        foreach (var tile in layer.Tiles)
+        {
+            if (tile.GlobalIdentifier == 0)
+                continue;
+
+            int x = tile.X * _cellSize;
+            int y = tile.Y * _cellSize;
+
+            BoxCollider spawnCollider = new BoxCollider(
+                new Vector2(x, y),
+                _cellSize,
+                _cellSize,
+                CollisionLayer.SPAWNENEMIES,
+                this
+            );
+
+            StaticHash.Insert(spawnCollider);
+        }
+    }
 }
+

@@ -153,7 +153,7 @@ namespace BikeWars.Content.managers
             var nearby = _collisionManager.StaticHash.QueryNearby(pos);
             foreach (var col in nearby)
             {
-                if (col.Layer == CollisionLayer.TERRAIN)
+                if (col.Layer == CollisionLayer.SPAWNENEMIES)
                 {
                     if (col.Intersects(checkCollider))
                     {
