@@ -33,7 +33,9 @@ namespace BikeWars.Entities.Characters
         public int XpLevelUp = 10;
         public int CurrentLevel { get; private set; } = 1;
         public Vector2 AimTarget { get; private set; }
-        private Vector2 _facingDirection = Vector2.UnitX; // Default to Right to match initial animation
+        private Vector2 _facingDirection = Vector2.UnitX; // Default to right
+        private bool _usingControllerAim = false;
+        private Vector2 _lastGazeDirection = Vector2.UnitX;
 
         public TerrainCollider CurrentTerrain { get; set; }
         public float TerrainSpeedMultiplier = 1.0f;
@@ -293,13 +295,31 @@ namespace BikeWars.Entities.Characters
 
             // 1. Check Controller Input (Right Stick)
             Vector2 rightStick = InputHandler.GamePad.RightStick;
+            
+            // Check if mouse moved to switch back to mouse aiming
+            if (InputHandler.Mouse.Delta != Point.Zero || InputHandler.Mouse.Held(MouseButton.Left))
+            {
+                 // Also reset if clicking, just in case
+                _usingControllerAim = false;
+            }
+
             if (rightStick != Vector2.Zero)
             {
                 // Controller aiming
-                rightStick.Y *= -1; // Invert Y for correct screen space direction
-
+                rightStick.Y *= -1;
                 potentialGaze = Vector2.Normalize(rightStick);
-                AimTarget = eyePos + potentialGaze * 100f; // Visual target for line
+                
+                // Store state
+                _usingControllerAim = true;
+                _lastGazeDirection = potentialGaze;
+
+                AimTarget = eyePos + potentialGaze * 100f;
+            }
+            else if (_usingControllerAim)
+            {
+                // Fallback to last controller direction if we haven't touched the mouse
+                potentialGaze = _lastGazeDirection;
+                AimTarget = eyePos + potentialGaze * 100f;
             }
             else
             {
@@ -312,28 +332,24 @@ namespace BikeWars.Entities.Characters
                 }
             }
 
-            // 3. Apply Angle Restriction
+            // 3. Apply Angle Restriction (240 degrees total = +/- 120 degrees)
             if (potentialGaze != Vector2.Zero)
             {
-                // Check if the angle is within +/- 90 degrees (Dot product > 0)
-                if (Vector2.Dot(_facingDirection, potentialGaze) > 0)
+                // Check if the angle is within +/- 120 degrees 
+                if (Vector2.Dot(_facingDirection, potentialGaze) > -0.5f)
                 {
                     GazeDirection = potentialGaze;
                 }
                 else
                 {
-                    // Clamp to nearest 90 degree angle
-                    Vector2 perp1 = new Vector2(-_facingDirection.Y, _facingDirection.X); // -90 degrees
-                    Vector2 perp2 = new Vector2(_facingDirection.Y, -_facingDirection.X); // +90 degrees
-
-                    if (Vector2.Dot(perp1, potentialGaze) > Vector2.Dot(perp2, potentialGaze))
-                    {
-                        GazeDirection = perp1;
-                    }
-                    else
-                    {
-                        GazeDirection = perp2;
-                    }
+                    // Clamp to nearest 120 degree angle
+                    float facingAngle = (float)Math.Atan2(_facingDirection.Y, _facingDirection.X);
+                    float cross = _facingDirection.X * potentialGaze.Y - _facingDirection.Y * potentialGaze.X;
+                    float limit = MathHelper.ToRadians(120);
+                    
+                    float targetAngle = facingAngle + (cross > 0 ? limit : -limit);
+                    
+                    GazeDirection = new Vector2((float)Math.Cos(targetAngle), (float)Math.Sin(targetAngle));
                 }
             }
             else
@@ -428,7 +444,7 @@ namespace BikeWars.Entities.Characters
 
                 // Draw static valid zone arc based on facing direction
                 float facingAngle = (float)Math.Atan2(_facingDirection.Y, _facingDirection.X);
-                DrawArc(spriteBatch, center, 50f, facingAngle, MathHelper.Pi, Color.Red * 0.5f); // Semi-transparent red for zone
+                DrawArc(spriteBatch, center, 50f, facingAngle, MathHelper.ToRadians(240), Color.Red * 0.5f);
 
                 // Draw aiming line
                 Vector2 aimEnd = center + GazeDirection * 50f;
