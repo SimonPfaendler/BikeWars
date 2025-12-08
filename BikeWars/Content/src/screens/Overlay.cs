@@ -11,10 +11,6 @@ namespace BikeWars.Content.src.screens.Overlay
     {
         // to draw the counter
         private SpriteFont _counterFont;
-        
-        // to draw the life lines and inventory
-        private Texture2D _pixel;
-        
         // timer position
         private Vector2 _timerPosition;
         
@@ -38,9 +34,6 @@ namespace BikeWars.Content.src.screens.Overlay
         public Overlay(SpriteFont counterFont, GraphicsDevice device)
         {
             _counterFont = counterFont;
-            _pixel = new Texture2D(device, 1, 1);
-            _pixel.SetData(new[] { Color.White });
-            
             // calculation to put the timer in the middle upper part of the screen
             _timerPosition = new Vector2(device.Viewport.Width / 2f, 40f);
         }
@@ -49,12 +42,6 @@ namespace BikeWars.Content.src.screens.Overlay
         {
             // timer
             DrawTimer(spriteBatch, frameTime);
-        }
-
-        public void DrawOnWorld(SpriteBatch spriteBatch, Player player)
-        {
-            // player + bike lifelines
-            DrawLifeLines( spriteBatch, player);
         }
         
         // draw the timer
@@ -78,44 +65,6 @@ namespace BikeWars.Content.src.screens.Overlay
             
             // draws the counter on screen
             spriteBatch.DrawString(_counterFont, $"Time: {minutes:00}:{seconds:00}", _timerPosition, Color.White);
-        }
-
-        private void DrawLifeLines(SpriteBatch spriteBatch, Player player)
-        {
-            // bar layout
-            int barWidth  = 30;   
-            int barHeight = 3;  
-            int gap = 3; 
-            int barPosition = 5;   // how far under the player will the bar be
-            
-            // get the player’s position from Transform
-            Vector2 characterPos = player.Transform.Position;
-            
-            // center the lifelines
-            float centerX = player.Transform.Position.X + player.Transform.Size.X / 2f + 5f;
-
-            float bottomY = player.Transform.Position.Y + player.Transform.Size.Y;
-            
-            // get the position of the players lifeline
-            Vector2 playerBarPos = new Vector2(
-                centerX - barWidth / 2f,
-                bottomY + barPosition
-            );
-            
-            //player lifeline
-            // background of the lifeline (black)
-            Rectangle bgRect = new Rectangle((int)playerBarPos.X, (int)playerBarPos.Y, barWidth, barHeight);
-            spriteBatch.Draw(_pixel, bgRect, Color.Black);
-            
-            // red "lost health" bar (no math yet)
-            int redWidth = (int)(barWidth * 0.65f); 
-            Rectangle redRect = new Rectangle((int)playerBarPos.X, (int)playerBarPos.Y, redWidth, barHeight);
-            spriteBatch.Draw(_pixel, redRect, Color.Red);
-            
-            // bike lifeline
-            Vector2 bikeBarPos = new Vector2(playerBarPos.X, playerBarPos.Y + barHeight + gap);
-            Rectangle bikeRect = new Rectangle((int)bikeBarPos.X, (int)bikeBarPos.Y, barWidth, barHeight);
-            spriteBatch.Draw(_pixel, bikeRect, Color.Red);
         }
     }
     
