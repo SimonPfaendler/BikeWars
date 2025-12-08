@@ -174,7 +174,7 @@ namespace BikeWars.Content.engine
             { GameAction.SAVE, new[]  { Keys.T } },
             { GameAction.LOAD, new[] { Keys.L } },
             { GameAction.RESET, new[] { Keys.R } },
-            { GameAction.DEBUG_TOGGLE, new[] { Keys.P } },
+            { GameAction.DEBUG_TOGGLE, new[] { Keys.D6 } },
             { GameAction.TOGGLE_CAMERA,new [] {Keys.C } },
             { GameAction.ESC, new[] {Keys.Escape } },
             { GameAction.SPRINT, new[] { Keys.LeftShift, Keys.RightShift } },

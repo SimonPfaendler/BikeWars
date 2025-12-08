@@ -384,7 +384,6 @@ namespace BikeWars.Content.screens
 
             spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.GetTransform());
             _gameObjectManager.Draw(spriteBatch);
-            _overlay.DrawOnWorld(spriteBatch, _gameObjectManager.Player1);
 
             if (_isTechDemo && _showStaticHitboxes)
             {
@@ -410,13 +409,7 @@ namespace BikeWars.Content.screens
 
             _debugger.Draw(spriteBatch);
             _overlay.DrawOnScreen(spriteBatch, gameTime);
-
-            if (!_isTechDemo)
-            {
-                spriteBatch.DrawString(_debugFont, $"Counter: {_counter}", new Vector2(20, 160), Color.Black);
-                spriteBatch.DrawString(_debugFont, "T=Save  L=Load  R=Reset counter", new Vector2(20, 185),
-                    Color.Black);
-            }
+            
             _gameObjectManager.Player1.Inventory.Draw(spriteBatch, _pixel);
             hud.Draw(spriteBatch, _gameObjectManager.Player1);
 
