@@ -124,15 +124,13 @@ namespace BikeWars.Content.managers
 
             if (spawnHobo)
             {
-                var hobo = new Hobo(spawnPos, new Point(32, 32), _audioService, _pathFinding,
-                    _collisionManager);
+                var hobo = new Hobo(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager);
                 ApplyScaling(hobo, difficultyMultiplier, speedMultiplier);
                 _gameObjectManager.AddCharacter(hobo);
             }
             else
             {
-                var thief = new BikeThief(spawnPos, new Point(32, 32), _audioService, _pathFinding,
-                    _collisionManager);
+                var thief = new BikeThief(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager);
                 ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
                 _gameObjectManager.AddCharacter(thief);
             }
@@ -155,16 +153,16 @@ namespace BikeWars.Content.managers
             var nearby = _collisionManager.StaticHash.QueryNearby(pos);
             foreach (var col in nearby)
             {
-                if (col.Layer == CollisionLayer.TERRAIN || col.Layer == CollisionLayer.WALL)
+                if (col.Layer == CollisionLayer.TERRAIN)
                 {
                     if (col.Intersects(checkCollider))
                     {
-                        return false;
+                        return true;
                     }
                 }
             }
 
-            return true;
+            return false;
         }
 
         private void SpawnCircle(double progress)
@@ -186,8 +184,7 @@ namespace BikeWars.Content.managers
                 if (!IsValidSpawnPosition(pos)) continue;
 
                 // Alternate between Hobo and BikeThief
-                CharacterBase enemy = new Hobo(pos, new Point(32, 32), _audioService, _pathFinding,
-                    _collisionManager);
+                CharacterBase enemy = new Hobo(pos, new Point(32, 32), _audioService, _pathFinding, _collisionManager);
 
                 ApplyScaling(enemy, difficultyMultiplier, speedMultiplier);
                 _gameObjectManager.AddCharacter(enemy);
