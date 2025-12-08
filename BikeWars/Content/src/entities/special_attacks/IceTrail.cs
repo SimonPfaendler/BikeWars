@@ -20,7 +20,7 @@ namespace BikeWars.Content.entities.items
         private int _frameCount = 5;
         private int _currentFrame = 0;
 
-        private float _frameTime = 0.05f;
+        private float _frameTime = 0.18f; // How fast he animation runs
         private float _frameTimer = 0f;
 
         private Player _player;
@@ -32,11 +32,11 @@ namespace BikeWars.Content.entities.items
         private class TrailSprite
         {
             public Vector2 Pos;
-            public int Frame;
-            public TrailSprite(Vector2 pos, int frame)
+            public int Frame = 0;
+            public float Timer = 0f;
+            public TrailSprite(Vector2 pos)
             {
                 Pos = pos;
-                Frame = frame;
             }
         }
 
@@ -72,7 +72,7 @@ namespace BikeWars.Content.entities.items
                 new Vector2(_player.Transform.Size.X / 2f,
                             _player.Transform.Size.Y / 2f);
 
-            Vector2 offset = _dir * 30f;
+            Vector2 offset = new Vector2(-30, -30);
             Vector2 trailCenter = playerCenter - offset;
 
             // draw location
@@ -93,7 +93,7 @@ namespace BikeWars.Content.entities.items
                 _spawnTimer = 0f;
 
                 // store a visual trail copy
-                _trailSprites.Add(new TrailSprite(_spritePos, _currentFrame));
+                _trailSprites.Add(new TrailSprite(_spritePos));
 
                 // add regular hitbox for collision manager
                 _hitboxes.Add(new BoxCollider(
@@ -103,6 +103,18 @@ namespace BikeWars.Content.entities.items
                     CollisionLayer.AOE,
                     this
                 ));
+            
+            }
+
+            foreach (var t in _trailSprites)
+            {
+                t.Timer += dt;
+
+                if (t.Timer >= _frameTime)
+                {
+                    t.Timer -= _frameTime;
+                    t.Frame = (t.Frame + 1) % _frameCount;
+                }
             }
         }
 

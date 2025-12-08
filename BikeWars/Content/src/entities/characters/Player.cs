@@ -121,7 +121,7 @@ namespace BikeWars.Entities.Characters
 
                 case WeaponType.IceTrail:
                     IceTrail?.Invoke();
-                    _audio.Sounds.Play(AudioAssets.Flamethrower);
+                    _audio.Sounds.Play(AudioAssets.IceTrail);
                     break;
             }
         }
