@@ -44,6 +44,7 @@ namespace BikeWars.Entities.Characters
         public event Action ShotBullet;
         public event Action<ItemBase> ItemPickedUp;
         public event Action Flamethrower;
+        public event Action IceTrail;
 
         private SpriteAnimation _walkDownAnimation;
         private SpriteAnimation _walkUpAnimation;
@@ -75,7 +76,8 @@ namespace BikeWars.Entities.Characters
         public enum WeaponType
         {
             Gun,
-            Flamethrower
+            Flamethrower,
+            IceTrail
         }
 
         public WeaponType CurrentWeapon { get; private set; } = WeaponType.Gun;
@@ -114,6 +116,11 @@ namespace BikeWars.Entities.Characters
 
                 case WeaponType.Flamethrower:
                     Flamethrower?.Invoke();
+                    _audio.Sounds.Play(AudioAssets.Flamethrower);
+                    break;
+
+                case WeaponType.IceTrail:
+                    IceTrail?.Invoke();
                     _audio.Sounds.Play(AudioAssets.Flamethrower);
                     break;
             }
@@ -202,6 +209,8 @@ namespace BikeWars.Entities.Characters
                 // Toggle between the two weapons
                 if (CurrentWeapon == WeaponType.Gun)
                     CurrentWeapon = WeaponType.Flamethrower;
+                else if (CurrentWeapon == WeaponType.Flamethrower)
+                    CurrentWeapon = WeaponType.IceTrail;
                 else
                     CurrentWeapon = WeaponType.Gun;
             }

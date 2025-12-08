@@ -61,6 +61,7 @@ public class GameObjectManager
 
         Player1.ShotBullet += OnPlayerShotBullet;
         Player1.Flamethrower += OnPlayerFlamethrower;
+        Player1.IceTrail += OnPlayerIceTrail;
 
     }
     public GameObjectManager(ContentManager content, List<CharacterBase> characters, List<ItemBase> items, List<BoxCollider> statics, List<ProjectileBase> projectiles) // TODO
@@ -189,6 +190,14 @@ public class GameObjectManager
         Flamethrower f = new Flamethrower(Player1, direction);
         f.LoadContent(_contentManager);
         AddAOE(f);
+    }
+
+        private void OnPlayerIceTrail()
+    {
+        Vector2 direction = Player1.GazeDirection;
+        IceTrail ice = new IceTrail(Player1, direction);
+        ice.LoadContent(_contentManager);
+        AddAOE(ice);
     }
 
     public void SetWorldAudioManager(WorldAudioManager worldAudioManager)
