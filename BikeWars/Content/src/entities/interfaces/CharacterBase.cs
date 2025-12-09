@@ -15,6 +15,7 @@ public abstract class CharacterBase : ICharacter, ICombat
     private Transform _lastTransform { get; set; }
     public Transform LastTransform { get => _lastTransform; set => _lastTransform = value; }
     public float Speed;
+    public bool slowed;
     public float SprintSpeed;
     public float CurrentSpeed { get; set; }
     private BoxCollider _collider { get; set; }
@@ -66,6 +67,14 @@ public abstract class CharacterBase : ICharacter, ICombat
     public bool CanAttack()
     {
         return _attackCooldownTimer <= 0f;
+    }
+
+    public virtual void SlowDown(float slowFactor)
+    {
+        if(slowed) return; // Make sure enemy can only be slowed once
+
+        Speed *= slowFactor;
+        slowed = true;
     }
 
     public virtual void Attack(ICombat target)
