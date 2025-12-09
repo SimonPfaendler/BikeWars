@@ -16,6 +16,7 @@ namespace BikeWars.Content.engine.Audio
         public const string Flamethrower = "flamethrower";
         public const string IceTrail = "ice_trail";
         public const string CarHorn = "car_horn";
+        public const string ShortPain = "short_pain";
 
         // Mapping ID -> Content-Path
         public static readonly IReadOnlyDictionary<string, string> SoundEffectPaths = new Dictionary<string, string>
@@ -30,7 +31,8 @@ namespace BikeWars.Content.engine.Audio
             { CarCrash, "assets/sounds/CarCrash"},
             { Flamethrower, "assets/sounds/flamethrower"},
             { IceTrail, "assets/sounds/ice_trail"},
-            {CarHorn, "assets/sounds/CarHorn"}
+            { CarHorn, "assets/sounds/CarHorn"},
+            { ShortPain, "assets/sounds/short_pain"}
         };
 
         // Song IDs to be used in the code
