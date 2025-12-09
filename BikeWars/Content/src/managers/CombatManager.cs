@@ -74,7 +74,7 @@ public class CombatManager
             target.SlowDown(0.5f);
         }    
         
-        _audio.Sounds.Play(AudioAssets.BulletHit);
+        _audio.Sounds.Play(AudioAssets.ShortPain);
         if (target.Health <= 0)
         { 
             HandleDeath(target);
