@@ -82,6 +82,7 @@ namespace BikeWars.Entities.Characters
 
         public WeaponType CurrentWeapon { get; private set; } = WeaponType.Gun;
 
+
         public override void UpdateCollider()
         {
             Vector2 colliderPosition = new Vector2(
@@ -110,16 +111,19 @@ namespace BikeWars.Entities.Characters
             switch (CurrentWeapon)
             {
                 case WeaponType.Gun:
+                    AttackCooldown = 0.5f; 
                     ShotBullet?.Invoke();
                     _audio.Sounds.Play(AudioAssets.GunShot);
                     break;
 
                 case WeaponType.Flamethrower:
+                    AttackCooldown = 3.0f; 
                     Flamethrower?.Invoke();
                     _audio.Sounds.Play(AudioAssets.Flamethrower);
                     break;
 
                 case WeaponType.IceTrail:
+                    AttackCooldown = 3.0f; 
                     IceTrail?.Invoke();
                     _audio.Sounds.Play(AudioAssets.IceTrail);
                     break;
@@ -217,7 +221,9 @@ namespace BikeWars.Entities.Characters
 
             if (InputHandler.IsPressed(GameAction.SHOOT))
             {
+                if(!CanAttack()) return;
                 Shooting();
+                ResetAttackCooldown();
             }
 
             movement.Update();
