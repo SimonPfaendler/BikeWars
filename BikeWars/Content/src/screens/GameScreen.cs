@@ -68,7 +68,7 @@ namespace BikeWars.Content.screens
         private bool _showStaticHitboxes = true;
         
         private GameTimer _gameTimer;
-        private const float GAME_TIME_LIMIT = 300f;
+        private const float GAME_TIME_LIMIT = 10f;
         private SpriteFont _timerFont;
         private Vector2 _timerPosition;
 
@@ -107,13 +107,13 @@ namespace BikeWars.Content.screens
             camera.Position = _gameObjectManager.Player1.Transform.Position;
 
             // Create SaveLoad and load saved data
-            var state = SaveLoad.LoadGame();
-            _gameObjectManager.Player1.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
+            //var state = SaveLoad.LoadGame();
+            //_gameObjectManager.Player1.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
             Console.WriteLine("Loaded saved position (or default if no file).");
             
             _gameTimer = new GameTimer(GAME_TIME_LIMIT);
             _gameTimer.OnTimerFinished += OnGameTimerFinished;
-            _gameTimer.SetFromSave(state.GameTimerCurrentTime, state.IsGameTimerRunning, state.IsGameTimerPaused);
+            //_gameTimer.SetFromSave(state.GameTimerCurrentTime, state.IsGameTimerRunning, state.IsGameTimerPaused);
             GameEvents.OnResumeTimer += ResumeTimer;
         }
 
@@ -458,7 +458,11 @@ namespace BikeWars.Content.screens
         
         private void OnGameTimerFinished()
         {
-            // TODO: GameWonScreen should pop up
+            _audioService.Sounds.PauseAll();
+            _audioService.Music.Stop();
+            _overlay.SetPaused(true, Game1.CurrentGameTime);
+            //_audioService.Sounds.Play(AudioAssets.CarCrash);
+            ScreenManager.AddScreen(new GameWonScreen(_font, _audioService));
         }
         
         private void DrawTimer(SpriteBatch spriteBatch, GameTime gameTime)

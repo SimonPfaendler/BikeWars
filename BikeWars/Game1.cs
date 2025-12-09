@@ -17,6 +17,7 @@ public class Game1 : Game
     public static AudioService Audio => Instance._audioService;
     public static Game1 Instance { get; private set; }
     public static Texture2D background;
+    public static GameTime CurrentGameTime { get; private set; }
 
 
     public Game1()
@@ -66,6 +67,7 @@ public class Game1 : Game
     protected override void Update(GameTime gameTime)
     {
         ScreenManager.Update(gameTime);
+        CurrentGameTime = gameTime;
 
         if (InputHandler.IsPressed(GameAction.ESC))
             Exit();

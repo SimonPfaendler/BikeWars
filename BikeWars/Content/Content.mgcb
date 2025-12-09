@@ -253,6 +253,30 @@
 /processorParam:TextureFormat=Color
 /build:assets/sprites/videos/BikeCrash.png
 
+#begin assets/sprites/videos/PogacarBeerSpriteSheet.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/sprites/videos/PogacarBeerSpriteSheet.png
+
+#begin assets/sprites/videos/PogacarWinSpriteSheet.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/sprites/videos/PogacarWinSpriteSheet.png
+
 #begin assets/sprites/XP/xp_beer_texture.png
 /importer:TextureImporter
 /processor:TextureProcessor

@@ -1,0 +1,132 @@
+{"frames": [
+
+{
+	"filename": "pogacar_frame_03.png",
+	"frame": {"x":0,"y":0,"w":360,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":360,"h":640},
+	"sourceSize": {"w":360,"h":640}
+},
+{
+	"filename": "pogacar_frame_05.png",
+	"frame": {"x":360,"y":0,"w":360,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":360,"h":640},
+	"sourceSize": {"w":360,"h":640}
+},
+{
+	"filename": "pogacar_frame_07.png",
+	"frame": {"x":720,"y":0,"w":360,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":360,"h":640},
+	"sourceSize": {"w":360,"h":640}
+},
+{
+	"filename": "pogacar_frame_09.png",
+	"frame": {"x":1080,"y":0,"w":360,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":360,"h":640},
+	"sourceSize": {"w":360,"h":640}
+},
+{
+	"filename": "pogacar_frame_11.png",
+	"frame": {"x":1440,"y":0,"w":360,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":360,"h":640},
+	"sourceSize": {"w":360,"h":640}
+},
+{
+	"filename": "pogacar_frame_13.png",
+	"frame": {"x":0,"y":640,"w":360,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":360,"h":640},
+	"sourceSize": {"w":360,"h":640}
+},
+{
+	"filename": "pogacar_frame_15.png",
+	"frame": {"x":360,"y":640,"w":360,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":360,"h":640},
+	"sourceSize": {"w":360,"h":640}
+},
+{
+	"filename": "pogacar_frame_17.png",
+	"frame": {"x":720,"y":640,"w":360,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":360,"h":640},
+	"sourceSize": {"w":360,"h":640}
+},
+{
+	"filename": "pogacar_frame_19.png",
+	"frame": {"x":1080,"y":640,"w":360,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":360,"h":640},
+	"sourceSize": {"w":360,"h":640}
+},
+{
+	"filename": "pogacar_frame_21.png",
+	"frame": {"x":1440,"y":640,"w":360,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":360,"h":640},
+	"sourceSize": {"w":360,"h":640}
+},
+{
+	"filename": "pogacar_frame_23.png",
+	"frame": {"x":0,"y":1280,"w":360,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":360,"h":640},
+	"sourceSize": {"w":360,"h":640}
+},
+{
+	"filename": "pogacar_frame_25.png",
+	"frame": {"x":360,"y":1280,"w":360,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":360,"h":640},
+	"sourceSize": {"w":360,"h":640}
+},
+{
+	"filename": "pogacar_frame_27.png",
+	"frame": {"x":720,"y":1280,"w":360,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":360,"h":640},
+	"sourceSize": {"w":360,"h":640}
+},
+{
+	"filename": "pogacar_frame_29.png",
+	"frame": {"x":1080,"y":1280,"w":360,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":360,"h":640},
+	"sourceSize": {"w":360,"h":640}
+},
+{
+	"filename": "pogacar_frame_31.png",
+	"frame": {"x":1440,"y":1280,"w":360,"h":640},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":360,"h":640},
+	"sourceSize": {"w":360,"h":640}
+}],
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "PogacarBeerSpriteSheet.png",
+	"format": "RGBA8888",
+	"size": {"w":1800,"h":1920},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:aae7c596c64521562f5b9bc373d3c04a:eb8b18a2ae7300ee6ec11238a4f002dc:95819429929fc45572c223e691933482$"
+}
+}
