@@ -68,7 +68,7 @@ namespace BikeWars.Content.screens
         private bool _showStaticHitboxes = true;
         
         private GameTimer _gameTimer;
-        private const float GAME_TIME_LIMIT = 300f;
+        private const float GAME_TIME_LIMIT = 120f;
         private SpriteFont _timerFont;
         private Vector2 _timerPosition;
 
@@ -458,7 +458,11 @@ namespace BikeWars.Content.screens
         
         private void OnGameTimerFinished()
         {
-            // TODO: GameWonScreen should pop up
+            _audioService.Sounds.PauseAll();
+            _audioService.Music.Stop();
+            _overlay.SetPaused(true, Game1.CurrentGameTime);
+            _audioService.Sounds.Play(AudioAssets.CarHorn);
+            ScreenManager.AddScreen(new GameWonScreen(_font, _audioService));
         }
         
         private void DrawTimer(SpriteBatch spriteBatch, GameTime gameTime)

@@ -32,8 +32,8 @@ public static class SaveLoad
     // The data should have a default set, in case the information isn't in the JSON file yet
     public class GameState
     {
-        public float GameTimerCurrentTime { get; set; } = 300f;
-        public float GameTimerTotalTime { get; set; } = 300f;
+        public float GameTimerCurrentTime { get; set; } = 120f;
+        public float GameTimerTotalTime { get; set; } = 120f;
         public bool IsGameTimerRunning {get; set;} = true;
         public bool IsGameTimerPaused { get; set; } = false;
         public float PlayerX { get; set; } = _worldBounds;
