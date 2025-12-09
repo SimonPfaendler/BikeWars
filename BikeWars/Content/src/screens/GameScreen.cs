@@ -13,6 +13,7 @@ using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled.Renderers;
 using BikeWars.Content.managers;
 using BikeWars.Content.engine.PathFinding;
+using BikeWars.Content.events;
 
 namespace BikeWars.Content.screens
 {
@@ -26,8 +27,6 @@ namespace BikeWars.Content.screens
         private TiledMapRenderer _tiledMapRenderer;
         private SpriteFont _debugFont;
         private Debugger _debugger;
-        private int _counter = 0;
-        private float _counterTimer = 0;
         private SpriteFont _font;
         private Texture2D _pixel;
         private const int CELL_SIZE = 16;
@@ -67,6 +66,11 @@ namespace BikeWars.Content.screens
         // bool that checks if you're in the tech demo or normal gameplay
         private readonly bool _isTechDemo;
         private bool _showStaticHitboxes = true;
+        
+        private GameTimer _gameTimer;
+        private const float GAME_TIME_LIMIT = 300f;
+        private SpriteFont _timerFont;
+        private Vector2 _timerPosition;
 
         public GameScreen(AudioService audioService, bool isTechDemo = false)
         {
@@ -104,9 +108,13 @@ namespace BikeWars.Content.screens
 
             // Create SaveLoad and load saved data
             var state = SaveLoad.LoadGame();
-            _counter = state.Counter;
             _gameObjectManager.Player1.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
             Console.WriteLine("Loaded saved position (or default if no file).");
+            
+            _gameTimer = new GameTimer(GAME_TIME_LIMIT);
+            _gameTimer.OnTimerFinished += OnGameTimerFinished;
+            _gameTimer.SetFromSave(state.GameTimerCurrentTime, state.IsGameTimerRunning, state.IsGameTimerPaused);
+            GameEvents.OnResumeTimer += ResumeTimer;
         }
 
         public virtual void LoadContent(ContentManager content)
@@ -134,7 +142,7 @@ namespace BikeWars.Content.screens
             _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
 
             // Overlay
-            _overlay = new Overlay(_debugFont, Game1.Instance.GraphicsDevice);
+            _overlay = new Overlay();
 
             // HUD
             hudTexture = managers.SpriteManager.GetTexture("HUD_Sheet");
@@ -166,6 +174,18 @@ namespace BikeWars.Content.screens
 
             // Spawn Manager
             _spawnManager = new SpawnManager(_gameObjectManager, _collisionManager, _audioService, _pathFinding);
+            
+            // timer
+            _timerFont = content.Load<SpriteFont>("assets/fonts/Arial");
+            Game1 game = Game1.Instance;
+            _timerPosition = new Vector2(
+                game.GraphicsDevice.Viewport.Width / 2f, 
+                40f
+            );
+            if (!_gameTimer.IsRunning)
+            {
+                InitializeTimer();
+            }
         }
         public virtual void Update(GameTime gameTime)
         {
@@ -226,7 +246,6 @@ namespace BikeWars.Content.screens
             camera.Update(gameTime, _gameObjectManager.Player1.Transform.Position, _freelook);
 
             _tiledMapRenderer.Update(gameTime);
-            HandleCounter(gameTime);
             HandleSaveLoadInput();
 
 
@@ -234,28 +253,19 @@ namespace BikeWars.Content.screens
             {
                 _audioService.Sounds.PauseAll();
                 _overlay.SetPaused(true, gameTime);
+                PauseTimer();
                 PauseMenuScreen pauseMenu = new PauseMenuScreen(_font, _audioService);
                 ScreenManager.AddScreen(pauseMenu);
             }
-        }
-
-        private void HandleCounter(GameTime gameTime)
-        {
-            _counterTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            if (_counterTimer >= 1)
-            {
-                _counter++;
-                _counterTimer = 0;
-            }
+            
+            _gameTimer.Update(gameTime);
         }
 
         private void HandleLoadGame()
         {
             var state = SaveLoad.LoadGame();
-            _counter = state.Counter;
-            _counterTimer = 0;
             _gameObjectManager.Player1.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
+            _gameTimer.SetFromSave(state.GameTimerCurrentTime, state.IsGameTimerRunning, state.IsGameTimerPaused);
 
             _gameObjectManager.Projectiles.Clear();
             foreach (var p in state.Projectiles)
@@ -312,7 +322,7 @@ namespace BikeWars.Content.screens
         private void HandleSaveLoadInput()
         {
             if (InputHandler.IsPressed(GameAction.SAVE))
-                SaveLoad.SaveGame(_counter, _gameObjectManager);
+                SaveLoad.SaveGame(_gameTimer, _gameObjectManager);
 
             if (InputHandler.IsPressed(GameAction.LOAD))
             {
@@ -333,11 +343,10 @@ namespace BikeWars.Content.screens
                 }
                 else
                 {
-                    _counter = 0;
-                    _counterTimer = 0;
 
                     _gameObjectManager.Player1.Transform.Position =
                         new Vector2(worldBounds.Width / 2, worldBounds.Height / 2);
+                    ResetGameTimer();
                     Console.WriteLine("Reset counter and player position.");
                 }
             }
@@ -408,7 +417,7 @@ namespace BikeWars.Content.screens
             spriteBatch.Begin();
 
             _debugger.Draw(spriteBatch);
-            _overlay.DrawOnScreen(spriteBatch, gameTime);
+            DrawTimer(spriteBatch, gameTime);
             
             _gameObjectManager.Player1.Inventory.Draw(spriteBatch, _pixel);
             hud.Draw(spriteBatch, _gameObjectManager.Player1);
@@ -440,6 +449,74 @@ namespace BikeWars.Content.screens
                 (int)MathF.Ceiling(halfW * 2f),
                 (int)MathF.Ceiling(halfH * 2f)
             );
+        }
+        
+        private void InitializeTimer()
+        {
+            _gameTimer.Restart(); // restart Timer
+        }
+        
+        private void OnGameTimerFinished()
+        {
+            // TODO: GameWonScreen should pop up
+        }
+        
+        private void DrawTimer(SpriteBatch spriteBatch, GameTime gameTime)
+        {
+            string timerText = _gameTimer.GetFormattedTime();
+        
+            // change timer_font collor, when time is running out
+            Color timerColor = Color.White;
+            if (_gameTimer.CurrentTime < 60f)
+            {
+                timerColor = Color.Yellow;
+            }
+            if (_gameTimer.CurrentTime < 30f)
+            {
+                timerColor = Color.Red;
+            
+                // blink when time is about to run out
+                float blink = (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 10) * 0.5f + 0.5f;
+                timerColor = Color.Lerp(Color.Red, Color.White, blink);
+            }
+
+            // background
+            Vector2 textSize = _timerFont.MeasureString(timerText);
+            Vector2 centeredPosition = new Vector2(
+                _timerPosition.X - textSize.X / 2f,
+                _timerPosition.Y
+            );
+            
+            Rectangle backgroundRect = new Rectangle(
+                (int)centeredPosition.X - 5,
+                (int)centeredPosition.Y - 2,
+                (int)textSize.X + 10,
+                (int)textSize.Y + 4
+            );
+        
+            spriteBatch.Draw(_pixel, backgroundRect, Color.Black * 0.5f);
+            
+            spriteBatch.DrawString(_timerFont, timerText, centeredPosition, timerColor);
+        }
+        
+        public void ResetGameTimer()
+        {
+            _gameTimer.Restart();
+        }
+        
+        public void PauseTimer()
+        {
+            _gameTimer.Pause();
+        }
+
+        public void ResumeTimer()
+        {
+            _gameTimer.Resume();
+        }
+        
+        public void Unload()
+        {
+            GameEvents.OnResumeTimer -= ResumeTimer;
         }
 
     }

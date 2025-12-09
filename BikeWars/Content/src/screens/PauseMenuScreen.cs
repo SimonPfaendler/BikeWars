@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 using BikeWars.Content.engine.Audio;
+using BikeWars.Content.events;
 using BikeWars.Content.managers;
 using BikeWars.Content.src.screens.Overlay;
 
@@ -68,6 +69,7 @@ namespace BikeWars.Content.screens
             {
                 case ButtonAction.Resume:
                     _audioService.Sounds.ResumeAll();
+                    GameEvents.RaiseResumeTimer();
                     ScreenManager.RemoveScreen(this);
                     break;
             
