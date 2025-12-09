@@ -44,6 +44,7 @@ namespace BikeWars.Entities.Characters
         public event Action ShotBullet;
         public event Action<ItemBase> ItemPickedUp;
         public event Action Flamethrower;
+        public event Action IceTrail;
 
         private SpriteAnimation _walkDownAnimation;
         private SpriteAnimation _walkUpAnimation;
@@ -75,10 +76,12 @@ namespace BikeWars.Entities.Characters
         public enum WeaponType
         {
             Gun,
-            Flamethrower
+            Flamethrower,
+            IceTrail
         }
 
         public WeaponType CurrentWeapon { get; private set; } = WeaponType.Gun;
+
 
         public override void UpdateCollider()
         {
@@ -108,13 +111,21 @@ namespace BikeWars.Entities.Characters
             switch (CurrentWeapon)
             {
                 case WeaponType.Gun:
+                    AttackCooldown = 0.5f; 
                     ShotBullet?.Invoke();
                     _audio.Sounds.Play(AudioAssets.GunShot);
                     break;
 
                 case WeaponType.Flamethrower:
+                    AttackCooldown = 3.0f; 
                     Flamethrower?.Invoke();
                     _audio.Sounds.Play(AudioAssets.Flamethrower);
+                    break;
+
+                case WeaponType.IceTrail:
+                    AttackCooldown = 3.0f; 
+                    IceTrail?.Invoke();
+                    _audio.Sounds.Play(AudioAssets.IceTrail);
                     break;
             }
         }
@@ -202,13 +213,17 @@ namespace BikeWars.Entities.Characters
                 // Toggle between the two weapons
                 if (CurrentWeapon == WeaponType.Gun)
                     CurrentWeapon = WeaponType.Flamethrower;
+                else if (CurrentWeapon == WeaponType.Flamethrower)
+                    CurrentWeapon = WeaponType.IceTrail;
                 else
                     CurrentWeapon = WeaponType.Gun;
             }
 
             if (InputHandler.IsPressed(GameAction.SHOOT))
             {
+                if(!CanAttack()) return;
                 Shooting();
+                ResetAttackCooldown();
             }
 
             movement.Update();

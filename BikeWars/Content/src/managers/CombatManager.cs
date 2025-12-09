@@ -8,6 +8,7 @@ using BikeWars.Entities.Characters;
 using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
 using BikeWars.Content.engine.Audio;
+using BikeWars.Content.entities.items;
 
 namespace BikeWars.Content.managers;
 
@@ -67,6 +68,11 @@ public class CombatManager
 
         // Apply Damage
         target.TakeDamage(aoe.Damage);
+
+        if (aoe is IceTrail)
+        {
+            target.SlowDown(0.5f);
+        }    
         
         _audio.Sounds.Play(AudioAssets.BulletHit);
         if (target.Health <= 0)
