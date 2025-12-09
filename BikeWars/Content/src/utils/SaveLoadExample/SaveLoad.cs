@@ -7,6 +7,7 @@ using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.entities.items;
 using BikeWars.Content.managers;
 using BikeWars.Entities.Characters;
+using BikeWars.Content.engine;
 
 namespace BikeWars.Content.src.utils.SaveLoadExample;
 
@@ -31,7 +32,10 @@ public static class SaveLoad
     // The data should have a default set, in case the information isn't in the JSON file yet
     public class GameState
     {
-        public int Counter { get; set; } = 0;
+        public float GameTimerCurrentTime { get; set; } = 300f;
+        public float GameTimerTotalTime { get; set; } = 300f;
+        public bool IsGameTimerRunning {get; set;} = true;
+        public bool IsGameTimerPaused { get; set; } = false;
         public float PlayerX { get; set; } = _worldBounds;
         public float PlayerY { get; set; } = _worldBounds;
         public List<ProjectileSaveModel> Projectiles {get; set;}
@@ -149,16 +153,21 @@ public static class SaveLoad
 
     // save the counter in a JSON file
     // public static void SaveGame(int counter, Transform playerPosition, List<ProjectileBase> projectiles)
-    public static void SaveGame(int counter, GameObjectManager gameObjectManager)
+    public static void SaveGame(GameTimer gameTimer, GameObjectManager gameObjectManager)
     {
         try
         {
             // serialize the current info into JSON text
             GameState state = new GameState
             {
-                Counter = counter,
+                GameTimerCurrentTime = gameTimer.CurrentTime,
+                GameTimerTotalTime = gameTimer.TotalTime,
+                IsGameTimerRunning = gameTimer.IsRunning,
+                IsGameTimerPaused = gameTimer.IsPaused,
+                
                 PlayerX = gameObjectManager.Player1.Transform.Position.X,
                 PlayerY = gameObjectManager.Player1.Transform.Position.Y,
+                
                 Projectiles = MakeProjectileSaveList(gameObjectManager.Projectiles),
                 Characters = MakeCharacterSaveList(gameObjectManager.Characters),
                 Items = MakeItemSaveList(gameObjectManager.Items),
@@ -202,7 +211,7 @@ public static class SaveLoad
             throw new InvalidDataException("Failed to deserialize save data.");
         }
 
-        Console.WriteLine("Loaded. Counter=" + state.Counter);
+        Console.WriteLine($"Timer loaded: {FormatTime(state.GameTimerCurrentTime)}");
         Console.WriteLine("Loaded. Player Position=" + state.PlayerX + " " + state.PlayerY);
         return state;
     }
@@ -258,5 +267,12 @@ public static class SaveLoad
             crtList.Add(MakeItemSaveModel(p));
         }
         return crtList;
+    }
+    
+    private static string FormatTime(float seconds)
+    {
+        int minutes = (int)(seconds / 60);
+        int secs = (int)(seconds % 60);
+        return $"{minutes:00}:{secs:00}";
     }
 }
