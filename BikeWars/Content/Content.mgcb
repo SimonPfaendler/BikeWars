@@ -175,11 +175,23 @@
 /processorParam:Quality=Best
 /build:assets/sounds/Menu_music.mp3
 
+#begin assets/sounds/Relief.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/Relief.mp3
+
 #begin assets/sounds/short_pain.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:assets/sounds/short_pain.wav
+
+#begin assets/sounds/Slurp.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/Slurp.mp3
 
 #begin assets/sounds/SoftClick.mp3
 /importer:Mp3Importer

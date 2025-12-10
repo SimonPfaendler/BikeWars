@@ -638,7 +638,7 @@ namespace BikeWars.Entities.Characters
             _itemUseTimer = ItemUseDuration;
             _currentItemIndex = inventoryIndex;
             
-            // TODO: add sound effect
+            _audio.Sounds.Play(AudioAssets.Slurp);
         }
         
         private void FinishUsingItem()
@@ -660,7 +660,7 @@ namespace BikeWars.Entities.Characters
             _isUsingItem = false;
             _currentItemIndex = -1;
             
-            // TODO: add sound effect
+            _audio.Sounds.Play(AudioAssets.Relief);
         }
 
 
