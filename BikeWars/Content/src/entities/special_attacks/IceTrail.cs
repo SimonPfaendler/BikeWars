@@ -1,7 +1,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
-using System;
 using System.Collections.Generic;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Entities.Characters;
@@ -103,7 +102,7 @@ namespace BikeWars.Content.entities.items
                     CollisionLayer.AOE,
                     this
                 ));
-            
+
             }
 
             foreach (var t in _trailSprites)

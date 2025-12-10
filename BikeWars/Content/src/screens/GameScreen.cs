@@ -66,7 +66,7 @@ namespace BikeWars.Content.screens
         // bool that checks if you're in the tech demo or normal gameplay
         private readonly bool _isTechDemo;
         private bool _showStaticHitboxes = true;
-        
+
         private GameTimer _gameTimer;
         private const float GAME_TIME_LIMIT = 120f;
         private SpriteFont _timerFont;
@@ -110,7 +110,7 @@ namespace BikeWars.Content.screens
             var state = SaveLoad.LoadGame();
             _gameObjectManager.Player1.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
             Console.WriteLine("Loaded saved position (or default if no file).");
-            
+
             _gameTimer = new GameTimer(GAME_TIME_LIMIT);
             _gameTimer.OnTimerFinished += OnGameTimerFinished;
             _gameTimer.SetFromSave(state.GameTimerCurrentTime, state.IsGameTimerRunning, state.IsGameTimerPaused);
@@ -164,7 +164,7 @@ namespace BikeWars.Content.screens
             // checks if the event OnLevelUp is triggered if it is LevelUpSreen gets active
             _gameObjectManager.Player1.OnLevelUp += () =>
             {
-                _levelUpScreen.Open();
+                _levelUpScreen.Open(_gameObjectManager.Player1);
             };
             // the Option selected gets upgraded
             _levelUpScreen.OnOptionSelected += skillId =>
@@ -174,12 +174,12 @@ namespace BikeWars.Content.screens
 
             // Spawn Manager
             _spawnManager = new SpawnManager(_gameObjectManager, _collisionManager, _audioService, _pathFinding);
-            
+
             // timer
             _timerFont = content.Load<SpriteFont>("assets/fonts/Arial");
             Game1 game = Game1.Instance;
             _timerPosition = new Vector2(
-                game.GraphicsDevice.Viewport.Width / 2f, 
+                game.GraphicsDevice.Viewport.Width / 2f,
                 40f
             );
             if (!_gameTimer.IsRunning)
@@ -214,7 +214,7 @@ namespace BikeWars.Content.screens
             hpTestTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             if (InputHandler.IsPressed(GameAction.DEBUG_HEAL))
-                _gameObjectManager.Player1.Health = _gameObjectManager.Player1.MaxHealth;
+                _gameObjectManager.Player1.Attributes.Health = _gameObjectManager.Player1.Attributes.MaxHealth;
 
             if (InputHandler.IsPressed(GameAction.TECH_DEMO))
             {
@@ -257,7 +257,7 @@ namespace BikeWars.Content.screens
                 PauseMenuScreen pauseMenu = new PauseMenuScreen(_font, _audioService);
                 ScreenManager.AddScreen(pauseMenu);
             }
-            
+
             _gameTimer.Update(gameTime);
         }
 
@@ -418,7 +418,7 @@ namespace BikeWars.Content.screens
 
             _debugger.Draw(spriteBatch);
             DrawTimer(spriteBatch, gameTime);
-            
+
             _gameObjectManager.Player1.Inventory.Draw(spriteBatch, _pixel);
             hud.Draw(spriteBatch, _gameObjectManager.Player1);
 
@@ -450,12 +450,12 @@ namespace BikeWars.Content.screens
                 (int)MathF.Ceiling(halfH * 2f)
             );
         }
-        
+
         private void InitializeTimer()
         {
             _gameTimer.Restart(); // restart Timer
         }
-        
+
         private void OnGameTimerFinished()
         {
             _audioService.Sounds.PauseAll();
@@ -464,11 +464,11 @@ namespace BikeWars.Content.screens
             _audioService.Sounds.Play(AudioAssets.CarHorn);
             ScreenManager.AddScreen(new GameWonScreen(_font, _audioService));
         }
-        
+
         private void DrawTimer(SpriteBatch spriteBatch, GameTime gameTime)
         {
             string timerText = _gameTimer.GetFormattedTime();
-        
+
             // change timer_font collor, when time is running out
             Color timerColor = Color.White;
             if (_gameTimer.CurrentTime < 60f)
@@ -478,7 +478,7 @@ namespace BikeWars.Content.screens
             if (_gameTimer.CurrentTime < 30f)
             {
                 timerColor = Color.Red;
-            
+
                 // blink when time is about to run out
                 float blink = (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 10) * 0.5f + 0.5f;
                 timerColor = Color.Lerp(Color.Red, Color.White, blink);
@@ -490,24 +490,24 @@ namespace BikeWars.Content.screens
                 _timerPosition.X - textSize.X / 2f,
                 _timerPosition.Y
             );
-            
+
             Rectangle backgroundRect = new Rectangle(
                 (int)centeredPosition.X - 5,
                 (int)centeredPosition.Y - 2,
                 (int)textSize.X + 10,
                 (int)textSize.Y + 4
             );
-        
+
             spriteBatch.Draw(_pixel, backgroundRect, Color.Black * 0.5f);
-            
+
             spriteBatch.DrawString(_timerFont, timerText, centeredPosition, timerColor);
         }
-        
+
         public void ResetGameTimer()
         {
             _gameTimer.Restart();
         }
-        
+
         public void PauseTimer()
         {
             _gameTimer.Pause();
@@ -517,7 +517,7 @@ namespace BikeWars.Content.screens
         {
             _gameTimer.Resume();
         }
-        
+
         public void Unload()
         {
             GameEvents.OnResumeTimer -= ResumeTimer;

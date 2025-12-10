@@ -138,9 +138,9 @@ namespace BikeWars.Content.managers
 
         private void ApplyScaling(CharacterBase character, float difficultyMultiplier, float speedMultiplier)
         {
-            character.MaxHealth = (int)(character.MaxHealth * difficultyMultiplier);
-            character.Health = character.MaxHealth;
-            character.AttackDamage = (int)(character.AttackDamage * difficultyMultiplier);
+            character.Attributes.MaxHealth = (int)(character.Attributes.MaxHealth * difficultyMultiplier);
+            character.Attributes.Health = character.Attributes.MaxHealth;
+            character.Attributes.AttackDamage = (int)(character.Attributes.AttackDamage * difficultyMultiplier);
             character.Speed *= speedMultiplier;
         }
 

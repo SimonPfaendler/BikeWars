@@ -8,10 +8,12 @@ public class SkillTree
     {
         MoreHp,
         MoreDamage,
-        LongerSprintDuration
+        LongerSprintDuration,
+
+        AutomaticFire
         // other option for example spacial skills can be added here
     }
-        
+
     // Dictionary: Welcher Skill hat welche Beschreibung?
     public static readonly Dictionary<SkillId, string> All = new()
     {
@@ -20,5 +22,7 @@ public class SkillTree
         { SkillId.MoreDamage, ("Mehr Schaden: +2 Schaden") },
 
         { SkillId.LongerSprintDuration, ("Laengere Sprintdauer: +0,5s Sprint dauer") },
+
+        { SkillId.AutomaticFire, ("Dauerfeuer: Halte den Angriffsknopf gedrueckt!") },
     };
 }

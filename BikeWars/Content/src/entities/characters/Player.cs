@@ -111,19 +111,19 @@ namespace BikeWars.Entities.Characters
             switch (CurrentWeapon)
             {
                 case WeaponType.Gun:
-                    AttackCooldown = 0.5f; 
+                    Attributes.AttackCooldown = 0.5f;
                     ShotBullet?.Invoke();
                     _audio.Sounds.Play(AudioAssets.GunShot);
                     break;
 
                 case WeaponType.Flamethrower:
-                    AttackCooldown = 3.0f; 
+                    Attributes.AttackCooldown = 3.0f;
                     Flamethrower?.Invoke();
                     _audio.Sounds.Play(AudioAssets.Flamethrower);
                     break;
 
                 case WeaponType.IceTrail:
-                    AttackCooldown = 3.0f; 
+                    Attributes.AttackCooldown = 3.0f;
                     IceTrail?.Invoke();
                     _audio.Sounds.Play(AudioAssets.IceTrail);
                     break;
@@ -159,10 +159,7 @@ namespace BikeWars.Entities.Characters
 
         public Player(Vector2 start, Point size, AudioService audio)
         {
-            MaxHealth = 300;
-            Health = MaxHealth;
-            AttackDamage = 10;
-            AttackCooldown = 2f;
+            Attributes = new CharacterAttributes(300, 0 , 10, 2f, false);
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 200f;
@@ -219,9 +216,9 @@ namespace BikeWars.Entities.Characters
                     CurrentWeapon = WeaponType.Gun;
             }
 
-            if (InputHandler.IsPressed(GameAction.SHOOT))
+            bool shooting = (Attributes.CanAutoAttack && InputHandler.IsHeld(GameAction.SHOOT) || InputHandler.IsPressed(GameAction.SHOOT)) && CanAttack();
+            if (shooting)
             {
-                if(!CanAttack()) return;
                 Shooting();
                 ResetAttackCooldown();
             }
@@ -310,7 +307,7 @@ namespace BikeWars.Entities.Characters
 
             // 1. Check Controller Input (Right Stick)
             Vector2 rightStick = InputHandler.GamePad.RightStick;
-            
+
             // Check if mouse moved to switch back to mouse aiming
             if (InputHandler.Mouse.Delta != Point.Zero || InputHandler.Mouse.Held(MouseButton.Left))
             {
@@ -323,7 +320,7 @@ namespace BikeWars.Entities.Characters
                 // Controller aiming
                 rightStick.Y *= -1;
                 potentialGaze = Vector2.Normalize(rightStick);
-                
+
                 // Store state
                 _usingControllerAim = true;
                 _lastGazeDirection = potentialGaze;
@@ -350,7 +347,7 @@ namespace BikeWars.Entities.Characters
             // 3. Apply Angle Restriction (240 degrees total = +/- 120 degrees)
             if (potentialGaze != Vector2.Zero)
             {
-                // Check if the angle is within +/- 120 degrees 
+                // Check if the angle is within +/- 120 degrees
                 if (Vector2.Dot(_facingDirection, potentialGaze) > -0.5f)
                 {
                     GazeDirection = potentialGaze;
@@ -361,9 +358,9 @@ namespace BikeWars.Entities.Characters
                     float facingAngle = (float)Math.Atan2(_facingDirection.Y, _facingDirection.X);
                     float cross = _facingDirection.X * potentialGaze.Y - _facingDirection.Y * potentialGaze.X;
                     float limit = MathHelper.ToRadians(120);
-                    
+
                     float targetAngle = facingAngle + (cross > 0 ? limit : -limit);
-                    
+
                     GazeDirection = new Vector2((float)Math.Cos(targetAngle), (float)Math.Sin(targetAngle));
                 }
             }
@@ -586,17 +583,20 @@ namespace BikeWars.Entities.Characters
         {
             if (skill is SkillTree.SkillId.MoreHp)
             {
-                MaxHealth += 30;
+                Attributes.MaxHealth += 30;
             }
             else if (skill is SkillTree.SkillId.MoreDamage)
             {
-                AttackDamage += 2;
+                Attributes.AttackDamage += 2;
             }
             else if (skill is SkillTree.SkillId.LongerSprintDuration)
             {
                 sprint.Duration += 0.5f;
             }
+            else if (skill is SkillTree.SkillId.AutomaticFire)
+            {
+                Attributes.CanAutoAttack = true;
+            }
         }
-
     }
 }
