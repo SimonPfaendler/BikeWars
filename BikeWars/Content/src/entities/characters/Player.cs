@@ -57,6 +57,12 @@ namespace BikeWars.Entities.Characters
         private WorldAudioManager _worldAudioManager;
         private string _currentMovementSound = null;
         public event Action OnLevelUp;
+        
+        private bool _isUsingItem = false;
+        private float _itemUseTimer = 0f;
+        private const float ItemUseDuration = 2f;
+        private ItemBase _currentItemBeingUsed;
+        private int _currentItemIndex = -1;
 
 
         private struct GhostFrame
@@ -225,6 +231,30 @@ namespace BikeWars.Entities.Characters
 
             movement.Update();
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            
+            // consume logic
+            if (_isUsingItem)
+            {
+                _itemUseTimer -= delta;
+                if (_itemUseTimer <= 0f)
+                {
+                    FinishUsingItem();
+                }
+            }
+            else
+            {
+                if (InputHandler.IsPressed(GameAction.INVENTORY_1) && Inventory.Items.Count >= 1)
+                    StartUsingItem(0);
+                else if (InputHandler.IsPressed(GameAction.INVENTORY_2) && Inventory.Items.Count >= 2)
+                    StartUsingItem(1);
+                else if (InputHandler.IsPressed(GameAction.INVENTORY_3) && Inventory.Items.Count >= 3)
+                    StartUsingItem(2);
+                else if (InputHandler.IsPressed(GameAction.INVENTORY_4) && Inventory.Items.Count >= 4)
+                    StartUsingItem(3);
+                else if (InputHandler.IsPressed(GameAction.INVENTORY_5) && Inventory.Items.Count >= 5)
+                    StartUsingItem(4);
+            }
+
             // Sound-Control
             string desiredSound = movement.CurrentMovement is BicycleMovement
                 ? AudioAssets.Driving
@@ -598,5 +628,45 @@ namespace BikeWars.Entities.Characters
                 Attributes.CanAutoAttack = true;
             }
         }
+        
+        private void StartUsingItem(int inventoryIndex)
+        {
+            if (_isUsingItem || inventoryIndex < 0 || inventoryIndex >= Inventory.Items.Count)
+                return;
+
+            var item = Inventory.Items[inventoryIndex];
+
+            if (!item.IsConsumable)
+                return;
+
+            _isUsingItem = true;
+            _itemUseTimer = ItemUseDuration;
+            _currentItemBeingUsed = item;
+            _currentItemIndex = inventoryIndex;
+        }
+        
+        private void FinishUsingItem()
+        {
+            if (_currentItemBeingUsed is EnergyGel gel)
+            {
+                Attributes.Health += gel.HealAmount;
+                if (Attributes.Health > Attributes.MaxHealth)
+                    Attributes.Health = Attributes.MaxHealth;
+            }
+
+            if (_currentItemIndex >= 0 && _currentItemIndex < Inventory.Items.Count)
+            {
+                Inventory.RemoveAt(_currentItemIndex);
+            }
+
+            _isUsingItem = false;
+            _currentItemBeingUsed = null;
+            _currentItemIndex = -1;
+
+            //_audio.Sounds.Play("ItemUseFinish");
+        }
+
+
+
     }
 }

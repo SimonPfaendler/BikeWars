@@ -72,5 +72,17 @@ public class Inventory
             spriteBatch.Draw(item.CurrentTex, iconRect, Color.White);
         }
     }
+    
+    public void RemoveItem(ItemBase item)
+    {
+        _items.Remove(item);
+    }
+    
+    public void RemoveAt(int index)
+    {
+        if (index < 0 || index >= _items.Count)
+            return;
+        _items.RemoveAt(index);
+    }
 }
 

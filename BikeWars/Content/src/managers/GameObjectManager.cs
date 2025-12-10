@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using BikeWars.Content.engine;
 using BikeWars.Content.entities.interfaces;
@@ -227,6 +228,13 @@ public class GameObjectManager
         else
             xp = new Xp_Money(pos, new Point(16, 16));
         AddItem(xp);
+        
+        Random rnd = new Random();
+        if (rnd.NextDouble() <= 0.05) // 5% chance to drop an energy gel
+        {
+            EnergyGel energyGel = new EnergyGel(pos, new Point(16, 16));
+            AddItem(energyGel);
+        }
     }
 
 }
