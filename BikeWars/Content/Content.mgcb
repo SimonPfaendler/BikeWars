@@ -22,6 +22,18 @@
 /processorParam:TextureFormat=Compressed
 /build:assets/fonts/Arial.spritefont;assets/fonts/Arial
 
+#begin assets/images/EnergyGel.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/EnergyGel.png
+
 #begin assets/images/PlainButton.png
 /importer:TextureImporter
 /processor:TextureProcessor
