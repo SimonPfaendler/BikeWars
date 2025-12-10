@@ -43,9 +43,9 @@ namespace BikeWars.Entities.Characters
             set {
                 if (value < 0)
                 {
-                    _maxHealth = 0;
+                    _attackDamage = 0;
                 }
-                _maxHealth = value;
+                _attackDamage = value;
             }
         }
 
