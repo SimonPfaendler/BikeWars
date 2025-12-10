@@ -243,16 +243,11 @@ namespace BikeWars.Entities.Characters
             }
             else
             {
-                if (InputHandler.IsPressed(GameAction.INVENTORY_1) && Inventory.Items.Count >= 1)
-                    StartUsingItem(0);
-                else if (InputHandler.IsPressed(GameAction.INVENTORY_2) && Inventory.Items.Count >= 2)
-                    StartUsingItem(1);
-                else if (InputHandler.IsPressed(GameAction.INVENTORY_3) && Inventory.Items.Count >= 3)
-                    StartUsingItem(2);
-                else if (InputHandler.IsPressed(GameAction.INVENTORY_4) && Inventory.Items.Count >= 4)
-                    StartUsingItem(3);
-                else if (InputHandler.IsPressed(GameAction.INVENTORY_5) && Inventory.Items.Count >= 5)
-                    StartUsingItem(4);
+                if (InputHandler.IsPressed(GameAction.INVENTORY_1)) StartUsingItem(0);
+                else if (InputHandler.IsPressed(GameAction.INVENTORY_2)) StartUsingItem(1);
+                else if (InputHandler.IsPressed(GameAction.INVENTORY_3)) StartUsingItem(2);
+                else if (InputHandler.IsPressed(GameAction.INVENTORY_4)) StartUsingItem(3);
+                else if (InputHandler.IsPressed(GameAction.INVENTORY_5)) StartUsingItem(4);
             }
 
             // Sound-Control
@@ -631,39 +626,41 @@ namespace BikeWars.Entities.Characters
         
         private void StartUsingItem(int inventoryIndex)
         {
-            if (_isUsingItem || inventoryIndex < 0 || inventoryIndex >= Inventory.Items.Count)
+            if (_isUsingItem || inventoryIndex < 0 || inventoryIndex >= 5) // 5 = Inventory Size
                 return;
-
-            var item = Inventory.Items[inventoryIndex];
-
-            if (!item.IsConsumable)
+            
+            var item = Inventory.GetItemAt(inventoryIndex);
+            
+            if (item == null || !item.IsConsumable)
                 return;
 
             _isUsingItem = true;
             _itemUseTimer = ItemUseDuration;
-            _currentItemBeingUsed = item;
             _currentItemIndex = inventoryIndex;
+            
+            // TODO: add sound effect
         }
         
         private void FinishUsingItem()
         {
-            if (_currentItemBeingUsed is EnergyGel gel)
-            {
-                Attributes.Health += gel.HealAmount;
-                if (Attributes.Health > Attributes.MaxHealth)
-                    Attributes.Health = Attributes.MaxHealth;
-            }
+            var item = Inventory.GetItemAt(_currentItemIndex);
 
-            if (_currentItemIndex >= 0 && _currentItemIndex < Inventory.Items.Count)
+            if (item != null)
             {
+                if (item is EnergyGel gel)
+                {
+                    Attributes.Health += gel.HealAmount;
+                    if (Attributes.Health > Attributes.MaxHealth)
+                        Attributes.Health = Attributes.MaxHealth;
+                }
+                
                 Inventory.RemoveAt(_currentItemIndex);
             }
 
             _isUsingItem = false;
-            _currentItemBeingUsed = null;
             _currentItemIndex = -1;
-
-            //_audio.Sounds.Play("ItemUseFinish");
+            
+            // TODO: add sound effect
         }
 
 
