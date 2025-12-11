@@ -19,17 +19,21 @@ namespace BikeWars.Content.entities.items
         {
             Transform = new Transform(start, size);
 
+            int pickupRange = 40;
+
             _collider = new BoxCollider(
-                new Vector2(Transform.Position.X, Transform.Position.Y),
-                Transform.Size.X,
-                Transform.Size.Y,
+                new Vector2(Transform.Position.X - pickupRange / 2f,
+                    Transform.Position.Y - pickupRange / 2f),
+                Transform.Size.X + pickupRange,
+                Transform.Size.Y + pickupRange,
                 CollisionLayer.ITEM,
                 this
             );
-            
+
             TexRight = managers.SpriteManager.GetTexture("EnergyGel");
             CurrentTex = TexRight;
         }
+
 
         public override void Draw(SpriteBatch spriteBatch)
         {
