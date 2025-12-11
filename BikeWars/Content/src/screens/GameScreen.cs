@@ -12,7 +12,6 @@ using BikeWars.Content.src.utils.SaveLoadExample;
 using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled.Renderers;
 using BikeWars.Content.managers;
-using BikeWars.Content.engine.PathFinding;
 using BikeWars.Content.events;
 
 namespace BikeWars.Content.screens

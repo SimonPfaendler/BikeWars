@@ -8,7 +8,6 @@ using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using BikeWars.Content.engine.PathFinding;
 
 namespace BikeWars.Content.managers;
 public class CollisionManager
@@ -22,7 +21,7 @@ public class CollisionManager
     private const string MAP = "assets/Map/Bike_Wars_Map";
     private const string TILED_MAP_LAYER = "Collision";
 
-    private int _cellSize {get; set;}
+    public int _cellSize {get; set;}
     private SpatialHash _dynamicHash {get; set;}
     public SpatialHash DynamicHash {get => _dynamicHash; set => _dynamicHash = value;}
     private SpatialHash _staticHash {get; set;}
@@ -33,7 +32,7 @@ public class CollisionManager
     private List<BoxCollider> _collisionBoxes {get; set;} // Mainly used for the static layout
     public List<BoxCollider> CollisionBoxes {get => _collisionBoxes; set => _collisionBoxes = value;}
     private List<ICollider> _toRemoveColliders {get; set;}
-    
+
     // the grid for the pathfinding
     public Node[,] PathGrid { get; private set; }
 
@@ -65,7 +64,7 @@ public class CollisionManager
             CollisionBoxes.Add(box);
             StaticHash.Insert(box);
         }
-        
+
         // build pathfinding grid based on collision layer
         int gridWidth = collisionLayer.Width;
         int gridHeight = collisionLayer.Height;
@@ -76,12 +75,12 @@ public class CollisionManager
             for (int x = 0; x < gridWidth; x++)
             {
                 var tile = collisionLayer.GetTile((ushort) x, (ushort) y);
-                
+
                 bool walkable = tile.GlobalIdentifier == 0;
                 PathGrid[x, y] = new Node(x, y, walkable);
             }
         }
-        
+
         LoadTerrainLayer("Streets", TerrainType.ROAD);
         LoadTerrainLayer("Floor", TerrainType.GRASS);
         LoadSpawnLayer("Enemy_Spawn");
@@ -92,7 +91,7 @@ public class CollisionManager
     {
         int gridX = (int) (worldPos.X / _cellSize);
         int gridY = (int) (worldPos.Y / _cellSize);
-        
+
         return new Point(gridX, gridY);
     }
 
@@ -349,13 +348,13 @@ public class CollisionManager
                 {
                     dynamics = new List<ICollider>();
                     foreach (var hitbox in aoe.GetHitboxes())
-                        dynamics.AddRange(DynamicHash.QueryNearby(hitbox.Position));
+                        dynamics.AddRange(DynamicHash.QueryNearby(hitbox.Position, 1));
                 }
                 else
                 {
-                    dynamics = DynamicHash.QueryNearby(c.Position);
+                    dynamics = DynamicHash.QueryNearby(c.Position, 1);
                 }
-                List<ICollider> statics = StaticHash.QueryNearby(c.Position);
+                List<ICollider> statics = StaticHash.QueryNearby(c.Position, 1);
                 HandleDynamics(c, dynamics);
                 HandleStatics(c, statics);
                 HandleTerrain(c, statics);
@@ -386,8 +385,8 @@ public class CollisionManager
 
     // makes the hitboxes visible for when in the tech demo
     // makes the hitboxes visible for when in the tech demo
-public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel, 
-                         Player player, List<CharacterBase> characters, 
+public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
+                         Player player, List<CharacterBase> characters,
                          List<ItemBase> items, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks)
 {
     // Static collision boxes

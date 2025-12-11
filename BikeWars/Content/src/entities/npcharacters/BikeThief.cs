@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
-using BikeWars.Content.engine.PathFinding;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.managers;
 

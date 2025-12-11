@@ -4,7 +4,6 @@ using BikeWars.Content.engine.Audio;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.entities.interfaces;
 using Microsoft.Xna.Framework;
-using BikeWars.Content.engine.PathFinding;
 
 namespace BikeWars.Content.managers
 {
@@ -150,7 +149,7 @@ namespace BikeWars.Content.managers
             // Use 32x32 size (enemy size)
             BoxCollider checkCollider = new BoxCollider(pos, 32, 32, CollisionLayer.CHARACTER, null);
 
-            var nearby = _collisionManager.StaticHash.QueryNearby(pos);
+            var nearby = _collisionManager.StaticHash.QueryNearby(pos, 1);
             foreach (var col in nearby)
             {
                 if (col.Layer == CollisionLayer.SPAWNENEMIES)

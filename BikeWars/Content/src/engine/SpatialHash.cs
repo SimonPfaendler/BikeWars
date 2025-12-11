@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework;
@@ -99,14 +98,14 @@ public class SpatialHash
         }
     }
 
-    public List<ICollider> QueryNearby(Vector2 pos)
+    public List<ICollider> QueryNearby(Vector2 pos, int radius)
     {
         var (cellX, cellY) = ToCellCoords(pos);
         List<ICollider> results = new();
 
-        for (int x = cellX - 1; x <= cellX + 1; x++)
+        for (int x = cellX - radius; x <= cellX + radius; x++)
         {
-            for (int y = cellY - 1; y <= cellY + 1; y++)
+            for (int y = cellY - radius; y <= cellY + radius; y++)
             {
                 int key = To1DKey(x, y);
 
@@ -115,7 +114,6 @@ public class SpatialHash
                 results.AddRange(cell.Colliders!);
             }
         }
-
         return results;
     }
 
