@@ -1,6 +1,6 @@
+using Microsoft.Xna.Framework;
 
-using Microsoft.Xna.Framework; 
-
+namespace BikeWars.Content.engine;
 public class AnimationFrame
 {
     public Rectangle SourceRectangle { get; set; }

@@ -57,7 +57,7 @@ namespace BikeWars.Entities.Characters
         private WorldAudioManager _worldAudioManager;
         private string _currentMovementSound = null;
         public event Action OnLevelUp;
-        
+
         private bool _isUsingItem = false;
         private float _itemUseTimer = 0f;
         private const float ItemUseDuration = 2f;
@@ -165,7 +165,7 @@ namespace BikeWars.Entities.Characters
 
         public Player(Vector2 start, Point size, AudioService audio)
         {
-            Attributes = new CharacterAttributes(300, 0 , 10, 2f, false);
+            Attributes = new CharacterAttributes(300, 0, 10, 2f, false);
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 200f;
@@ -197,238 +197,15 @@ namespace BikeWars.Entities.Characters
         public void Update(GameTime gameTime, Vector2 mousePos)
         {
             UpdateAttackCooldown(gameTime);
-
-            // TODO THIS IS NOW ONLY FOR TESTING AND SHOWING
-            if (InputHandler.IsPressed(GameAction.SWITCH))
-            {
-                if (movement.CurrentMovement.GetType() == typeof(BicycleMovement))
-                {
-                    movement.CurrentMovement = new WalkingMovement(true, true);
-                    TerrainSpeedMultiplier = 1.0f;
-                } else
-                {
-                    movement.CurrentMovement = new BicycleMovement(true, true, movement.RotationAcceleration);
-                }
-            }
-
-            if (InputHandler.IsPressed(GameAction.SWITCH_WEAPON))
-            {
-                // Toggle between the two weapons
-                if (CurrentWeapon == WeaponType.Gun)
-                    CurrentWeapon = WeaponType.Flamethrower;
-                else if (CurrentWeapon == WeaponType.Flamethrower)
-                    CurrentWeapon = WeaponType.IceTrail;
-                else
-                    CurrentWeapon = WeaponType.Gun;
-            }
-
-            bool shooting = (Attributes.CanAutoAttack && InputHandler.IsHeld(GameAction.SHOOT) || InputHandler.IsPressed(GameAction.SHOOT)) && CanAttack();
-            if (shooting)
-            {
-                Shooting();
-                ResetAttackCooldown();
-            }
-
-            movement.Update();
-            float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            
-            // consume logic
-            if (_isUsingItem)
-            {
-                _itemUseTimer -= delta;
-                if (_itemUseTimer <= 0f)
-                {
-                    FinishUsingItem();
-                }
-            }
-            else
-            {
-                if (InputHandler.IsPressed(GameAction.INVENTORY_1)) StartUsingItem(0);
-                else if (InputHandler.IsPressed(GameAction.INVENTORY_2)) StartUsingItem(1);
-                else if (InputHandler.IsPressed(GameAction.INVENTORY_3)) StartUsingItem(2);
-                else if (InputHandler.IsPressed(GameAction.INVENTORY_4)) StartUsingItem(3);
-                else if (InputHandler.IsPressed(GameAction.INVENTORY_5)) StartUsingItem(4);
-            }
-
-            // Sound-Control
-            string desiredSound = movement.CurrentMovement is BicycleMovement
-                ? AudioAssets.Driving
-                : AudioAssets.Walking;
-
-            float speedThreshold = 5.0f;
-            bool hasSpeed = movement.CurrentMovement.Speed > speedThreshold;
-            bool isInputMoving = movement.IsMoving();
-
-            bool shouldPlaySound = hasSpeed && isInputMoving;
-
-            if (!shouldPlaySound)
-            {
-                if (_currentMovementSound != null)
-                {
-                    _audio.Sounds.StopLoop(_currentMovementSound);
-                    _currentMovementSound = null;
-                }
-            }
-            else
-            {
-                if (_currentMovementSound != desiredSound)
-                {
-                    if (_currentMovementSound != null)
-                        _audio.Sounds.StopLoop(_currentMovementSound);
-
-                    _audio.Sounds.PlayLoop(desiredSound);
-                    _currentMovementSound = desiredSound;
-                }
-            }
-
-            // Sprinting Logic
-            sprint.Update(gameTime);
-            if (InputHandler.IsHeld(GameAction.SPRINT) && sprint.Ready)
-            {
-                sprint.Activate();
-            }
-
-            CurrentSpeed = sprint.IsActive ? SprintSpeed : movement.CurrentMovement.Speed;
-            Vector2 direction = movement.CurrentMovement.Direction;
-
-            if (Transform.Position.X != LastTransform.Position.X || Transform.Position.Y != LastTransform.Position.Y)
-                LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
-
-            TerrainSpeedMultiplier = GetTerrainMultiplier();
-
-
-            bool isMoving = movement.IsMoving();
-            if (isMoving)
-            {
-                direction.Normalize();
-                _facingDirection = direction; // Update facing direction
-                if (sprint.IsActive)
-                {
-                    Transform.Position += direction * CurrentSpeed * delta * TerrainSpeedMultiplier;
-                }
-                else
-                {
-                    Transform.Position += direction * movement.CurrentMovement.Speed * delta * TerrainSpeedMultiplier;
-                }
-                _currentAnimation = _walkUpAnimation;
-                // choose animation based on main direction
-                // @TODO We need to decide on how the animation should look like so don't delete it now
-                if (movement.CurrentMovement.GetType() == typeof(WalkingMovement)) // THIS IS ONLY INSERTED TO SHOW. BUT NOT GOOD!
-                {
-                    if (MathF.Abs(direction.X) > MathF.Abs(direction.Y))
-                {
-                    _currentAnimation = (direction.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
-                }
-                else
-                {
-                    _currentAnimation = (direction.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
-                }
-                }
-            }
-
-            // Gaze Direction Logic
-            Vector2 eyePos = Transform.Position;
-            Vector2 potentialGaze = Vector2.Zero;
-
-            // 1. Check Controller Input (Right Stick)
-            Vector2 rightStick = InputHandler.GamePad.RightStick;
-
-            // Check if mouse moved to switch back to mouse aiming
-            if (InputHandler.Mouse.Delta != Point.Zero || InputHandler.Mouse.Held(MouseButton.Left))
-            {
-                 // Also reset if clicking, just in case
-                _usingControllerAim = false;
-            }
-
-            if (rightStick != Vector2.Zero)
-            {
-                // Controller aiming
-                rightStick.Y *= -1;
-                potentialGaze = Vector2.Normalize(rightStick);
-
-                // Store state
-                _usingControllerAim = true;
-                _lastGazeDirection = potentialGaze;
-
-                AimTarget = eyePos + potentialGaze * 100f;
-            }
-            else if (_usingControllerAim)
-            {
-                // Fallback to last controller direction if we haven't touched the mouse
-                potentialGaze = _lastGazeDirection;
-                AimTarget = eyePos + potentialGaze * 100f;
-            }
-            else
-            {
-                // 2. Fallback to Mouse Input
-                AimTarget = mousePos;
-                Vector2 diff = AimTarget - eyePos;
-                if (diff != Vector2.Zero)
-                {
-                    potentialGaze = Vector2.Normalize(diff);
-                }
-            }
-
-            // 3. Apply Angle Restriction (240 degrees total = +/- 120 degrees)
-            if (potentialGaze != Vector2.Zero)
-            {
-                // Check if the angle is within +/- 120 degrees
-                if (Vector2.Dot(_facingDirection, potentialGaze) > -0.5f)
-                {
-                    GazeDirection = potentialGaze;
-                }
-                else
-                {
-                    // Clamp to nearest 120 degree angle
-                    float facingAngle = (float)Math.Atan2(_facingDirection.Y, _facingDirection.X);
-                    float cross = _facingDirection.X * potentialGaze.Y - _facingDirection.Y * potentialGaze.X;
-                    float limit = MathHelper.ToRadians(120);
-
-                    float targetAngle = facingAngle + (cross > 0 ? limit : -limit);
-
-                    GazeDirection = new Vector2((float)Math.Cos(targetAngle), (float)Math.Sin(targetAngle));
-                }
-            }
-            else
-            {
-                GazeDirection = Vector2.Zero;
-            }
-
-            _currentAnimation?.Update(gameTime, isMoving);
-
-            if (movement.CurrentMovement.IsMoving && sprint.IsActive && _currentAnimation != null)
-            {
-                _ghostSpawnTimer -= delta;
-                if (_ghostSpawnTimer <= 0f)
-                {
-                    _ghostSpawnTimer = GhostSpawnInterval;
-
-                    Rectangle source = _currentAnimation.GetCurrentFrame();
-
-                    _ghostTrail.Add(new GhostFrame
-                    {
-                        Texture = SpriteManager.GetCharacterAtlas(),
-                        Position = Transform.Position,
-                        Source = source,
-                        TimeLeft = GhostLifeTime
-                    });
-                }
-            }
-
-            for (int i = _ghostTrail.Count - 1; i >= 0; i--)
-            {
-                var ghost = _ghostTrail[i];
-                ghost.TimeLeft -= delta;
-
-                if (ghost.TimeLeft <= 0f)
-                {
-                    _ghostTrail.RemoveAt(i);
-                }
-                else
-                {
-                    _ghostTrail[i] = ghost;
-                }
-            }
+            HandleSwitchMovement();
+            HandleWeaponSwitch();
+            HandleShooting();
+            UpdateMovement(gameTime);
+            HandleItemUsage(gameTime);
+            HandleMovementSound();
+            HandleAnimation(gameTime);
+            UpdateGazeDirection(mousePos);
+            HandleGhostTrail(gameTime);
             UpdateCollider();
         }
         public override void Draw(SpriteBatch spriteBatch)
@@ -464,12 +241,13 @@ namespace BikeWars.Entities.Characters
 
             // 2) Spieler zeichnen
             if (_currentAnimation == null)
-            return;
+                return;
 
             if (movement.CurrentMovement.GetType() == typeof(WalkingMovement)) // TODO THIS IS ONLY INSERTED TO SHOW. BUT NOT GOOD!
             {
                 _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, movement.CurrentMovement.Rotation);
-            } else
+            }
+            else
             {
                 _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, movement.CurrentMovement.Rotation + MathHelper.PiOver2);
             }
@@ -623,24 +401,24 @@ namespace BikeWars.Entities.Characters
                 Attributes.CanAutoAttack = true;
             }
         }
-        
+
         private void StartUsingItem(int inventoryIndex)
         {
             if (_isUsingItem || inventoryIndex < 0 || inventoryIndex >= 5) // 5 = Inventory Size
                 return;
-            
+
             var item = Inventory.GetItemAt(inventoryIndex);
-            
+
             if (item == null || !item.IsConsumable)
                 return;
 
             _isUsingItem = true;
             _itemUseTimer = ItemUseDuration;
             _currentItemIndex = inventoryIndex;
-            
+
             _audio.Sounds.Play(AudioAssets.Slurp);
         }
-        
+
         private void FinishUsingItem()
         {
             var item = Inventory.GetItemAt(_currentItemIndex);
@@ -653,17 +431,284 @@ namespace BikeWars.Entities.Characters
                     if (Attributes.Health > Attributes.MaxHealth)
                         Attributes.Health = Attributes.MaxHealth;
                 }
-                
+
                 Inventory.RemoveAt(_currentItemIndex);
             }
 
             _isUsingItem = false;
             _currentItemIndex = -1;
-            
+
             _audio.Sounds.Play(AudioAssets.Relief);
         }
 
+        private void HandleSwitchMovement()
+        {
+            // TODO THIS IS NOW ONLY FOR TESTING AND SHOWING
+
+            if (!InputHandler.IsPressed(GameAction.SWITCH))
+                return;
+
+            if (movement.CurrentMovement.GetType() == typeof(BicycleMovement))
+            {
+                movement.CurrentMovement = new WalkingMovement(true, true);
+                TerrainSpeedMultiplier = 1.0f;
+            }
+            else
+            {
+                movement.CurrentMovement = new BicycleMovement(true, true, movement.RotationAcceleration);
+            }
+
+        }
+
+        private void UpdateMovement(GameTime gameTime)
+        {
+            float d = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            movement.Update();
+            sprint.Update(gameTime);
+            if (InputHandler.IsHeld(GameAction.SPRINT) && sprint.Ready)
+            {
+                sprint.Activate();
+            }
+            CurrentSpeed = sprint.IsActive ? SprintSpeed : movement.CurrentMovement.Speed;
+            Vector2 direction = movement.CurrentMovement.Direction;
+
+            if (Transform.Position.X != LastTransform.Position.X || Transform.Position.Y != LastTransform.Position.Y)
+                LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
+
+            TerrainSpeedMultiplier = GetTerrainMultiplier();
+
+            if (movement.IsMoving())
+            {
+                direction.Normalize();
+                _facingDirection = direction; // Update facing direction
+                if (sprint.IsActive)
+                {
+                    Transform.Position += direction * CurrentSpeed * d * TerrainSpeedMultiplier;
+                }
+                else
+                {
+                    Transform.Position += direction * movement.CurrentMovement.Speed * d * TerrainSpeedMultiplier;
+                }
+            }
 
 
+
+
+
+        }
+
+        private void HandleWeaponSwitch()
+        {
+            if (!InputHandler.IsPressed(GameAction.SWITCH_WEAPON))
+                return;
+            
+            
+                // Toggle between the two weapons
+            if (CurrentWeapon == WeaponType.Gun)
+                    CurrentWeapon = WeaponType.Flamethrower;
+            else if (CurrentWeapon == WeaponType.Flamethrower)
+                    CurrentWeapon = WeaponType.IceTrail;
+            else
+                    CurrentWeapon = WeaponType.Gun;
+            
+        }
+
+        private void HandleItemUsage(GameTime gameTime)
+        {
+            float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (_isUsingItem)
+            {
+                _itemUseTimer -= delta;
+                if (_itemUseTimer <= 0f)
+                {
+                    FinishUsingItem();
+                }
+            }
+            else
+            {
+                if (InputHandler.IsPressed(GameAction.INVENTORY_1)) StartUsingItem(0);
+                else if (InputHandler.IsPressed(GameAction.INVENTORY_2)) StartUsingItem(1);
+                else if (InputHandler.IsPressed(GameAction.INVENTORY_3)) StartUsingItem(2);
+                else if (InputHandler.IsPressed(GameAction.INVENTORY_4)) StartUsingItem(3);
+                else if (InputHandler.IsPressed(GameAction.INVENTORY_5)) StartUsingItem(4);
+            }
+        }
+
+        private void HandleMovementSound()
+        {
+            // Sound-Control
+            string desiredSound = movement.CurrentMovement is BicycleMovement
+                ? AudioAssets.Driving
+                : AudioAssets.Walking;
+
+            float speedThreshold = 5.0f;
+            bool hasSpeed = movement.CurrentMovement.Speed > speedThreshold;
+            bool isInputMoving = movement.IsMoving();
+
+            bool shouldPlaySound = hasSpeed && isInputMoving;
+
+            if (!shouldPlaySound)
+            {
+                if (_currentMovementSound != null)
+                {
+                    _audio.Sounds.StopLoop(_currentMovementSound);
+                    _currentMovementSound = null;
+                }
+            }
+            else
+            {
+                if (_currentMovementSound != desiredSound)
+                {
+                    if (_currentMovementSound != null)
+                        _audio.Sounds.StopLoop(_currentMovementSound);
+
+                    _audio.Sounds.PlayLoop(desiredSound);
+                    _currentMovementSound = desiredSound;
+                }
+            }
+        }
+
+
+        private void UpdateGazeDirection(Vector2 mousePos)
+        {
+            // Gaze Direction Logic
+            Vector2 eyePos = Transform.Position;
+            Vector2 potentialGaze = Vector2.Zero;
+
+            // 1. Check Controller Input (Right Stick)
+            Vector2 rightStick = InputHandler.GamePad.RightStick;
+
+            // Check if mouse moved to switch back to mouse aiming
+            if (InputHandler.Mouse.Delta != Point.Zero || InputHandler.Mouse.Held(MouseButton.Left))
+            {
+                // Also reset if clicking, just in case
+                _usingControllerAim = false;
+            }
+
+            if (rightStick != Vector2.Zero)
+            {
+                // Controller aiming
+                rightStick.Y *= -1;
+                potentialGaze = Vector2.Normalize(rightStick);
+
+                // Store state
+                _usingControllerAim = true;
+                _lastGazeDirection = potentialGaze;
+
+                AimTarget = eyePos + potentialGaze * 100f;
+            }
+            else if (_usingControllerAim)
+            {
+                // Fallback to last controller direction if we haven't touched the mouse
+                potentialGaze = _lastGazeDirection;
+                AimTarget = eyePos + potentialGaze * 100f;
+            }
+            else
+            {
+                // 2. Fallback to Mouse Input
+                AimTarget = mousePos;
+                Vector2 diff = AimTarget - eyePos;
+                if (diff != Vector2.Zero)
+                {
+                    potentialGaze = Vector2.Normalize(diff);
+                }
+            }
+
+            // 3. Apply Angle Restriction (240 degrees total = +/- 120 degrees)
+            if (potentialGaze != Vector2.Zero)
+            {
+                // Check if the angle is within +/- 120 degrees
+                if (Vector2.Dot(_facingDirection, potentialGaze) > -0.5f)
+                {
+                    GazeDirection = potentialGaze;
+                }
+                else
+                {
+                    // Clamp to nearest 120 degree angle
+                    float facingAngle = (float)Math.Atan2(_facingDirection.Y, _facingDirection.X);
+                    float cross = _facingDirection.X * potentialGaze.Y - _facingDirection.Y * potentialGaze.X;
+                    float limit = MathHelper.ToRadians(120);
+
+                    float targetAngle = facingAngle + (cross > 0 ? limit : -limit);
+
+                    GazeDirection = new Vector2((float)Math.Cos(targetAngle), (float)Math.Sin(targetAngle));
+                }
+            }
+            else
+            {
+                GazeDirection = Vector2.Zero;
+            }
+        }
+
+        private void HandleShooting()
+        {
+            bool shooting = (Attributes.CanAutoAttack && InputHandler.IsHeld(GameAction.SHOOT) || InputHandler.IsPressed(GameAction.SHOOT)) && CanAttack();
+            if (shooting)
+            {
+                Shooting();
+                ResetAttackCooldown();
+            }
+        }
+
+        private void HandleGhostTrail(GameTime gameTime)
+        {
+            float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (movement.CurrentMovement.IsMoving && sprint.IsActive && _currentAnimation != null)
+            {
+                _ghostSpawnTimer -= delta;
+                if (_ghostSpawnTimer <= 0f)
+                {
+                    _ghostSpawnTimer = GhostSpawnInterval;
+
+                    Rectangle source = _currentAnimation.GetCurrentFrame();
+
+                    _ghostTrail.Add(new GhostFrame
+                    {
+                        Texture = SpriteManager.GetCharacterAtlas(),
+                        Position = Transform.Position,
+                        Source = source,
+                        TimeLeft = GhostLifeTime
+                    });
+                }
+            }
+
+            for (int i = _ghostTrail.Count - 1; i >= 0; i--)
+            {
+                var ghost = _ghostTrail[i];
+                ghost.TimeLeft -= delta;
+
+                if (ghost.TimeLeft <= 0f)
+                {
+                    _ghostTrail.RemoveAt(i);
+                }
+                else
+                {
+                    _ghostTrail[i] = ghost;
+                }
+            }
+        }
+
+        private void HandleAnimation(GameTime gameTime)
+        {
+            if (movement.IsMoving())
+            {
+                _currentAnimation = _walkUpAnimation;
+                // choose animation based on main direction
+                // @TODO We need to decide on how the animation should look like so don't delete it now
+                if (movement.CurrentMovement.GetType() == typeof(WalkingMovement)) // THIS IS ONLY INSERTED TO SHOW. BUT NOT GOOD!
+                {
+                    if (MathF.Abs(_facingDirection.X) > MathF.Abs(_facingDirection.Y))
+                    {
+                        _currentAnimation = (_facingDirection.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
+                    }
+                    else
+                    {
+                        _currentAnimation = (_facingDirection.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
+                    }
+                }
+            }
+
+            _currentAnimation?.Update(gameTime, movement.IsMoving());
+        }
     }
 }
