@@ -81,6 +81,8 @@ public class CollisionManager
             }
         }
 
+        WallPadding();
+
         LoadTerrainLayer("Streets", TerrainType.ROAD);
         LoadTerrainLayer("Floor", TerrainType.GRASS);
         LoadSpawnLayer("Enemy_Spawn");
@@ -103,6 +105,86 @@ public class CollisionManager
             node.X * _cellSize + _cellSize / 2f,
             node.Y * _cellSize + _cellSize / 2f
         );
+    }
+    
+    // sets the neighbours of an unwalkable tile 
+    // so that the enemies don't get stuck on edges of hitboxes
+    private void WallPadding(int padding = 1)
+    {
+        bool[,] copy = CopyWalkableGrid();
+        InflateWalls(copy, padding);
+        WriteInflatedGrid(copy);
+    }
+    
+    // copy walkable grid
+    private bool [,] CopyWalkableGrid()
+    {
+        int width = PathGrid.GetLength(0);
+        int height = PathGrid.GetLength(1);
+        
+        bool [,] inflated =  new bool[width, height];
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                inflated[x, y] = PathGrid[x, y].Walkable;
+            }
+        }
+        return inflated;
+    }
+    
+    // inflate the walls of the unwalkable nodes
+    private void InflateWalls(bool[,] inflated, int padding)
+    {
+        int width = PathGrid.GetLength(0);
+        int height = PathGrid.GetLength(1);
+        
+        int [,] dirs = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                if (!PathGrid[x, y].Walkable)
+                {
+                    for (int dy = -padding; dy <= padding; dy++)
+                    {
+                        for (int dx = -padding; dx <= padding; dx++)
+                        {
+                            if (dx == 0 && dy == 0)
+                                continue;
+                            
+                            int nx = x + dx;
+                            int ny = y + dy;
+                            
+                            if (nx < 0 || nx >= width || ny < 0 || ny >= height)
+                                continue;
+                            
+                            if (!inflated[nx, ny])
+                                continue;
+                            
+                            inflated[nx, ny] = false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // write the padding into the grid
+    private void WriteInflatedGrid(bool[,] inflated)
+    {
+        int width = PathGrid.GetLength(0);
+        int height = PathGrid.GetLength(1);
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                PathGrid[x, y].Walkable = inflated[x, y];
+            }
+        }
     }
 
     public Vector2 GetPenetrationVector(ICollider a, ICollider b)
