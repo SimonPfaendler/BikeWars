@@ -20,7 +20,7 @@ public class EnemyMovement : MovementBase
     public IReadOnlyList<Node> CurrentPath => _currentPath;
     public int CurrentPathIndex => _pathIndex;
     private const int QueryRadius = 3; // nearby collisions
-    private const int LocalGridSize = 25; // 7x7 nodes A*
+    private const int LocalGridSize = 40; // 7x7 nodes A*
     private Point _lastPlayerGrid = new Point(-1, -1);
     private float _repathTimer = 0f;
     private const float RepathInterval = 1f;

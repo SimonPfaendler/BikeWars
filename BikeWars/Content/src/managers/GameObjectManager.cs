@@ -232,7 +232,7 @@ public class GameObjectManager
         Random rnd = new Random();
         if (rnd.NextDouble() <= 0.05) // 5% chance to drop an energy gel
         {
-            EnergyGel energyGel = new EnergyGel(pos, new Point(16, 16));
+            EnergyGel energyGel = new EnergyGel(pos, new Point(32, 32));
             AddItem(energyGel);
         }
     }

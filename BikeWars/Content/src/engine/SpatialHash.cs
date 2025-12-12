@@ -4,6 +4,7 @@ using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework;
 
+namespace BikeWars.Content.engine;
 public class CellData
 {
     public HashSet<CollisionLayer> Layers = new();

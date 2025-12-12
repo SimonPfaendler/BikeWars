@@ -60,7 +60,7 @@ namespace BikeWars.Content.managers
 
             if (_timeSinceLastSwarm >= SWARM_INTERVAL)
             {
-                // Console.WriteLine($"TRIGGERING SWARM at time {_totalTime:F2}s");
+                
                 SpawnSwarm(progress);
                 _timeSinceLastSwarm = 0;
             }
