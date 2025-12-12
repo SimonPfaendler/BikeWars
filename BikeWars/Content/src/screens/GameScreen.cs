@@ -42,7 +42,7 @@ namespace BikeWars.Content.screens
 
         private HUD hud;
         private Texture2D hudTexture;
-        private float hpTestTimer = 0f;
+        
 
         private CollisionManager _collisionManager;
         private GameObjectManager _gameObjectManager;
@@ -210,7 +210,7 @@ namespace BikeWars.Content.screens
 
             _gameObjectManager.Update(gameTime, InputHandler.MakeMouseWorldPosByCamera(camera));
             _itemManager.Update(gameTime);
-            hpTestTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            
 
             if (InputHandler.IsPressed(GameAction.DEBUG_HEAL))
                 _gameObjectManager.Player1.Attributes.Health = _gameObjectManager.Player1.Attributes.MaxHealth;

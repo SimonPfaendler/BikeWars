@@ -321,14 +321,10 @@ public class CollisionManager
 
         foreach (var s in statics)
         {
-            if (s.Layer == CollisionLayer.TERRAIN)
+            if (s.Layer == CollisionLayer.TERRAIN && s.Intersects(c))
             {
-
-                if (s.Intersects(c))
-                {
                     player.CurrentTerrain = (TerrainCollider)s;
                     return;
-                }
             }
         }
     }

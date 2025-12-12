@@ -36,6 +36,7 @@ namespace BikeWars.Entities.Characters
         private Vector2 _facingDirection = Vector2.UnitX; // Default to right
         private bool _usingControllerAim = false;
         private Vector2 _lastGazeDirection = Vector2.UnitX;
+        private const float AimLength = 100f;
 
         public TerrainCollider CurrentTerrain { get; set; }
         public float TerrainSpeedMultiplier = 1.0f;
@@ -595,13 +596,13 @@ namespace BikeWars.Entities.Characters
                 _usingControllerAim = true;
                 _lastGazeDirection = potentialGaze;
 
-                AimTarget = eyePos + potentialGaze * 100f;
+                AimTarget = eyePos + potentialGaze * AimLength;
             }
             else if (_usingControllerAim)
             {
                 // Fallback to last controller direction if we haven't touched the mouse
                 potentialGaze = _lastGazeDirection;
-                AimTarget = eyePos + potentialGaze * 100f;
+                AimTarget = eyePos + potentialGaze * AimLength;
             }
             else
             {
