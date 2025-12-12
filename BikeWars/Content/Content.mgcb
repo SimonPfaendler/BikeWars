@@ -22,6 +22,18 @@
 /processorParam:TextureFormat=Compressed
 /build:assets/fonts/Arial.spritefont;assets/fonts/Arial
 
+#begin assets/images/EnergyGel.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/EnergyGel.png
+
 #begin assets/images/PlainButton.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -121,6 +133,12 @@
 /processorParam:Quality=Best
 /build:assets/sounds/CarCrash.mp3
 
+#begin assets/sounds/CarHorn.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/CarHorn.mp3
+
 #begin assets/sounds/flamethrower.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
@@ -145,11 +163,35 @@
 /processorParam:Quality=Best
 /build:assets/sounds/HandgunClick.mp3
 
+#begin assets/sounds/ice_trail.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/ice_trail.wav
+
 #begin assets/sounds/Menu_music.mp3
 /importer:Mp3Importer
 /processor:SongProcessor
 /processorParam:Quality=Best
 /build:assets/sounds/Menu_music.mp3
+
+#begin assets/sounds/Relief.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/Relief.mp3
+
+#begin assets/sounds/short_pain.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/short_pain.wav
+
+#begin assets/sounds/Slurp.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/Slurp.mp3
 
 #begin assets/sounds/SoftClick.mp3
 /importer:Mp3Importer
@@ -223,6 +265,18 @@
 /processorParam:TextureFormat=Color
 /build:assets/sprites/projectiles/flamethrower.png
 
+#begin assets/sprites/projectiles/ice_trail.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/sprites/projectiles/ice_trail.png
+
 #begin assets/sprites/videos/BikeCrash.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -234,6 +288,30 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:assets/sprites/videos/BikeCrash.png
+
+#begin assets/sprites/videos/PogacarBeerSpriteSheet.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/sprites/videos/PogacarBeerSpriteSheet.png
+
+#begin assets/sprites/videos/PogacarWinSpriteSheet.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/sprites/videos/PogacarWinSpriteSheet.png
 
 #begin assets/sprites/XP/xp_beer_texture.png
 /importer:TextureImporter

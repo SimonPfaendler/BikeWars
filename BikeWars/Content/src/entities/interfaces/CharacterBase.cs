@@ -6,6 +6,7 @@ using BikeWars.Content.managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
+using BikeWars.Entities.Characters;
 
 namespace BikeWars.Content.entities.interfaces;
 public abstract class CharacterBase : ICharacter, ICombat
@@ -15,16 +16,16 @@ public abstract class CharacterBase : ICharacter, ICombat
     private Transform _lastTransform { get; set; }
     public Transform LastTransform { get => _lastTransform; set => _lastTransform = value; }
     public float Speed;
+    public bool slowed;
     public float SprintSpeed;
     public float CurrentSpeed { get; set; }
     private BoxCollider _collider { get; set; }
     public BoxCollider Collider {get => _collider; set => _collider = value;}
-    public int Health { get; set; }
-    public int MaxHealth { get; set; }
-    public int AttackDamage { get; set; }
-    public float AttackCooldown { get; set; }
+
+    private CharacterAttributes _attributes {get;set;}
+    public CharacterAttributes Attributes {get => _attributes; set => _attributes = value;}
     private float _attackCooldownTimer = 0f;
-    public bool IsDead => Health <= 0;
+    public bool IsDead => Attributes.Health <= 0;
     public bool IsGodMode { get; set; } = false;
 
     public bool _XpDropped { get; set; } = false; // for making sure each enemy only drops XP once
@@ -55,11 +56,11 @@ public abstract class CharacterBase : ICharacter, ICombat
 
         if (IsDead) return;
 
-        Health -= amount;
+        Attributes.Health -= amount;
 
-        if (Health <= 0)
+        if (Attributes.Health <= 0)
         {
-            Health = 0;
+            Attributes.Health = 0;
         }
     }
 
@@ -68,10 +69,18 @@ public abstract class CharacterBase : ICharacter, ICombat
         return _attackCooldownTimer <= 0f;
     }
 
+    public virtual void SlowDown(float slowFactor)
+    {
+        if(slowed) return; // Make sure enemy can only be slowed once
+
+        Speed *= slowFactor;
+        slowed = true;
+    }
+
     public virtual void Attack(ICombat target)
     {
         if (!CanAttack()) return;
-        target.TakeDamage(AttackDamage);
+        target.TakeDamage(Attributes.AttackDamage);
         ResetAttackCooldown();
     }
 
@@ -83,7 +92,7 @@ public abstract class CharacterBase : ICharacter, ICombat
 
     public void ResetAttackCooldown()
     {
-        _attackCooldownTimer = AttackCooldown;
+        _attackCooldownTimer = Attributes.AttackCooldown;
     }
 
     public abstract void UpdateCollider();

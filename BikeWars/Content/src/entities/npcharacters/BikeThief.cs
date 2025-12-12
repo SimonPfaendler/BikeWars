@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
-using BikeWars.Content.engine.PathFinding;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.managers;
 
@@ -47,10 +46,8 @@ namespace BikeWars.Entities.Characters
             _audio = audio;
             _pathFinding = pathFinding;
             _collisionManager = collisionManager;
-            MaxHealth = 40;
-            Health = MaxHealth;
-            AttackDamage = 5;
-            AttackCooldown = 2f;
+
+            Attributes = new CharacterAttributes(40, 0, 5, 2f, false);
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 100f;
@@ -138,7 +135,7 @@ namespace BikeWars.Entities.Characters
         public override void Attack(ICombat target)
         {
             if (!CanAttack()) return;
-            target.TakeDamage(AttackDamage);
+            target.TakeDamage(Attributes.AttackDamage);
             ResetAttackCooldown();
             _audio.Sounds.Play(AudioAssets.Punch);
         }

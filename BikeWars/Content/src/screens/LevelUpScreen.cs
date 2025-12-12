@@ -1,9 +1,9 @@
 ﻿using System;
-using BikeWars;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.levelup;
 using BikeWars.Content.managers;
+using BikeWars.Entities.Characters;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -16,11 +16,11 @@ public class LevelUpScreen : IScreen
 
     private readonly SpriteFont _font;
     private readonly Texture2D _pixel;
-    
+
     private SkillTree.SkillId _option1;
     private SkillTree.SkillId _option2;
     private SkillTree.SkillId _option3;
-    
+
     public event Action<SkillTree.SkillId> OnOptionSelected;
 
     public LevelUpScreen()
@@ -30,16 +30,22 @@ public class LevelUpScreen : IScreen
         _font = Game1.Instance.Content.Load<SpriteFont>("assets/fonts/Arial");
     }
 
-    public void Open()
+    public void Open(Player player)
     {
         IsOpen = true;
         // here different options can be listed, for example depending on which level it is or which where chosen before
         _option1 = SkillTree.SkillId.MoreHp;
-        _option2 = SkillTree.SkillId.MoreDamage;
+        if (player.Attributes.CanAutoAttack)
+        {
+            _option2 = SkillTree.SkillId.MoreDamage;
+        } else
+        {
+            _option2 = SkillTree.SkillId.AutomaticFire;
+        }
         _option3 = SkillTree.SkillId.LongerSprintDuration;
     }
     public void Close() => IsOpen = false; // Game runs again and LevelUpScreen is closed
-    
+
     public void Update(GameTime gameTime)
     {
         if (!IsOpen) return;
@@ -50,19 +56,18 @@ public class LevelUpScreen : IScreen
             OnOptionSelected?.Invoke(_option1);
             Close();
         }
-        
+
         else if (InputHandler.IsPressed(GameAction.INVENTORY_2))
         {
             OnOptionSelected?.Invoke(_option2);
             Close();
         }
-        
+
         else if (InputHandler.IsPressed(GameAction.INVENTORY_3))
         {
             OnOptionSelected?.Invoke(_option3);
             Close();
         }
-        
     }
 
     public void Draw(SpriteBatch spriteBatch)
@@ -86,7 +91,7 @@ public class LevelUpScreen : IScreen
         get => null;
         set { }
     }
-    public bool DrawLower  => false; 
+    public bool DrawLower  => false;
     public bool UpdateLower => false;
     public void OnEnter() { }
     public void OnExit()  { }

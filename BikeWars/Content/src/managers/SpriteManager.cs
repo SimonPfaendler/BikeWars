@@ -47,6 +47,7 @@ namespace BikeWars.Content.managers
             { "Chest", "assets/sprites/chest_texture" },
             { "XP_Beer", "assets/sprites/XP/xp_beer_texture" },
             { "XP_Money", "assets/sprites/XP/xp_money_texture" },
+            { "EnergyGel", "assets/images/EnergyGel" },
         };
         // hier sollte irgendwann auch auf atlas strukturen gewechselt werden
 

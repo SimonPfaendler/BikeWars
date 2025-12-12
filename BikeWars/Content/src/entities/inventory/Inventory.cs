@@ -5,22 +5,33 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace BikeWars.Content.entities.Inventory;
 
-// Inventory is handled as a list, it can only take max 5 items
+// Inventory is handled as an array, it can only take max 5 items
 public class Inventory
 {
     private const int MaxSlots = 5;
-    private readonly List<ItemBase> _items = new();
+    private readonly ItemBase[] _items = new ItemBase[MaxSlots];
     public IReadOnlyList<ItemBase> Items => _items;
 
     public bool AddItem(ItemBase item)
     {
         if (!item.InventoryItem)
             return false;
-        if (_items.Count >= MaxSlots)
-            return false;
+        for (int i = 0; i < MaxSlots; i++)
+        {
+            if (_items[i] == null)
+            {
+                _items[i] = item;
+                return true;
+            }
+        }
 
-        _items.Add(item);
-        return true;
+        return false;
+    }
+    
+    public ItemBase GetItemAt(int index)
+    {
+        if (index < 0 || index >= MaxSlots) return null;
+        return _items[index];
     }
 
     public void Draw(SpriteBatch spriteBatch, Texture2D pixel)
@@ -55,22 +66,33 @@ public class Inventory
             Rectangle slotRect = new Rectangle(x, y, slotSize, slotSize);
             spriteBatch.Draw(pixel, slotRect, Color.White);
 
-            if (i >= _items.Count)
-                continue;
-
             var item = _items[i];
-            if (item == null)
-                continue;
-
-            Rectangle iconRect = new Rectangle(
-                x + 4,
-                y + 4,
-                slotSize - 8,
-                slotSize - 8
-            );
-
-            spriteBatch.Draw(item.CurrentTex, iconRect, Color.White);
+            if (item != null)
+            {
+                Rectangle iconRect = new Rectangle(x + 4, y + 4, slotSize - 8, slotSize - 8);
+                spriteBatch.Draw(item.CurrentTex, iconRect, Color.White);
+            }
         }
+    }
+    
+    public void RemoveItem(ItemBase item)
+    {
+        for(int i=0; i < MaxSlots; i++)
+        {
+            if(_items[i] == item)
+            {
+                _items[i] = null;
+                return;
+            }
+        }
+    }
+    
+    public void RemoveAt(int index)
+    {
+        if (index < 0 || index >= MaxSlots)
+            return;
+            
+        _items[index] = null;
     }
 }
 

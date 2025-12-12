@@ -4,7 +4,6 @@ using BikeWars.Content.engine.Audio;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.entities.interfaces;
 using Microsoft.Xna.Framework;
-using BikeWars.Content.engine.PathFinding;
 
 namespace BikeWars.Content.managers
 {
@@ -61,7 +60,7 @@ namespace BikeWars.Content.managers
 
             if (_timeSinceLastSwarm >= SWARM_INTERVAL)
             {
-                // Console.WriteLine($"TRIGGERING SWARM at time {_totalTime:F2}s");
+                
                 SpawnSwarm(progress);
                 _timeSinceLastSwarm = 0;
             }
@@ -147,9 +146,9 @@ namespace BikeWars.Content.managers
 
         private void ApplyScaling(CharacterBase character, float difficultyMultiplier, float speedMultiplier)
         {
-            character.MaxHealth = (int)(character.MaxHealth * difficultyMultiplier);
-            character.Health = character.MaxHealth;
-            character.AttackDamage = (int)(character.AttackDamage * difficultyMultiplier);
+            character.Attributes.MaxHealth = (int)(character.Attributes.MaxHealth * difficultyMultiplier);
+            character.Attributes.Health = character.Attributes.MaxHealth;
+            character.Attributes.AttackDamage = (int)(character.Attributes.AttackDamage * difficultyMultiplier);
             character.Speed *= speedMultiplier;
         }
 
@@ -159,7 +158,7 @@ namespace BikeWars.Content.managers
             // Use 32x32 size (enemy size)
             BoxCollider checkCollider = new BoxCollider(pos, 32, 32, CollisionLayer.CHARACTER, null);
 
-            var nearby = _collisionManager.StaticHash.QueryNearby(pos);
+            var nearby = _collisionManager.StaticHash.QueryNearby(pos, 1);
             foreach (var col in nearby)
             {
                 if (col.Layer == CollisionLayer.SPAWNENEMIES)

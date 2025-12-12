@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using BikeWars.Content.engine;
 using BikeWars.Content.entities.interfaces;
@@ -61,6 +62,7 @@ public class GameObjectManager
 
         Player1.ShotBullet += OnPlayerShotBullet;
         Player1.Flamethrower += OnPlayerFlamethrower;
+        Player1.IceTrail += OnPlayerIceTrail;
 
     }
     public GameObjectManager(ContentManager content, List<CharacterBase> characters, List<ItemBase> items, List<BoxCollider> statics, List<ProjectileBase> projectiles) // TODO
@@ -191,6 +193,14 @@ public class GameObjectManager
         AddAOE(f);
     }
 
+        private void OnPlayerIceTrail()
+    {
+        Vector2 direction = Player1.GazeDirection;
+        IceTrail ice = new IceTrail(Player1, direction);
+        ice.LoadContent(_contentManager);
+        AddAOE(ice);
+    }
+
     public void SetWorldAudioManager(WorldAudioManager worldAudioManager)
     {
         _worldAudioManager = worldAudioManager;
@@ -218,6 +228,13 @@ public class GameObjectManager
         else
             xp = new Xp_Money(pos, new Point(16, 16));
         AddItem(xp);
+        
+        Random rnd = new Random();
+        if (rnd.NextDouble() <= 0.05) // 5% chance to drop an energy gel
+        {
+            EnergyGel energyGel = new EnergyGel(pos, new Point(32, 32));
+            AddItem(energyGel);
+        }
     }
 
 }
