@@ -217,51 +217,6 @@
 	"pivot": {"x":0.5,"y":0.5}
 },
 {
-	"filename": "e3_dog_standing.png",
-	"frame": {"x":0,"y":0,"w":40,"h":50},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":40,"h":50},
-	"sourceSize": {"w":40,"h":50},
-	"pivot": {"x":0.5,"y":0.5}
-},
-{
-	"filename": "e3_dog_walking_down.png",
-	"frame": {"x":0,"y":385,"w":153,"h":127},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":153,"h":127},
-	"sourceSize": {"w":153,"h":127},
-	"pivot": {"x":0.5,"y":0.5}
-},
-{
-	"filename": "e3_dog_walking_left.png",
-	"frame": {"x":64,"y":128,"w":96,"h":127},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":96,"h":127},
-	"sourceSize": {"w":96,"h":127},
-	"pivot": {"x":0.5,"y":0.5}
-},
-{
-	"filename": "e3_dog_walking_right.png",
-	"frame": {"x":190,"y":0,"w":80,"h":108},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":80,"h":108},
-	"sourceSize": {"w":80,"h":108},
-	"pivot": {"x":0.5,"y":0.5}
-},
-{
-	"filename": "e3_dog_walking_up.png",
-	"frame": {"x":262,"y":128,"w":102,"h":127},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":102,"h":127},
-	"sourceSize": {"w":102,"h":127},
-	"pivot": {"x":0.5,"y":0.5}
-},
-{
 	"filename": "Zange_nobackground.png",
 	"frame": {"x":90,"y":0,"w":50,"h":50},
 	"rotated": false,
