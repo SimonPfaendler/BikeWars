@@ -141,6 +141,46 @@ namespace BikeWars.Content.utils
                     new Rectangle(345, 507, 64, 62)
                 }
             },
+            
+            //DOG(enemy 3)
+            // Dog_Idle: e3_dog_standing.png 
+            { "Dog_Idle", new List<Rectangle>
+                {
+                    new Rectangle(372, 131, 42, 68) 
+                }
+            },
+
+            // Dog_WalkLeft: e3_dog_walking_left.png 
+            { "Dog_WalkLeft", new List<Rectangle>
+                {
+                    new Rectangle(326, 197, 55, 60), 
+                    new Rectangle(392, 194, 55, 60) 
+                }
+            },
+            
+            // Dog_WalkRight: e3_dog_walking_right.png 
+            { "Dog_WalkRight", new List<Rectangle>
+                {
+                    new Rectangle(78, 55, 58, 65), 
+                    new Rectangle(4, 53, 58, 63)  
+                }
+            },
+            
+            // Hobo_WalkDown: e3_dog_walking_down.png
+            { "Dog_WalkDown", new List<Rectangle> 
+                {
+                    new Rectangle(414, 129, 42, 74),
+                    new Rectangle(372, 131, 42, 68) 
+                }
+            },
+
+            //  Dog_WalkUp: e3_dog_walking_up.png
+            { "Dog_WalkUp", new List<Rectangle> 
+                {
+                    new Rectangle(144, 54, 36, 60) 
+                }
+            },
+
 
             // Flamethrower_Attack: 10 Frames, 32x112 each, single row spritesheet
             {

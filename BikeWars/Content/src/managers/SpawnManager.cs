@@ -112,7 +112,7 @@ namespace BikeWars.Content.managers
             // Determine type of enemy
             // As time progresses, higher chance for stronger enemies (BikeThief vs Hobo)
 
-            bool spawnHobo = _random.NextDouble() > (0.2 + 0.3 * progress); // Chance of BikeThief increases from 20% to 50%
+            bool spawnHobo = _random.NextDouble() > (0.2 + 0.3 * progress); // Chance of BikeThief/ Dog increases from 20% to 50%
 
             Vector2 spawnPos = GetRandomSpawnPosition();
 
@@ -130,9 +130,18 @@ namespace BikeWars.Content.managers
             }
             else
             {
-                var thief = new BikeThief(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager);
-                ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
-                _gameObjectManager.AddCharacter(thief);
+                bool spawnDog = _random.NextDouble() > (0.2 + 0.3 * progress); // Chance of BikeThief increases from 20% to 50%
+                if (spawnDog)
+                {
+                    var dog = new Dog(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager);
+                    ApplyScaling(dog, difficultyMultiplier, speedMultiplier);
+                    _gameObjectManager.AddCharacter(dog);
+                }
+                else
+                {
+                    var thief = new BikeThief(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager);
+                    ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
+                    _gameObjectManager.AddCharacter(thief);}
             }
         }
 
