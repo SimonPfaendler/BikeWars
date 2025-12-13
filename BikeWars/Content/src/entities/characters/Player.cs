@@ -47,6 +47,11 @@ namespace BikeWars.Entities.Characters
         public event Action Flamethrower;
         public event Action IceTrail;
 
+        private SpriteAnimation _bikeDownAnimation;
+        private SpriteAnimation _bikeUpAnimation;
+        private SpriteAnimation _bikeLeftAnimation;
+        private SpriteAnimation _bikeRightAnimation;
+        
         private SpriteAnimation _walkDownAnimation;
         private SpriteAnimation _walkUpAnimation;
         private SpriteAnimation _walkLeftAnimation;
@@ -181,12 +186,18 @@ namespace BikeWars.Entities.Characters
                 pixel.SetData(new[] { Color.White });
             }
 
+            // LOAD BOTH ANIMATION SETS
+            _bikeDownAnimation = SpriteManager.GetAnimation("Character1_BikeDown");
+            _bikeLeftAnimation = SpriteManager.GetAnimation("Character1_BikeLeft");
+            _bikeRightAnimation = SpriteManager.GetAnimation("Character1_BikeRight");
+            _bikeUpAnimation = SpriteManager.GetAnimation("Character1_BikeUp");
+
             _walkDownAnimation = SpriteManager.GetAnimation("Character1_WalkDown");
             _walkLeftAnimation = SpriteManager.GetAnimation("Character1_WalkLeft");
             _walkRightAnimation = SpriteManager.GetAnimation("Character1_WalkRight");
             _walkUpAnimation = SpriteManager.GetAnimation("Character1_WalkUp");
 
-            _currentAnimation = _walkRightAnimation;
+            _currentAnimation = _bikeRightAnimation;
             UpdateCollider();
         }
 
@@ -226,7 +237,7 @@ namespace BikeWars.Entities.Characters
                     destinationRectangle: ghostDest,
                     sourceRectangle: ghost.Source,
                     color: Color.White * alpha,
-                    rotation: movement.Rotation,
+                    rotation: 0f,
                     origin: new Vector2(ghost.Source.Width / 2f, ghost.Source.Height / 2f),
                     effects: SpriteEffects.None,
                     layerDepth: 0f
@@ -244,13 +255,33 @@ namespace BikeWars.Entities.Characters
             if (_currentAnimation == null)
                 return;
 
-            if (movement.CurrentMovement.GetType() == typeof(WalkingMovement)) // TODO THIS IS ONLY INSERTED TO SHOW. BUT NOT GOOD!
+            Rectangle source = _currentAnimation.GetCurrentFrame(); 
+            // Calculate aspect ratio to avoid squashing (e.g. WalkDown is 93px wide, but collider is 64px)
+            float aspectRatio = (float)source.Width / source.Height;
+            int drawWidth = (int)(Transform.Size.Y * aspectRatio); // Assuming Height is the constant anchor
+            int drawHeight = Transform.Size.Y;
+
+            // Since we draw from Center (Transform.Position), the destination rectangle position (anchor) is the Center.
+            // MonoGame Draw with DestinationRectangle and Origin works such that the Origin (source center) 
+            // is placed at the DestRect Position (x,y). 
+            // The DestRect Width/Height determine the scaling.
+            // So we just need to pass the correct dimensions.
+            
+            var destRect = new Rectangle(
+                (int)MathF.Round(Transform.Position.X),
+                (int)MathF.Round(Transform.Position.Y),
+                drawWidth,
+                drawHeight
+            );
+
+            if (movement.CurrentMovement is WalkingMovement)
             {
-                _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, movement.CurrentMovement.Rotation);
+                _currentAnimation.Draw(spriteBatch, destRect.Location.ToVector2(), new Point(drawWidth, drawHeight), 0f);
             }
             else
             {
-                _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, movement.CurrentMovement.Rotation + MathHelper.PiOver2);
+                 // Bicycle movement might still need specific handling if the sprites are authoritative
+                _currentAnimation.Draw(spriteBatch, destRect.Location.ToVector2(), new Point(drawWidth, drawHeight), 0f);
             }
 
             // Draw line from eye position only if GazeDirection is valid (non-zero)
@@ -444,8 +475,6 @@ namespace BikeWars.Entities.Characters
 
         private void HandleSwitchMovement()
         {
-            // TODO THIS IS NOW ONLY FOR TESTING AND SHOWING
-
             if (!InputHandler.IsPressed(GameAction.SWITCH))
                 return;
 
@@ -491,11 +520,6 @@ namespace BikeWars.Entities.Characters
                     Transform.Position += direction * movement.CurrentMovement.Speed * d * TerrainSpeedMultiplier;
                 }
             }
-
-
-
-
-
         }
 
         private void HandleWeaponSwitch()
@@ -511,6 +535,8 @@ namespace BikeWars.Entities.Characters
                     CurrentWeapon = WeaponType.IceTrail;
             else
                     CurrentWeapon = WeaponType.Gun;
+
+            System.Diagnostics.Debug.WriteLine($"[Player] Switched weapon to: {CurrentWeapon}");
             
         }
 
@@ -693,18 +719,27 @@ namespace BikeWars.Entities.Characters
         {
             if (movement.IsMoving())
             {
-                _currentAnimation = _walkUpAnimation;
-                // choose animation based on main direction
-                // @TODO We need to decide on how the animation should look like so don't delete it now
-                if (movement.CurrentMovement.GetType() == typeof(WalkingMovement)) // THIS IS ONLY INSERTED TO SHOW. BUT NOT GOOD!
+                // Choose animation based on movement type
+                if (movement.CurrentMovement is WalkingMovement)
                 {
-                    if (MathF.Abs(_facingDirection.X) > MathF.Abs(_facingDirection.Y))
+                     if (MathF.Abs(_facingDirection.X) > MathF.Abs(_facingDirection.Y))
                     {
                         _currentAnimation = (_facingDirection.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
                     }
                     else
                     {
                         _currentAnimation = (_facingDirection.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
+                    }
+                }
+                else // BicycleMovement
+                {
+                    if (MathF.Abs(_facingDirection.X) > MathF.Abs(_facingDirection.Y))
+                    {
+                        _currentAnimation = (_facingDirection.X > 0) ? _bikeRightAnimation : _bikeLeftAnimation;
+                    }
+                    else
+                    {
+                        _currentAnimation = (_facingDirection.Y > 0) ? _bikeDownAnimation : _bikeUpAnimation;
                     }
                 }
             }
