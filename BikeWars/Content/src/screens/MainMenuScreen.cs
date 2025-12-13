@@ -127,7 +127,7 @@ namespace BikeWars.Content.screens
                     break;
 
                 case ButtonAction.Statistics:
-                    ScreenManager.AddScreen(new StatisticsScreen(_backgroundTexture, _font));
+                    ScreenManager.AddScreen(new StatisticsScreen(_backgroundTexture, _font, _audioService));
                     break;
 
                 case ButtonAction.TechDemo:

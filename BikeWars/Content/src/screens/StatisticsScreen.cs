@@ -16,9 +16,10 @@ public class StatisticsScreen : MenuScreenBase, IScreen
     public float MusicVolume => 1f;
 
     public List<Statistic> Statistics;
-    public StatisticsScreen(Texture2D background, SpriteFont font)
+    public StatisticsScreen(Texture2D background, SpriteFont font, AudioService audioService)
         :base(background, font)
     {
+        _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
         var state = SaveLoad.LoadGame();
         Statistics = state.Statistics;
         InitializeButtons();
