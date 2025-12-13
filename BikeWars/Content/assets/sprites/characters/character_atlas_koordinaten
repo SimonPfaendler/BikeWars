@@ -163,6 +163,60 @@
 	"pivot": {"x":0.5,"y":0.5}
 },
 {
+	"filename": "e1_drunkdude_closerange_attack.png",
+	"frame": {"x":206,"y":256,"w":128,"h":125},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":125},
+	"sourceSize": {"w":128,"h":125},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "e1_drunkdude_longrange_attack.png",
+	"frame": {"x":0,"y":569,"w":294,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":294,"h":64},
+	"sourceSize": {"w":294,"h":64},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "e1_drunkdude_sprinting_down.png",
+	"frame": {"x":334,"y":256,"w":132,"h":129},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":132,"h":129},
+	"sourceSize": {"w":132,"h":129},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "e1_drunkdude_sprinting_left.png",
+	"frame": {"x":0,"y":256,"w":103,"h":128},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":103,"h":128},
+	"sourceSize": {"w":103,"h":128},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "e1_drunkdude_sprinting_right.png",
+	"frame": {"x":103,"y":256,"w":103,"h":128},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":103,"h":128},
+	"sourceSize": {"w":103,"h":128},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
+	"filename": "e1_drunkdude_sprinting_up.png",
+	"frame": {"x":160,"y":128,"w":102,"h":127},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":102,"h":127},
+	"sourceSize": {"w":102,"h":127},
+	"pivot": {"x":0.5,"y":0.5}
+},
+{
 	"filename": "Zange_nobackground.png",
 	"frame": {"x":90,"y":0,"w":50,"h":50},
 	"rotated": false,
