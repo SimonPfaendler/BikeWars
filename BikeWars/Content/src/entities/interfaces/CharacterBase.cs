@@ -50,18 +50,12 @@ public abstract class CharacterBase : ICharacter, ICombat
 
     public virtual void TakeDamage(int amount)
     {
-
         if (IsGodMode)
             return;
 
         if (IsDead) return;
 
         Attributes.Health -= amount;
-
-        if (Attributes.Health <= 0)
-        {
-            Attributes.Health = 0;
-        }
     }
 
     public bool CanAttack()

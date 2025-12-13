@@ -166,7 +166,7 @@ namespace BikeWars.Entities.Characters
 
         public Player(Vector2 start, Point size, AudioService audio)
         {
-            Attributes = new CharacterAttributes(300, 0, 10, 2f, false);
+            Attributes = new CharacterAttributes(this, 300, 0 , 10, 2f, false);
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 200f;
@@ -198,6 +198,7 @@ namespace BikeWars.Entities.Characters
         public void Update(GameTime gameTime, Vector2 mousePos)
         {
             UpdateAttackCooldown(gameTime);
+
             HandleSwitchMovement();
             HandleWeaponSwitch();
             HandleShooting();
@@ -207,6 +208,7 @@ namespace BikeWars.Entities.Characters
             HandleAnimation(gameTime);
             UpdateGazeDirection(mousePos);
             HandleGhostTrail(gameTime);
+
             UpdateCollider();
         }
         public override void Draw(SpriteBatch spriteBatch)
@@ -502,8 +504,8 @@ namespace BikeWars.Entities.Characters
         {
             if (!InputHandler.IsPressed(GameAction.SWITCH_WEAPON))
                 return;
-            
-            
+
+
                 // Toggle between the two weapons
             if (CurrentWeapon == WeaponType.Gun)
                     CurrentWeapon = WeaponType.Flamethrower;
@@ -511,7 +513,7 @@ namespace BikeWars.Entities.Characters
                     CurrentWeapon = WeaponType.IceTrail;
             else
                     CurrentWeapon = WeaponType.Gun;
-            
+
         }
 
         private void HandleItemUsage(GameTime gameTime)

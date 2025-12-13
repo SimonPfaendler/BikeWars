@@ -49,8 +49,8 @@ namespace BikeWars.Entities.Characters
             _audio = audio;
             _pathFinding = pathFinding;
             _collisionManager = collisionManager;
-            
-            Attributes = new CharacterAttributes(25, 0, 3, 2f, false);
+
+            Attributes = new CharacterAttributes(this, 25, 0, 3, 2f, false);
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 130f;

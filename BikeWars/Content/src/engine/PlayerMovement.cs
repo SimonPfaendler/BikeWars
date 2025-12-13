@@ -1,4 +1,3 @@
-using System;
 using Microsoft.Xna.Framework;
 using BikeWars.Content.components;
 using BikeWars.Content.engine.interfaces;
@@ -43,7 +42,7 @@ public class PlayerMovement
             directions.Add(MoveDirection.RIGHT);
         }
 
-        
+
         var leftStick = InputHandler.GamePad.LeftStick;
 
         if (leftStick != Vector2.Zero)
@@ -60,7 +59,7 @@ public class PlayerMovement
                 float diff = targetAngle - currentRotation;
                 while (diff <= -MathHelper.Pi) diff += MathHelper.TwoPi;
                 while (diff > MathHelper.Pi) diff -= MathHelper.TwoPi;
-                
+
                 // Deadzone for rotation stability
                 if (System.Math.Abs(diff) > 0.1f)
                 {

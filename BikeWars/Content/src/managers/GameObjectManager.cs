@@ -10,10 +10,11 @@ using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 
-
 namespace BikeWars.Content.managers;
 public class GameObjectManager
 {
+
+    public event Action<CharacterBase> OnCharacterDied;
     private Player _player1 {get; set;}
     public Player Player1{get => _player1; set => _player1 = value;}
     private Player _player2 {get; set;}
@@ -79,8 +80,13 @@ public class GameObjectManager
             wa.SetWorldAudioManager(_worldAudioManager);
 
         Characters.Add(character);
+        character.Attributes.OnDied += HandleCharacterDeath;
     }
 
+    private void HandleCharacterDeath(CharacterBase c)
+    {
+        OnCharacterDied?.Invoke(c);
+    }
 
     public void AddItem(ItemBase item)
     {
@@ -228,7 +234,7 @@ public class GameObjectManager
         else
             xp = new Xp_Money(pos, new Point(16, 16));
         AddItem(xp);
-        
+
         Random rnd = new Random();
         if (rnd.NextDouble() <= 0.05) // 5% chance to drop an energy gel
         {

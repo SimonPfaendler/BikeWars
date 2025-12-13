@@ -3,8 +3,6 @@ using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using System.Collections.Generic;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.managers;
 
@@ -21,18 +19,18 @@ namespace BikeWars.Content.screens
             _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
             InitializeButtons();
         }
-        
+
         protected sealed override void InitializeButtons()
         {
             Game1 game = Game1.Instance;
             int screenWidth = game.GraphicsDevice.Viewport.Width;
             int screenHeight = game.GraphicsDevice.Viewport.Height;
-    
+
             int buttonWidth = 250;
             int buttonHeight = 60;
             int verticalSpacing = 20;
             int horizontalSpacing = screenWidth / 15;
-            
+
             int leftStartY = screenHeight / 7;
             int rightStartY = screenHeight / 7;
 
@@ -52,7 +50,7 @@ namespace BikeWars.Content.screens
                 id: (int)ButtonAction.LoadGame,
                 texture: _buttonTexture,
                 bounds: new Rectangle(horizontalSpacing, leftStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
-                text: "Spiel laden", 
+                text: "Spiel laden",
                 font: _font,
                 audioService: _audioService
             ));
@@ -103,8 +101,8 @@ namespace BikeWars.Content.screens
                 audioService: _audioService
             ));
         }
-        
-        
+
+
         protected override void HandleButtonClick(MenuButton button)
         {
             switch ((ButtonAction)button.Id)
@@ -113,18 +111,23 @@ namespace BikeWars.Content.screens
                     GameConfigScreen gameConfigScreen = new GameConfigScreen(_backgroundTexture, _font, _audioService);
                     ScreenManager.AddScreen(gameConfigScreen);
                     break;
-            
+
                 case ButtonAction.LoadGame:
-                    // TODO: Load game Logic
+                    // Temporary we can just load the last game state.
+                    GameScreen gameScreen = new GameScreen(_audioService);
+                    gameScreen.LoadContent(Game1.Instance.Content);
+                    gameScreen.HandleLoadGame();
+                    ScreenManager.RemoveScreen(this);
+                    ScreenManager.AddScreen(gameScreen);
                     break;
-            
+
                 case ButtonAction.Profile:
                     ProfileScreen profileScreen = new ProfileScreen(_backgroundTexture, _font, _audioService);
                     ScreenManager.AddScreen(profileScreen);
                     break;
 
                 case ButtonAction.Statistics:
-                    // TODO: Open Statistics Screen
+                    ScreenManager.AddScreen(new StatisticsScreen(_backgroundTexture, _font));
                     break;
 
                 case ButtonAction.TechDemo:
@@ -137,11 +140,11 @@ namespace BikeWars.Content.screens
                     OptionScreen optionScreen = new OptionScreen(_backgroundTexture, _font, _audioService);
                     ScreenManager.AddScreen(optionScreen);
                     break;
-            
+
                 case ButtonAction.Exit:
                     ConfirmationDialogScreen confirmDialog = new ConfirmationDialogScreen(
-                        _font, 
-                        "Bist Du Dir sicher?", 
+                        _font,
+                        "Bist Du Dir sicher?",
                         this,
                         _audioService
                     );
