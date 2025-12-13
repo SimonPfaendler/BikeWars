@@ -256,6 +256,7 @@ public class CollisionManager
             }
         }
     }
+    
     private void HandleProjectileWithStatic(ICollider b, ICollider c)
     {
         if (b.Layer == CollisionLayer.WALL && c.Layer == CollisionLayer.PROJECTILE)

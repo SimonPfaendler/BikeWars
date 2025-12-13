@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.managers;
@@ -101,6 +102,22 @@ public class EnemyMovement : MovementBase
     {
         int localSize = LocalGridSize; // z.B. 7
         int half = localSize / 2;
+        
+        int dx = playerGrid.X - enemyGrid.X;
+        int dy = playerGrid.Y - enemyGrid.Y;
+
+        // if the player is outside the local grid range, use global A* instead
+        if (Math.Abs(dx) > half || Math.Abs(dy) > half)
+        {
+            _currentPath = _pathFinding.FindPath(
+                enemyGrid.X, enemyGrid.Y,
+                playerGrid.X, playerGrid.Y
+            );
+
+            _pathIndex = 0;
+            _lastPlayerGrid = playerGrid;
+            return;
+        }
     
         // 1. Local Grid erstellen
         Node[,] localGrid = new Node[localSize, localSize];
@@ -142,16 +159,6 @@ public class EnemyMovement : MovementBase
         _pathIndex = 0;
         _lastPlayerGrid = playerGrid;
     }
-    
-    // private void RecalculatePath(Point enemyGrid, Point playerGrid)
-    // {
-    //     _currentPath = _pathFinding.FindPath(
-    //         enemyGrid.X, enemyGrid.Y,
-    //         playerGrid.X, playerGrid.Y
-    //     );
-    //     _pathIndex = 0;
-    //     _lastPlayerGrid = playerGrid;
-    // }
 
     // returns the direction toward the next node in the path, or moves to next node.
     private Vector2 DirectionAlongPath()
