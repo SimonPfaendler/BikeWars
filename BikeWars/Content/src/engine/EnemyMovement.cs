@@ -30,19 +30,11 @@ public class EnemyMovement : MovementBase
     private const float StopRadius = 10f;
 
     private Vector2 _playerPosition;
-    public Vector2 PlayerPosition
-    {
-        get => _playerPosition;
-        set => _playerPosition = value;
-    }
+    public Vector2 PlayerPosition {get; set;}
 
     private Vector2 _enemyPosition;
 
-    public Vector2 EnemyPosition
-    {
-        get => _enemyPosition;
-        set => _enemyPosition =  value;
-    }
+    public Vector2 EnemyPosition {get; set;}
 
     // sets up the enemy movement system and stores pathfinding + grid helpers.
     public EnemyMovement(bool canMove, bool isMoving, PathFinding pathFinding,
