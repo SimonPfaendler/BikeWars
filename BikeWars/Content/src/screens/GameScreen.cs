@@ -113,6 +113,11 @@ namespace BikeWars.Content.screens
 
             _statisticsManager = new StatisticsManager();
             _gameObjectManager.OnCharacterDied += _statisticsManager.HandleCharacterDied;
+            _gameObjectManager.OnTookDamage += _statisticsManager.HandleTookDamage;
+            _gameObjectManager.Player1.OnTookDamage += _statisticsManager.HandleTookDamage;
+            _gameObjectManager.Player1.OnLevelUp += _statisticsManager.HandleLevel;
+            _gameObjectManager.Player1.OnMoreXP += _statisticsManager.HandleExperience;
+
             GameEvents.OnResumeTimer += ResumeTimer;
             HandleLoadNonInGameData();
         }
@@ -141,6 +146,7 @@ namespace BikeWars.Content.screens
             _collisionManager.OnItemPickup += _gameObjectManager.Player1.OnPickUpItem;
             _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
 
+
             // Overlay
             _overlay = new Overlay();
 
@@ -162,10 +168,12 @@ namespace BikeWars.Content.screens
 
             _levelUpScreen = new LevelUpScreen();
             // checks if the event OnLevelUp is triggered if it is LevelUpSreen gets active
-            _gameObjectManager.Player1.OnLevelUp += () =>
+            _gameObjectManager.Player1.OnLevelUp += (int xp, int amount) =>
             {
                 _levelUpScreen.Open(_gameObjectManager.Player1);
             };
+
+
             // the Option selected gets upgraded
             _levelUpScreen.OnOptionSelected += skillId =>
             {
@@ -338,7 +346,7 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.AddItem(b);
                 }
             }
-            _statisticsManager.Statistic = new Statistic(state.Statistic.Kills);
+            _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level);
             Console.WriteLine("Game loaded.");
         }
         private void HandleSaveLoadInput()

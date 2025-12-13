@@ -13,8 +13,8 @@ using BikeWars.Content.engine.interfaces;
 namespace BikeWars.Content.managers;
 public class GameObjectManager
 {
-
     public event Action<CharacterBase> OnCharacterDied;
+    public event Action<CharacterBase, int> OnTookDamage;
     private Player _player1 {get; set;}
     public Player Player1{get => _player1; set => _player1 = value;}
     private Player _player2 {get; set;}
@@ -81,11 +81,16 @@ public class GameObjectManager
 
         Characters.Add(character);
         character.Attributes.OnDied += HandleCharacterDeath;
+        character.OnTookDamage += HandleTookDamage;
     }
 
     private void HandleCharacterDeath(CharacterBase c)
     {
         OnCharacterDied?.Invoke(c);
+    }
+    private void HandleTookDamage(CharacterBase c, int amount)
+    {
+        OnTookDamage?.Invoke(c, amount);
     }
 
     public void AddItem(ItemBase item)

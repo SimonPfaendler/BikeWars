@@ -1,6 +1,5 @@
 using Microsoft.Xna.Framework;
 using System;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
@@ -11,7 +10,6 @@ using BikeWars.Content.entities.Inventory;
 using BikeWars.Content.entities.items;
 using BikeWars.Content.entities.levelup;
 using BikeWars.Content.managers;
-using System.Diagnostics.Metrics;
 using BikeWars.Utilities;
 
 // ============================================================
@@ -58,7 +56,8 @@ namespace BikeWars.Entities.Characters
         private readonly AudioService _audio;
         private WorldAudioManager _worldAudioManager;
         private string _currentMovementSound = null;
-        public event Action OnLevelUp;
+        public event Action<int, int> OnLevelUp;
+        public event Action<int> OnMoreXP;
 
         private bool _isUsingItem = false;
         private float _itemUseTimer = 0f;
@@ -331,7 +330,7 @@ namespace BikeWars.Entities.Characters
         public void AddXp(int XpAmount)
         {
             XpCounter += XpAmount;
-
+            OnMoreXP?.Invoke(XpLevelUp + XpAmount);
             if (XpCounter >= XpLevelUp)
             {
                 LevelUp();
@@ -344,7 +343,7 @@ namespace BikeWars.Entities.Characters
             XpLevelUp = XpLevelUp * 2;
             CurrentLevel++;
             // level upscreen is triggered:
-            OnLevelUp?.Invoke();
+            OnLevelUp?.Invoke(XpLevelUp, CurrentLevel);
         }
 
         // the Upgrades from LevelUpScreen are applied here

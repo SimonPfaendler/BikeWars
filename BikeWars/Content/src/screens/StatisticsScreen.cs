@@ -66,7 +66,7 @@ public class StatisticsScreen : MenuScreenBase, IScreen
         overlay.SetData(new[] { Color.White });
         foreach (Statistic statistic in Statistics) {
             new StatisticsComponent(statistic).Draw(sp, overlay, 400, row, _font);
-            row += 30;
+            row += 110;
         }
     }
 

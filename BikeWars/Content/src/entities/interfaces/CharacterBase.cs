@@ -38,6 +38,8 @@ public abstract class CharacterBase : ICharacter, ICombat
 
     protected virtual string WalkingSound => AudioAssets.Walking;
 
+    public event Action<CharacterBase, int> OnTookDamage;
+
     public void UpdateAttackCooldown(GameTime gameTime)
     {
         if (_attackCooldownTimer > 0f)
@@ -54,7 +56,7 @@ public abstract class CharacterBase : ICharacter, ICombat
             return;
 
         if (IsDead) return;
-
+        OnTookDamage?.Invoke(this, amount);
         Attributes.Health -= amount;
     }
 

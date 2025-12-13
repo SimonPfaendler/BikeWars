@@ -31,6 +31,21 @@ public class StatisticsManager
             Statistic.AddKill();
         }
     }
+
+    public void HandleLevel(int xp, int level)
+    {
+        Statistic.CurrentLevel(xp, level);
+    }
+
+    public void HandleExperience(int xp)
+    {
+        Statistic.CurrentXP(xp);
+    }
+
+    public void HandleTookDamage(CharacterBase c, int amount)
+    {
+        Statistic.AddDamage(c, amount);
+    }
     public void SaveStatistic()
     {
         Statistics.Add(Statistic);

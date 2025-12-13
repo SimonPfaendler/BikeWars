@@ -131,12 +131,9 @@ namespace BikeWars.Entities.Characters
                 Movement.CanMove = true;
             }
         }
-
         public override void Attack(ICombat target)
         {
-            if (!CanAttack()) return;
-            target.TakeDamage(Attributes.AttackDamage);
-            ResetAttackCooldown();
+            base.Attack(target);
             _audio.Sounds.Play(AudioAssets.Punch);
         }
     }
