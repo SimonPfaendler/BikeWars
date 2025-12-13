@@ -76,6 +76,13 @@ namespace BikeWars.Content.managers
             "BikeThief_Idle",
             "BikeThief_WalkLeft",
             "BikeThief_WalkRight",
+            
+            //DOG
+            "Dog_Idle",
+            "Dog_WalkLeft",
+            "Dog_WalkRight",
+            "Dog_WalkDown",
+            "Dog_WalkUp",
         };
 
         /// <summary>
@@ -109,6 +116,11 @@ namespace BikeWars.Content.managers
                 if (key.Contains("Character1"))
                 {
                     speed = 0.16f;
+                }
+
+                if (key.Contains("Dog_Idle"))
+                {
+                    speed = 0.5f;
                 }
 
                 var animation = new SpriteAnimation(_characterAtlas, frames, speed);
