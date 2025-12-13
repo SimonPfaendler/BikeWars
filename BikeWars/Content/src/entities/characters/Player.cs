@@ -12,6 +12,7 @@ using BikeWars.Content.entities.items;
 using BikeWars.Content.entities.levelup;
 using BikeWars.Content.managers;
 using System.Diagnostics.Metrics;
+using BikeWars.Utilities;
 
 // ============================================================
 // Player.cs
@@ -262,11 +263,11 @@ namespace BikeWars.Entities.Characters
 
                 // Draw static valid zone arc based on facing direction
                 float facingAngle = (float)Math.Atan2(_facingDirection.Y, _facingDirection.X);
-                DrawArc(spriteBatch, center, 50f, facingAngle, MathHelper.ToRadians(240), Color.Red * 0.5f);
+                DrawUtils.DrawArc(spriteBatch, pixel, center, 50f, facingAngle, MathHelper.ToRadians(240), Color.Red * 0.5f);
 
                 // Draw aiming line
                 Vector2 aimEnd = center + GazeDirection * 50f;
-                DrawLine(spriteBatch, center, aimEnd, Color.Red);
+                DrawUtils.DrawLine(spriteBatch, pixel, center, aimEnd, Color.Red);
             }
         }
 
@@ -323,44 +324,9 @@ namespace BikeWars.Entities.Characters
             }
         }
 
-
-
-        // Helper function to draw a line
-        private void DrawLine(SpriteBatch spriteBatch, Vector2 start, Vector2 end, Color color)
-        {
-            Vector2 edge = end - start;
-            float angle = (float)Math.Atan2(edge.Y, edge.X);
-            float length = edge.Length();
-            spriteBatch.Draw(pixel,
-                new Rectangle((int)start.X, (int)start.Y, (int)length, 2), // 2 is thickness
-                null,
-                color,
-                angle,
-                Vector2.Zero,
-                SpriteEffects.None,
-                0);
-        }
-
         public void SetWorldAudioManager(WorldAudioManager manager)
         {
             _worldAudioManager = manager;
-        }
-
-        private void DrawArc(SpriteBatch spriteBatch, Vector2 center, float radius, float angle, float sweep, Color color, int segments = 16)
-        {
-            float startAngle = angle - sweep / 2f;
-            float step = sweep / segments;
-
-            for (int i = 0; i < segments; i++)
-            {
-                float theta1 = startAngle + i * step;
-                float theta2 = startAngle + (i + 1) * step;
-
-                Vector2 p1 = center + new Vector2((float)Math.Cos(theta1), (float)Math.Sin(theta1)) * radius;
-                Vector2 p2 = center + new Vector2((float)Math.Cos(theta2), (float)Math.Sin(theta2)) * radius;
-
-                DrawLine(spriteBatch, p1, p2, color);
-            }
         }
         public void AddXp(int XpAmount)
         {
@@ -493,11 +459,6 @@ namespace BikeWars.Entities.Characters
                     Transform.Position += direction * movement.CurrentMovement.Speed * d * TerrainSpeedMultiplier;
                 }
             }
-
-
-
-
-
         }
 
         private void HandleWeaponSwitch()
