@@ -19,9 +19,6 @@ namespace BikeWars.Content.engine
             Position = position;
             Layer = CollisionLayer.TERRAIN;
             Owner = this;
-            Radius = Math.Max(width, height) * 0.5f;
-
-            Update();
         }
 
         protected override void Update()
@@ -32,6 +29,7 @@ namespace BikeWars.Content.engine
                 Width,
                 Height
             );
+            Radius = Math.Max(Width, Height) * 0.5f;
         }
 
         public override bool Intersects(ICollider other)

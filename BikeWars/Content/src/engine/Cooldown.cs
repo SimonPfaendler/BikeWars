@@ -42,15 +42,9 @@ public class CooldownWithDuration
         _durationTimer = _duration;
     }
 
-    public float GetRemainingDuration()
-    {
-        return _durationTimer;
-    }
+    public float RemainingDuration => _durationTimer;
 
-    public float GetRemainingCooldown()
-    {
-        return _cooldownTimer;
-    }
+    public float RemainingCooldown => _cooldownTimer;
 
     public void Update(GameTime gameTime)
     {

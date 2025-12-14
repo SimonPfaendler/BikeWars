@@ -27,7 +27,7 @@ namespace BikeWars.Content.managers
         private const float MIN_SPAWN_RADIUS = 300f;
         private const float MAX_SPAWN_RADIUS = 700f;
 
-        private Random _random;
+        private readonly Random _random;
 
         public SpawnManager(GameObjectManager gameObjectManager, CollisionManager collisionManager, AudioService audioService, PathFinding pathFinding)
         {
@@ -152,12 +152,11 @@ namespace BikeWars.Content.managers
             var nearby = _collisionManager.StaticHash.QueryNearby(pos, 1);
             foreach (var col in nearby)
             {
-                if (col.Layer == CollisionLayer.SPAWNENEMIES)
+                if (col.Layer == CollisionLayer.SPAWNENEMIES && col.Intersects(checkCollider))
                 {
-                    if (col.Intersects(checkCollider))
-                    {
-                        return true;
-                    }
+                    
+                    return true;
+                    
                 }
             }
 

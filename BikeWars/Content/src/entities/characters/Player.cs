@@ -40,6 +40,8 @@ namespace BikeWars.Entities.Characters
 
         public TerrainCollider CurrentTerrain { get; set; }
         public float TerrainSpeedMultiplier = 1.0f;
+        private const float IncreaseSpeed = 1.1f;
+        private const float DecreaseSpeed = 0.9f;
         // public bool IsGodMode { get; set; }
 
         public event Action ShotBullet;
@@ -293,7 +295,7 @@ namespace BikeWars.Entities.Characters
 
         public float CooldownTimer()
         {
-            return sprint.GetRemainingCooldown();
+            return sprint.RemainingCooldown;
         }
 
         private float GetTerrainMultiplier()
@@ -306,10 +308,10 @@ namespace BikeWars.Entities.Characters
                 switch (CurrentTerrain.TerrainType)
                 {
                     case TerrainType.ROAD:
-                        return 1.10f;
+                        return IncreaseSpeed;
 
                     case TerrainType.GRASS:
-                        return 0.90f;
+                        return DecreaseSpeed;
 
                     default:
                         return 1.0f;
