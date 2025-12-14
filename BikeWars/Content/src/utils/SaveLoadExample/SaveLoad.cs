@@ -18,8 +18,10 @@ public static class SaveLoad
     {
         BULLET,
         HOBO,
+        DOG,
         BIKETHIEF,
         CHEST,
+        ENERGY_GEL,
         BEER,
         MONEY
     }
@@ -41,6 +43,8 @@ public static class SaveLoad
         public List<ProjectileSaveModel> Projectiles {get; set;}
         public List<CharacterSaveModel> Characters {get; set;}
         public List<ItemSaveModel> Items {get; set;}
+        public List<Statistic> Statistics{get; set;}
+        public Statistic Statistic{get; set;}
     }
 
     public class BasicSaveModel
@@ -153,7 +157,7 @@ public static class SaveLoad
 
     // save the counter in a JSON file
     // public static void SaveGame(int counter, Transform playerPosition, List<ProjectileBase> projectiles)
-    public static void SaveGame(GameTimer gameTimer, GameObjectManager gameObjectManager)
+    public static void SaveGame(GameTimer gameTimer, GameObjectManager gameObjectManager, StatisticsManager statisticsManager)
     {
         try
         {
@@ -164,13 +168,58 @@ public static class SaveLoad
                 GameTimerTotalTime = gameTimer.TotalTime,
                 IsGameTimerRunning = gameTimer.IsRunning,
                 IsGameTimerPaused = gameTimer.IsPaused,
-                
+
                 PlayerX = gameObjectManager.Player1.Transform.Position.X,
                 PlayerY = gameObjectManager.Player1.Transform.Position.Y,
-                
+
                 Projectiles = MakeProjectileSaveList(gameObjectManager.Projectiles),
                 Characters = MakeCharacterSaveList(gameObjectManager.Characters),
                 Items = MakeItemSaveList(gameObjectManager.Items),
+                Statistics = statisticsManager.Statistics,
+                Statistic = statisticsManager.Statistic
+            };
+            string json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
+
+            // get the folder where the JSON file will be saved
+            // if it doesn't exist yet, it creates one
+            string dir = Path.GetDirectoryName(SAVE_PATH);
+            if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
+
+            // write the JSON file and print a message in the console when it's saved successfully
+            File.WriteAllText(SAVE_PATH, json);
+            Console.WriteLine("Saved: " + SAVE_PATH);
+        }
+
+        // if the save isn't successful it will print a message in the console
+        catch (Exception ex)
+        {
+            Console.WriteLine("Save failed: " + ex.Message);
+        }
+    }
+
+    // Use this if you just want to add other data like statistics and you still need the
+    // last save in the game to load it again. That's why we need LoadGame here
+    public static void SaveNonGame(StatisticsManager statisticsManager)
+    {
+        GameState loadState = LoadGame();
+        try
+        {
+            // serialize the current info into JSON text
+            GameState state = new GameState
+            {
+                GameTimerCurrentTime = loadState.GameTimerCurrentTime,
+                GameTimerTotalTime = loadState.GameTimerTotalTime,
+                IsGameTimerRunning = loadState.IsGameTimerRunning,
+                IsGameTimerPaused = loadState.IsGameTimerPaused,
+
+                PlayerX = loadState.PlayerX,
+                PlayerY = loadState.PlayerY,
+
+                Projectiles = loadState.Projectiles,
+                Characters = loadState.Characters,
+                Items = loadState.Items,
+                Statistics = statisticsManager.Statistics,
+                Statistic = statisticsManager.Statistic
             };
             string json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
 
@@ -229,7 +278,8 @@ public static class SaveLoad
         {
             Chest c => new ItemSaveModel(TYPES.CHEST, item.Transform.Position, item.Transform.Size),
             Xp_Beer b => new ItemSaveModel(TYPES.BEER, item.Transform.Position, item.Transform.Size),
-            Xp_Money b => new ItemSaveModel(TYPES.MONEY, item.Transform.Position, item.Transform.Size)
+            Xp_Money b => new ItemSaveModel(TYPES.MONEY, item.Transform.Position, item.Transform.Size),
+            EnergyGel e => new ItemSaveModel(TYPES.ENERGY_GEL, item.Transform.Position, item.Transform.Size)
         };
     }
     private static CharacterSaveModel MakeCharacterSaveModel(CharacterBase character)
@@ -237,7 +287,8 @@ public static class SaveLoad
         return character switch
         {
             Hobo h => new CharacterSaveModel(TYPES.HOBO, character.Transform.Position, character.Transform.Size),
-            BikeThief bt => new CharacterSaveModel(TYPES.BIKETHIEF, character.Transform.Position, character.Transform.Size)
+            BikeThief bt => new CharacterSaveModel(TYPES.BIKETHIEF, character.Transform.Position, character.Transform.Size),
+            Dog dg => new CharacterSaveModel(TYPES.DOG, character.Transform.Position, character.Transform.Size)
         };
     }
     private static List<ProjectileSaveModel> MakeProjectileSaveList(List<ProjectileBase> pList)
@@ -268,7 +319,7 @@ public static class SaveLoad
         }
         return crtList;
     }
-    
+
     private static string FormatTime(float seconds)
     {
         int minutes = (int)(seconds / 60);

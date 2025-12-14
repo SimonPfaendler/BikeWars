@@ -51,7 +51,7 @@ public class CombatManager
         }
     }
 
-        public void HandleAOEHit(CharacterBase target, AreaOfEffectBase aoe)
+    public void HandleAOEHit(CharacterBase target, AreaOfEffectBase aoe)
     {
         if (target.IsDead) return;
         if (target.IsGodMode)
