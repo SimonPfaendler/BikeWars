@@ -25,6 +25,9 @@
         <None Update="Content\sprites\PogacarWinSpriteSheet.json">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <None Update="Content\assets\sprites\characters\character_atlas_koordinaten">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="Icon.ico">

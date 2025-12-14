@@ -55,6 +55,11 @@ namespace BikeWars.Content.managers
         private static readonly List<string> AnimationKeys = new List<string>
         {
             // SPIELER 1
+            // SPIELER 1
+            "Character1_BikeDown",
+            "Character1_BikeLeft",
+            "Character1_BikeRight",
+            "Character1_BikeUp",
             "Character1_WalkDown",
             "Character1_WalkLeft",
             "Character1_WalkRight",
@@ -108,7 +113,7 @@ namespace BikeWars.Content.managers
                 {
                     speed = 0.4f;
                 }
-                if (key.Contains("Character1_Walk"))
+                if (key.Contains("Character1"))
                 {
                     speed = 0.16f;
                 }
