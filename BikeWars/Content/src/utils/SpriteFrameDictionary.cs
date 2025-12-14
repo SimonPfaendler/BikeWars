@@ -125,6 +125,16 @@ namespace BikeWars.Content.utils
             AnimationFrames["BikeThief_WalkLeft"] = GetFramesFromAtlas("e2_bikethief_walking_left.png", 2, 3);
             AnimationFrames["BikeThief_WalkRight"] = btWalkRight;
             
+            // Dog
+            AnimationFrames["Dog_Idle"] = GetFramesFromAtlas("e3_dog_walking_right.png", 1, 1);
+            AnimationFrames["Dog_WalkLeft"] = GetFramesFromAtlas("e3_dog_walking_left.png", 1, 1);
+            AnimationFrames["Dog_WalkRight"] = GetFramesFromAtlas("e3_dog_walking_right.png", 1, 1);
+            AnimationFrames["Dog_WalkUp"] = GetFramesFromAtlas("e3_dog_walking_up.png", 1, 1);
+            
+            var dogDown = GetFramesFromAtlas("e3_dog_walking_down_1.png", 1, 1);
+            dogDown.AddRange(GetFramesFromAtlas("e3_dog_walking_down_2.png", 1, 1));
+            AnimationFrames["Dog_WalkDown"] = dogDown;
+
             // Spezialattacken:
              AnimationFrames["Flamethrower_Attack"] = new List<Rectangle>();
              for (int i = 0; i < 10; i++) AnimationFrames["Flamethrower_Attack"].Add(new Rectangle(i * 32, 0, 32, 112));
