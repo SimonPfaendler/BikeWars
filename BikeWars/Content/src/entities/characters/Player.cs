@@ -51,7 +51,7 @@ namespace BikeWars.Entities.Characters
         private SpriteAnimation _bikeUpAnimation;
         private SpriteAnimation _bikeLeftAnimation;
         private SpriteAnimation _bikeRightAnimation;
-        
+
         private SpriteAnimation _walkDownAnimation;
         private SpriteAnimation _walkUpAnimation;
         private SpriteAnimation _walkLeftAnimation;
@@ -165,14 +165,16 @@ namespace BikeWars.Entities.Characters
                 {
                     ItemPickedUp?.Invoke(item);
                 }
+
                 return;
             }
+
             ItemPickedUp?.Invoke(item);
         }
 
         public Player(Vector2 start, Point size, AudioService audio)
         {
-            Attributes = new CharacterAttributes(this, 300, 0 , 10, 2f, false);
+            Attributes = new CharacterAttributes(this, 300, 0, 10, 2f, false);
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 200f;
@@ -223,6 +225,7 @@ namespace BikeWars.Entities.Characters
 
             UpdateCollider();
         }
+
         public override void Draw(SpriteBatch spriteBatch)
         {
             foreach (var ghost in _ghostTrail)
@@ -240,12 +243,13 @@ namespace BikeWars.Entities.Characters
                     destinationRectangle: ghostDest,
                     sourceRectangle: ghost.Source,
                     color: Color.White * alpha,
-                    rotation: 0f,
+                    rotation: movement.Rotation,
                     origin: new Vector2(ghost.Source.Width / 2f, ghost.Source.Height / 2f),
                     effects: SpriteEffects.None,
                     layerDepth: 0f
                 );
             }
+
             // saubere Ganzzahl-Position, sonst „zittert“ Pixelart
             var dest = new Rectangle(
                 (int)MathF.Round(Transform.Position.X),
@@ -258,33 +262,16 @@ namespace BikeWars.Entities.Characters
             if (_currentAnimation == null)
                 return;
 
-            Rectangle source = _currentAnimation.GetCurrentFrame(); 
-            // Calculate aspect ratio to avoid squashing (e.g. WalkDown is 93px wide, but collider is 64px)
-            float aspectRatio = (float)source.Width / source.Height;
-            int drawWidth = (int)(Transform.Size.Y * aspectRatio); // Assuming Height is the constant anchor
-            int drawHeight = Transform.Size.Y;
-
-            // Since we draw from Center (Transform.Position), the destination rectangle position (anchor) is the Center.
-            // MonoGame Draw with DestinationRectangle and Origin works such that the Origin (source center) 
-            // is placed at the DestRect Position (x,y). 
-            // The DestRect Width/Height determine the scaling.
-            // So we just need to pass the correct dimensions.
-            
-            var destRect = new Rectangle(
-                (int)MathF.Round(Transform.Position.X),
-                (int)MathF.Round(Transform.Position.Y),
-                drawWidth,
-                drawHeight
-            );
-
-            if (movement.CurrentMovement is WalkingMovement)
+            if (movement.CurrentMovement.GetType() ==
+                typeof(WalkingMovement)) // TODO THIS IS ONLY INSERTED TO SHOW. BUT NOT GOOD!
             {
-                _currentAnimation.Draw(spriteBatch, destRect.Location.ToVector2(), new Point(drawWidth, drawHeight), 0f);
+                _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size,
+                    movement.CurrentMovement.Rotation);
             }
             else
             {
-                 // Bicycle movement might still need specific handling if the sprites are authoritative
-                _currentAnimation.Draw(spriteBatch, destRect.Location.ToVector2(), new Point(drawWidth, drawHeight), 0f);
+                _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size,
+                    movement.CurrentMovement.Rotation + MathHelper.PiOver2);
             }
 
             // Draw line from eye position only if GazeDirection is valid (non-zero)
@@ -294,7 +281,8 @@ namespace BikeWars.Entities.Characters
 
                 // Draw static valid zone arc based on facing direction
                 float facingAngle = (float)Math.Atan2(_facingDirection.Y, _facingDirection.X);
-                DrawUtils.DrawArc(spriteBatch, pixel, center, 50f, facingAngle, MathHelper.ToRadians(240), Color.Red * 0.5f);
+                DrawUtils.DrawArc(spriteBatch, pixel, center, 50f, facingAngle, MathHelper.ToRadians(240),
+                    Color.Red * 0.5f);
 
                 // Draw aiming line
                 Vector2 aimEnd = center + GazeDirection * 50f;
@@ -305,7 +293,8 @@ namespace BikeWars.Entities.Characters
         // Is Helpful for example with colliders to set the original position back.
         public override void SetLastTransform()
         {
-            Transform = new Transform(new Vector2(LastTransform.Position.X, LastTransform.Position.Y), LastTransform.Size);
+            Transform = new Transform(new Vector2(LastTransform.Position.X, LastTransform.Position.Y),
+                LastTransform.Size);
         }
 
         public void Immobalize(bool value)
@@ -359,6 +348,7 @@ namespace BikeWars.Entities.Characters
         {
             _worldAudioManager = manager;
         }
+
         public void AddXp(int XpAmount)
         {
             XpCounter += XpAmount;
@@ -469,6 +459,7 @@ namespace BikeWars.Entities.Characters
             {
                 sprint.Activate();
             }
+
             CurrentSpeed = sprint.IsActive ? SprintSpeed : movement.CurrentMovement.Speed;
             Vector2 direction = movement.CurrentMovement.Direction;
 
@@ -498,13 +489,13 @@ namespace BikeWars.Entities.Characters
                 return;
 
 
-                // Toggle between the two weapons
+            // Toggle between the two weapons
             if (CurrentWeapon == WeaponType.Gun)
-                    CurrentWeapon = WeaponType.Flamethrower;
+                CurrentWeapon = WeaponType.Flamethrower;
             else if (CurrentWeapon == WeaponType.Flamethrower)
-                    CurrentWeapon = WeaponType.IceTrail;
+                CurrentWeapon = WeaponType.IceTrail;
             else
-                    CurrentWeapon = WeaponType.Gun;
+                CurrentWeapon = WeaponType.Gun;
         }
 
         private void HandleItemUsage(GameTime gameTime)
@@ -636,7 +627,9 @@ namespace BikeWars.Entities.Characters
 
         private void HandleShooting()
         {
-            bool shooting = (Attributes.CanAutoAttack && InputHandler.IsHeld(GameAction.SHOOT) || InputHandler.IsPressed(GameAction.SHOOT)) && CanAttack();
+            bool shooting =
+                (Attributes.CanAutoAttack && InputHandler.IsHeld(GameAction.SHOOT) ||
+                 InputHandler.IsPressed(GameAction.SHOOT)) && CanAttack();
             if (shooting)
             {
                 Shooting();
@@ -689,7 +682,7 @@ namespace BikeWars.Entities.Characters
                 // Choose animation based on movement type
                 if (movement.CurrentMovement is WalkingMovement)
                 {
-                     if (MathF.Abs(_facingDirection.X) > MathF.Abs(_facingDirection.Y))
+                    if (MathF.Abs(_facingDirection.X) > MathF.Abs(_facingDirection.Y))
                     {
                         _currentAnimation = (_facingDirection.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
                     }
@@ -700,18 +693,11 @@ namespace BikeWars.Entities.Characters
                 }
                 else // BicycleMovement
                 {
-                    if (MathF.Abs(_facingDirection.X) > MathF.Abs(_facingDirection.Y))
-                    {
-                        _currentAnimation = (_facingDirection.X > 0) ? _bikeRightAnimation : _bikeLeftAnimation;
-                    }
-                    else
-                    {
-                        _currentAnimation = (_facingDirection.Y > 0) ? _bikeDownAnimation : _bikeUpAnimation;
-                    }
+                    _currentAnimation = _bikeUpAnimation;
                 }
-            }
 
-            _currentAnimation?.Update(gameTime, movement.IsMoving());
+                _currentAnimation?.Update(gameTime, movement.IsMoving());
+            }
         }
     }
 }
