@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.managers;
@@ -12,7 +13,6 @@ namespace BikeWars.Content.engine;
 
 public class EnemyMovement : MovementBase
 {
-    // i dont understand why it gives me this error
     private readonly PathFinding _pathFinding;
     private readonly CollisionManager _gridMapper;
 
@@ -26,23 +26,15 @@ public class EnemyMovement : MovementBase
     private float _repathTimer = 0f;
     private const float RepathInterval = 1f;
 
-    private const float NodeReachDistance = 8f;
+    private const float NodeReachDistance = 18f;
     private const float StopRadius = 10f;
 
     private Vector2 _playerPosition;
-    public Vector2 PlayerPosition
-    {
-        get => _playerPosition;
-        set => _playerPosition = value;
-    }
+    public Vector2 PlayerPosition {get; set;}
 
     private Vector2 _enemyPosition;
 
-    public Vector2 EnemyPosition
-    {
-        get => _enemyPosition;
-        set => _enemyPosition =  value;
-    }
+    public Vector2 EnemyPosition {get; set;}
 
     // sets up the enemy movement system and stores pathfinding + grid helpers.
     public EnemyMovement(bool canMove, bool isMoving, PathFinding pathFinding,
@@ -102,7 +94,23 @@ public class EnemyMovement : MovementBase
     {
         int localSize = LocalGridSize; // z.B. 7
         int half = localSize / 2;
+        
+        int dx = playerGrid.X - enemyGrid.X;
+        int dy = playerGrid.Y - enemyGrid.Y;
 
+        // if the player is outside the local grid range, use global A* instead
+        if (Math.Abs(dx) > half || Math.Abs(dy) > half)
+        {
+            _currentPath = _pathFinding.FindPath(
+                enemyGrid.X, enemyGrid.Y,
+                playerGrid.X, playerGrid.Y
+            );
+
+            _pathIndex = 0;
+            _lastPlayerGrid = playerGrid;
+            return;
+        }
+    
         // 1. Local Grid erstellen
         Node[,] localGrid = new Node[localSize, localSize];
         for (int y = 0; y < localSize; y++)
@@ -111,35 +119,35 @@ public class EnemyMovement : MovementBase
             {
                 int globalX = enemyGrid.X - half + x;
                 int globalY = enemyGrid.Y - half + y;
-
+    
                 bool walkable = false;
                 if (_pathFinding.IsInsideGrid(globalX, globalY))
                     walkable = _pathFinding.GetNode(globalX, globalY).Walkable;
-
+    
                 localGrid[x, y] = new Node(x, y, walkable);
             }
         }
-
+    
         // 2. PathFinding für Local Grid
         PathFinding localFinder = new PathFinding(localGrid);
-
+    
         // 3. Start & Ziel auf Local Grid abbilden
         Point startLocal = new Point(half, half);
         Point targetLocal = new Point(
             half + (playerGrid.X - enemyGrid.X),
             half + (playerGrid.Y - enemyGrid.Y)
         );
-
+    
         var localPath = localFinder.FindPath(startLocal.X, startLocal.Y, targetLocal.X, targetLocal.Y);
         _currentPath.Clear();
-
+    
         foreach (var node in localPath)
         {
             int globalX = node.X + (enemyGrid.X - half);
             int globalY = node.Y + (enemyGrid.Y - half);
             _currentPath.Add(_pathFinding.GetNode(globalX, globalY));
         }
-
+    
         _pathIndex = 0;
         _lastPlayerGrid = playerGrid;
     }

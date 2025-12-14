@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
@@ -6,9 +6,10 @@ using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.managers;
 
+
 namespace BikeWars.Entities.Characters
 {
-    public class Hobo: CharacterBase, IWorldAudioAware
+    public class Dog: CharacterBase, IWorldAudioAware
     {
         private SpriteAnimation _idleAnimation;
         private SpriteAnimation _walkLeftAnimation;
@@ -42,24 +43,24 @@ namespace BikeWars.Entities.Characters
         public static Texture2D pixel;
 
 
-        public Hobo(Vector2 start, Point size, AudioService audio, PathFinding pathFinding,
+        public Dog(Vector2 start, Point size, AudioService audio, PathFinding pathFinding,
             CollisionManager collisionManager)
         {
             _audio = audio;
             _pathFinding = pathFinding;
             _collisionManager = collisionManager;
 
-            Attributes = new CharacterAttributes(this, 40, 0, 5, 2f, false);
+            Attributes = new CharacterAttributes(this, 25, 0, 3, 2f, false);
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
-            Speed = 100f;
+            Speed = 130f;
             Movement = new EnemyMovement(canMove: true, isMoving: false, pathFinding: _pathFinding,
                 gridMapper: _collisionManager);
-            _idleAnimation = SpriteManager.GetAnimation("Hobo_Idle");
-            _walkLeftAnimation = SpriteManager.GetAnimation("Hobo_WalkLeft");
-            _walkRightAnimation = SpriteManager.GetAnimation("Hobo_WalkRight");
-            _walkDownAnimation = SpriteManager.GetAnimation("Hobo_WalkDown");
-            _walkUpAnimation = SpriteManager.GetAnimation("Hobo_WalkUp");
+            _idleAnimation = SpriteManager.GetAnimation("Dog_Idle");
+            _walkLeftAnimation = SpriteManager.GetAnimation("Dog_WalkLeft");
+            _walkRightAnimation = SpriteManager.GetAnimation("Dog_WalkRight");
+            _walkDownAnimation = SpriteManager.GetAnimation("Dog_WalkDown");
+            _walkUpAnimation = SpriteManager.GetAnimation("Dog_WalkUp");
             _currentAnimation = _idleAnimation;
             UpdateCollider();
         }

@@ -34,6 +34,9 @@ namespace BikeWars.Content.screens
 
         private ContentManager _contentManager;
         public ContentManager ContentManager => _contentManager;
+
+        private StatisticsManager _statisticsManager {get; set;}
+        public StatisticsManager StatisticsManager => _statisticsManager;
         private readonly AudioService _audioService;
         public AudioService AudioService => _audioService;
 
@@ -42,7 +45,7 @@ namespace BikeWars.Content.screens
 
         private HUD hud;
         private Texture2D hudTexture;
-        
+
 
         private CollisionManager _collisionManager;
         private GameObjectManager _gameObjectManager;
@@ -105,15 +108,18 @@ namespace BikeWars.Content.screens
             _freelook = false;
             camera.Position = _gameObjectManager.Player1.Transform.Position;
 
-            // Create SaveLoad and load saved data
-            var state = SaveLoad.LoadGame();
-            _gameObjectManager.Player1.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
-            Console.WriteLine("Loaded saved position (or default if no file).");
-
             _gameTimer = new GameTimer(GAME_TIME_LIMIT);
             _gameTimer.OnTimerFinished += OnGameTimerFinished;
-            _gameTimer.SetFromSave(state.GameTimerCurrentTime, state.IsGameTimerRunning, state.IsGameTimerPaused);
+
+            _statisticsManager = new StatisticsManager();
+            _gameObjectManager.OnCharacterDied += _statisticsManager.HandleCharacterDied;
+            _gameObjectManager.OnTookDamage += _statisticsManager.HandleTookDamage;
+            _gameObjectManager.Player1.OnTookDamage += _statisticsManager.HandleTookDamage;
+            _gameObjectManager.Player1.OnLevelUp += _statisticsManager.HandleLevel;
+            _gameObjectManager.Player1.OnMoreXP += _statisticsManager.HandleExperience;
+
             GameEvents.OnResumeTimer += ResumeTimer;
+            HandleLoadNonInGameData();
         }
 
         public virtual void LoadContent(ContentManager content)
@@ -140,6 +146,7 @@ namespace BikeWars.Content.screens
             _collisionManager.OnItemPickup += _gameObjectManager.Player1.OnPickUpItem;
             _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
 
+
             // Overlay
             _overlay = new Overlay();
 
@@ -161,10 +168,12 @@ namespace BikeWars.Content.screens
 
             _levelUpScreen = new LevelUpScreen();
             // checks if the event OnLevelUp is triggered if it is LevelUpSreen gets active
-            _gameObjectManager.Player1.OnLevelUp += () =>
+            _gameObjectManager.Player1.OnLevelUp += (int xp, int amount) =>
             {
                 _levelUpScreen.Open(_gameObjectManager.Player1);
             };
+
+
             // the Option selected gets upgraded
             _levelUpScreen.OnOptionSelected += skillId =>
             {
@@ -210,7 +219,7 @@ namespace BikeWars.Content.screens
 
             _gameObjectManager.Update(gameTime, InputHandler.MakeMouseWorldPosByCamera(camera));
             _itemManager.Update(gameTime);
-            
+
 
             if (InputHandler.IsPressed(GameAction.DEBUG_HEAL))
                 _gameObjectManager.Player1.Attributes.Health = _gameObjectManager.Player1.Attributes.MaxHealth;
@@ -232,7 +241,9 @@ namespace BikeWars.Content.screens
                 _audioService.Music.Stop();
                 _overlay.SetPaused(true, gameTime);
                 _audioService.Sounds.Play(AudioAssets.CarCrash);
-                ScreenManager.AddScreen(new GameOverScreen(_font, _audioService));
+                ScreenManager.AddScreen(new GameOverScreen(_font, _audioService, _statisticsManager.Statistic));
+                _statisticsManager.SaveStatistic();
+                SaveLoad.SaveNonGame(_statisticsManager);
             }
 
             _debugger.Update(gameTime);
@@ -260,7 +271,15 @@ namespace BikeWars.Content.screens
             _gameTimer.Update(gameTime);
         }
 
-        private void HandleLoadGame()
+        // Load here stuff like statistics or options that is not related to the
+        // game and gameplay
+        private void HandleLoadNonInGameData()
+        {
+            var state = SaveLoad.LoadGame();
+            _statisticsManager.Statistics = state.Statistics;
+        }
+
+        public void HandleLoadGame()
         {
             var state = SaveLoad.LoadGame();
             _gameObjectManager.Player1.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
@@ -295,6 +314,12 @@ namespace BikeWars.Content.screens
                         _collisionManager);
                     _gameObjectManager.AddCharacter(b);
                 }
+                if (p.Type == SaveLoad.TYPES.DOG)
+                {
+                    Dog b = new Dog(p.Position.ToVector2(), p.Size.ToPoint(), _audioService, _pathFinding,
+                        _collisionManager);
+                    _gameObjectManager.AddCharacter(b);
+                }
             }
 
             _gameObjectManager.Items.Clear();
@@ -315,13 +340,19 @@ namespace BikeWars.Content.screens
                     Xp_Money b = new Xp_Money(p.Position.ToVector2(), p.Size.ToPoint());
                     _gameObjectManager.AddItem(b);
                 }
+                if (p.Type == SaveLoad.TYPES.ENERGY_GEL)
+                {
+                    EnergyGel b = new EnergyGel(p.Position.ToVector2(), p.Size.ToPoint());
+                    _gameObjectManager.AddItem(b);
+                }
             }
+            _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level);
             Console.WriteLine("Game loaded.");
         }
         private void HandleSaveLoadInput()
         {
             if (InputHandler.IsPressed(GameAction.SAVE))
-                SaveLoad.SaveGame(_gameTimer, _gameObjectManager);
+                SaveLoad.SaveGame(_gameTimer, _gameObjectManager, _statisticsManager);
 
             if (InputHandler.IsPressed(GameAction.LOAD))
             {
@@ -461,7 +492,9 @@ namespace BikeWars.Content.screens
             _audioService.Music.Stop();
             _overlay.SetPaused(true, Game1.CurrentGameTime);
             _audioService.Sounds.Play(AudioAssets.CarHorn);
-            ScreenManager.AddScreen(new GameWonScreen(_font, _audioService));
+            ScreenManager.AddScreen(new GameWonScreen(_font, _audioService, _statisticsManager.Statistic));
+            _statisticsManager.SaveStatistic();
+            SaveLoad.SaveNonGame(_statisticsManager);
         }
 
         private void DrawTimer(SpriteBatch spriteBatch, GameTime gameTime)

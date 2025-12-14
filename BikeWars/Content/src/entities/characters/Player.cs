@@ -11,7 +11,7 @@ using BikeWars.Content.entities.Inventory;
 using BikeWars.Content.entities.items;
 using BikeWars.Content.entities.levelup;
 using BikeWars.Content.managers;
-using System.Diagnostics.Metrics;
+using BikeWars.Utilities;
 
 // ============================================================
 // Player.cs
@@ -49,6 +49,11 @@ namespace BikeWars.Entities.Characters
         public event Action Flamethrower;
         public event Action IceTrail;
 
+        private SpriteAnimation _bikeDownAnimation;
+        private SpriteAnimation _bikeUpAnimation;
+        private SpriteAnimation _bikeLeftAnimation;
+        private SpriteAnimation _bikeRightAnimation;
+
         private SpriteAnimation _walkDownAnimation;
         private SpriteAnimation _walkUpAnimation;
         private SpriteAnimation _walkLeftAnimation;
@@ -59,7 +64,8 @@ namespace BikeWars.Entities.Characters
         private readonly AudioService _audio;
         private WorldAudioManager _worldAudioManager;
         private string _currentMovementSound = null;
-        public event Action OnLevelUp;
+        public event Action<int, int> OnLevelUp;
+        public event Action<int> OnMoreXP;
 
         private bool _isUsingItem = false;
         private float _itemUseTimer = 0f;
@@ -161,14 +167,16 @@ namespace BikeWars.Entities.Characters
                 {
                     ItemPickedUp?.Invoke(item);
                 }
+
                 return;
             }
+
             ItemPickedUp?.Invoke(item);
         }
 
         public Player(Vector2 start, Point size, AudioService audio)
         {
-            Attributes = new CharacterAttributes(300, 0, 10, 2f, false);
+            Attributes = new CharacterAttributes(this, 300, 0, 10, 2f, false);
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 200f;
@@ -183,12 +191,18 @@ namespace BikeWars.Entities.Characters
                 pixel.SetData(new[] { Color.White });
             }
 
+            // LOAD BOTH ANIMATION SETS
+            _bikeDownAnimation = SpriteManager.GetAnimation("Character1_BikeDown");
+            _bikeLeftAnimation = SpriteManager.GetAnimation("Character1_BikeLeft");
+            _bikeRightAnimation = SpriteManager.GetAnimation("Character1_BikeRight");
+            _bikeUpAnimation = SpriteManager.GetAnimation("Character1_BikeUp");
+
             _walkDownAnimation = SpriteManager.GetAnimation("Character1_WalkDown");
             _walkLeftAnimation = SpriteManager.GetAnimation("Character1_WalkLeft");
             _walkRightAnimation = SpriteManager.GetAnimation("Character1_WalkRight");
             _walkUpAnimation = SpriteManager.GetAnimation("Character1_WalkUp");
 
-            _currentAnimation = _walkRightAnimation;
+            _currentAnimation = _bikeRightAnimation;
             UpdateCollider();
         }
 
@@ -200,6 +214,7 @@ namespace BikeWars.Entities.Characters
         public void Update(GameTime gameTime, Vector2 mousePos)
         {
             UpdateAttackCooldown(gameTime);
+
             HandleSwitchMovement();
             HandleWeaponSwitch();
             HandleShooting();
@@ -209,8 +224,10 @@ namespace BikeWars.Entities.Characters
             HandleAnimation(gameTime);
             UpdateGazeDirection(mousePos);
             HandleGhostTrail(gameTime);
+
             UpdateCollider();
         }
+
         public override void Draw(SpriteBatch spriteBatch)
         {
             foreach (var ghost in _ghostTrail)
@@ -234,6 +251,7 @@ namespace BikeWars.Entities.Characters
                     layerDepth: 0f
                 );
             }
+
             // saubere Ganzzahl-Position, sonst „zittert“ Pixelart
             var dest = new Rectangle(
                 (int)MathF.Round(Transform.Position.X),
@@ -246,13 +264,16 @@ namespace BikeWars.Entities.Characters
             if (_currentAnimation == null)
                 return;
 
-            if (movement.CurrentMovement.GetType() == typeof(WalkingMovement)) // TODO THIS IS ONLY INSERTED TO SHOW. BUT NOT GOOD!
+            if (movement.CurrentMovement.GetType() ==
+                typeof(WalkingMovement)) // TODO THIS IS ONLY INSERTED TO SHOW. BUT NOT GOOD!
             {
-                _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, movement.CurrentMovement.Rotation);
+                _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size,
+                    movement.CurrentMovement.Rotation);
             }
             else
             {
-                _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, movement.CurrentMovement.Rotation + MathHelper.PiOver2);
+                _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size,
+                    movement.CurrentMovement.Rotation + MathHelper.PiOver2);
             }
 
             // Draw line from eye position only if GazeDirection is valid (non-zero)
@@ -262,18 +283,20 @@ namespace BikeWars.Entities.Characters
 
                 // Draw static valid zone arc based on facing direction
                 float facingAngle = (float)Math.Atan2(_facingDirection.Y, _facingDirection.X);
-                DrawArc(spriteBatch, center, 50f, facingAngle, MathHelper.ToRadians(240), Color.Red * 0.5f);
+                DrawUtils.DrawArc(spriteBatch, pixel, center, 50f, facingAngle, MathHelper.ToRadians(240),
+                    Color.Red * 0.5f);
 
                 // Draw aiming line
                 Vector2 aimEnd = center + GazeDirection * 50f;
-                DrawLine(spriteBatch, center, aimEnd, Color.Red);
+                DrawUtils.DrawLine(spriteBatch, pixel, center, aimEnd, Color.Red);
             }
         }
 
         // Is Helpful for example with colliders to set the original position back.
         public override void SetLastTransform()
         {
-            Transform = new Transform(new Vector2(LastTransform.Position.X, LastTransform.Position.Y), LastTransform.Size);
+            Transform = new Transform(new Vector2(LastTransform.Position.X, LastTransform.Position.Y),
+                LastTransform.Size);
         }
 
         public void Immobalize(bool value)
@@ -323,49 +346,15 @@ namespace BikeWars.Entities.Characters
             }
         }
 
-
-
-        // Helper function to draw a line
-        private void DrawLine(SpriteBatch spriteBatch, Vector2 start, Vector2 end, Color color)
-        {
-            Vector2 edge = end - start;
-            float angle = (float)Math.Atan2(edge.Y, edge.X);
-            float length = edge.Length();
-            spriteBatch.Draw(pixel,
-                new Rectangle((int)start.X, (int)start.Y, (int)length, 2), // 2 is thickness
-                null,
-                color,
-                angle,
-                Vector2.Zero,
-                SpriteEffects.None,
-                0);
-        }
-
         public void SetWorldAudioManager(WorldAudioManager manager)
         {
             _worldAudioManager = manager;
         }
 
-        private void DrawArc(SpriteBatch spriteBatch, Vector2 center, float radius, float angle, float sweep, Color color, int segments = 16)
-        {
-            float startAngle = angle - sweep / 2f;
-            float step = sweep / segments;
-
-            for (int i = 0; i < segments; i++)
-            {
-                float theta1 = startAngle + i * step;
-                float theta2 = startAngle + (i + 1) * step;
-
-                Vector2 p1 = center + new Vector2((float)Math.Cos(theta1), (float)Math.Sin(theta1)) * radius;
-                Vector2 p2 = center + new Vector2((float)Math.Cos(theta2), (float)Math.Sin(theta2)) * radius;
-
-                DrawLine(spriteBatch, p1, p2, color);
-            }
-        }
         public void AddXp(int XpAmount)
         {
             XpCounter += XpAmount;
-
+            OnMoreXP?.Invoke(XpLevelUp + XpAmount);
             if (XpCounter >= XpLevelUp)
             {
                 LevelUp();
@@ -378,7 +367,7 @@ namespace BikeWars.Entities.Characters
             XpLevelUp = XpLevelUp * 2;
             CurrentLevel++;
             // level upscreen is triggered:
-            OnLevelUp?.Invoke();
+            OnLevelUp?.Invoke(XpLevelUp, CurrentLevel);
         }
 
         // the Upgrades from LevelUpScreen are applied here
@@ -472,6 +461,7 @@ namespace BikeWars.Entities.Characters
             {
                 sprint.Activate();
             }
+
             CurrentSpeed = sprint.IsActive ? SprintSpeed : movement.CurrentMovement.Speed;
             Vector2 direction = movement.CurrentMovement.Direction;
 
@@ -493,27 +483,21 @@ namespace BikeWars.Entities.Characters
                     Transform.Position += direction * movement.CurrentMovement.Speed * d * TerrainSpeedMultiplier;
                 }
             }
-
-
-
-
-
         }
 
         private void HandleWeaponSwitch()
         {
             if (!InputHandler.IsPressed(GameAction.SWITCH_WEAPON))
                 return;
-            
-            
-                // Toggle between the two weapons
+
+
+            // Toggle between the two weapons
             if (CurrentWeapon == WeaponType.Gun)
-                    CurrentWeapon = WeaponType.Flamethrower;
+                CurrentWeapon = WeaponType.Flamethrower;
             else if (CurrentWeapon == WeaponType.Flamethrower)
-                    CurrentWeapon = WeaponType.IceTrail;
+                CurrentWeapon = WeaponType.IceTrail;
             else
-                    CurrentWeapon = WeaponType.Gun;
-            
+                CurrentWeapon = WeaponType.Gun;
         }
 
         private void HandleItemUsage(GameTime gameTime)
@@ -645,7 +629,9 @@ namespace BikeWars.Entities.Characters
 
         private void HandleShooting()
         {
-            bool shooting = (Attributes.CanAutoAttack && InputHandler.IsHeld(GameAction.SHOOT) || InputHandler.IsPressed(GameAction.SHOOT)) && CanAttack();
+            bool shooting =
+                (Attributes.CanAutoAttack && InputHandler.IsHeld(GameAction.SHOOT) ||
+                 InputHandler.IsPressed(GameAction.SHOOT)) && CanAttack();
             if (shooting)
             {
                 Shooting();
@@ -695,10 +681,8 @@ namespace BikeWars.Entities.Characters
         {
             if (movement.IsMoving())
             {
-                _currentAnimation = _walkUpAnimation;
-                // choose animation based on main direction
-                // @TODO We need to decide on how the animation should look like so don't delete it now
-                if (movement.CurrentMovement.GetType() == typeof(WalkingMovement)) // THIS IS ONLY INSERTED TO SHOW. BUT NOT GOOD!
+                // Choose animation based on movement type
+                if (movement.CurrentMovement is WalkingMovement)
                 {
                     if (MathF.Abs(_facingDirection.X) > MathF.Abs(_facingDirection.Y))
                     {
@@ -709,9 +693,13 @@ namespace BikeWars.Entities.Characters
                         _currentAnimation = (_facingDirection.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
                     }
                 }
-            }
+                else // BicycleMovement
+                {
+                    _currentAnimation = _bikeUpAnimation;
+                }
 
-            _currentAnimation?.Update(gameTime, movement.IsMoving());
+                _currentAnimation?.Update(gameTime, movement.IsMoving());
+            }
         }
     }
 }
