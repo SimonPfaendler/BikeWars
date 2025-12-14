@@ -9,7 +9,7 @@ public interface ICombat
     void TakeDamage(int amount);
     void Attack(ICombat target);
 
-    void UpdateAttackCooldown(GameTime gametime);
+    void UpdateAttackCooldown(GameTime gameTime);
     bool CanAttack();
 
     void ResetAttackCooldown();
