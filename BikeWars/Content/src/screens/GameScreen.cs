@@ -108,18 +108,22 @@ namespace BikeWars.Content.screens
             _freelook = false;
             camera.Position = _gameObjectManager.Player1.Transform.Position;
 
-            _gameTimer = new GameTimer(GAME_TIME_LIMIT);
-            _gameTimer.OnTimerFinished += OnGameTimerFinished;
-
             _statisticsManager = new StatisticsManager();
+            _gameTimer = new GameTimer(GAME_TIME_LIMIT);
+
+
+
             _gameObjectManager.OnCharacterDied += _statisticsManager.HandleCharacterDied;
             _gameObjectManager.OnTookDamage += _statisticsManager.HandleTookDamage;
             _gameObjectManager.Player1.OnTookDamage += _statisticsManager.HandleTookDamage;
             _gameObjectManager.Player1.OnLevelUp += _statisticsManager.HandleLevel;
             _gameObjectManager.Player1.OnMoreXP += _statisticsManager.HandleExperience;
 
+
+
             GameEvents.OnResumeTimer += ResumeTimer;
             HandleLoadNonInGameData();
+            _gameTimer.OnTimerFinished += OnGameTimerFinished;
         }
 
         public virtual void LoadContent(ContentManager content)
@@ -276,7 +280,10 @@ namespace BikeWars.Content.screens
         private void HandleLoadNonInGameData()
         {
             var state = SaveLoad.LoadGame();
-            _statisticsManager.Statistics = state.Statistics;
+            if (state.Statistics != null)
+            {
+                _statisticsManager.Statistics = state.Statistics;
+            }
         }
 
         public void HandleLoadGame()

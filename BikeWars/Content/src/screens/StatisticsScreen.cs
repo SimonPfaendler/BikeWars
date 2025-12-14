@@ -64,6 +64,10 @@ public class StatisticsScreen : MenuScreenBase, IScreen
         int row = 0;
         Texture2D overlay = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
         overlay.SetData(new[] { Color.White });
+        if (Statistics == null)
+        {
+            return;
+        }
         foreach (Statistic statistic in Statistics) {
             new StatisticsComponent(statistic).Draw(sp, overlay, 400, row, _font);
             row += 110;
