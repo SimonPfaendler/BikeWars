@@ -12,7 +12,7 @@ using BikeWars.Content.src.utils.SaveLoadExample;
 using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled.Renderers;
 using BikeWars.Content.managers;
-using BikeWars.Content.engine.PathFinding;
+using BikeWars.Content.events;
 
 namespace BikeWars.Content.screens
 {
@@ -26,8 +26,6 @@ namespace BikeWars.Content.screens
         private TiledMapRenderer _tiledMapRenderer;
         private SpriteFont _debugFont;
         private Debugger _debugger;
-        private int _counter = 0;
-        private float _counterTimer = 0;
         private SpriteFont _font;
         private Texture2D _pixel;
         private const int CELL_SIZE = 16;
@@ -36,6 +34,9 @@ namespace BikeWars.Content.screens
 
         private ContentManager _contentManager;
         public ContentManager ContentManager => _contentManager;
+
+        private StatisticsManager _statisticsManager {get; set;}
+        public StatisticsManager StatisticsManager => _statisticsManager;
         private readonly AudioService _audioService;
         public AudioService AudioService => _audioService;
 
@@ -44,7 +45,7 @@ namespace BikeWars.Content.screens
 
         private HUD hud;
         private Texture2D hudTexture;
-        private float hpTestTimer = 0f;
+
 
         private CollisionManager _collisionManager;
         private GameObjectManager _gameObjectManager;
@@ -67,6 +68,11 @@ namespace BikeWars.Content.screens
         // bool that checks if you're in the tech demo or normal gameplay
         private readonly bool _isTechDemo;
         private bool _showStaticHitboxes = true;
+
+        private GameTimer _gameTimer;
+        private const float GAME_TIME_LIMIT = 120f;
+        private SpriteFont _timerFont;
+        private Vector2 _timerPosition;
 
         public GameScreen(AudioService audioService, bool isTechDemo = false)
         {
@@ -102,11 +108,22 @@ namespace BikeWars.Content.screens
             _freelook = false;
             camera.Position = _gameObjectManager.Player1.Transform.Position;
 
-            // Create SaveLoad and load saved data
-            var state = SaveLoad.LoadGame();
-            _counter = state.Counter;
-            _gameObjectManager.Player1.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
-            Console.WriteLine("Loaded saved position (or default if no file).");
+            _statisticsManager = new StatisticsManager();
+            _gameTimer = new GameTimer(GAME_TIME_LIMIT);
+
+
+
+            _gameObjectManager.OnCharacterDied += _statisticsManager.HandleCharacterDied;
+            _gameObjectManager.OnTookDamage += _statisticsManager.HandleTookDamage;
+            _gameObjectManager.Player1.OnTookDamage += _statisticsManager.HandleTookDamage;
+            _gameObjectManager.Player1.OnLevelUp += _statisticsManager.HandleLevel;
+            _gameObjectManager.Player1.OnMoreXP += _statisticsManager.HandleExperience;
+
+
+
+            GameEvents.OnResumeTimer += ResumeTimer;
+            HandleLoadNonInGameData();
+            _gameTimer.OnTimerFinished += OnGameTimerFinished;
         }
 
         public virtual void LoadContent(ContentManager content)
@@ -133,8 +150,9 @@ namespace BikeWars.Content.screens
             _collisionManager.OnItemPickup += _gameObjectManager.Player1.OnPickUpItem;
             _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
 
+
             // Overlay
-            _overlay = new Overlay(_debugFont, Game1.Instance.GraphicsDevice);
+            _overlay = new Overlay();
 
             // HUD
             hudTexture = managers.SpriteManager.GetTexture("HUD_Sheet");
@@ -154,10 +172,12 @@ namespace BikeWars.Content.screens
 
             _levelUpScreen = new LevelUpScreen();
             // checks if the event OnLevelUp is triggered if it is LevelUpSreen gets active
-            _gameObjectManager.Player1.OnLevelUp += () =>
+            _gameObjectManager.Player1.OnLevelUp += (int xp, int amount) =>
             {
-                _levelUpScreen.Open();
+                _levelUpScreen.Open(_gameObjectManager.Player1);
             };
+
+
             // the Option selected gets upgraded
             _levelUpScreen.OnOptionSelected += skillId =>
             {
@@ -166,6 +186,18 @@ namespace BikeWars.Content.screens
 
             // Spawn Manager
             _spawnManager = new SpawnManager(_gameObjectManager, _collisionManager, _audioService, _pathFinding);
+
+            // timer
+            _timerFont = content.Load<SpriteFont>("assets/fonts/Arial");
+            Game1 game = Game1.Instance;
+            _timerPosition = new Vector2(
+                game.GraphicsDevice.Viewport.Width / 2f,
+                40f
+            );
+            if (!_gameTimer.IsRunning)
+            {
+                InitializeTimer();
+            }
         }
         public virtual void Update(GameTime gameTime)
         {
@@ -191,10 +223,10 @@ namespace BikeWars.Content.screens
 
             _gameObjectManager.Update(gameTime, InputHandler.MakeMouseWorldPosByCamera(camera));
             _itemManager.Update(gameTime);
-            hpTestTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
 
             if (InputHandler.IsPressed(GameAction.DEBUG_HEAL))
-                _gameObjectManager.Player1.Health = _gameObjectManager.Player1.MaxHealth;
+                _gameObjectManager.Player1.Attributes.Health = _gameObjectManager.Player1.Attributes.MaxHealth;
 
             if (InputHandler.IsPressed(GameAction.TECH_DEMO))
             {
@@ -213,7 +245,9 @@ namespace BikeWars.Content.screens
                 _audioService.Music.Stop();
                 _overlay.SetPaused(true, gameTime);
                 _audioService.Sounds.Play(AudioAssets.CarCrash);
-                ScreenManager.AddScreen(new GameOverScreen(_font, _audioService));
+                ScreenManager.AddScreen(new GameOverScreen(_font, _audioService, _statisticsManager.Statistic));
+                _statisticsManager.SaveStatistic();
+                SaveLoad.SaveNonGame(_statisticsManager);
             }
 
             _debugger.Update(gameTime);
@@ -226,7 +260,6 @@ namespace BikeWars.Content.screens
             camera.Update(gameTime, _gameObjectManager.Player1.Transform.Position, _freelook);
 
             _tiledMapRenderer.Update(gameTime);
-            HandleCounter(gameTime);
             HandleSaveLoadInput();
 
 
@@ -234,28 +267,30 @@ namespace BikeWars.Content.screens
             {
                 _audioService.Sounds.PauseAll();
                 _overlay.SetPaused(true, gameTime);
+                PauseTimer();
                 PauseMenuScreen pauseMenu = new PauseMenuScreen(_font, _audioService);
                 ScreenManager.AddScreen(pauseMenu);
             }
+
+            _gameTimer.Update(gameTime);
         }
 
-        private void HandleCounter(GameTime gameTime)
+        // Load here stuff like statistics or options that is not related to the
+        // game and gameplay
+        private void HandleLoadNonInGameData()
         {
-            _counterTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            if (_counterTimer >= 1)
+            var state = SaveLoad.LoadGame();
+            if (state.Statistics != null)
             {
-                _counter++;
-                _counterTimer = 0;
+                _statisticsManager.Statistics = state.Statistics;
             }
         }
 
-        private void HandleLoadGame()
+        public void HandleLoadGame()
         {
             var state = SaveLoad.LoadGame();
-            _counter = state.Counter;
-            _counterTimer = 0;
             _gameObjectManager.Player1.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
+            _gameTimer.SetFromSave(state.GameTimerCurrentTime, state.IsGameTimerRunning, state.IsGameTimerPaused);
 
             _gameObjectManager.Projectiles.Clear();
             foreach (var p in state.Projectiles)
@@ -286,6 +321,12 @@ namespace BikeWars.Content.screens
                         _collisionManager);
                     _gameObjectManager.AddCharacter(b);
                 }
+                if (p.Type == SaveLoad.TYPES.DOG)
+                {
+                    Dog b = new Dog(p.Position.ToVector2(), p.Size.ToPoint(), _audioService, _pathFinding,
+                        _collisionManager);
+                    _gameObjectManager.AddCharacter(b);
+                }
             }
 
             _gameObjectManager.Items.Clear();
@@ -306,13 +347,19 @@ namespace BikeWars.Content.screens
                     Xp_Money b = new Xp_Money(p.Position.ToVector2(), p.Size.ToPoint());
                     _gameObjectManager.AddItem(b);
                 }
+                if (p.Type == SaveLoad.TYPES.ENERGY_GEL)
+                {
+                    EnergyGel b = new EnergyGel(p.Position.ToVector2(), p.Size.ToPoint());
+                    _gameObjectManager.AddItem(b);
+                }
             }
+            _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level);
             Console.WriteLine("Game loaded.");
         }
         private void HandleSaveLoadInput()
         {
             if (InputHandler.IsPressed(GameAction.SAVE))
-                SaveLoad.SaveGame(_counter, _gameObjectManager);
+                SaveLoad.SaveGame(_gameTimer, _gameObjectManager, _statisticsManager);
 
             if (InputHandler.IsPressed(GameAction.LOAD))
             {
@@ -333,11 +380,10 @@ namespace BikeWars.Content.screens
                 }
                 else
                 {
-                    _counter = 0;
-                    _counterTimer = 0;
 
                     _gameObjectManager.Player1.Transform.Position =
                         new Vector2(worldBounds.Width / 2, worldBounds.Height / 2);
+                    ResetGameTimer();
                     Console.WriteLine("Reset counter and player position.");
                 }
             }
@@ -384,7 +430,6 @@ namespace BikeWars.Content.screens
 
             spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.GetTransform());
             _gameObjectManager.Draw(spriteBatch);
-            _overlay.DrawOnWorld(spriteBatch, _gameObjectManager.Player1);
 
             if (_isTechDemo && _showStaticHitboxes)
             {
@@ -409,14 +454,8 @@ namespace BikeWars.Content.screens
             spriteBatch.Begin();
 
             _debugger.Draw(spriteBatch);
-            _overlay.DrawOnScreen(spriteBatch, gameTime);
+            DrawTimer(spriteBatch, gameTime);
 
-            if (!_isTechDemo)
-            {
-                spriteBatch.DrawString(_debugFont, $"Counter: {_counter}", new Vector2(20, 160), Color.Black);
-                spriteBatch.DrawString(_debugFont, "T=Save  L=Load  R=Reset counter", new Vector2(20, 185),
-                    Color.Black);
-            }
             _gameObjectManager.Player1.Inventory.Draw(spriteBatch, _pixel);
             hud.Draw(spriteBatch, _gameObjectManager.Player1);
 
@@ -447,6 +486,80 @@ namespace BikeWars.Content.screens
                 (int)MathF.Ceiling(halfW * 2f),
                 (int)MathF.Ceiling(halfH * 2f)
             );
+        }
+
+        private void InitializeTimer()
+        {
+            _gameTimer.Restart(); // restart Timer
+        }
+
+        private void OnGameTimerFinished()
+        {
+            _audioService.Sounds.PauseAll();
+            _audioService.Music.Stop();
+            _overlay.SetPaused(true, Game1.CurrentGameTime);
+            _audioService.Sounds.Play(AudioAssets.CarHorn);
+            ScreenManager.AddScreen(new GameWonScreen(_font, _audioService, _statisticsManager.Statistic));
+            _statisticsManager.SaveStatistic();
+            SaveLoad.SaveNonGame(_statisticsManager);
+        }
+
+        private void DrawTimer(SpriteBatch spriteBatch, GameTime gameTime)
+        {
+            string timerText = _gameTimer.GetFormattedTime();
+
+            // change timer_font collor, when time is running out
+            Color timerColor = Color.White;
+            if (_gameTimer.CurrentTime < 60f)
+            {
+                timerColor = Color.Yellow;
+            }
+            if (_gameTimer.CurrentTime < 30f)
+            {
+                timerColor = Color.Red;
+
+                // blink when time is about to run out
+                float blink = (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 10) * 0.5f + 0.5f;
+                timerColor = Color.Lerp(Color.Red, Color.White, blink);
+            }
+
+            // background
+            Vector2 textSize = _timerFont.MeasureString(timerText);
+            Vector2 centeredPosition = new Vector2(
+                _timerPosition.X - textSize.X / 2f,
+                _timerPosition.Y
+            );
+
+            Rectangle backgroundRect = new Rectangle(
+                (int)centeredPosition.X - 5,
+                (int)centeredPosition.Y - 2,
+                (int)textSize.X + 10,
+                (int)textSize.Y + 4
+            );
+
+            spriteBatch.Draw(_pixel, backgroundRect, Color.Black * 0.5f);
+
+            spriteBatch.DrawString(_timerFont, timerText, centeredPosition, timerColor);
+        }
+
+        public void ResetGameTimer()
+        {
+            _gameTimer.Restart();
+        }
+
+        public void PauseTimer()
+        {
+            _gameTimer.Pause();
+        }
+
+        public void ResumeTimer()
+        {
+            _gameTimer.Resume();
+        }
+
+        public void Unload()
+        {
+            GameEvents.OnResumeTimer -= ResumeTimer;
         }
 
     }

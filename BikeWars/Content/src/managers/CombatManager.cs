@@ -1,13 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Numerics;
-using BikeWars.Content.engine;
-using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Entities.Characters;
-using Microsoft.Xna.Framework.Content;
-using MonoGame.Extended.Tiled;
 using BikeWars.Content.engine.Audio;
+using BikeWars.Content.entities.items;
 
 namespace BikeWars.Content.managers;
 
@@ -47,16 +42,16 @@ public class CombatManager
         // Apply Damage
         target.TakeDamage(projectile.Damage);
         projectile.HasHit = true;
-        
+
         _audio.Sounds.Play(AudioAssets.BulletHit);
-        
-        if (target.Health <= 0)
-        { 
+
+        if (target.Attributes.Health <= 0)
+        {
             HandleDeath(target);
         }
     }
 
-        public void HandleAOEHit(CharacterBase target, AreaOfEffectBase aoe)
+    public void HandleAOEHit(CharacterBase target, AreaOfEffectBase aoe)
     {
         if (target.IsDead) return;
         if (target.IsGodMode)
@@ -67,10 +62,15 @@ public class CombatManager
 
         // Apply Damage
         target.TakeDamage(aoe.Damage);
-        
-        _audio.Sounds.Play(AudioAssets.BulletHit);
-        if (target.Health <= 0)
-        { 
+
+        if (aoe is IceTrail)
+        {
+            target.SlowDown(0.5f);
+        }
+
+        _audio.Sounds.Play(AudioAssets.ShortPain);
+        if (target.Attributes.Health <= 0)
+        {
             HandleDeath(target);
         }
     }

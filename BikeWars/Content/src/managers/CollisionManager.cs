@@ -8,7 +8,6 @@ using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using BikeWars.Content.engine.PathFinding;
 
 namespace BikeWars.Content.managers;
 public class CollisionManager
@@ -22,7 +21,7 @@ public class CollisionManager
     private const string MAP = "assets/Map/Bike_Wars_Map";
     private const string TILED_MAP_LAYER = "Collision";
 
-    private int _cellSize {get; set;}
+    public int _cellSize {get; set;}
     private SpatialHash _dynamicHash {get; set;}
     public SpatialHash DynamicHash {get => _dynamicHash; set => _dynamicHash = value;}
     private SpatialHash _staticHash {get; set;}
@@ -33,7 +32,7 @@ public class CollisionManager
     private List<BoxCollider> _collisionBoxes {get; set;} // Mainly used for the static layout
     public List<BoxCollider> CollisionBoxes {get => _collisionBoxes; set => _collisionBoxes = value;}
     private List<ICollider> _toRemoveColliders {get; set;}
-    
+
     // the grid for the pathfinding
     public Node[,] PathGrid { get; private set; }
 
@@ -65,7 +64,7 @@ public class CollisionManager
             CollisionBoxes.Add(box);
             StaticHash.Insert(box);
         }
-        
+
         // build pathfinding grid based on collision layer
         int gridWidth = collisionLayer.Width;
         int gridHeight = collisionLayer.Height;
@@ -76,14 +75,17 @@ public class CollisionManager
             for (int x = 0; x < gridWidth; x++)
             {
                 var tile = collisionLayer.GetTile((ushort) x, (ushort) y);
-                
+
                 bool walkable = tile.GlobalIdentifier == 0;
                 PathGrid[x, y] = new Node(x, y, walkable);
             }
         }
-        
+
+        WallPadding();
+
         LoadTerrainLayer("Streets", TerrainType.ROAD);
         LoadTerrainLayer("Floor", TerrainType.GRASS);
+        LoadSpawnLayer("Enemy_Spawn");
     }
 
     // takes a world position in pixels (Vector2) and returns which tile that position is inside
@@ -91,7 +93,7 @@ public class CollisionManager
     {
         int gridX = (int) (worldPos.X / _cellSize);
         int gridY = (int) (worldPos.Y / _cellSize);
-        
+
         return new Point(gridX, gridY);
     }
 
@@ -103,6 +105,86 @@ public class CollisionManager
             node.X * _cellSize + _cellSize / 2f,
             node.Y * _cellSize + _cellSize / 2f
         );
+    }
+    
+    // sets the neighbours of an unwalkable tile 
+    // so that the enemies don't get stuck on edges of hitboxes
+    private void WallPadding(int padding = 1)
+    {
+        bool[,] copy = CopyWalkableGrid();
+        InflateWalls(copy, padding);
+        WriteInflatedGrid(copy);
+    }
+    
+    // copy walkable grid
+    private bool [,] CopyWalkableGrid()
+    {
+        int width = PathGrid.GetLength(0);
+        int height = PathGrid.GetLength(1);
+        
+        bool [,] inflated =  new bool[width, height];
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                inflated[x, y] = PathGrid[x, y].Walkable;
+            }
+        }
+        return inflated;
+    }
+    
+    // inflate the walls of the unwalkable nodes
+    private void InflateWalls(bool[,] inflated, int padding)
+    {
+        int width = PathGrid.GetLength(0);
+        int height = PathGrid.GetLength(1);
+        
+        int [,] dirs = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                if (!PathGrid[x, y].Walkable)
+                {
+                    for (int dy = -padding; dy <= padding; dy++)
+                    {
+                        for (int dx = -padding; dx <= padding; dx++)
+                        {
+                            if (dx == 0 && dy == 0)
+                                continue;
+                            
+                            int nx = x + dx;
+                            int ny = y + dy;
+                            
+                            if (nx < 0 || nx >= width || ny < 0 || ny >= height)
+                                continue;
+                            
+                            if (!inflated[nx, ny])
+                                continue;
+                            
+                            inflated[nx, ny] = false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // write the padding into the grid
+    private void WriteInflatedGrid(bool[,] inflated)
+    {
+        int width = PathGrid.GetLength(0);
+        int height = PathGrid.GetLength(1);
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                PathGrid[x, y].Walkable = inflated[x, y];
+            }
+        }
     }
 
     public Vector2 GetPenetrationVector(ICollider a, ICollider b)
@@ -161,6 +243,9 @@ public class CollisionManager
 
     private void HandleCharacterWithStatic(ICollider b, ICollider c)
     {
+        // Ignore SPAWNENEMIES layer for characters
+        if (b.Layer == CollisionLayer.SPAWNENEMIES) return;
+
         if (c.Layer == CollisionLayer.CHARACTER || c.Layer == CollisionLayer.PLAYER)
         {
             if (c.Intersects(b))
@@ -171,6 +256,7 @@ public class CollisionManager
             }
         }
     }
+    
     private void HandleProjectileWithStatic(ICollider b, ICollider c)
     {
         if (b.Layer == CollisionLayer.WALL && c.Layer == CollisionLayer.PROJECTILE)
@@ -318,14 +404,10 @@ public class CollisionManager
 
         foreach (var s in statics)
         {
-            if (s.Layer == CollisionLayer.TERRAIN)
+            if (s.Layer == CollisionLayer.TERRAIN && s.Intersects(c))
             {
-
-                if (s.Intersects(c))
-                {
                     player.CurrentTerrain = (TerrainCollider)s;
                     return;
-                }
             }
         }
     }
@@ -345,13 +427,13 @@ public class CollisionManager
                 {
                     dynamics = new List<ICollider>();
                     foreach (var hitbox in aoe.GetHitboxes())
-                        dynamics.AddRange(DynamicHash.QueryNearby(hitbox.Position));
+                        dynamics.AddRange(DynamicHash.QueryNearby(hitbox.Position, 1));
                 }
                 else
                 {
-                    dynamics = DynamicHash.QueryNearby(c.Position);
+                    dynamics = DynamicHash.QueryNearby(c.Position, 1);
                 }
-                List<ICollider> statics = StaticHash.QueryNearby(c.Position);
+                List<ICollider> statics = StaticHash.QueryNearby(c.Position, 1);
                 HandleDynamics(c, dynamics);
                 HandleStatics(c, statics);
                 HandleTerrain(c, statics);
@@ -382,8 +464,8 @@ public class CollisionManager
 
     // makes the hitboxes visible for when in the tech demo
     // makes the hitboxes visible for when in the tech demo
-public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel, 
-                         Player player, List<CharacterBase> characters, 
+public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
+                         Player player, List<CharacterBase> characters,
                          List<ItemBase> items, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks)
 {
     // Static collision boxes
@@ -503,5 +585,30 @@ public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
             StaticHash.Insert(tc);
         }
     }
+    private void LoadSpawnLayer(string layerName)
+    {
+        var layer = TiledMap.GetLayer<TiledMapTileLayer>(layerName);
+        if (layer == null)
+            return;
 
+        foreach (var tile in layer.Tiles)
+        {
+            if (tile.GlobalIdentifier == 0)
+                continue;
+
+            int x = tile.X * _cellSize;
+            int y = tile.Y * _cellSize;
+
+            BoxCollider spawnCollider = new BoxCollider(
+                new Vector2(x, y),
+                _cellSize,
+                _cellSize,
+                CollisionLayer.SPAWNENEMIES,
+                this
+            );
+
+            StaticHash.Insert(spawnCollider);
+        }
+    }
 }
+

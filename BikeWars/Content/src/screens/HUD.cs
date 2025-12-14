@@ -32,10 +32,10 @@ namespace BikeWars.Content.screens
         private const float Scale = 2f;
         public void Draw(SpriteBatch sb, Player player)
         {
-            
+
             sb.Draw(_sheet, Position, null, Color.White, 0f, Vector2.Zero, Scale, SpriteEffects.None, 0f);
 
-            float hpPercent = (float)player.Health / player.MaxHealth;
+            float hpPercent = (float)player.Attributes.Health / player.Attributes.MaxHealth;
             DrawCover(sb, _hpfill, hpPercent);
             float xpPercent = (float)player.XpCounter / player.XpLevelUp;
             DrawCover(sb, _xpfill, xpPercent);
@@ -75,8 +75,8 @@ namespace BikeWars.Content.screens
 
             sb.Draw(_pixel, dest, Color.Gray);
         }
-        
-        
+
+
         private void DrawSprintIcon(SpriteBatch sb, Player player)
         {
             // Icon position (scaled)
@@ -86,7 +86,7 @@ namespace BikeWars.Content.screens
 
             if (player.CooldownTimer() > 0)
             {
-                tint = Color.Orange;  
+                tint = Color.Orange;
             }
             else
             {

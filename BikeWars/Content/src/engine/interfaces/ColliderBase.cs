@@ -30,5 +30,5 @@ public abstract class ColliderBase : ICollider
     private object _owner {get; set;}
     public object Owner {get => _owner; set => _owner = value;}
     protected abstract void Update(); // Use this to update the logic like where the position is or resize the collision box
-    public abstract bool Intersects(ICollider other);
+    public abstract bool Intersects(ICollider otherCollider);
 }

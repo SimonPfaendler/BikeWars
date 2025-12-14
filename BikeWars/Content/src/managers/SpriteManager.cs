@@ -47,6 +47,7 @@ namespace BikeWars.Content.managers
             { "Chest", "assets/sprites/chest_texture" },
             { "XP_Beer", "assets/sprites/XP/xp_beer_texture" },
             { "XP_Money", "assets/sprites/XP/xp_money_texture" },
+            { "EnergyGel", "assets/images/EnergyGel" },
         };
         // hier sollte irgendwann auch auf atlas strukturen gewechselt werden
 
@@ -54,6 +55,11 @@ namespace BikeWars.Content.managers
         private static readonly List<string> AnimationKeys = new List<string>
         {
             // SPIELER 1
+            // SPIELER 1
+            "Character1_BikeDown",
+            "Character1_BikeLeft",
+            "Character1_BikeRight",
+            "Character1_BikeUp",
             "Character1_WalkDown",
             "Character1_WalkLeft",
             "Character1_WalkRight",
@@ -70,6 +76,13 @@ namespace BikeWars.Content.managers
             "BikeThief_Idle",
             "BikeThief_WalkLeft",
             "BikeThief_WalkRight",
+            
+            //DOG
+            "Dog_Idle",
+            "Dog_WalkLeft",
+            "Dog_WalkRight",
+            "Dog_WalkDown",
+            "Dog_WalkUp",
         };
 
         /// <summary>
@@ -100,9 +113,14 @@ namespace BikeWars.Content.managers
                 {
                     speed = 0.4f;
                 }
-                if (key.Contains("Character1_Walk"))
+                if (key.Contains("Character1"))
                 {
                     speed = 0.16f;
+                }
+
+                if (key.Contains("Dog_Idle"))
+                {
+                    speed = 0.5f;
                 }
 
                 var animation = new SpriteAnimation(_characterAtlas, frames, speed);

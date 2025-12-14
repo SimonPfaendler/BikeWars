@@ -1,6 +1,5 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
 // ============================================================
@@ -39,9 +38,9 @@ namespace BikeWars.Utilities
             // You can add more debug information as needed e.g. collider info, Bounds, FPS, etc.
             string debugInfo = $"Player Position: X: {(int)_player.Transform.Position.X} Y: {(int)_player.Transform.Position.Y}\n" +
                                $"Player Velocity: {_player.CurrentSpeed * _player.TerrainSpeedMultiplier}\n" +
-                               $"Player Bounds: {_player.Transform.Size}\n" +  
+                               $"Player Bounds: {_player.Transform.Size}\n" +
                                $"Player Sprint Cooldown: {(int)_player.CooldownTimer()}\n" +
-                               $"Player Health: {_player.Health}";
+                               $"Player Health: {_player.Attributes.Health}";
 
 
             spriteBatch.DrawString(_font, debugInfo, new Vector2(10, 600), Color.White);

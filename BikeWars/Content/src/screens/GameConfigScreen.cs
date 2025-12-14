@@ -1,10 +1,7 @@
-using System;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using System.Collections.Generic;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.managers;
 
@@ -21,18 +18,18 @@ public class GameConfigScreen : MenuScreenBase, IScreen
         _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
         InitializeButtons();
     }
-    
+
     protected sealed override void InitializeButtons()
         {
             Game1 game = Game1.Instance;
             int screenWidth = game.GraphicsDevice.Viewport.Width;
             int screenHeight = game.GraphicsDevice.Viewport.Height;
-    
+
             int buttonWidth = 250;
             int buttonHeight = 60;
             int verticalSpacing = 20;
             int horizontalSpacing = screenWidth / 15;
-            
+
             int leftStartY = screenHeight / 4;
             int rightStartY = screenHeight / 4;
 
@@ -52,7 +49,7 @@ public class GameConfigScreen : MenuScreenBase, IScreen
                 id: (int)ButtonAction.Back,
                 texture: _buttonTexture,
                 bounds: new Rectangle(horizontalSpacing, leftStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
-                text: "Back", 
+                text: "Back",
                 font: _font,
                 audioService: _audioService
             ));
@@ -75,7 +72,7 @@ public class GameConfigScreen : MenuScreenBase, IScreen
                 font: _font,
                 audioService: _audioService
             ));
-            
+
             // centre start Button
             _buttons.Add(new MenuButton(
                 id: (int)ButtonAction.StartGame,
@@ -91,7 +88,7 @@ public class GameConfigScreen : MenuScreenBase, IScreen
                 audioService: _audioService
             ));
         }
-        
+
         protected override void HandleButtonClick(MenuButton button)
         {
             switch ((ButtonAction)button.Id)
@@ -102,11 +99,11 @@ public class GameConfigScreen : MenuScreenBase, IScreen
                     ScreenManager.RemoveScreen(this);
                     ScreenManager.AddScreen(gameScreen);
                     break;
-            
+
                 case ButtonAction.Back:
                     ScreenManager.RemoveScreen(this);
                     break;
-            
+
                 case ButtonAction.NewProfile:
                     // TODO: Profile Creation Logic
                     break;

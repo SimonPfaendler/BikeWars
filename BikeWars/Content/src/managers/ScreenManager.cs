@@ -14,11 +14,11 @@ namespace BikeWars.Content.managers
         // The Screen Stack contains all Screens that are in use at the moment
         // The manager handles Draw and Update for them using the stack
         private List<IScreen> _mScreenStack = new List<IScreen>();
-        
+
         public event Action<IScreen> OnScreenAdded;
-        public event Action<IScreen> OnScreenRemoved; 
+        public event Action<IScreen> OnScreenRemoved;
         public event Action OnReturnToMainMenu;
-        
+
         private AudioService _audio;
         private string _currentMusic;
         private float _currentVolume = -1f;
@@ -41,7 +41,7 @@ namespace BikeWars.Content.managers
             _mScreenStack.Clear();
             OnReturnToMainMenu?.Invoke();
         }
-        
+
         // used for the Game/ Menu music
         public bool GameScreenIsActive()
         {
@@ -50,23 +50,23 @@ namespace BikeWars.Content.managers
 
             return _mScreenStack[_mScreenStack.Count - 1] is GameScreen;
         }
-        
+
         private void UpdateMusic()
         {
             if (_audio == null || _mScreenStack.Count == 0)
                 return;
 
             var top = _mScreenStack[_mScreenStack.Count - 1];
-            
+
             if (Math.Abs(_currentVolume - top.MusicVolume) > 0.01f)
             {
                 _audio.Music.MusicVolume = top.MusicVolume;
                 _currentVolume = top.MusicVolume;
             }
-            
+
             if (top.DesiredMusic == null)
                 return;
-            
+
             if (_currentMusic != top.DesiredMusic)
             {
                 _audio.Music.Play(top.DesiredMusic);
@@ -90,7 +90,7 @@ namespace BikeWars.Content.managers
                     break;
                 }
             }
-            
+
             for (int i = lowestScreenToBeDrawn; i < _mScreenStack.Count; i++)
             {
                 IScreen screen = _mScreenStack[i];

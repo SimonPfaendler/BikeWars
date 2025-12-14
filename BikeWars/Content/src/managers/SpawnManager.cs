@@ -4,7 +4,6 @@ using BikeWars.Content.engine.Audio;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.entities.interfaces;
 using Microsoft.Xna.Framework;
-using BikeWars.Content.engine.PathFinding;
 
 namespace BikeWars.Content.managers
 {
@@ -28,7 +27,7 @@ namespace BikeWars.Content.managers
         private const float MIN_SPAWN_RADIUS = 300f;
         private const float MAX_SPAWN_RADIUS = 700f;
 
-        private Random _random;
+        private readonly Random _random;
 
         public SpawnManager(GameObjectManager gameObjectManager, CollisionManager collisionManager, AudioService audioService, PathFinding pathFinding)
         {
@@ -61,7 +60,7 @@ namespace BikeWars.Content.managers
 
             if (_timeSinceLastSwarm >= SWARM_INTERVAL)
             {
-                // Console.WriteLine($"TRIGGERING SWARM at time {_totalTime:F2}s");
+                
                 SpawnSwarm(progress);
                 _timeSinceLastSwarm = 0;
             }
@@ -112,7 +111,7 @@ namespace BikeWars.Content.managers
             // Determine type of enemy
             // As time progresses, higher chance for stronger enemies (BikeThief vs Hobo)
 
-            bool spawnHobo = _random.NextDouble() > (0.2 + 0.3 * progress); // Chance of BikeThief increases from 20% to 50%
+            bool spawnHobo = _random.NextDouble() > (0.2 + 0.3 * progress); // Chance of BikeThief/ Dog increases from 20% to 50%
 
             Vector2 spawnPos = GetRandomSpawnPosition();
 
@@ -124,25 +123,32 @@ namespace BikeWars.Content.managers
 
             if (spawnHobo)
             {
-                var hobo = new Hobo(spawnPos, new Point(32, 32), _audioService, _pathFinding,
-                    _collisionManager);
+                var hobo = new Hobo(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager);
                 ApplyScaling(hobo, difficultyMultiplier, speedMultiplier);
                 _gameObjectManager.AddCharacter(hobo);
             }
             else
             {
-                var thief = new BikeThief(spawnPos, new Point(32, 32), _audioService, _pathFinding,
-                    _collisionManager);
-                ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
-                _gameObjectManager.AddCharacter(thief);
+                bool spawnDog = _random.NextDouble() > (0.2 + 0.3 * progress); // Chance of BikeThief increases from 20% to 50%
+                if (spawnDog)
+                {
+                    var dog = new Dog(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager);
+                    ApplyScaling(dog, difficultyMultiplier, speedMultiplier);
+                    _gameObjectManager.AddCharacter(dog);
+                }
+                else
+                {
+                    var thief = new BikeThief(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager);
+                    ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
+                    _gameObjectManager.AddCharacter(thief);}
             }
         }
 
         private void ApplyScaling(CharacterBase character, float difficultyMultiplier, float speedMultiplier)
         {
-            character.MaxHealth = (int)(character.MaxHealth * difficultyMultiplier);
-            character.Health = character.MaxHealth;
-            character.AttackDamage = (int)(character.AttackDamage * difficultyMultiplier);
+            character.Attributes.MaxHealth = (int)(character.Attributes.MaxHealth * difficultyMultiplier);
+            character.Attributes.Health = character.Attributes.MaxHealth;
+            character.Attributes.AttackDamage = (int)(character.Attributes.AttackDamage * difficultyMultiplier);
             character.Speed *= speedMultiplier;
         }
 
@@ -152,19 +158,18 @@ namespace BikeWars.Content.managers
             // Use 32x32 size (enemy size)
             BoxCollider checkCollider = new BoxCollider(pos, 32, 32, CollisionLayer.CHARACTER, null);
 
-            var nearby = _collisionManager.StaticHash.QueryNearby(pos);
+            var nearby = _collisionManager.StaticHash.QueryNearby(pos, 1);
             foreach (var col in nearby)
             {
-                if (col.Layer == CollisionLayer.TERRAIN || col.Layer == CollisionLayer.WALL)
+                if (col.Layer == CollisionLayer.SPAWNENEMIES && col.Intersects(checkCollider))
                 {
-                    if (col.Intersects(checkCollider))
-                    {
-                        return false;
-                    }
+                    
+                    return true;
+                    
                 }
             }
 
-            return true;
+            return false;
         }
 
         private void SpawnCircle(double progress)
@@ -186,8 +191,7 @@ namespace BikeWars.Content.managers
                 if (!IsValidSpawnPosition(pos)) continue;
 
                 // Alternate between Hobo and BikeThief
-                CharacterBase enemy = new Hobo(pos, new Point(32, 32), _audioService, _pathFinding,
-                    _collisionManager);
+                CharacterBase enemy = new Hobo(pos, new Point(32, 32), _audioService, _pathFinding, _collisionManager);
 
                 ApplyScaling(enemy, difficultyMultiplier, speedMultiplier);
                 _gameObjectManager.AddCharacter(enemy);

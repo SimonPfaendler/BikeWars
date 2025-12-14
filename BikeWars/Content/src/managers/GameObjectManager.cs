@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using BikeWars.Content.engine;
 using BikeWars.Content.entities.interfaces;
@@ -9,10 +10,11 @@ using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 
-
 namespace BikeWars.Content.managers;
 public class GameObjectManager
 {
+    public event Action<CharacterBase> OnCharacterDied;
+    public event Action<CharacterBase, int> OnTookDamage;
     private Player _player1 {get; set;}
     public Player Player1{get => _player1; set => _player1 = value;}
     private Player _player2 {get; set;}
@@ -61,6 +63,7 @@ public class GameObjectManager
 
         Player1.ShotBullet += OnPlayerShotBullet;
         Player1.Flamethrower += OnPlayerFlamethrower;
+        Player1.IceTrail += OnPlayerIceTrail;
 
     }
     public GameObjectManager(ContentManager content, List<CharacterBase> characters, List<ItemBase> items, List<BoxCollider> statics, List<ProjectileBase> projectiles) // TODO
@@ -77,8 +80,18 @@ public class GameObjectManager
             wa.SetWorldAudioManager(_worldAudioManager);
 
         Characters.Add(character);
+        character.Attributes.OnDied += HandleCharacterDeath;
+        character.OnTookDamage += HandleTookDamage;
     }
 
+    private void HandleCharacterDeath(CharacterBase c)
+    {
+        OnCharacterDied?.Invoke(c);
+    }
+    private void HandleTookDamage(CharacterBase c, int amount)
+    {
+        OnTookDamage?.Invoke(c, amount);
+    }
 
     public void AddItem(ItemBase item)
     {
@@ -191,6 +204,14 @@ public class GameObjectManager
         AddAOE(f);
     }
 
+        private void OnPlayerIceTrail()
+    {
+        Vector2 direction = Player1.GazeDirection;
+        IceTrail ice = new IceTrail(Player1, direction);
+        ice.LoadContent(_contentManager);
+        AddAOE(ice);
+    }
+
     public void SetWorldAudioManager(WorldAudioManager worldAudioManager)
     {
         _worldAudioManager = worldAudioManager;
@@ -218,6 +239,13 @@ public class GameObjectManager
         else
             xp = new Xp_Money(pos, new Point(16, 16));
         AddItem(xp);
+
+        Random rnd = new Random();
+        if (rnd.NextDouble() <= 0.05) // 5% chance to drop an energy gel
+        {
+            EnergyGel energyGel = new EnergyGel(pos, new Point(32, 32));
+            AddItem(energyGel);
+        }
     }
 
 }

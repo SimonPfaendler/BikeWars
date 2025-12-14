@@ -174,7 +174,7 @@ namespace BikeWars.Content.engine
             { GameAction.SAVE, new[]  { Keys.T } },
             { GameAction.LOAD, new[] { Keys.L } },
             { GameAction.RESET, new[] { Keys.R } },
-            { GameAction.DEBUG_TOGGLE, new[] { Keys.P } },
+            { GameAction.DEBUG_TOGGLE, new[] { Keys.D6 } },
             { GameAction.TOGGLE_CAMERA,new [] {Keys.C } },
             { GameAction.ESC, new[] {Keys.Escape } },
             { GameAction.SPRINT, new[] { Keys.LeftShift, Keys.RightShift } },
@@ -203,13 +203,15 @@ namespace BikeWars.Content.engine
             { GameAction.SAVE, new[]  {Buttons.DPadUp} },
             { GameAction.LOAD, new[] {Buttons.DPadRight} },
             { GameAction.RESET, new[] {Buttons.DPadLeft} },
-            { GameAction.DEBUG_TOGGLE, new[] {Buttons.DPadDown} },
+            //{ GameAction.DEBUG_TOGGLE, new[] {Buttons.DPadDown} },  no need for debug in controller we dont have much buttons
             { GameAction.TOGGLE_CAMERA,new [] {Buttons.A} },
             { GameAction.ESC, new[] { Buttons.B} },
             { GameAction.SPRINT, new[] { Buttons.LeftTrigger} },
             { GameAction.PAUSE, new[] { Buttons.Start} },
             { GameAction.SHOOT, new[] { Buttons.RightTrigger } },
-            { GameAction.INTERACT, new[] { Buttons.X } }
+            { GameAction.INTERACT, new[] { Buttons.X } },
+            { GameAction.SWITCH_WEAPON, new[] {Buttons.Y} },
+            { GameAction.SWITCH, new[] {Buttons.DPadDown } }
             /* INTERACT should be A not X, but X is already used and I m not sure for what.
              Should be fixed later*/
 
