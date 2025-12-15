@@ -113,21 +113,20 @@ namespace BikeWars.Content.screens
             // camera.Position is set by Update usually, but let's init it
             camera.Position = player.Transform.Position;
 
-            _gameTimer = new GameTimer(GAME_TIME_LIMIT);
-            _gameTimer.OnTimerFinished += OnGameTimerFinished;
-
             _statisticsManager = new StatisticsManager();
+            _gameTimer = new GameTimer(GAME_TIME_LIMIT);
+
+
+
             _gameObjectManager.OnCharacterDied += _statisticsManager.HandleCharacterDied;
             _gameObjectManager.OnTookDamage += _statisticsManager.HandleTookDamage;
             _gameObjectManager.Player1.OnTookDamage += _statisticsManager.HandleTookDamage;
             _gameObjectManager.Player1.OnLevelUp += _statisticsManager.HandleLevel;
             _gameObjectManager.Player1.OnMoreXP += _statisticsManager.HandleExperience;
-            
-            //_gameObjectManager.Player2.OnTookDamage += _statisticsManager.HandleTookDamage;
-            
-            
+
             GameEvents.OnResumeTimer += ResumeTimer;
             HandleLoadNonInGameData();
+            _gameTimer.OnTimerFinished += OnGameTimerFinished;
         }
 
         public virtual void LoadContent(ContentManager content)
@@ -301,8 +300,7 @@ namespace BikeWars.Content.screens
         private void HandleLoadNonInGameData()
         {
             var state = SaveLoad.LoadGame();
-            if (state.Statistics != null)
-                _statisticsManager.Statistics = state.Statistics;
+            _statisticsManager.Statistics = state.Statistics;
         }
 
         public void HandleLoadGame()

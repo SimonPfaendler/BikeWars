@@ -14,7 +14,7 @@ public class StatisticsManager
 
     public StatisticsManager()
     {
-        _statistics = new List<Statistic>();
+        Statistics = new List<Statistic>();
         Statistic = new Statistic();
     }
 
