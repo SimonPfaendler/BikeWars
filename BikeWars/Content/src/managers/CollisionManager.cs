@@ -219,13 +219,16 @@ public class CollisionManager
         return Vector2.Zero;
     }
 
-    private void Insertions(List<ItemBase> items, Player player, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters)
+    private void Insertions(List<ItemBase> items, List<Player> players, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters)
     {
         foreach (var c in items)
         {
             DynamicHash.Insert(c.Collider);
         }
-        DynamicHash.Insert(player.Collider);
+        foreach (var p in players)
+        {
+            if (p != null) DynamicHash.Insert(p.Collider);
+        }
         foreach(ProjectileBase p in projectiles)
         {
             DynamicHash.Insert(p.Collider);
@@ -414,10 +417,10 @@ public class CollisionManager
 
 
 
-    public void Update(Player player, List<ItemBase> items, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters)
+    public void Update(List<Player> players, List<ItemBase> items, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters)
     {
         DynamicHash.Clear();
-        Insertions(items, player, projectiles, aoeAttacks, characters);
+        Insertions(items, players, projectiles, aoeAttacks, characters);
         foreach (KeyValuePair<int, CellData> cell in DynamicHash._cells)
         {
             foreach(var c in cell.Value.Colliders)

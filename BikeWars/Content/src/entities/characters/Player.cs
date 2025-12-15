@@ -26,6 +26,7 @@ namespace BikeWars.Entities.Characters
     {
         public Inventory Inventory { get; private set; }
         private PlayerMovement movement { get; set; }
+        private IPlayerInput _input;
         private CooldownWithDuration sprint { get; }
 
         public Vector2 GazeDirection { get; private set; }
@@ -42,7 +43,7 @@ namespace BikeWars.Entities.Characters
         public float TerrainSpeedMultiplier = 1.0f;
         private const float IncreaseSpeed = 1.1f;
         private const float DecreaseSpeed = 0.9f;
-        // public bool IsGodMode { get; set; }
+        public bool IsGodMode { get; set; }
 
         public event Action ShotBullet;
         public event Action<ItemBase> ItemPickedUp;
@@ -163,7 +164,7 @@ namespace BikeWars.Entities.Characters
 
             if (item.InventoryItem)
             {
-                if (InputHandler.IsPressed(GameAction.INTERACT) && Inventory.AddItem(item))
+                if (_input.IsPressed(GameAction.INTERACT) && Inventory.AddItem(item))
                 {
                     ItemPickedUp?.Invoke(item);
                 }
@@ -174,14 +175,15 @@ namespace BikeWars.Entities.Characters
             ItemPickedUp?.Invoke(item);
         }
 
-        public Player(Vector2 start, Point size, AudioService audio)
+        public Player(Vector2 start, Point size, AudioService audio, IPlayerInput input)
         {
             Attributes = new CharacterAttributes(this, 300, 0, 10, 2f, false);
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 200f;
             SprintSpeed = 350f;
-            movement = new PlayerMovement(canMove: true, isMoving: false);
+            _input = input;
+            movement = new PlayerMovement(canMove: true, isMoving: false, _input);
             sprint = new CooldownWithDuration(1f, 5f);
             Inventory = new Inventory();
             _audio = audio;
@@ -437,7 +439,7 @@ namespace BikeWars.Entities.Characters
         {
             // TODO THIS IS NOW ONLY FOR TESTING AND SHOWING
 
-            if (!InputHandler.IsPressed(GameAction.SWITCH))
+            if (!_input.IsPressed(GameAction.SWITCH))
                 return;
 
             if (movement.CurrentMovement.GetType() == typeof(BicycleMovement))
@@ -457,7 +459,7 @@ namespace BikeWars.Entities.Characters
             float d = (float)gameTime.ElapsedGameTime.TotalSeconds;
             movement.Update();
             sprint.Update(gameTime);
-            if (InputHandler.IsHeld(GameAction.SPRINT) && sprint.Ready)
+            if (_input.IsHeld(GameAction.SPRINT) && sprint.Ready)
             {
                 sprint.Activate();
             }
@@ -487,7 +489,7 @@ namespace BikeWars.Entities.Characters
 
         private void HandleWeaponSwitch()
         {
-            if (!InputHandler.IsPressed(GameAction.SWITCH_WEAPON))
+            if (!_input.IsPressed(GameAction.SWITCH_WEAPON))
                 return;
 
 
@@ -513,11 +515,11 @@ namespace BikeWars.Entities.Characters
             }
             else
             {
-                if (InputHandler.IsPressed(GameAction.INVENTORY_1)) StartUsingItem(0);
-                else if (InputHandler.IsPressed(GameAction.INVENTORY_2)) StartUsingItem(1);
-                else if (InputHandler.IsPressed(GameAction.INVENTORY_3)) StartUsingItem(2);
-                else if (InputHandler.IsPressed(GameAction.INVENTORY_4)) StartUsingItem(3);
-                else if (InputHandler.IsPressed(GameAction.INVENTORY_5)) StartUsingItem(4);
+                if (_input.IsPressed(GameAction.INVENTORY_1)) StartUsingItem(0);
+                else if (_input.IsPressed(GameAction.INVENTORY_2)) StartUsingItem(1);
+                else if (_input.IsPressed(GameAction.INVENTORY_3)) StartUsingItem(2);
+                else if (_input.IsPressed(GameAction.INVENTORY_4)) StartUsingItem(3);
+                else if (_input.IsPressed(GameAction.INVENTORY_5)) StartUsingItem(4);
             }
         }
 
@@ -560,45 +562,11 @@ namespace BikeWars.Entities.Characters
         {
             // Gaze Direction Logic
             Vector2 eyePos = Transform.Position;
-            Vector2 potentialGaze = Vector2.Zero;
-
-            // 1. Check Controller Input (Right Stick)
-            Vector2 rightStick = InputHandler.GamePad.RightStick;
-
-            // Check if mouse moved to switch back to mouse aiming
-            if (InputHandler.Mouse.Delta != Point.Zero || InputHandler.Mouse.Held(MouseButton.Left))
+            Vector2 potentialGaze = _input.GetAimDirection(eyePos, _facingDirection);
+            
+            if (potentialGaze != Vector2.Zero)
             {
-                // Also reset if clicking, just in case
-                _usingControllerAim = false;
-            }
-
-            if (rightStick != Vector2.Zero)
-            {
-                // Controller aiming
-                rightStick.Y *= -1;
-                potentialGaze = Vector2.Normalize(rightStick);
-
-                // Store state
-                _usingControllerAim = true;
-                _lastGazeDirection = potentialGaze;
-
                 AimTarget = eyePos + potentialGaze * AimLength;
-            }
-            else if (_usingControllerAim)
-            {
-                // Fallback to last controller direction if we haven't touched the mouse
-                potentialGaze = _lastGazeDirection;
-                AimTarget = eyePos + potentialGaze * AimLength;
-            }
-            else
-            {
-                // 2. Fallback to Mouse Input
-                AimTarget = mousePos;
-                Vector2 diff = AimTarget - eyePos;
-                if (diff != Vector2.Zero)
-                {
-                    potentialGaze = Vector2.Normalize(diff);
-                }
             }
 
             // 3. Apply Angle Restriction (240 degrees total = +/- 120 degrees)
@@ -630,8 +598,8 @@ namespace BikeWars.Entities.Characters
         private void HandleShooting()
         {
             bool shooting =
-                (Attributes.CanAutoAttack && InputHandler.IsHeld(GameAction.SHOOT) ||
-                 InputHandler.IsPressed(GameAction.SHOOT)) && CanAttack();
+                (Attributes.CanAutoAttack && _input.IsHeld(GameAction.SHOOT) ||
+                 _input.IsPressed(GameAction.SHOOT)) && CanAttack();
             if (shooting)
             {
                 Shooting();

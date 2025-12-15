@@ -179,7 +179,7 @@ namespace BikeWars.Content.engine
             { GameAction.ESC, new[] {Keys.Escape } },
             { GameAction.SPRINT, new[] { Keys.LeftShift, Keys.RightShift } },
             { GameAction.PAUSE, new[] { Keys.Escape, Keys.P } },
-            { GameAction.SHOOT, new[] {Keys.None } },
+            { GameAction.SHOOT, new Keys[0] },
             { GameAction.INTERACT, new[] {Keys.Q } },
             { GameAction.SWITCH, new[] {Keys.X } },
             { GameAction.DEBUG_HEAL, new[] {Keys.M } },

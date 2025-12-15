@@ -21,7 +21,7 @@ public class StatisticsScreen : MenuScreenBase, IScreen
     {
         _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
         var state = SaveLoad.LoadGame();
-        Statistics = state.Statistics;
+        Statistics = state.Statistics ?? new List<Statistic>();
         InitializeButtons();
     }
 
