@@ -59,16 +59,13 @@ public class PlayerMovement
              }
              else
              {
-                 // Digital / Digital-like Logic (Keyboard)
-                 // Y is usually -1 for UP. 
-                 // Logic in old PlayerMovement: UP key -> UP enum + FORWARD enum
                  
                  if (inputDir.Y < -0.3f) // UP / Accelerate
                  {
                      directions.Add(MoveDirection.UP);
                      directions.Add(MoveDirection.FORWARD);
                  }
-                 if (inputDir.Y > 0.3f) // DOWN / Brake/Reverse
+                 if (inputDir.Y > 0.3f) // DOWN / Brake
                  {
                      directions.Add(MoveDirection.DOWN);
                      directions.Add(MoveDirection.BACKWARD);

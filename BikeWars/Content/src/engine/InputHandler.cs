@@ -204,14 +204,14 @@ namespace BikeWars.Content.engine
             { GameAction.LOAD, new[] {Buttons.DPadRight} },
             { GameAction.RESET, new[] {Buttons.DPadLeft} },
             //{ GameAction.DEBUG_TOGGLE, new[] {Buttons.DPadDown} },  no need for debug in controller we dont have much buttons
-            { GameAction.TOGGLE_CAMERA,new [] {Buttons.A} },
-            { GameAction.ESC, new[] { Buttons.B} },
+            { GameAction.TOGGLE_CAMERA,new [] {Buttons.DPadDown} },
+            //{ GameAction.ESC, new[] { Buttons.B} },
             { GameAction.SPRINT, new[] { Buttons.LeftTrigger} },
             { GameAction.PAUSE, new[] { Buttons.Start} },
             { GameAction.SHOOT, new[] { Buttons.RightTrigger } },
-            { GameAction.INTERACT, new[] { Buttons.X } },
+            { GameAction.INTERACT, new[] { Buttons.A } },
             { GameAction.SWITCH_WEAPON, new[] {Buttons.Y} },
-            { GameAction.SWITCH, new[] {Buttons.DPadDown } }
+            { GameAction.SWITCH, new[] {Buttons.X } }
             /* INTERACT should be A not X, but X is already used and I m not sure for what.
              Should be fixed later*/
 
