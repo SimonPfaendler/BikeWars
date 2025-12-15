@@ -63,11 +63,15 @@ public class BicycleMovement : IMoveable
         }
     }
 
+    private SteeringCurve _steeringCurve;
+    public SteeringCurve Curve => _steeringCurve;
+
     public BicycleMovement(bool canMove, bool isMoving, float rotationAcceleration)
     {
         CanMove = canMove;
         IsMoving = isMoving;
         RotationAcceleration = rotationAcceleration;
+        _steeringCurve = new SteeringCurve();
     }
     private bool MakeIsMoving()
     {
@@ -85,15 +89,18 @@ public class BicycleMovement : IMoveable
 
     public float HandleRotation(List<MoveDirection> moveDirections)
     {
+        float steerFactor = _steeringCurve.Evaluate(Speed);
+        float adjustedRotation = RotationAcceleration * steerFactor;
+
         foreach (var dir in moveDirections)
         {
             if (dir == MoveDirection.LEFT)
             {
-                Rotation -= RotationAcceleration;
+                Rotation -= adjustedRotation;
             }
             if (dir == MoveDirection.RIGHT)
             {
-                Rotation += RotationAcceleration;
+                Rotation += adjustedRotation;
             }
         }
         return Rotation;
