@@ -76,7 +76,6 @@ namespace BikeWars.Content.screens
 
         public GameScreen(AudioService audioService, bool isTechDemo = false)
         {
-
             _isTechDemo = isTechDemo;
 
             worldBounds = new Rectangle(0, 0, 11200, 11200);
@@ -443,6 +442,8 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.AOEAttacks
                 );
             }
+
+
 
             // draws A* paths for enemies in tech demo
             if (_isTechDemo)

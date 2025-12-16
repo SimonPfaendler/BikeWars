@@ -59,7 +59,6 @@ public abstract class CharacterBase : ICharacter, ICombat
         OnTookDamage?.Invoke(this, amount);
         Attributes.Health -= amount;
     }
-
     public bool CanAttack()
     {
         return _attackCooldownTimer <= 0f;

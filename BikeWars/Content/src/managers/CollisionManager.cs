@@ -61,7 +61,6 @@ public class CollisionManager
             int y = tile.Y * _cellSize;
 
             BoxCollider box = new BoxCollider(new Vector2(x, y), _cellSize, _cellSize, CollisionLayer.WALL, this);
-            CollisionBoxes.Add(box);
             StaticHash.Insert(box);
         }
 
@@ -82,7 +81,6 @@ public class CollisionManager
         }
 
         WallPadding();
-
         LoadTerrainLayer("Streets", TerrainType.ROAD);
         LoadTerrainLayer("Floor", TerrainType.GRASS);
         LoadSpawnLayer("Enemy_Spawn");
@@ -106,8 +104,8 @@ public class CollisionManager
             node.Y * _cellSize + _cellSize / 2f
         );
     }
-    
-    // sets the neighbours of an unwalkable tile 
+
+    // sets the neighbours of an unwalkable tile
     // so that the enemies don't get stuck on edges of hitboxes
     private void WallPadding(int padding = 1)
     {
@@ -115,13 +113,13 @@ public class CollisionManager
         InflateWalls(copy, padding);
         WriteInflatedGrid(copy);
     }
-    
+
     // copy walkable grid
     private bool [,] CopyWalkableGrid()
     {
         int width = PathGrid.GetLength(0);
         int height = PathGrid.GetLength(1);
-        
+
         bool [,] inflated =  new bool[width, height];
 
         for (int y = 0; y < height; y++)
@@ -133,13 +131,13 @@ public class CollisionManager
         }
         return inflated;
     }
-    
+
     // inflate the walls of the unwalkable nodes
     private void InflateWalls(bool[,] inflated, int padding)
     {
         int width = PathGrid.GetLength(0);
         int height = PathGrid.GetLength(1);
-        
+
         int [,] dirs = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
 
         for (int y = 0; y < height; y++)
@@ -154,16 +152,16 @@ public class CollisionManager
                         {
                             if (dx == 0 && dy == 0)
                                 continue;
-                            
+
                             int nx = x + dx;
                             int ny = y + dy;
-                            
+
                             if (nx < 0 || nx >= width || ny < 0 || ny >= height)
                                 continue;
-                            
+
                             if (!inflated[nx, ny])
                                 continue;
-                            
+
                             inflated[nx, ny] = false;
                         }
                     }
@@ -171,7 +169,7 @@ public class CollisionManager
             }
         }
     }
-    
+
     // write the padding into the grid
     private void WriteInflatedGrid(bool[,] inflated)
     {
@@ -241,6 +239,23 @@ public class CollisionManager
         }
     }
 
+    public BoxCollider Projected(BoxCollider original, Vector2 delta)
+    {
+        return new BoxCollider(
+            original.Position + delta,
+            original.Width,
+            original.Height,
+            original.Layer,
+            original.Owner
+        );
+    }
+
+    public bool WillCollide(BoxCollider moving, Vector2 delta, ICollider obstacle)
+    {
+        var projected = Projected(moving, delta);
+        return projected.Intersects(obstacle);
+    }
+
     private void HandleCharacterWithStatic(ICollider b, ICollider c)
     {
         // Ignore SPAWNENEMIES layer for characters
@@ -248,15 +263,37 @@ public class CollisionManager
 
         if (c.Layer == CollisionLayer.CHARACTER || c.Layer == CollisionLayer.PLAYER)
         {
-            if (c.Intersects(b))
+            CharacterBase ch = (CharacterBase)c.Owner;
+            Vector2 delta = ch.Transform.Position - ch.LastTransform.Position;
+
+            if (delta.X != 0)
             {
-                CharacterBase ch = (CharacterBase)c.Owner;
-                ch.SetLastTransform();
-                ch.UpdateCollider();
+                if (WillCollide((BoxCollider)c, new Vector2(delta.X, 0), b))
+                {
+                    ch.SetLastTransform();
+                    ch.Transform.Position = new Vector2(
+                        ch.LastTransform.Position.X,
+                        ch.Transform.Position.Y
+                    );
+                }
             }
+
+            ch.UpdateCollider();
+            if (delta.Y != 0)
+            {
+                if (WillCollide((BoxCollider)c, new Vector2(0, delta.Y), b))
+                {
+                    ch.SetLastTransform();
+                    ch.Transform.Position = new Vector2(
+                        ch.Transform.Position.X,
+                        ch.LastTransform.Position.Y
+                    );
+                }
+            }
+            ch.UpdateCollider();
         }
     }
-    
+
     private void HandleProjectileWithStatic(ICollider b, ICollider c)
     {
         if (b.Layer == CollisionLayer.WALL && c.Layer == CollisionLayer.PROJECTILE)
@@ -307,14 +344,19 @@ public class CollisionManager
 
     private void HandleCharacterCollision(ICollider c, ICollider d)
     {
+        if (c.Owner == d.Owner || d.Layer != CollisionLayer.CHARACTER && d.Layer != CollisionLayer.PLAYER)
+        {
+            return;
+        }
+
         if (d.Layer == CollisionLayer.CHARACTER || d.Layer == CollisionLayer.PLAYER)
         {
-            if (c.Intersects(d) && c.Owner != d.Owner)
+            CharacterBase ch = (CharacterBase)c.Owner;
+            Vector2 delta = ch.Transform.Position - ch.LastTransform.Position;
+            if (c.Owner != d.Owner && WillCollide((BoxCollider)c, delta, d))
             {
-                // Event for two Characters directly colliding (Close combat)
                 OnCharacterCollision?.Invoke((CharacterBase)c.Owner, (CharacterBase)d.Owner);
 
-                CharacterBase ch = (CharacterBase)c.Owner;
                 CharacterBase chd = (CharacterBase)d.Owner;
                 Vector2 t = GetPenetrationVector(c, d);
 
@@ -412,8 +454,6 @@ public class CollisionManager
         }
     }
 
-
-
     public void Update(Player player, List<ItemBase> items, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters)
     {
         DynamicHash.Clear();
@@ -431,9 +471,9 @@ public class CollisionManager
                 }
                 else
                 {
-                    dynamics = DynamicHash.QueryNearby(c.Position, 1);
+                    dynamics = DynamicHash.QueryNearby(c.Position, 2);
                 }
-                List<ICollider> statics = StaticHash.QueryNearby(c.Position, 1);
+                List<ICollider> statics = StaticHash.QueryNearby(c.Position, 2);
                 HandleDynamics(c, dynamics);
                 HandleStatics(c, statics);
                 HandleTerrain(c, statics);
@@ -468,17 +508,23 @@ public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
                          Player player, List<CharacterBase> characters,
                          List<ItemBase> items, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks)
 {
-    // Static collision boxes
-    foreach (var box in _collisionBoxes)
+    foreach (var cell in StaticHash._cells)
     {
-        var rect = new Rectangle(
-            (int)box.Position.X,
-            (int)box.Position.Y,
-            box.Width,
-            box.Height
-        );
-        DrawRectOutline(spriteBatch, pixel, rect, Color.Red * 0.7f);
+        foreach(var box in cell.Value.Colliders)
+        {
+            if (box.Layer == CollisionLayer.WALL)
+            {
+                var rect = new Rectangle(
+                    (int)box.Position.X,
+                    (int)box.Position.Y,
+                    box.Width,
+                    box.Height
+                );
+                DrawRectOutline(spriteBatch, pixel, rect, Color.Red * 0.7f);
+            }
+        }
     }
+
     // AOE hitboxes
     foreach (var aoe in aoeAttacks)
     {

@@ -42,10 +42,16 @@ public class SpatialHash
 
     public void Insert(ICollider c)
     {
-        int minX = (int)MathF.Floor(c.Position.X / _cellSize);
-        int maxX = (int)MathF.Floor(c.Position.X / _cellSize);
-        int minY = (int)MathF.Floor(c.Position.Y / _cellSize);
-        int maxY = (int)MathF.Floor(c.Position.Y / _cellSize);
+        float left   = c.Position.X;
+        float right  = c.Position.X + c.Width;
+        float top    = c.Position.Y;
+        float bottom = c.Position.Y + c.Height;
+
+        int minX = (int)MathF.Floor(left / _cellSize);
+        int maxX = (int)MathF.Floor((right  - 1) / _cellSize);
+        int minY = (int)MathF.Floor(top / _cellSize);
+        int maxY = (int)MathF.Floor((bottom - 1) / _cellSize);
+
 
         for (int x = minX; x <= maxX; x++)
         {
