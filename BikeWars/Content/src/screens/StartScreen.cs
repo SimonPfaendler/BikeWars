@@ -73,7 +73,7 @@ public class StartScreen : IScreen
     {
         MouseState currentMouseState = Mouse.GetState();
         
-        _startButton.Update(currentMouseState);
+        _startButton.Update(currentMouseState, gameTime);
         
         if (_startButton.IsClicked(currentMouseState, _previousMouseState))
         {

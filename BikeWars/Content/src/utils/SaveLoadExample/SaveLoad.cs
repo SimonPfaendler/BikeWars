@@ -8,6 +8,7 @@ using BikeWars.Content.entities.items;
 using BikeWars.Content.managers;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
+using BikeWars.Content.components;
 
 namespace BikeWars.Content.src.utils.SaveLoadExample;
 
@@ -45,6 +46,7 @@ public static class SaveLoad
         public List<ItemSaveModel> Items {get; set;}
         public List<Statistic> Statistics{get; set;}
         public Statistic Statistic{get; set;}
+        public int GameMode { get; set; } = 0;
     }
 
     public class BasicSaveModel
@@ -157,13 +159,14 @@ public static class SaveLoad
 
     // save the counter in a JSON file
     // public static void SaveGame(int counter, Transform playerPosition, List<ProjectileBase> projectiles)
-    public static void SaveGame(GameTimer gameTimer, GameObjectManager gameObjectManager, StatisticsManager statisticsManager)
+    public static void SaveGame(GameTimer gameTimer, GameObjectManager gameObjectManager, StatisticsManager statisticsManager, GameMode gameMode)
     {
         try
         {
             // serialize the current info into JSON text
             GameState state = new GameState
             {
+                GameMode = (int)gameMode,
                 GameTimerCurrentTime = gameTimer.CurrentTime,
                 GameTimerTotalTime = gameTimer.TotalTime,
                 IsGameTimerRunning = gameTimer.IsRunning,
@@ -207,6 +210,7 @@ public static class SaveLoad
             // serialize the current info into JSON text
             GameState state = new GameState
             {
+                GameMode = loadState.GameMode,
                 GameTimerCurrentTime = loadState.GameTimerCurrentTime,
                 GameTimerTotalTime = loadState.GameTimerTotalTime,
                 IsGameTimerRunning = loadState.IsGameTimerRunning,

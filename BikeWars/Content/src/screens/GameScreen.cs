@@ -80,8 +80,12 @@ namespace BikeWars.Content.screens
         private const float GAME_TIME_LIMIT = 120f;
         private SpriteFont _timerFont;
         private Vector2 _timerPosition;
+        private readonly GameMode _gameMode;
+        public GameMode GameMode => _gameMode;
+        public bool IsMultiplayer => _gameMode == GameMode.MultiPlayer; // might be helpful later
 
-        public GameScreen(AudioService audioService, bool isTechDemo = false)
+
+        public GameScreen(AudioService audioService, GameMode gameMode, bool isTechDemo = false)
         {
 
             _isTechDemo = isTechDemo;
@@ -89,6 +93,7 @@ namespace BikeWars.Content.screens
             worldBounds = new Rectangle(0, 0, 11200, 11200);
 
             _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
+            _gameMode = gameMode;
 
             _itemManager = new ItemManager();
             _itemManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
@@ -99,7 +104,7 @@ namespace BikeWars.Content.screens
             _playerManager = new PlayerManager();
             
             // Decide mode
-            _playerManager.Initialize(GameMode.MultiPlayer, worldBounds, _audioService, _isTechDemo);
+            _playerManager.Initialize(_gameMode, worldBounds, _audioService, _isTechDemo);
 
             camera = _playerManager.Camera;
             Player player = _playerManager.Player1;
@@ -376,7 +381,7 @@ namespace BikeWars.Content.screens
         private void HandleSaveLoadInput()
         {
             if (InputHandler.IsPressed(GameAction.SAVE))
-                SaveLoad.SaveGame(_gameTimer, _gameObjectManager, _statisticsManager);
+                SaveLoad.SaveGame(_gameTimer, _gameObjectManager, _statisticsManager, _gameMode);
 
             if (InputHandler.IsPressed(GameAction.LOAD))
             {
