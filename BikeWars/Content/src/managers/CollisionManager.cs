@@ -473,7 +473,7 @@ public class CollisionManager
         Insertions(items, players, projectiles, aoeAttacks, characters);
         foreach (var c in allDynamics)
         {
-            var dynamics = DynamicHash.QueryNearby(c.Position, 3);
+            var dynamics = DynamicHash.QueryNearby(c.Position, 1);
             var statics  = StaticHash.QueryNearby(c.Position, 2);
 
             HandleDynamics(c, dynamics);
