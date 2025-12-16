@@ -339,15 +339,12 @@ public class CollisionManager
 
     private void PickingUpItem(ICollider c, ICollider d)
     {
-        if (c.Layer == CollisionLayer.PLAYER)
+        if (c.Layer == CollisionLayer.PLAYER && d.Layer == CollisionLayer.ITEM && c.Intersects(d))
         {
-            if (d.Layer == CollisionLayer.ITEM)
+            if (c.Intersects(d))
             {
-                if (c.Intersects(d))
-                {
-                    // Event for picking up items
-                    OnItemPickup?.Invoke((Player)c.Owner, (ItemBase)d.Owner);
-                }
+                // Event for picking up items
+                OnItemPickup?.Invoke((Player)c.Owner, (ItemBase)d.Owner);
             }
         }
     }
@@ -479,6 +476,10 @@ public class CollisionManager
 
         foreach (var c in allDynamics)
         {
+            if (c.Layer != CollisionLayer.CHARACTER && c.Layer != CollisionLayer.PLAYER && c.Layer != CollisionLayer.PROJECTILE)
+            {
+                continue;
+            }
             var dynamics = DynamicHash.QueryNearby(c.Position, 1);
             var statics  = StaticHash.QueryNearby(c.Position, 2);
 
