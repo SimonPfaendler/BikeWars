@@ -356,96 +356,99 @@ public class CollisionManager
 
     private void HandleCharacterCollision(ICollider c, ICollider d)
     {
-        if (c.Owner == d.Owner || d.Layer != CollisionLayer.CHARACTER && d.Layer != CollisionLayer.PLAYER)
+        if (c == d || c.GetHashCode() > d.GetHashCode() || (d.Layer != CollisionLayer.CHARACTER && d.Layer != CollisionLayer.PLAYER))
         {
             return;
         }
 
-        if (d.Layer == CollisionLayer.CHARACTER || d.Layer == CollisionLayer.PLAYER)
+        CharacterBase ch = (CharacterBase)c.Owner;
+        Vector2 delta = ch.Transform.Position - ch.LastTransform.Position;
+
+        if (!WillCollide((BoxCollider)c, delta, d))
         {
-            CharacterBase ch = (CharacterBase)c.Owner;
-            Vector2 delta = ch.Transform.Position - ch.LastTransform.Position;
-            if (c.Owner != d.Owner && WillCollide((BoxCollider)c, delta, d))
-            {
-                OnCharacterCollision?.Invoke((CharacterBase)c.Owner, (CharacterBase)d.Owner);
-
-                CharacterBase chd = (CharacterBase)d.Owner;
-                Vector2 t = GetPenetrationVector(c, d);
-
-                ch.SetLastTransform();
-                ch.Transform.Position -= t;
-                ch.UpdateCollider();
-                chd.SetLastTransform();
-                chd.Transform.Position += t;
-                chd.UpdateCollider();
-            }
+            return;
         }
+
+        OnCharacterCollision?.Invoke((CharacterBase)c.Owner, (CharacterBase)d.Owner);
+        Vector2 t = GetPenetrationVector(c, d);
+        CharacterBase chd = (CharacterBase)d.Owner;
+
+
+        if (t.LengthSquared() < 0.01f)
+            return;
+        ch.SetLastTransform();
+        ch.Transform.Position -= t;
+        ch.UpdateCollider();
+
+        chd.SetLastTransform();
+        chd.UpdateCollider();
     }
 
-    // private void HandleCharacterProjectiles(ICollider c, ICollider d, List<ProjectileBase> toRemoveProjectiles, List<CharacterBase> toRemoveCharacters)
     private void HandleCharacterProjectiles(ICollider c, ICollider d)
     {
-        if (d.Layer == CollisionLayer.PROJECTILE)
+        if (d.Layer != CollisionLayer.PROJECTILE || !c.Intersects(d))
         {
-            if (c.Intersects(d))
-            {
-            ProjectileBase p = (ProjectileBase)d.Owner;
-
-            // Make sure projectile cannot hit more than once
-            if (p.HasHit)
-            {
-                _toRemoveColliders.Add(p.Collider);
-                return;
-            }
-
-            // Ignore self-hit
-            if (c.Owner == p.Owner)
-            {
-                return;
-            }
-
-            // Event for a character or player gets hit by projectile
-            OnProjectileHit?.Invoke((CharacterBase)c.Owner, (ProjectileBase)d.Owner);
-
-            CharacterBase ch = (CharacterBase)c.Owner;
-            if(ch.IsDead)
-                _toRemoveColliders.Add(ch.Collider);
-                p.HasHit = true;
-                _toRemoveColliders.Add(p.Collider);
-            }
+            return;
         }
+        ProjectileBase p = (ProjectileBase)d.Owner;
+
+        // Make sure projectile cannot hit more than once
+        if (p.HasHit)
+        {
+            _toRemoveColliders.Add(p.Collider);
+            return;
+        }
+
+        // Ignore self-hit
+        if (c.Owner == p.Owner)
+        {
+            return;
+        }
+
+        // Event for a character or player gets hit by projectile
+        OnProjectileHit?.Invoke((CharacterBase)c.Owner, (ProjectileBase)d.Owner);
+
+        CharacterBase ch = (CharacterBase)c.Owner;
+        if (ch.IsDead)
+        {
+            _toRemoveColliders.Add(ch.Collider);
+        }
+        p.HasHit = true;
+        _toRemoveColliders.Add(p.Collider);
     }
 
     private void HandleCharacters(ICollider c, ICollider d)
     {
-        if (c.Layer == CollisionLayer.CHARACTER || c.Layer == CollisionLayer.PLAYER)
+        if (c.Layer != CollisionLayer.CHARACTER && c.Layer != CollisionLayer.PLAYER)
         {
-            HandleCharacterCollision(c, d);
-            HandleCharacterProjectiles(c, d);
-            // AOE damage handling
-            if (d.Layer == CollisionLayer.AOE)
-            {
-                AreaOfEffectBase aoe = (AreaOfEffectBase)d.Owner;
-
-                // prevent hitting yourself
-                if (aoe.Owner == c.Owner)
-                    return;
-
-                if (c.Intersects(d))
-                {
-                    CharacterBase ch = (CharacterBase)c.Owner;
-
-                    // Call proper AOE damage event
-                    OnAOEHit?.Invoke(ch, aoe);
-
-                    if (ch.IsDead)
-                        _toRemoveColliders.Add(ch.Collider);
-                }
-
-                return; // don't run projectile logic
-            }
-
+            return;
         }
+        HandleCharacterCollision(c, d);
+        HandleCharacterProjectiles(c, d);
+        // AOE damage handling
+        if (d.Layer != CollisionLayer.AOE)
+        {
+            return;
+        }
+        AreaOfEffectBase aoe = (AreaOfEffectBase)d.Owner;
+
+        // prevent hitting yourself
+        if (aoe.Owner == c.Owner)
+            return;
+
+        if (c.Intersects(d))
+        {
+            CharacterBase ch = (CharacterBase)c.Owner;
+
+            // Call proper AOE damage event
+            OnAOEHit?.Invoke(ch, aoe);
+
+            if (ch.IsDead)
+            {
+                _toRemoveColliders.Add(ch.Collider);
+            }
+        }
+        return; // don't run projectile logic
     }
 
     private void HandleTerrain(ICollider c, List<ICollider> statics)
@@ -453,15 +456,14 @@ public class CollisionManager
         if (c.Owner is not Player player)
             return;
 
-
         player.CurrentTerrain = null;
 
         foreach (var s in statics)
         {
             if (s.Layer == CollisionLayer.TERRAIN && s.Intersects(c))
             {
-                    player.CurrentTerrain = (TerrainCollider)s;
-                    return;
+                player.CurrentTerrain = (TerrainCollider)s;
+                return;
             }
         }
     }
@@ -513,16 +515,17 @@ public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
     {
         foreach(var box in cell.Value.Colliders)
         {
-            if (box.Layer == CollisionLayer.WALL)
+            if (box.Layer != CollisionLayer.WALL)
             {
-                var rect = new Rectangle(
-                    (int)box.Position.X,
-                    (int)box.Position.Y,
-                    box.Width,
-                    box.Height
-                );
-                DrawRectOutline(spriteBatch, pixel, rect, Color.Red * 0.7f);
+                continue;
             }
+            var rect = new Rectangle(
+                (int)box.Position.X,
+                (int)box.Position.Y,
+                box.Width,
+                box.Height
+            );
+            DrawRectOutline(spriteBatch, pixel, rect, Color.Red * 0.7f);
         }
     }
 
@@ -552,11 +555,12 @@ public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
     // NPC/Character hitboxes
     foreach (var character in characters)
     {
-        if (character?.Collider != null)
+        if (character?.Collider == null)
         {
-            var charRect = GetColliderRectangle(character.Collider);
-            DrawRectOutline(spriteBatch, pixel, charRect, Color.Red * 0.7f);
+            continue;
         }
+        var charRect = GetColliderRectangle(character.Collider);
+        DrawRectOutline(spriteBatch, pixel, charRect, Color.Red * 0.7f);
     }
 
     // Item hitboxes
