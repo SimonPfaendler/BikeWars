@@ -86,9 +86,9 @@ namespace BikeWars.Content.screens
 
             MouseState mouse = Mouse.GetState();
 
-            _spawnHoboBtn.Update(mouse);
-            _spawnBikeBtn.Update(mouse);
-            _spawnDogBtn.Update(mouse);
+            _spawnHoboBtn.Update(mouse, gameTime);
+            _spawnBikeBtn.Update(mouse, gameTime);
+            _spawnDogBtn.Update(mouse, gameTime);
 
             if(_spawnHoboBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Hobo, 100);

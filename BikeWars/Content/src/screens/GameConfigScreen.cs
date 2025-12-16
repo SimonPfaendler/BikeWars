@@ -134,17 +134,17 @@ public class GameConfigScreen : MenuScreenBase, IScreen
         }
         private void UpdateModeButtonColors()
         {
-            if (_selectedGameMode == GameMode.MultiPlayer)
-            {
-                _multiplayerButton.BackgroundColor = _selectedColor;
-                _singleplayerButton.BackgroundColor = _defaultColor;
-            }
-            else
-            {
-                _singleplayerButton.BackgroundColor = _selectedColor;
-                _multiplayerButton.BackgroundColor = _defaultColor;
-            }
+            bool isMultiplayer = _selectedGameMode == GameMode.MultiPlayer;
+
+            // Multiplayer Button
+            _multiplayerButton.BackgroundColor = isMultiplayer ? _selectedColor : _defaultColor;
+            _multiplayerButton.IsSelected = isMultiplayer;
+
+            // Singleplayer Button
+            _singleplayerButton.BackgroundColor = !isMultiplayer ? _selectedColor : _defaultColor;
+            _singleplayerButton.IsSelected = !isMultiplayer;
         }
+
 
 
 
