@@ -127,8 +127,12 @@ namespace BikeWars.Content.utils
             
             // Dog
             AnimationFrames["Dog_Idle"] = GetFramesFromAtlas("e3_dog_walking_right.png", 1, 1);
-            AnimationFrames["Dog_WalkLeft"] = GetFramesFromAtlas("e3_dog_walking_left.png", 1, 1);
-            AnimationFrames["Dog_WalkRight"] = GetFramesFromAtlas("e3_dog_walking_right.png", 1, 1);
+            var dogLeft = GetFramesFromAtlas("e3_dog_walking_left.png", 1, 1);
+            dogLeft.AddRange(GetFramesFromAtlas("e3_dog_walking_left_2.png", 1, 1));
+            AnimationFrames["Dog_WalkLeft"] = dogLeft;
+            var dogRight = GetFramesFromAtlas("e3_dog_walking_right.png", 1, 1);
+            dogRight.AddRange(GetFramesFromAtlas("e3_dog_walking_right_2.png", 1, 1));
+            AnimationFrames["Dog_WalkRight"] = dogRight;
             AnimationFrames["Dog_WalkUp"] = GetFramesFromAtlas("e3_dog_walking_up.png", 1, 1);
             
             var dogDown = GetFramesFromAtlas("e3_dog_walking_down_1.png", 1, 1);
