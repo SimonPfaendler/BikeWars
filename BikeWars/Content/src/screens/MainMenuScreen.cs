@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.managers;
+using BikeWars.Content.src.utils.SaveLoadExample;
 
 namespace BikeWars.Content.screens
 {
@@ -114,11 +115,24 @@ namespace BikeWars.Content.screens
 
                 case ButtonAction.LoadGame:
                     // Temporary we can just load the last game state.
-                    GameScreen gameScreen = new GameScreen(_audioService);
-                    gameScreen.LoadContent(Game1.Instance.Content);
-                    gameScreen.HandleLoadGame();
-                    ScreenManager.RemoveScreen(this);
-                    ScreenManager.AddScreen(gameScreen);
+                    try 
+                    {
+                        var loadedState = SaveLoad.LoadGame();
+                        
+                        GameMode savedMode = (GameMode)loadedState.GameMode;
+                        
+                        GameScreen gameScreen = new GameScreen(_audioService, savedMode);
+                        
+                        gameScreen.LoadContent(Game1.Instance.Content);
+                        gameScreen.HandleLoadGame();
+
+                        ScreenManager.RemoveScreen(this);
+                        ScreenManager.AddScreen(gameScreen);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Fehler beim Laden: " + ex.Message);
+                    }
                     break;
 
                 case ButtonAction.Profile:

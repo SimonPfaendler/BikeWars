@@ -1,0 +1,53 @@
+using Microsoft.Xna.Framework;
+using BikeWars.Content.engine;
+using BikeWars.Content.engine.input;
+using BikeWars.Entities.Characters;
+using BikeWars.Content.engine.Audio;
+using Microsoft.Xna.Framework.Input;
+
+namespace BikeWars.Content.managers
+{
+    public enum GameMode
+    {
+        SinglePlayer,
+        MultiPlayer
+    }
+
+    public class PlayerManager
+    {
+        public Player Player1 { get; private set; }
+        public Player Player2 { get; private set; }
+        public Camera2D Camera { get; private set; }
+
+        public void Initialize(GameMode mode, Rectangle worldBounds, AudioService audioService, bool isTechDemo)
+        {
+            Game1 game = Game1.Instance;
+            Camera = new Camera2D(
+                game.GraphicsDevice.Viewport.Width,
+                game.GraphicsDevice.Viewport.Height,
+                worldBounds
+            );
+
+            // Player 1 - Keyboard
+            var inputP1 = new KeyboardPlayerInput(Camera);
+            Player1 = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(32, 32), audioService, inputP1);
+
+            if (isTechDemo)
+            {
+                Player1.IsGodMode = true;
+            }
+
+            // Player 2 - Gamepad (Only in MultiPlayer)
+            if (mode == GameMode.MultiPlayer)
+            {
+                var inputP2 = new GamepadPlayerInput(PlayerIndex.One);
+                Player2 = new Player(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2), new Point(32, 32), audioService, inputP2);
+                
+                if (isTechDemo)
+                {
+                    Player2.IsGodMode = true;
+                }
+            }
+        }
+    }
+}

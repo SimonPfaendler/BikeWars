@@ -40,7 +40,7 @@ namespace BikeWars.Content.screens
             
             foreach (var button in _buttons)
             {
-                button.Update(currentMouseState);
+                button.Update(currentMouseState, gameTime);
                 
                 if (button.IsClicked(currentMouseState, _previousMouseState))
                 {

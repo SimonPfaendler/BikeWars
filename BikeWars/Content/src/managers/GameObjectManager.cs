@@ -61,9 +61,19 @@ public class GameObjectManager
         _statics = new List<BoxCollider>();
         _projectiles = new List<ProjectileBase>();
 
-        Player1.ShotBullet += OnPlayerShotBullet;
-        Player1.Flamethrower += OnPlayerFlamethrower;
-        Player1.IceTrail += OnPlayerIceTrail;
+        if (Player1 != null)
+        {
+            Player1.ShotBullet += () => OnPlayerShotBullet(Player1);
+            Player1.Flamethrower += () => OnPlayerFlamethrower(Player1);
+            Player1.IceTrail += () => OnPlayerIceTrail(Player1);
+        }
+
+        if (Player2 != null)
+        {
+            Player2.ShotBullet += () => OnPlayerShotBullet(Player2);
+            Player2.Flamethrower += () => OnPlayerFlamethrower(Player2);
+            Player2.IceTrail += () => OnPlayerIceTrail(Player2);
+        }
 
     }
     public GameObjectManager(ContentManager content, List<CharacterBase> characters, List<ItemBase> items, List<BoxCollider> statics, List<ProjectileBase> projectiles) // TODO
@@ -123,8 +133,8 @@ public class GameObjectManager
 
     public void Draw(SpriteBatch spriteBatch)
     {
-        Player1.Draw(spriteBatch); // Maybe put it in characters too?
-        // Player2.Draw(spriteBatch);
+        if (Player1 != null) Player1.Draw(spriteBatch);
+        if (Player2 != null) Player2.Draw(spriteBatch);
         foreach (CharacterBase c in Characters)
         {
             c.Draw(spriteBatch);
@@ -149,7 +159,8 @@ public class GameObjectManager
 
     public void Update(GameTime gameTime, Vector2 mouseWorldPos)
     {
-        Player1.Update(gameTime, mouseWorldPos);
+        if (Player1 != null) Player1.Update(gameTime, mouseWorldPos);
+        if (Player2 != null) Player2.Update(gameTime, mouseWorldPos);
         foreach (ProjectileBase p in Projectiles)
         {
             p.Update(gameTime);
@@ -186,28 +197,28 @@ public class GameObjectManager
         }
     }
 
-    private void OnPlayerShotBullet()
+    private void OnPlayerShotBullet(Player player)
     {
-        Vector2 spawnPos = Player1.Transform.Position;
-        Vector2 direction = Player1.GazeDirection;
+        Vector2 spawnPos = player.Transform.Position;
+        Vector2 direction = player.GazeDirection;
 
-        Bullet b = new Bullet(spawnPos, new Point(8, 8), Player1);
+        Bullet b = new Bullet(spawnPos, new Point(8, 8), player);
         b.Movement.Direction = direction; // Set the movement direction
         AddProjectile(b);
     }
 
-        private void OnPlayerFlamethrower()
+    private void OnPlayerFlamethrower(Player player)
     {
-        Vector2 direction = Player1.GazeDirection;
-        Flamethrower f = new Flamethrower(Player1, direction);
+        Vector2 direction = player.GazeDirection;
+        Flamethrower f = new Flamethrower(player, direction);
         f.LoadContent(_contentManager);
         AddAOE(f);
     }
 
-        private void OnPlayerIceTrail()
+    private void OnPlayerIceTrail(Player player)
     {
-        Vector2 direction = Player1.GazeDirection;
-        IceTrail ice = new IceTrail(Player1, direction);
+        Vector2 direction = player.GazeDirection;
+        IceTrail ice = new IceTrail(player, direction);
         ice.LoadContent(_contentManager);
         AddAOE(ice);
     }
@@ -218,6 +229,8 @@ public class GameObjectManager
 
         if (Player1 is IWorldAudioAware pa)
             pa.SetWorldAudioManager(worldAudioManager);
+        if (Player2 is IWorldAudioAware pa2)
+            pa2.SetWorldAudioManager(worldAudioManager);
 
         foreach (var c in Characters)
         {

@@ -1,3 +1,4 @@
+using System;
 using BikeWars.Content.engine.Audio;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -21,6 +22,10 @@ namespace BikeWars.Content.components
         private const float HOVER_SCALE = 1.2f;
         public int Id { get; private set; }
         private readonly AudioService _audioService;
+        private Color _backgroundColor = Color.White;
+        private bool _isSelected;
+        private float _pulseTime;
+
         
         public MenuButton(int id, Texture2D texture, Rectangle bounds, string text, SpriteFont font, AudioService audioService, Color? textColor = null)
         {
@@ -37,10 +42,40 @@ namespace BikeWars.Content.components
             _drawBounds = _originalBounds;
             _audioService = audioService;
         }
+        
+        public Color BackgroundColor
+        {
+            get => _backgroundColor;
+            set => _backgroundColor = value;
+        }
+        
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set
+            {
+                _isSelected = value;
+                if (!value)
+                    _pulseTime = 0f;
+            }
+        }
+
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(_texture, _drawBounds, Color.White);
+            Color drawColor = _backgroundColor;
+
+            if (_isSelected)
+            {
+                float pulse = (float)(Math.Sin(_pulseTime * 3f) * 0.1f + 0.9f);
+                drawColor = new Color(
+                    (int)(_backgroundColor.R * pulse),
+                    (int)(_backgroundColor.G * pulse),
+                    (int)(_backgroundColor.B * pulse)
+                );
+            }
+
+            spriteBatch.Draw(_texture, _drawBounds, drawColor);
 
             Vector2 textSize = _font.MeasureString(_text);
             float scale = 1.5f;
@@ -54,12 +89,16 @@ namespace BikeWars.Content.components
             spriteBatch.DrawString(_font, _text, textPosition, _textColor, 0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
         }
         
-        public void Update(MouseState mouseState)
+        public void Update(MouseState mouseState, GameTime gameTime)
         {
             // make button bigger when the mouse is in its bounds
             _isHovered = _collisionBounds.Contains(mouseState.Position);
             
             _drawBounds = _isHovered ? _hoverBounds : _originalBounds;
+            if (_isSelected)
+            {
+                _pulseTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            }
         }
 
         public bool IsClicked(MouseState currentMouseState, MouseState previousMouseState)
