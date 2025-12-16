@@ -29,11 +29,7 @@ public class EnemyMovement : MovementBase
     private const float NodeReachDistance = 18f;
     private const float StopRadius = 10f;
 
-    private Vector2 _playerPosition;
     public Vector2 PlayerPosition {get; set;}
-
-    private Vector2 _enemyPosition;
-
     public Vector2 EnemyPosition {get; set;}
 
     // sets up the enemy movement system and stores pathfinding + grid helpers.
@@ -78,7 +74,6 @@ public class EnemyMovement : MovementBase
             _repathTimer = RepathInterval;
         }
         Direction = DirectionAlongPath();
-
         if (Direction == Vector2.Zero)
         {
             // optional: clear path when done, then just chase directly

@@ -5,7 +5,6 @@ using BikeWars.Content.engine.Audio;
 using BikeWars.Content.managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Content;
 using BikeWars.Entities.Characters;
 
 namespace BikeWars.Content.entities.interfaces;

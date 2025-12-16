@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework;
 

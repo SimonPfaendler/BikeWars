@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using BikeWars.Content.entities.items;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
@@ -15,7 +14,6 @@ using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled.Renderers;
 using BikeWars.Content.managers;
 using BikeWars.Content.events;
-using BikeWars.Content.engine.input;
 
 namespace BikeWars.Content.screens
 {
@@ -31,6 +29,7 @@ namespace BikeWars.Content.screens
         private Debugger _debugger;
         private SpriteFont _font;
         private Texture2D _pixel;
+
         private const int CELL_SIZE = 16;
         public ScreenManager ScreenManager { get; set; }
         private WorldAudioManager _worldAudioManager;
@@ -42,7 +41,7 @@ namespace BikeWars.Content.screens
         public StatisticsManager StatisticsManager => _statisticsManager;
         private readonly AudioService _audioService;
         public AudioService AudioService => _audioService;
-        
+
         private PlayerManager _playerManager;
         public PlayerManager PlayerManager => _playerManager;
 
@@ -97,11 +96,11 @@ namespace BikeWars.Content.screens
             _itemManager = new ItemManager();
             _itemManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
             _itemManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 90), new Point(32, 32)));
-            _collisionManager = new CollisionManager(CELL_SIZE, worldBounds.Height);
-            
-            
+
+
+
             _playerManager = new PlayerManager();
-            
+
             // Decide mode
             _playerManager.Initialize(_gameMode, worldBounds, _audioService, _isTechDemo);
 
@@ -121,12 +120,18 @@ namespace BikeWars.Content.screens
             _gameTimer = new GameTimer(GAME_TIME_LIMIT);
 
 
-
             _gameObjectManager.OnCharacterDied += _statisticsManager.HandleCharacterDied;
             _gameObjectManager.OnTookDamage += _statisticsManager.HandleTookDamage;
             _gameObjectManager.Player1.OnTookDamage += _statisticsManager.HandleTookDamage;
             _gameObjectManager.Player1.OnLevelUp += _statisticsManager.HandleLevel;
             _gameObjectManager.Player1.OnMoreXP += _statisticsManager.HandleExperience;
+
+            _collisionManager = new CollisionManager(CELL_SIZE, worldBounds.Height);
+            var players = new List<Player>();
+            if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);
+            if (_gameObjectManager.Player2 != null) players.Add(_gameObjectManager.Player2);
+
+            _collisionManager.Insertions(_itemManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters);
 
             GameEvents.OnResumeTimer += ResumeTimer;
             HandleLoadNonInGameData();
@@ -169,7 +174,7 @@ namespace BikeWars.Content.screens
             // HUD
             hudTexture = managers.SpriteManager.GetTexture("HUD_Sheet");
             hud = new HUD(hudTexture);
-            
+
             _hudP2 = new HUD(hudTexture);
             // Position P2 HUD at bottom right
             int viewW = Game1.Instance.GraphicsDevice.Viewport.Width;
@@ -233,12 +238,10 @@ namespace BikeWars.Content.screens
             }
             _overlay.SetPaused(false, gameTime);
             _overlay.SetPaused(false, gameTime);
-            
+
             var players = new List<Player>();
             if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);
             if (_gameObjectManager.Player2 != null) players.Add(_gameObjectManager.Player2);
-
-            _collisionManager.Update(players, _itemManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters);
 
             if (!_isTechDemo)
             {
@@ -246,6 +249,7 @@ namespace BikeWars.Content.screens
             }
 
             _gameObjectManager.Update(gameTime, InputHandler.MakeMouseWorldPosByCamera(camera));
+            _collisionManager.Update(players, _itemManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters);
             _itemManager.Update(gameTime);
 
 

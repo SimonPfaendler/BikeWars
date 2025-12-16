@@ -566,7 +566,7 @@ namespace BikeWars.Entities.Characters
             // Gaze Direction Logic
             Vector2 eyePos = Transform.Position;
             Vector2 potentialGaze = _input.GetAimDirection(eyePos, _facingDirection);
-            
+
             if (potentialGaze != Vector2.Zero)
             {
                 AimTarget = eyePos + potentialGaze * AimLength;

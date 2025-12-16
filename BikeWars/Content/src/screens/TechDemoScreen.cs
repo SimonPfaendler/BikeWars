@@ -69,7 +69,7 @@ namespace BikeWars.Content.screens
                 font: _font,
                 audioService: AudioService
             );
-            
+
             _spawnDogBtn = new MenuButton(
                 id: 1,
                 texture: _buttonTex,
@@ -95,7 +95,7 @@ namespace BikeWars.Content.screens
 
             if (_spawnBikeBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.BikeThief, 15);
-            
+
             if(_spawnDogBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Dog, 50);
 
@@ -135,7 +135,7 @@ namespace BikeWars.Content.screens
                     found = true;
                     break;
                 }
-                
+
                 CharacterBase enemy;
 
                 switch (type)

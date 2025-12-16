@@ -94,7 +94,6 @@ namespace BikeWars.Entities.Characters
                 _currentAnimation = _idleAnimation;
             }
 
-
             if (_currentAnimation != null)
             {
                 _currentAnimation.Update(gameTime, Movement.IsMoving);
