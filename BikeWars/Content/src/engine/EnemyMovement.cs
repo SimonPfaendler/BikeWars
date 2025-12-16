@@ -94,7 +94,7 @@ public class EnemyMovement : MovementBase
     {
         int localSize = LocalGridSize; // z.B. 7
         int half = localSize / 2;
-        
+
         int dx = playerGrid.X - enemyGrid.X;
         int dy = playerGrid.Y - enemyGrid.Y;
 
@@ -110,7 +110,7 @@ public class EnemyMovement : MovementBase
             _lastPlayerGrid = playerGrid;
             return;
         }
-    
+
         // 1. Local Grid erstellen
         Node[,] localGrid = new Node[localSize, localSize];
         for (int y = 0; y < localSize; y++)
@@ -119,35 +119,35 @@ public class EnemyMovement : MovementBase
             {
                 int globalX = enemyGrid.X - half + x;
                 int globalY = enemyGrid.Y - half + y;
-    
+
                 bool walkable = false;
                 if (_pathFinding.IsInsideGrid(globalX, globalY))
                     walkable = _pathFinding.GetNode(globalX, globalY).Walkable;
-    
+
                 localGrid[x, y] = new Node(x, y, walkable);
             }
         }
-    
+
         // 2. PathFinding für Local Grid
         PathFinding localFinder = new PathFinding(localGrid);
-    
+
         // 3. Start & Ziel auf Local Grid abbilden
         Point startLocal = new Point(half, half);
         Point targetLocal = new Point(
             half + (playerGrid.X - enemyGrid.X),
             half + (playerGrid.Y - enemyGrid.Y)
         );
-    
+
         var localPath = localFinder.FindPath(startLocal.X, startLocal.Y, targetLocal.X, targetLocal.Y);
         _currentPath.Clear();
-    
+
         foreach (var node in localPath)
         {
             int globalX = node.X + (enemyGrid.X - half);
             int globalY = node.Y + (enemyGrid.Y - half);
             _currentPath.Add(_pathFinding.GetNode(globalX, globalY));
         }
-    
+
         _pathIndex = 0;
         _lastPlayerGrid = playerGrid;
     }

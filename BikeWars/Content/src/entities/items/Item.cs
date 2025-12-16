@@ -20,6 +20,7 @@ public class Item: ItemBase
     {
         Transform = new Transform(start, size);
         _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.ITEM, this);
+        IsPickedUp = false;
     }
 
     public override void Update(GameTime gameTime)

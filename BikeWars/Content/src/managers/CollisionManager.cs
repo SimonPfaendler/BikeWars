@@ -24,6 +24,7 @@ public class CollisionManager
     public int _cellSize {get; set;}
     private SpatialHash _dynamicHash {get; set;}
     public SpatialHash DynamicHash {get => _dynamicHash; set => _dynamicHash = value;}
+    public HashSet<ICollider> allDynamics = new();
     private SpatialHash _staticHash {get; set;}
     public SpatialHash StaticHash {get => _staticHash; set => _staticHash = value;}
 
@@ -219,14 +220,17 @@ public class CollisionManager
 
     private void Insertions(List<ItemBase> items, Player player, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters)
     {
-        foreach (var c in items)
+        foreach (ItemBase c in items)
         {
             DynamicHash.Insert(c.Collider);
+            allDynamics.Add(c.Collider);
         }
         DynamicHash.Insert(player.Collider);
+        allDynamics.Add(player.Collider);
         foreach(ProjectileBase p in projectiles)
         {
             DynamicHash.Insert(p.Collider);
+            allDynamics.Add(p.Collider);
         }
         foreach (var aoe in aoeAttacks)
         {
@@ -236,6 +240,7 @@ public class CollisionManager
         foreach(CharacterBase c in characters)
         {
             DynamicHash.Insert(c.Collider);
+            allDynamics.Add(c.Collider);
         }
     }
 
@@ -340,6 +345,7 @@ public class CollisionManager
     public void OnRemoveItem(ItemBase item)
     {
         _toRemoveColliders.Add(item.Collider);
+        allDynamics.Remove(item.Collider);
     }
 
     private void HandleCharacterCollision(ICollider c, ICollider d)
@@ -456,29 +462,19 @@ public class CollisionManager
 
     public void Update(Player player, List<ItemBase> items, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters)
     {
+        allDynamics.Clear();
         DynamicHash.Clear();
         Insertions(items, player, projectiles, aoeAttacks, characters);
-        foreach (KeyValuePair<int, CellData> cell in DynamicHash._cells)
+        foreach (var c in allDynamics)
         {
-            foreach(var c in cell.Value.Colliders)
-            {
-                List<ICollider> dynamics;
-                if (c.Owner is AreaOfEffectBase aoe)
-                {
-                    dynamics = new List<ICollider>();
-                    foreach (var hitbox in aoe.GetHitboxes())
-                        dynamics.AddRange(DynamicHash.QueryNearby(hitbox.Position, 1));
-                }
-                else
-                {
-                    dynamics = DynamicHash.QueryNearby(c.Position, 2);
-                }
-                List<ICollider> statics = StaticHash.QueryNearby(c.Position, 2);
-                HandleDynamics(c, dynamics);
-                HandleStatics(c, statics);
-                HandleTerrain(c, statics);
-            }
+            var dynamics = DynamicHash.QueryNearby(c.Position, 3);
+            var statics  = StaticHash.QueryNearby(c.Position, 2);
+
+            HandleDynamics(c, dynamics);
+            HandleStatics(c, statics);
+            HandleTerrain(c, statics);
         }
+
         foreach(ICollider c in _toRemoveColliders)
         {
             switch (c.Owner) {
@@ -502,7 +498,6 @@ public class CollisionManager
         }
     }
 
-    // makes the hitboxes visible for when in the tech demo
     // makes the hitboxes visible for when in the tech demo
 public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
                          Player player, List<CharacterBase> characters,

@@ -1,6 +1,5 @@
 using Microsoft.Xna.Framework;
 using System;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
@@ -151,6 +150,10 @@ namespace BikeWars.Entities.Characters
             {
                 return;
             }
+            if (item.IsPickedUp) // Because of the frames we have to cut it here
+            {
+                return;
+            }
 
             if (item is Xp xp)
             {
@@ -165,12 +168,12 @@ namespace BikeWars.Entities.Characters
             {
                 if (InputHandler.IsPressed(GameAction.INTERACT) && Inventory.AddItem(item))
                 {
+                    item.IsPickedUp = true;
                     ItemPickedUp?.Invoke(item);
                 }
-
                 return;
             }
-
+            item.IsPickedUp = true;
             ItemPickedUp?.Invoke(item);
         }
 

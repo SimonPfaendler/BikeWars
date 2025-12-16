@@ -1,20 +1,20 @@
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.engine;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace BikeWars.Content.entities.interfaces;
 public abstract class ItemBase : IItem
 {
     public virtual bool InventoryItem => false; //Items which go in the inventory
-    
+
     public virtual bool IsConsumable => false;
     public virtual int HealAmount => 0;
     private Transform _transform { get; set; }
     public Transform Transform { get => _transform;  set => _transform = value; }
     private ICollider _collider { get; set; }
     public virtual ICollider Collider { get => _collider; set => _collider = value; }
+    public bool IsPickedUp {get; set;}
     private Texture2D _texUp {get; set;}
     private Texture2D _texDown {get; set;}
     private Texture2D _texLeft {get; set;}
