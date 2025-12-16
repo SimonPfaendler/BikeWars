@@ -188,7 +188,7 @@ public class CollisionManager
 
     public Vector2 GetPenetrationVector(ICollider a, ICollider b)
     {
-        const float SEPARATION = 1.5f; // fixed Push
+        const float SEPARATION = 1.25f; // fixed Push
         if (a is BoxCollider A && b is BoxCollider B)
         {
             Vector2 aCenter = A.Position + new Vector2(A.Width / 2f, A.Height / 2f);
