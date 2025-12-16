@@ -21,6 +21,8 @@ namespace BikeWars.Content.components
         private const float HOVER_SCALE = 1.2f;
         public int Id { get; private set; }
         private readonly AudioService _audioService;
+        private Color _backgroundColor = Color.White;
+
         
         public MenuButton(int id, Texture2D texture, Rectangle bounds, string text, SpriteFont font, AudioService audioService, Color? textColor = null)
         {
@@ -37,10 +39,17 @@ namespace BikeWars.Content.components
             _drawBounds = _originalBounds;
             _audioService = audioService;
         }
+        
+        public Color BackgroundColor
+        {
+            get => _backgroundColor;
+            set => _backgroundColor = value;
+        }
+
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(_texture, _drawBounds, Color.White);
+            spriteBatch.Draw(_texture, _drawBounds, _backgroundColor);
 
             Vector2 textSize = _font.MeasureString(_text);
             float scale = 1.5f;

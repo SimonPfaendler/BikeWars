@@ -12,6 +12,13 @@ public class GameConfigScreen : MenuScreenBase, IScreen
     private readonly AudioService _audioService;
     public string DesiredMusic => AudioAssets.MenuMusic;
     public float MusicVolume => 1f;
+    private bool _isMultiplayerSelected = true;
+    private MenuButton _singleplayerButton;
+    private MenuButton _multiplayerButton;
+    private readonly Color _selectedColor = new Color(100, 149, 237);
+    private readonly Color _defaultColor = Color.White;
+
+
     public GameConfigScreen(Texture2D background, SpriteFont font, AudioService audioService)
         :base(background, font)
     {
@@ -55,23 +62,27 @@ public class GameConfigScreen : MenuScreenBase, IScreen
             ));
 
             // Buttons on the right side
-            _buttons.Add(new MenuButton(
+            _singleplayerButton = new MenuButton(
                 id: (int)ButtonAction.Singleplayer,
                 texture: _buttonTexture,
                 bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY, buttonWidth, buttonHeight),
                 text: "Singleplayer",
                 font: _font,
                 audioService: _audioService
-            ));
+            );
 
-            _buttons.Add(new MenuButton(
+            _multiplayerButton = new MenuButton(
                 id: (int)ButtonAction.Multiplayer,
                 texture: _buttonTexture,
                 bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
                 text: "Multiplayer",
                 font: _font,
                 audioService: _audioService
-            ));
+            );
+
+            _buttons.Add(_singleplayerButton);
+            _buttons.Add(_multiplayerButton);
+
 
             // centre start Button
             _buttons.Add(new MenuButton(
@@ -87,6 +98,8 @@ public class GameConfigScreen : MenuScreenBase, IScreen
                 font: _font,
                 audioService: _audioService
             ));
+            
+            UpdateModeButtonColors();
         }
 
         protected override void HandleButtonClick(MenuButton button)
@@ -109,14 +122,31 @@ public class GameConfigScreen : MenuScreenBase, IScreen
                     break;
 
                 case ButtonAction.Singleplayer:
-                    // TODO: Choose Singleplayer Gamemode
+                    _isMultiplayerSelected = false;
+                    UpdateModeButtonColors();
                     break;
 
                 case ButtonAction.Multiplayer:
-                    // TODO: Choose Multiplayer Gamemode
+                    _isMultiplayerSelected = true;
+                    UpdateModeButtonColors();
                     break;
             }
         }
+        private void UpdateModeButtonColors()
+        {
+            if (_isMultiplayerSelected)
+            {
+                _multiplayerButton.BackgroundColor = _selectedColor;
+                _singleplayerButton.BackgroundColor = _defaultColor;
+            }
+            else
+            {
+                _singleplayerButton.BackgroundColor = _selectedColor;
+                _multiplayerButton.BackgroundColor = _defaultColor;
+            }
+        }
+
+
         public override bool DrawLower => false;
         public override bool UpdateLower => false;
 }
