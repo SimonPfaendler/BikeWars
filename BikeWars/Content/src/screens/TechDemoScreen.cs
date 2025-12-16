@@ -36,7 +36,7 @@ namespace BikeWars.Content.screens
         private readonly System.Random _random = new System.Random();
 
         public TechDemoScreen(AudioService audioService)
-            : base(audioService, true)
+            : base(audioService, GameMode.SinglePlayer, true)
         {
             LoadContent(Game1.Instance.Content);
         }

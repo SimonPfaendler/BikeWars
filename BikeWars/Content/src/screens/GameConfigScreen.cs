@@ -12,7 +12,7 @@ public class GameConfigScreen : MenuScreenBase, IScreen
     private readonly AudioService _audioService;
     public string DesiredMusic => AudioAssets.MenuMusic;
     public float MusicVolume => 1f;
-    private bool _isMultiplayerSelected = true;
+    private GameMode _selectedGameMode = GameMode.MultiPlayer;
     private MenuButton _singleplayerButton;
     private MenuButton _multiplayerButton;
     private readonly Color _selectedColor = new Color(100, 149, 237);
@@ -107,7 +107,7 @@ public class GameConfigScreen : MenuScreenBase, IScreen
             switch ((ButtonAction)button.Id)
             {
                 case ButtonAction.StartGame:
-                    GameScreen gameScreen = new GameScreen(_audioService);
+                    GameScreen gameScreen = new GameScreen(_audioService, _selectedGameMode);
                     gameScreen.LoadContent(Game1.Instance.Content);
                     ScreenManager.RemoveScreen(this);
                     ScreenManager.AddScreen(gameScreen);
@@ -122,19 +122,19 @@ public class GameConfigScreen : MenuScreenBase, IScreen
                     break;
 
                 case ButtonAction.Singleplayer:
-                    _isMultiplayerSelected = false;
+                    _selectedGameMode = GameMode.SinglePlayer;
                     UpdateModeButtonColors();
                     break;
 
                 case ButtonAction.Multiplayer:
-                    _isMultiplayerSelected = true;
+                    _selectedGameMode = GameMode.MultiPlayer;
                     UpdateModeButtonColors();
                     break;
             }
         }
         private void UpdateModeButtonColors()
         {
-            if (_isMultiplayerSelected)
+            if (_selectedGameMode == GameMode.MultiPlayer)
             {
                 _multiplayerButton.BackgroundColor = _selectedColor;
                 _singleplayerButton.BackgroundColor = _defaultColor;
@@ -145,6 +145,7 @@ public class GameConfigScreen : MenuScreenBase, IScreen
                 _multiplayerButton.BackgroundColor = _defaultColor;
             }
         }
+
 
 
         public override bool DrawLower => false;
