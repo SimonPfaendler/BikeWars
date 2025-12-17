@@ -38,5 +38,29 @@ namespace BikeWars.Utilities
                 DrawLine(spriteBatch, pixel, p1, p2, color);
             }
         }
+
+        public static void DrawCircleOutline(
+            SpriteBatch spriteBatch,
+            Texture2D pixel,
+            Vector2 center,
+            float radius,
+            Color color,
+            int segments = 24)
+        {
+
+            Vector2 prevPoint = center + new Vector2(radius, 0);
+
+            for (int i = 1; i <= segments; i++)
+            {
+                float angle = MathHelper.TwoPi * i / segments;
+                Vector2 nextPoint = center + new Vector2(
+                    (float)Math.Cos(angle) * radius,
+                    (float)Math.Sin(angle) * radius
+                );
+
+                DrawLine(spriteBatch, pixel, prevPoint, nextPoint, color);
+                prevPoint = nextPoint;
+            }
+        }
     }
 }

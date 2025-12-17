@@ -48,7 +48,7 @@ namespace BikeWars.Entities.Characters
         public event Action<ItemBase> ItemPickedUp;
         public event Action Flamethrower;
         public event Action IceTrail;
-
+        public event Action DamageCircle;
         private SpriteAnimation _bikeDownAnimation;
         private SpriteAnimation _bikeUpAnimation;
         private SpriteAnimation _bikeLeftAnimation;
@@ -92,7 +92,8 @@ namespace BikeWars.Entities.Characters
         {
             Gun,
             Flamethrower,
-            IceTrail
+            IceTrail,
+            DamageCircle
         }
 
         public WeaponType CurrentWeapon { get; private set; } = WeaponType.Gun;
@@ -141,6 +142,12 @@ namespace BikeWars.Entities.Characters
                     Attributes.AttackCooldown = 3.0f;
                     IceTrail?.Invoke();
                     _audio.Sounds.Play(AudioAssets.IceTrail);
+                    break;
+
+                case WeaponType.DamageCircle:
+                    Attributes.AttackCooldown = 3.0f;
+                    DamageCircle?.Invoke();
+                    _audio.Sounds.Play(AudioAssets.DamageCircle);
                     break;
             }
         }
@@ -501,6 +508,8 @@ namespace BikeWars.Entities.Characters
                 CurrentWeapon = WeaponType.Flamethrower;
             else if (CurrentWeapon == WeaponType.Flamethrower)
                 CurrentWeapon = WeaponType.IceTrail;
+            else if (CurrentWeapon == WeaponType.IceTrail)
+                CurrentWeapon = WeaponType.DamageCircle;
             else
                 CurrentWeapon = WeaponType.Gun;
         }

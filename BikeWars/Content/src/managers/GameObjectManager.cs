@@ -66,6 +66,7 @@ public class GameObjectManager
             Player1.ShotBullet += () => OnPlayerShotBullet(Player1);
             Player1.Flamethrower += () => OnPlayerFlamethrower(Player1);
             Player1.IceTrail += () => OnPlayerIceTrail(Player1);
+            Player1.DamageCircle += () => OnPlayerDamageCircle(Player1);
         }
 
         if (Player2 != null)
@@ -73,6 +74,7 @@ public class GameObjectManager
             Player2.ShotBullet += () => OnPlayerShotBullet(Player2);
             Player2.Flamethrower += () => OnPlayerFlamethrower(Player2);
             Player2.IceTrail += () => OnPlayerIceTrail(Player2);
+            Player2.DamageCircle += () => OnPlayerDamageCircle(Player2);
         }
 
     }
@@ -221,6 +223,14 @@ public class GameObjectManager
         IceTrail ice = new IceTrail(player, direction);
         ice.LoadContent(_contentManager);
         AddAOE(ice);
+    }
+
+    private void OnPlayerDamageCircle(Player player)
+    {
+        Vector2 direction = player.GazeDirection;
+        DamageCircle dc = new DamageCircle(player);
+        dc.LoadContent(_contentManager);
+        AddAOE(dc);
     }
 
     public void SetWorldAudioManager(WorldAudioManager worldAudioManager)
