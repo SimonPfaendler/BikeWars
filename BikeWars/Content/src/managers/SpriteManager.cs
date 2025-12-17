@@ -41,7 +41,7 @@ namespace BikeWars.Content.managers
 
 
             // HUD
-            { "HUD_Sheet", "assets/sprites/HUD/HUD_sheet" },
+            { "HUD_Sheet", "assets/sprites/HUD/Hud_sheet2" },
 
             // ITEMS
             { "Chest", "assets/sprites/chest_texture" },

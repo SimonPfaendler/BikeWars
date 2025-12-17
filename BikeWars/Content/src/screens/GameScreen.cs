@@ -180,7 +180,7 @@ namespace BikeWars.Content.screens
             // Position P2 HUD at bottom right
             int viewW = Game1.Instance.GraphicsDevice.Viewport.Width;
             int viewH = Game1.Instance.GraphicsDevice.Viewport.Height;
-            _hudP2.Position = new Vector2(viewW - 330, viewH - 150);
+            _hudP2.Position = new Vector2(viewW - 350, viewH - 170);
 
             _gameObjectManager.LoadContent(content);
             _font = content.Load<SpriteFont>("assets/fonts/Arial");
