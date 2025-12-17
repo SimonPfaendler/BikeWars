@@ -204,6 +204,8 @@ namespace BikeWars.Content.screens
                 _levelUpScreen.Open(_gameObjectManager.Player1);
             };
 
+            _gameObjectManager.Player1.Dismounted += _gameObjectManager.AddItem;
+
 
             // the Option selected gets upgraded
             _levelUpScreen.OnOptionSelected += skillId =>

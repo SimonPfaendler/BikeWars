@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Content;
 namespace BikeWars.Content.entities.items;
 public class Bullet: ProjectileBase
 {
-    
+
     private BoxCollider _collider { get; set; }
     public float Speed = 400f;
     public override BoxCollider Collider
@@ -30,8 +30,8 @@ public class Bullet: ProjectileBase
         Movement = new BulletMovement(true, true);
         Owner = owner;
         HasHit = false;
-        
-        TexRight = managers.SpriteManager.GetTexture("Bullet"); 
+
+        TexRight = managers.SpriteManager.GetTexture("Bullet");
         CurrentTex = TexRight;
     }
 
@@ -51,11 +51,11 @@ public class Bullet: ProjectileBase
             _collider.Position = Transform.Position;
         }
     }
-    
+
     // wird ab sofort über SpriteManager.cs erledigt
     //
     // public override void LoadContent(ContentManager content)
-    // 
+    //
     //     TexRight = content.Load<Texture2D>(TEXTURE_PATH);
     //     CurrentTex = TexRight;
     // }
@@ -63,7 +63,7 @@ public class Bullet: ProjectileBase
     {
         return _collider.Intersects(collider);
     }
-    
+
     public override void LoadContent(ContentManager content)
     {
         // Platzhalter damit abstrakte Anforderung der Basisklasse korrekt ist, sollte irgendwann entfernt werden

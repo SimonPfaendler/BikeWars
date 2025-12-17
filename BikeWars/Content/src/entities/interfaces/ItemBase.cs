@@ -7,7 +7,7 @@ namespace BikeWars.Content.entities.interfaces;
 public abstract class ItemBase : IItem
 {
     public virtual bool InventoryItem => false; //Items which go in the inventory
-
+    public bool IsBike {get; set;}
     public virtual bool IsConsumable => false;
     public virtual int HealAmount => 0;
     private Transform _transform { get; set; }

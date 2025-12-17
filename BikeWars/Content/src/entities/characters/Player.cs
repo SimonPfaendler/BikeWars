@@ -11,6 +11,7 @@ using BikeWars.Content.entities.items;
 using BikeWars.Content.entities.levelup;
 using BikeWars.Content.managers;
 using BikeWars.Utilities;
+using System.Reflection.Metadata;
 
 // ============================================================
 // Player.cs
@@ -49,6 +50,8 @@ namespace BikeWars.Entities.Characters
         public event Action Flamethrower;
         public event Action IceTrail;
 
+        public event Action<Bike> Dismounted;
+
         private SpriteAnimation _bikeDownAnimation;
         private SpriteAnimation _bikeUpAnimation;
         private SpriteAnimation _bikeLeftAnimation;
@@ -70,6 +73,9 @@ namespace BikeWars.Entities.Characters
         private bool _isUsingItem = false;
         private float _itemUseTimer = 0f;
         private const float ItemUseDuration = 2f;
+
+        private float _bikeMountTime = 0f;
+        private const float BikeMountTime = 0.1f;
         private ItemBase _currentItemBeingUsed;
         private int _currentItemIndex = -1;
 
@@ -148,10 +154,21 @@ namespace BikeWars.Entities.Characters
                 }
             }
 
+
             if (item.InventoryItem)
             {
                 if (_input.IsPressed(GameAction.INTERACT) && Inventory.AddItem(item))
                 {
+                    item.IsPickedUp = true;
+                    ItemPickedUp?.Invoke(item);
+                }
+                return;
+            }
+            if (item.IsBike)
+            {
+                if (_input.IsPressed(GameAction.SWITCH) && _bikeMountTime == 0f)
+                {
+                    Mount((Bike)item);
                     item.IsPickedUp = true;
                     ItemPickedUp?.Invoke(item);
                 }
@@ -202,8 +219,8 @@ namespace BikeWars.Entities.Characters
         public void Update(GameTime gameTime, Vector2 mousePos)
         {
             UpdateAttackCooldown(gameTime);
+            UpdateMountTimer(gameTime);
 
-            HandleSwitchMovement();
             HandleWeaponSwitch();
             HandleShooting();
             UpdateMovement(gameTime);
@@ -212,6 +229,7 @@ namespace BikeWars.Entities.Characters
             HandleAnimation(gameTime);
             UpdateGazeDirection(mousePos);
             HandleGhostTrail(gameTime);
+            HandleSwitchMovement();
 
             UpdateCollider();
         }
@@ -382,6 +400,22 @@ namespace BikeWars.Entities.Characters
             }
         }
 
+        // When you dismount of the bike
+        public void Dismount()
+        {
+            if (!movement.OwnsBike)
+            {
+                return;
+            }
+            _bikeMountTime = BikeMountTime;
+            movement.CurrentMovement = new WalkingMovement(movement.CurrentMovement.CanMove, movement.CurrentMovement.IsMoving);
+            movement.OwnsBike = false;
+            movement.CrtBike.Transform.Position = Transform.Position;
+            movement.CrtBike.Collider.Position = Collider.Position;
+            Dismounted?.Invoke(movement.CrtBike);
+            movement.CrtBike = null;
+        }
+
         private void StartUsingItem(int inventoryIndex)
         {
             if (_isUsingItem || inventoryIndex < 0 || inventoryIndex >= 5) // 5 = Inventory Size
@@ -421,23 +455,31 @@ namespace BikeWars.Entities.Characters
             _audio.Sounds.Play(AudioAssets.Relief);
         }
 
+        // Mount a Bike
+        private void Mount(Bike b)
+        {
+            _bikeMountTime = BikeMountTime;
+            movement.CurrentMovement = new BicycleMovement(movement.CurrentMovement.CanMove, movement.CurrentMovement.IsMoving, movement.RotationAcceleration);
+            switch (b)
+            {
+                case Frelo:
+                    movement.CrtBike = new Frelo(b.Transform.Position, b.Transform.Size);
+                    break;
+                case RacingBike:
+                    movement.CrtBike = new RacingBike(b.Transform.Position, b.Transform.Size);
+                    break;
+            }
+            movement.OwnsBike = true;
+        }
+
         private void HandleSwitchMovement()
         {
-            // TODO THIS IS NOW ONLY FOR TESTING AND SHOWING
-
             if (!_input.IsPressed(GameAction.SWITCH))
                 return;
-
-            if (movement.CurrentMovement.GetType() == typeof(BicycleMovement))
+            if (movement.OwnsBike)
             {
-                movement.CurrentMovement = new WalkingMovement(true, true);
-                TerrainSpeedMultiplier = 1.0f;
+                Dismount();
             }
-            else
-            {
-                movement.CurrentMovement = new BicycleMovement(true, true, movement.RotationAcceleration);
-            }
-
         }
 
         private void UpdateMovement(GameTime gameTime)
@@ -477,7 +519,6 @@ namespace BikeWars.Entities.Characters
         {
             if (!_input.IsPressed(GameAction.SWITCH_WEAPON))
                 return;
-
 
             // Toggle between the two weapons
             if (CurrentWeapon == WeaponType.Gun)
@@ -590,6 +631,17 @@ namespace BikeWars.Entities.Characters
             {
                 Shooting();
                 ResetAttackCooldown();
+            }
+        }
+
+        // If we press the button to exchange the bike it can be now immediately. With this delay that shouldn't occur
+        public void UpdateMountTimer(GameTime gameTime)
+        {
+            if (_bikeMountTime > 0f)
+            {
+                _bikeMountTime -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                if (_bikeMountTime < 0f)
+                    _bikeMountTime = 0f;
             }
         }
 

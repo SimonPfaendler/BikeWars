@@ -1,5 +1,4 @@
 using System;
-using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.managers;
@@ -24,6 +23,7 @@ public abstract class Bike: ItemBase, IBike
 
     public Bike(Vector2 start, Point size, BikeAttributes attributes)
     {
+        IsBike = true;
         Transform = new Transform(start, size);
         Collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.ITEM, this);
         Attributes = attributes;
@@ -31,6 +31,7 @@ public abstract class Bike: ItemBase, IBike
 
     public Bike(Vector2 start, Point size)
     {
+        IsBike = true;
         Transform = new Transform(start, size);
         Collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.ITEM, this);
     }

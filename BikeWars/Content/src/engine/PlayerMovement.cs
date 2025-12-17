@@ -2,6 +2,8 @@ using Microsoft.Xna.Framework;
 using BikeWars.Content.components;
 using BikeWars.Content.engine.interfaces;
 using System.Collections.Generic;
+using BikeWars.Content.entities.interfaces;
+using System;
 
 namespace BikeWars.Content.engine;
 public class PlayerMovement
@@ -9,6 +11,17 @@ public class PlayerMovement
     private IMoveable _currentMovement {get; set;}
     public IMoveable CurrentMovement {get => _currentMovement; set => _currentMovement = value;}
     private IPlayerInput _input;
+
+    private Bike _bike {get; set;}
+    public Bike CrtBike {get => _bike; set => _bike = value;}
+
+    public event Action<Bike> OnDismounted;
+
+    private bool owns_bike {get; set;}
+    public bool OwnsBike {
+        get => owns_bike;
+        set => owns_bike = value;
+    }
 
     public float Rotation = 0.0f; // in Radiant
 
@@ -19,8 +32,39 @@ public class PlayerMovement
 
     public PlayerMovement(bool canMove, bool isMoving, IPlayerInput input)
     {
-        CurrentMovement = new BicycleMovement(canMove, isMoving, RotationAcceleration);
         _input = input;
+        if (OwnsBike)
+        {
+            CurrentMovement = new BicycleMovement(canMove, isMoving, RotationAcceleration);
+            return;
+        }
+        CurrentMovement = new WalkingMovement(canMove, isMoving);
+    }
+
+    public void SwitchBicycle(Bike b)
+    {
+        if (CurrentMovement is WalkingMovement)
+        {
+            CurrentMovement = new BicycleMovement(CurrentMovement.CanMove, CurrentMovement.IsMoving, RotationAcceleration);
+            switch (b) {
+                case Frelo:
+                    CrtBike = new Frelo(b.Transform.Position, b.Transform.Size);
+                    break;
+                case RacingBike:
+                    CrtBike = new RacingBike(b.Transform.Position, b.Transform.Size);
+                    break;
+            }
+            OwnsBike = true;
+            return;
+        }
+    }
+
+    public void Dismount()
+    {
+        CurrentMovement = new WalkingMovement(CurrentMovement.CanMove, CurrentMovement.IsMoving);
+        OwnsBike = false;
+        OnDismounted?.Invoke(CrtBike);
+        CrtBike = null;
     }
     private List<MoveDirection> MakeMoveDirections()
     {
