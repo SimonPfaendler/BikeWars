@@ -78,20 +78,25 @@ public class LevelUpScreen : IScreen
     public void Draw(SpriteBatch spriteBatch)
     {
         if (!IsOpen) return;
-        // makes backgound a little bit darker
+        
         spriteBatch.Draw(_pixel, new Rectangle(0, 0, 1280, 720), Color.Black * 0.4f);
 
         Rectangle box = new Rectangle(440, 200, 400, 250);
         spriteBatch.Draw(_pixel, box, Color.DarkGray);
-        // shown text
+
+        // Header
+        spriteBatch.DrawString(_font, "!!LEVEL UP!!", new Vector2(540, 230), Color.DarkRed);
+        
         DrawOption(spriteBatch, _option1, new Vector2(480, 270), _selectedOption == 0);
         DrawOption(spriteBatch, _option2, new Vector2(480, 320), _selectedOption == 1);
         DrawOption(spriteBatch, _option3, new Vector2(480, 370), _selectedOption == 2);
     }
+
     private void DrawOption(SpriteBatch spriteBatch, SkillTree.SkillId option, Vector2 position, bool selected)
     {
         Color color = selected ? Color.Gold : Color.White;
-        spriteBatch.DrawString(_font, option.ToString(), position, color);
+        string message = SkillTree.All.ContainsKey(option) ? SkillTree.All[option] : option.ToString();
+        spriteBatch.DrawString(_font, message, position, color);
     }
 
     // the code below doesn't do anything its just for IScreen
