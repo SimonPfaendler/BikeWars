@@ -117,4 +117,10 @@ public class PlayerMovement
     {
         return CurrentMovement.IsMoving;
     }
+    
+    public void SetInput(IPlayerInput input)
+    {
+        _input = input;
+    }
+
 }

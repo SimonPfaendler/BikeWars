@@ -8,6 +8,7 @@ using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
 using BikeWars.Utilities;
 using BikeWars.Content.engine.Audio;
+using BikeWars.Content.engine.input;
 using BikeWars.Content.src.screens.Overlay;
 using BikeWars.Content.src.utils.SaveLoadExample;
 using Microsoft.Xna.Framework.Content;
@@ -83,6 +84,7 @@ namespace BikeWars.Content.screens
         private readonly GameMode _gameMode;
         public GameMode GameMode => _gameMode;
         public bool IsMultiplayer => _gameMode == GameMode.MultiPlayer; // might be helpful later
+        private InputMode _inputMode = InputMode.Keyboard;
 
 
         public GameScreen(AudioService audioService, GameMode gameMode, bool isTechDemo = false)
@@ -225,6 +227,22 @@ namespace BikeWars.Content.screens
         }
         public virtual void Update(GameTime gameTime)
         {
+            
+            if (InputHandler.IsPressed(GameAction.MODE_SWITCH))
+            {
+                if (_inputMode == InputMode.Keyboard)
+                {
+                    _inputMode = InputMode.Controller;
+                    _gameObjectManager.Player1.SetInput(new GamepadPlayerInput(PlayerIndex.One));
+                }
+                else
+                {
+                    _inputMode = InputMode.Keyboard;
+                    _gameObjectManager.Player1.SetInput(new KeyboardPlayerInput(camera));
+                }
+                Console.WriteLine("Input mode switched to: " + _inputMode);
+            }
+
             // if the LevelUp is Open only the LevelUpMenu gets Updated all the other stuff is basically paused
             // if you want to add something before this or change order please double-check
             if (_levelUpScreen.IsOpen)
@@ -596,6 +614,12 @@ namespace BikeWars.Content.screens
         {
             GameEvents.OnResumeTimer -= ResumeTimer;
         }
+        public enum InputMode
+        {
+            Keyboard,
+            Controller
+        }
+
 
     }
 }

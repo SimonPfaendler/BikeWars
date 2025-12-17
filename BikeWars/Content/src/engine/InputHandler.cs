@@ -45,6 +45,7 @@ namespace BikeWars.Content.engine
         INVENTORY_3,
         INVENTORY_4,
         INVENTORY_5,
+        MODE_SWITCH,
         
         // UI
         UI_UP,
@@ -203,6 +204,7 @@ namespace BikeWars.Content.engine
             { GameAction.UI_UP, new[] { Keys.W, Keys.Up } },
             { GameAction.UI_DOWN, new[] { Keys.S, Keys.Down } },
             { GameAction.UI_CONFIRM, new[] { Keys.Enter, Keys.Space } },
+            { GameAction.MODE_SWITCH, new[] { Keys.J} },
             
         };
         public static Dictionary<GameAction, MouseButton[]> MouseMapping { get; } = new()
