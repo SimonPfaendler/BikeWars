@@ -331,8 +331,13 @@ namespace BikeWars.Content.screens
         private void HandleLoadNonInGameData()
         {
             var state = SaveLoad.LoadGame();
-            _statisticsManager.Statistics = state.Statistics;
+
+            if (state.Statistics != null)
+                _statisticsManager.Statistics = state.Statistics;
+            else
+                _statisticsManager.Statistics = new List<Statistic>();
         }
+
 
         public void HandleLoadGame()
         {
