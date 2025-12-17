@@ -20,6 +20,7 @@ namespace BikeWars.Content.engine
 {
     public enum GameAction
     {
+        // Gameplay
         MOVE_LEFT,
         MOVE_RIGHT,
         MOVE_UP,
@@ -43,7 +44,16 @@ namespace BikeWars.Content.engine
         INVENTORY_2,
         INVENTORY_3,
         INVENTORY_4,
-        INVENTORY_5
+        INVENTORY_5,
+        MODE_SWITCH,
+        
+        // UI
+        UI_UP,
+        UI_DOWN,
+        UI_LEFT,
+        UI_RIGHT,
+        UI_CONFIRM,
+        UI_BACK
     }
 
     public enum MouseButton
@@ -191,6 +201,11 @@ namespace BikeWars.Content.engine
             { GameAction.INVENTORY_3, new[] { Keys.D3 } },
             { GameAction.INVENTORY_4, new[] { Keys.D4 } },
             { GameAction.INVENTORY_5, new[] { Keys.D5 } },
+            { GameAction.UI_UP, new[] { Keys.W, Keys.Up } },
+            { GameAction.UI_DOWN, new[] { Keys.S, Keys.Down } },
+            { GameAction.UI_CONFIRM, new[] { Keys.Enter, Keys.Space } },
+            { GameAction.MODE_SWITCH, new[] { Keys.J} },
+            
         };
         public static Dictionary<GameAction, MouseButton[]> MouseMapping { get; } = new()
         {
@@ -198,8 +213,17 @@ namespace BikeWars.Content.engine
         };
 
         public static Dictionary<GameAction, Buttons[]> GamepadMap { get; } = new()
-        {
+        {   
+            // UI
+            { GameAction.UI_UP,    new[] { Buttons.DPadUp } },
+            { GameAction.UI_DOWN,  new[] { Buttons.DPadDown } },
+            { GameAction.UI_LEFT,  new[] { Buttons.DPadLeft } },
+            { GameAction.UI_RIGHT, new[] { Buttons.DPadRight } },
 
+            { GameAction.UI_CONFIRM, new[] { Buttons.A } },
+            { GameAction.UI_BACK,    new[] { Buttons.B } },
+            
+            // Gameplay
             { GameAction.SAVE, new[]  {Buttons.DPadUp} },
             { GameAction.LOAD, new[] {Buttons.DPadRight} },
             { GameAction.RESET, new[] {Buttons.DPadLeft} },

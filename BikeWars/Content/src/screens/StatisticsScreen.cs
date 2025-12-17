@@ -47,6 +47,8 @@ public class StatisticsScreen : MenuScreenBase, IScreen
             font: _font,
             audioService: _audioService
         ));
+        
+        UpdateSelection(0);
     }
 
     protected override void HandleButtonClick(MenuButton button)

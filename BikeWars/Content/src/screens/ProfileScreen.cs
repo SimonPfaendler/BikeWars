@@ -75,6 +75,8 @@ public class ProfileScreen: MenuScreenBase, IScreen
                 font: _font,
                 audioService: _audioService
             ));
+            
+            UpdateSelection(0);
         }
     
         

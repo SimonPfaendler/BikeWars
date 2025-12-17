@@ -655,5 +655,11 @@ namespace BikeWars.Entities.Characters
                 _currentAnimation?.Update(gameTime, movement.IsMoving());
             }
         }
+        public void SetInput(IPlayerInput input)
+        {
+            _input = input;
+            movement.SetInput(input);
+        }
+
     }
 }
