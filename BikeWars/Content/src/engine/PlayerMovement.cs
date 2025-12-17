@@ -38,8 +38,7 @@ public class PlayerMovement
              if (_input.IsAnalog)
              {
                  // Analog Stick Logic
-                 directions.Add(MoveDirection.FORWARD); // Always accelerate
-
+                 
                  float targetAngle = (float)System.Math.Atan2(inputDir.Y, inputDir.X);
                  float currentRotation = CurrentMovement.Rotation;
 
@@ -48,8 +47,15 @@ public class PlayerMovement
                  while (diff <= -MathHelper.Pi) diff += MathHelper.TwoPi;
                  while (diff > MathHelper.Pi) diff -= MathHelper.TwoPi;
 
+                 // Only accelerate if we are roughly facing the target direction (< 90 degrees difference)
+                 // This allows the bike to slow down for sharp turns
+                 if (System.Math.Abs(diff) < MathHelper.PiOver2)
+                 {
+                     directions.Add(MoveDirection.FORWARD); 
+                 }
+
                  // Deadzone for rotation stability
-                 if (System.Math.Abs(diff) > 0.1f)
+                 if (System.Math.Abs(diff) > 0.05f)
                  {
                      if (diff > 0)
                          directions.Add(MoveDirection.RIGHT);
