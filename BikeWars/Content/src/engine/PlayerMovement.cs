@@ -25,10 +25,10 @@ public class PlayerMovement
     private List<MoveDirection> MakeMoveDirections()
     {
         List<MoveDirection> directions = new List<MoveDirection>();
-        
+
         Vector2 inputDir = _input.GetMovementDirection(CurrentMovement);
 
-        if (inputDir == Vector2.Zero) 
+        if (inputDir == Vector2.Zero)
             return directions;
 
         if (CurrentMovement is BicycleMovement)
@@ -59,7 +59,7 @@ public class PlayerMovement
              }
              else
              {
-                 
+
                  if (inputDir.Y < -0.3f) // UP / Accelerate
                  {
                      directions.Add(MoveDirection.UP);
@@ -70,7 +70,7 @@ public class PlayerMovement
                      directions.Add(MoveDirection.DOWN);
                      directions.Add(MoveDirection.BACKWARD);
                  }
-                 
+
                  // Rotation
                  if (inputDir.X < -0.3f)
                  {
@@ -109,7 +109,7 @@ public class PlayerMovement
     }
     public void Update()
     {
-        _input.Update(); 
+        _input.Update();
         CurrentMovement.HandleMovement(MakeMoveDirections(), CurrentMovement.Speed, SpeedAcceleration, Rotation, RotationAcceleration, 0, MaxSpeed);
     }
 
