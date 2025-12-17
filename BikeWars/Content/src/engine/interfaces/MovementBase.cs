@@ -9,6 +9,7 @@ public abstract class MovementBase : IMoveable
     private bool _isMoving { get; set; }
     private bool _canMove { get; set; }
     private float _rotation { get; set; }
+    private float _sprintAcceleration { get; set; }
 
     public bool IsMoving { get => _isMoving; set => _isMoving = value; }
     public bool CanMove {
@@ -44,6 +45,32 @@ public abstract class MovementBase : IMoveable
             _speed = value;
         }
     }
+    public float SprintAcceleration {
+        get => _sprintAcceleration;
+        set
+        {
+            if (value < 0)
+            {
+                _sprintAcceleration = 0;
+                return;
+            }
+            _sprintAcceleration = value;
+        }
+    }
+
+    private float _maxSpeed { get; set; }
+    public float MaxSpeed {
+        get => _maxSpeed;
+        set
+        {
+            if (value < 0)
+            {
+                _maxSpeed = 0;
+                return;
+            }
+            _maxSpeed = value;
+        }
+    }
 
     public float Rotation {
         get => _rotation;
@@ -76,7 +103,7 @@ public abstract class MovementBase : IMoveable
         return 0f;
     }
 
-    public float HandleRotation(List<MoveDirection> moveDirections)
+    public float HandleRotation(List<MoveDirection> moveDirections, float rotationAcceleration)
     {
         return 0f;
     }

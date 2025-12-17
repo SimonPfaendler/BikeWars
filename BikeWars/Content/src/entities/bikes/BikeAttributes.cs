@@ -9,7 +9,7 @@ using BikeWars.Content.entities.interfaces;
 namespace BikeWars.Entities.Characters;
 public class BikeAttributes
 {
-    public event Action<CharacterBase> OnDied;
+    public event Action<Bike> OnDestroyed;
     private int _health { get; set; }
     public int Health {
         get => _health;
@@ -17,7 +17,7 @@ public class BikeAttributes
         {
             if (value <= 0) {
                 _health = 0;
-                OnDied?.Invoke((CharacterBase)owner);
+                OnDestroyed?.Invoke((Bike)owner);
                 return;
             }
             if (value > MaxHealth)
@@ -25,6 +25,19 @@ public class BikeAttributes
                 _health = MaxHealth;
             }
             _health = value;
+        }
+    }
+
+    private int _armor { get; set; }
+    public int Armor {
+        get => _armor;
+        set
+        {
+            if (value <= 0) {
+                _armor = 0;
+                return;
+            }
+            _armor = value;
         }
     }
 
@@ -42,37 +55,89 @@ public class BikeAttributes
     }
     public object owner {get; set;}
 
-    private int _attackDamage {get; set;}
-    public int AttackDamage {
-        get => _attackDamage;
+    private int _priority {get; set;}
+    public int Priority { // this should be used on how valueable it is for a bike thief for example
+        get => _priority;
         set {
             if (value < 0)
             {
-                _attackDamage = 0;
+                _priority = 0;
             }
-            _attackDamage = value;
+            _priority = value;
         }
     }
 
-    private float _attackCooldown {get; set;}
-    public float AttackCooldown {
-        get => _attackCooldown;
+    private float _speed {get; set;}
+    public float Speed {
+        get => _speed;
         set {
             if (value < 0)
             {
-                _attackCooldown = 0;
+                _speed = 0;
             }
-            _attackCooldown = value;
+            _speed = value;
+        }
+    }
+    private float _maxSpeed {get; set;}
+    public float MaxSpeed {
+        get => _maxSpeed;
+        set {
+            if (value < 0)
+            {
+                _maxSpeed = 0;
+            }
+            _maxSpeed = value;
         }
     }
 
-    private bool _canAutoAttack {get; set;}
-    public bool CanAutoAttack {
-        get => _canAutoAttack;
-        set  => _canAutoAttack = value;
+    private float _rotationAcceleration {get; set;}
+    public float RotationAcceleration {
+        get => _rotationAcceleration;
+        set {
+            if (value < 0)
+            {
+                _rotationAcceleration = 0;
+            }
+            _rotationAcceleration = value;
+        }
+    }
+    private float _speedAcceleration {get; set;}
+    public float SpeedAcceleration {
+        get => _speedAcceleration;
+        set {
+            if (value < 0)
+            {
+                _speedAcceleration = 0;
+            }
+            _speedAcceleration = value;
+        }
     }
 
-    public BikeAttributes(object o, int maxHealth, int health, int attackDamage, float attackCoolDown, bool canAutoAttack)
+    private float _sprintAcceleration {get; set;}
+    public float SprintAcceleration {
+        get => _sprintAcceleration;
+        set {
+            if (value < 0)
+            {
+                _sprintAcceleration = 0;
+            }
+            _sprintAcceleration = value;
+        }
+    }
+
+    private float _sprintModificator {get; set;}
+    public float SprintModificator {
+        get => _sprintModificator;
+        set {
+            if (value < 0)
+            {
+                _sprintModificator = 0;
+            }
+            _sprintModificator = value;
+        }
+    }
+
+    public BikeAttributes(object o, int maxHealth, int health, int armor, float speed, float maxSpeed, float sprintModificator, int priority, float speedAcceleration, float rotationAcceleration, float sprintAcceleration)
     {
         owner = o;
         MaxHealth = maxHealth;
@@ -83,8 +148,13 @@ public class BikeAttributes
         {
             Health = health;
         }
-        AttackDamage = attackDamage;
-        AttackCooldown = attackCoolDown;
-        CanAutoAttack = canAutoAttack;
+        Armor = armor;
+        Speed = speed;
+        MaxSpeed = maxSpeed;
+        SprintModificator = sprintModificator;
+        SpeedAcceleration = speedAcceleration;
+        SprintAcceleration = sprintAcceleration;
+        RotationAcceleration = rotationAcceleration;
+        Priority = priority;
     }
 }

@@ -8,7 +8,6 @@ using BikeWars.Content.entities.items;
 using BikeWars.Content.managers;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
-using BikeWars.Content.components;
 
 namespace BikeWars.Content.src.utils.SaveLoadExample;
 

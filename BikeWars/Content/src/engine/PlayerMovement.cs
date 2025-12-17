@@ -2,6 +2,8 @@ using Microsoft.Xna.Framework;
 using BikeWars.Content.components;
 using BikeWars.Content.engine.interfaces;
 using System.Collections.Generic;
+using BikeWars.Content.entities.interfaces;
+using System;
 
 namespace BikeWars.Content.engine;
 public class PlayerMovement
@@ -10,25 +12,67 @@ public class PlayerMovement
     public IMoveable CurrentMovement {get => _currentMovement; set => _currentMovement = value;}
     private IPlayerInput _input;
 
-    public float Rotation = 0.0f; // in Radiant
+    private Bike _bike {get; set;}
+    public Bike CrtBike {get => _bike; set => _bike = value;}
 
+    public event Action<Bike> OnDismounted;
+
+    private bool owns_bike {get; set;}
+    public bool OwnsBike {
+        get => owns_bike;
+        set => owns_bike = value;
+    }
+
+    public float WalkingSpeed = 120f;
+    public float SprintAcceleration = 1.5f;
+
+    public float Rotation = 0.0f; // in Radiant
     public float RotationAcceleration = 0.1f;
     public float SpeedAcceleration = 4f;
-    public float MaxSpeed = 200f;
-    public float Friction = 0.95f;
 
     public PlayerMovement(bool canMove, bool isMoving, IPlayerInput input)
     {
-        CurrentMovement = new BicycleMovement(canMove, isMoving, RotationAcceleration);
         _input = input;
+        if (OwnsBike && CrtBike != null)
+        {
+            CurrentMovement = new BicycleMovement(canMove, isMoving, 0, CrtBike.Attributes.MaxSpeed, CrtBike.Attributes.SpeedAcceleration, CrtBike.Attributes.SprintAcceleration, CrtBike.Attributes.RotationAcceleration);
+            return;
+        }
+        CurrentMovement = new WalkingMovement(canMove, isMoving, WalkingSpeed, SprintAcceleration);
+    }
+
+    public void SwitchBicycle(Bike b)
+    {
+        if (CurrentMovement is WalkingMovement)
+        {
+            CurrentMovement = new BicycleMovement(CurrentMovement.CanMove, CurrentMovement.IsMoving, 0, b.Attributes.MaxSpeed, b.Attributes.SpeedAcceleration, b.Attributes.SprintAcceleration, b.Attributes.RotationAcceleration);
+            switch (b) {
+                case Frelo:
+                    CrtBike = new Frelo(b.Transform.Position, b.Transform.Size);
+                    break;
+                case RacingBike:
+                    CrtBike = new RacingBike(b.Transform.Position, b.Transform.Size);
+                    break;
+            }
+            OwnsBike = true;
+            return;
+        }
+    }
+
+    public void Dismount()
+    {
+        CurrentMovement = new WalkingMovement(CurrentMovement.CanMove, CurrentMovement.IsMoving, WalkingSpeed, SprintAcceleration);
+        OwnsBike = false;
+        OnDismounted?.Invoke(CrtBike);
+        CrtBike = null;
     }
     private List<MoveDirection> MakeMoveDirections()
     {
         List<MoveDirection> directions = new List<MoveDirection>();
-        
+
         Vector2 inputDir = _input.GetMovementDirection(CurrentMovement);
 
-        if (inputDir == Vector2.Zero) 
+        if (inputDir == Vector2.Zero)
             return directions;
 
         if (CurrentMovement is BicycleMovement)
@@ -65,7 +109,7 @@ public class PlayerMovement
              }
              else
              {
-                 
+
                  if (inputDir.Y < -0.3f) // UP / Accelerate
                  {
                      directions.Add(MoveDirection.UP);
@@ -76,7 +120,7 @@ public class PlayerMovement
                      directions.Add(MoveDirection.DOWN);
                      directions.Add(MoveDirection.BACKWARD);
                  }
-                 
+
                  // Rotation
                  if (inputDir.X < -0.3f)
                  {
@@ -115,8 +159,8 @@ public class PlayerMovement
     }
     public void Update()
     {
-        _input.Update(); 
-        CurrentMovement.HandleMovement(MakeMoveDirections(), CurrentMovement.Speed, SpeedAcceleration, Rotation, RotationAcceleration, 0, MaxSpeed);
+        _input.Update();
+        CurrentMovement.HandleMovement(MakeMoveDirections(), CurrentMovement.Speed, SpeedAcceleration, Rotation, RotationAcceleration, 0, CurrentMovement.MaxSpeed);
     }
 
     public bool IsMoving()
