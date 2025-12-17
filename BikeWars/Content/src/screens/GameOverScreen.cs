@@ -133,6 +133,7 @@ namespace BikeWars.Content.screens
                     audioService: _audioService
                 ));
             }
+            UpdateSelection(0);
         }
 
         protected override void HandleButtonClick(MenuButton button)

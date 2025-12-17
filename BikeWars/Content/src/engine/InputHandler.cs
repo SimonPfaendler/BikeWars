@@ -20,6 +20,7 @@ namespace BikeWars.Content.engine
 {
     public enum GameAction
     {
+        // Gameplay
         MOVE_LEFT,
         MOVE_RIGHT,
         MOVE_UP,
@@ -43,7 +44,15 @@ namespace BikeWars.Content.engine
         INVENTORY_2,
         INVENTORY_3,
         INVENTORY_4,
-        INVENTORY_5
+        INVENTORY_5,
+        
+        // UI
+        UI_UP,
+        UI_DOWN,
+        UI_LEFT,
+        UI_RIGHT,
+        UI_CONFIRM,
+        UI_BACK
     }
 
     public enum MouseButton
@@ -198,8 +207,17 @@ namespace BikeWars.Content.engine
         };
 
         public static Dictionary<GameAction, Buttons[]> GamepadMap { get; } = new()
-        {
+        {   
+            // UI
+            { GameAction.UI_UP,    new[] { Buttons.DPadUp } },
+            { GameAction.UI_DOWN,  new[] { Buttons.DPadDown } },
+            { GameAction.UI_LEFT,  new[] { Buttons.DPadLeft } },
+            { GameAction.UI_RIGHT, new[] { Buttons.DPadRight } },
 
+            { GameAction.UI_CONFIRM, new[] { Buttons.A } },
+            { GameAction.UI_BACK,    new[] { Buttons.B } },
+            
+            // Gameplay
             { GameAction.SAVE, new[]  {Buttons.DPadUp} },
             { GameAction.LOAD, new[] {Buttons.DPadRight} },
             { GameAction.RESET, new[] {Buttons.DPadLeft} },

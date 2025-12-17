@@ -99,6 +99,7 @@ public class GameConfigScreen : MenuScreenBase, IScreen
                 audioService: _audioService
             ));
             
+            UpdateSelection(3);
             UpdateModeButtonColors();
         }
 

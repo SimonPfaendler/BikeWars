@@ -101,6 +101,8 @@ namespace BikeWars.Content.screens
                 font: _font,
                 audioService: _audioService
             ));
+            
+            UpdateSelection(0);
         }
 
 

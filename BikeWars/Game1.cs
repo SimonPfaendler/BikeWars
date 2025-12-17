@@ -58,14 +58,23 @@ public class Game1 : Game
         SpriteManager.LoadContent(Content);
         
         
-        Texture2D button = Content.Load<Texture2D>("assets/images/StartButton");
-        StartScreen startScreen = new StartScreen(background, _audioService);
+        SpriteFont font = Content.Load<SpriteFont>("assets/fonts/Arial");
+
+        StartScreen startScreen = new StartScreen(
+            background,
+            font,
+            _audioService
+        );
+
         ScreenManager.AddScreen(startScreen);
+
         ScreenManager.SetAudio(_audioService);
     }
 
     protected override void Update(GameTime gameTime)
     {
+        InputHandler.Update(); 
+        
         ScreenManager.Update(gameTime);
         CurrentGameTime = gameTime;
 

@@ -227,7 +227,6 @@ namespace BikeWars.Content.screens
         {
             // if the LevelUp is Open only the LevelUpMenu gets Updated all the other stuff is basically paused
             // if you want to add something before this or change order please double-check
-            InputHandler.Update();
             if (_levelUpScreen.IsOpen)
             {
                 _levelUpScreen.Update(gameTime);
