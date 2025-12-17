@@ -341,7 +341,8 @@ public class CollisionManager
     {
         if (c.Layer == CollisionLayer.PLAYER && d.Layer == CollisionLayer.ITEM && c.Intersects(d))
         {
-            OnItemPickup?.Invoke((Player)c.Owner, (ItemBase)d.Owner);
+            if (c.Owner is Player p && d.Owner is ItemBase i)
+                OnItemPickup?.Invoke(p, i);
         }
     }
     public void OnRemoveItem(ItemBase item)
