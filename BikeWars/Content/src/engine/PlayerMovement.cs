@@ -23,29 +23,29 @@ public class PlayerMovement
         set => owns_bike = value;
     }
 
-    public float Rotation = 0.0f; // in Radiant
+    public float WalkingSpeed = 120f;
+    public float SprintAcceleration = 1.5f;
 
+    public float Rotation = 0.0f; // in Radiant
     public float RotationAcceleration = 0.1f;
     public float SpeedAcceleration = 4f;
-    public float MaxSpeed = 200f;
-    public float Friction = 0.95f;
 
     public PlayerMovement(bool canMove, bool isMoving, IPlayerInput input)
     {
         _input = input;
-        if (OwnsBike)
+        if (OwnsBike && CrtBike != null)
         {
-            CurrentMovement = new BicycleMovement(canMove, isMoving, RotationAcceleration);
+            CurrentMovement = new BicycleMovement(canMove, isMoving, 0, CrtBike.Attributes.MaxSpeed, CrtBike.Attributes.SpeedAcceleration, CrtBike.Attributes.SprintAcceleration, CrtBike.Attributes.RotationAcceleration);
             return;
         }
-        CurrentMovement = new WalkingMovement(canMove, isMoving);
+        CurrentMovement = new WalkingMovement(canMove, isMoving, WalkingSpeed, SprintAcceleration);
     }
 
     public void SwitchBicycle(Bike b)
     {
         if (CurrentMovement is WalkingMovement)
         {
-            CurrentMovement = new BicycleMovement(CurrentMovement.CanMove, CurrentMovement.IsMoving, RotationAcceleration);
+            CurrentMovement = new BicycleMovement(CurrentMovement.CanMove, CurrentMovement.IsMoving, 0, b.Attributes.MaxSpeed, b.Attributes.SpeedAcceleration, b.Attributes.SprintAcceleration, b.Attributes.RotationAcceleration);
             switch (b) {
                 case Frelo:
                     CrtBike = new Frelo(b.Transform.Position, b.Transform.Size);
@@ -61,7 +61,7 @@ public class PlayerMovement
 
     public void Dismount()
     {
-        CurrentMovement = new WalkingMovement(CurrentMovement.CanMove, CurrentMovement.IsMoving);
+        CurrentMovement = new WalkingMovement(CurrentMovement.CanMove, CurrentMovement.IsMoving, WalkingSpeed, SprintAcceleration);
         OwnsBike = false;
         OnDismounted?.Invoke(CrtBike);
         CrtBike = null;
@@ -154,7 +154,7 @@ public class PlayerMovement
     public void Update()
     {
         _input.Update();
-        CurrentMovement.HandleMovement(MakeMoveDirections(), CurrentMovement.Speed, SpeedAcceleration, Rotation, RotationAcceleration, 0, MaxSpeed);
+        CurrentMovement.HandleMovement(MakeMoveDirections(), CurrentMovement.Speed, SpeedAcceleration, Rotation, RotationAcceleration, 0, CurrentMovement.MaxSpeed);
     }
 
     public bool IsMoving()

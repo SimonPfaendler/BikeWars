@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using BikeWars.Content.components;
 using BikeWars.Content.engine.interfaces;
@@ -11,6 +10,8 @@ public class WalkingMovement : IMoveable
     private bool _isMoving { get; set; }
     private bool _canMove { get; set; }
     private float _speed { get; set; }
+    private float _maxSpeed { get; set; }
+    private float _sprintAcceleration { get; set; }
     private float _rotation { get; set; }
 
     public bool IsMoving { get => _isMoving; set => _isMoving = value; }
@@ -47,6 +48,30 @@ public class WalkingMovement : IMoveable
             _speed = value;
         }
     }
+    public float SprintAcceleration {
+        get => _sprintAcceleration;
+        set
+        {
+            if (value < 0)
+            {
+                _sprintAcceleration = 0;
+                return;
+            }
+            _sprintAcceleration = value;
+        }
+    }
+    public float MaxSpeed {
+        get => _maxSpeed;
+        set
+        {
+            if (value < 0)
+            {
+                _maxSpeed = 0;
+                return;
+            }
+            _maxSpeed = value;
+        }
+    }
     public float Rotation {
         get => _rotation;
         set
@@ -60,20 +85,23 @@ public class WalkingMovement : IMoveable
         return Direction != Vector2.Zero;
     }
 
-    public WalkingMovement(bool canMove, bool isMoving)
+    public WalkingMovement(bool canMove, bool isMoving, float speed, float sprintAcceleration)
     {
         CanMove = canMove;
         IsMoving = isMoving;
+        Speed = speed;
+        MaxSpeed = speed;
+        SprintAcceleration = sprintAcceleration;
     }
     public void HandleMovement(List<MoveDirection> moveDirections, float currentSpeed, float speedAcceleration, float currentRotation, float rotationAcceleration, float minSpeed, float maxSpeed)
     {
-        Rotation = HandleRotation(moveDirections);
+        Rotation = HandleRotation(moveDirections, rotationAcceleration);
         Direction = HandleDirection(moveDirections);
         IsMoving = MakeIsMoving();
         Speed = HandleSpeed(moveDirections, currentSpeed, speedAcceleration, minSpeed, maxSpeed);
     }
 
-    public float HandleRotation(List<MoveDirection> moveDirections)
+    public float HandleRotation(List<MoveDirection> moveDirections, float rotationAcceleration)
     {
         return 0;
     }

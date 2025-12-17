@@ -11,6 +11,7 @@ public class RacingBike: Bike
     {
         TexRight = managers.SpriteManager.GetTexture("RacingBike");
         CurrentTex = TexRight;
+        Attributes = attributes;
     }
 
     public RacingBike(Vector2 start, Point size) : base(start, size)
@@ -19,7 +20,7 @@ public class RacingBike: Bike
         CurrentTex = TexRight;
 
         Attributes = new BikeAttributes(
-            this, 200, 200, 10, 300, 1.4f, 10, 1.4f, 1.4f
+            this, 200, 200, 10, 0, 300, 1.4f, 10, 1.4f, 1.4f, 1.4f
         );
     }
 

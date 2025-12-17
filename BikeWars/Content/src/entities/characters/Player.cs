@@ -11,7 +11,6 @@ using BikeWars.Content.entities.items;
 using BikeWars.Content.entities.levelup;
 using BikeWars.Content.managers;
 using BikeWars.Utilities;
-using System.Reflection.Metadata;
 
 // ============================================================
 // Player.cs
@@ -183,10 +182,9 @@ namespace BikeWars.Entities.Characters
             Attributes = new CharacterAttributes(this, 300, 0, 10, 2f, false);
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
-            Speed = 200f;
-            SprintSpeed = 350f;
             _input = input;
             movement = new PlayerMovement(canMove: true, isMoving: false, _input);
+
             sprint = new CooldownWithDuration(1f, 5f);
             Inventory = new Inventory();
             _audio = audio;
@@ -408,7 +406,7 @@ namespace BikeWars.Entities.Characters
                 return;
             }
             _bikeMountTime = BikeMountTime;
-            movement.CurrentMovement = new WalkingMovement(movement.CurrentMovement.CanMove, movement.CurrentMovement.IsMoving);
+            movement.CurrentMovement = new WalkingMovement(movement.CurrentMovement.CanMove, movement.CurrentMovement.IsMoving, movement.WalkingSpeed, movement.SprintAcceleration);
             movement.OwnsBike = false;
             movement.CrtBike.Transform.Position = Transform.Position;
             movement.CrtBike.Collider.Position = Collider.Position;
@@ -459,14 +457,14 @@ namespace BikeWars.Entities.Characters
         private void Mount(Bike b)
         {
             _bikeMountTime = BikeMountTime;
-            movement.CurrentMovement = new BicycleMovement(movement.CurrentMovement.CanMove, movement.CurrentMovement.IsMoving, movement.RotationAcceleration);
+            movement.CurrentMovement = new BicycleMovement(movement.CurrentMovement.CanMove, movement.CurrentMovement.IsMoving, 0, b.Attributes.MaxSpeed, b.Attributes.SpeedAcceleration, b.Attributes.SprintAcceleration, b.Attributes.RotationAcceleration);
             switch (b)
             {
                 case Frelo:
-                    movement.CrtBike = new Frelo(b.Transform.Position, b.Transform.Size);
+                    movement.CrtBike = new Frelo(b.Transform.Position, b.Transform.Size, b.Attributes);
                     break;
                 case RacingBike:
-                    movement.CrtBike = new RacingBike(b.Transform.Position, b.Transform.Size);
+                    movement.CrtBike = new RacingBike(b.Transform.Position, b.Transform.Size, b.Attributes);
                     break;
             }
             movement.OwnsBike = true;
@@ -492,7 +490,7 @@ namespace BikeWars.Entities.Characters
                 sprint.Activate();
             }
 
-            CurrentSpeed = sprint.IsActive ? SprintSpeed : movement.CurrentMovement.Speed;
+            CurrentSpeed = sprint.IsActive ? movement.CurrentMovement.Speed *movement.CurrentMovement.SprintAcceleration : movement.CurrentMovement.Speed;
             Vector2 direction = movement.CurrentMovement.Direction;
 
             if (Transform.Position.X != LastTransform.Position.X || Transform.Position.Y != LastTransform.Position.Y)
@@ -506,11 +504,11 @@ namespace BikeWars.Entities.Characters
                 _facingDirection = direction; // Update facing direction
                 if (sprint.IsActive)
                 {
-                    Transform.Position += direction * CurrentSpeed * d * TerrainSpeedMultiplier;
+                    Transform.Position += direction * CurrentSpeed * movement.CurrentMovement.SprintAcceleration * d * TerrainSpeedMultiplier;
                 }
                 else
                 {
-                    Transform.Position += direction * movement.CurrentMovement.Speed * d * TerrainSpeedMultiplier;
+                    Transform.Position += direction * CurrentSpeed * d * TerrainSpeedMultiplier;
                 }
             }
         }

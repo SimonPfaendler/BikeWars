@@ -78,6 +78,17 @@ public class BikeAttributes
             _speed = value;
         }
     }
+    private float _maxSpeed {get; set;}
+    public float MaxSpeed {
+        get => _maxSpeed;
+        set {
+            if (value < 0)
+            {
+                _maxSpeed = 0;
+            }
+            _maxSpeed = value;
+        }
+    }
 
     private float _rotationAcceleration {get; set;}
     public float RotationAcceleration {
@@ -102,6 +113,18 @@ public class BikeAttributes
         }
     }
 
+    private float _sprintAcceleration {get; set;}
+    public float SprintAcceleration {
+        get => _sprintAcceleration;
+        set {
+            if (value < 0)
+            {
+                _sprintAcceleration = 0;
+            }
+            _sprintAcceleration = value;
+        }
+    }
+
     private float _sprintModificator {get; set;}
     public float SprintModificator {
         get => _sprintModificator;
@@ -114,7 +137,7 @@ public class BikeAttributes
         }
     }
 
-    public BikeAttributes(object o, int maxHealth, int health, int armor, int speed, float sprintModificator, int priority, float speedAcceleration, float rotationAcceleration)
+    public BikeAttributes(object o, int maxHealth, int health, int armor, float speed, float maxSpeed, float sprintModificator, int priority, float speedAcceleration, float rotationAcceleration, float sprintAcceleration)
     {
         owner = o;
         MaxHealth = maxHealth;
@@ -127,8 +150,10 @@ public class BikeAttributes
         }
         Armor = armor;
         Speed = speed;
+        MaxSpeed = maxSpeed;
         SprintModificator = sprintModificator;
         SpeedAcceleration = speedAcceleration;
+        SprintAcceleration = sprintAcceleration;
         RotationAcceleration = rotationAcceleration;
         Priority = priority;
     }
