@@ -200,6 +200,10 @@ namespace BikeWars.Content.engine
             { GameAction.INVENTORY_3, new[] { Keys.D3 } },
             { GameAction.INVENTORY_4, new[] { Keys.D4 } },
             { GameAction.INVENTORY_5, new[] { Keys.D5 } },
+            { GameAction.UI_UP, new[] { Keys.W, Keys.Up } },
+            { GameAction.UI_DOWN, new[] { Keys.S, Keys.Down } },
+            { GameAction.UI_CONFIRM, new[] { Keys.Enter, Keys.Space } },
+            
         };
         public static Dictionary<GameAction, MouseButton[]> MouseMapping { get; } = new()
         {
