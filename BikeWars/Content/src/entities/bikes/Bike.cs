@@ -55,7 +55,7 @@ public abstract class Bike
             return;
 
         if (IsDead) return;
-        OnTookDamage?.Invoke(this, amount);
+        // OnTookDamage?.Invoke(this, amount);
         Attributes.Health -= amount;
     }
     public bool CanAttack()

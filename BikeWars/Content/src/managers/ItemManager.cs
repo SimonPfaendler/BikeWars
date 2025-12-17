@@ -5,8 +5,8 @@ using Microsoft.Xna.Framework.Graphics;
 namespace BikeWars.Content.managers;
 public class ItemManager
 {
-    private readonly List<ItemBase> _items = new();
-    public List<ItemBase> Items => _items;
+    private readonly HashSet<ItemBase> _items = new();
+    public HashSet<ItemBase> Items => _items;
     public void AddItem(ItemBase item)
     {
         _items.Add(item);

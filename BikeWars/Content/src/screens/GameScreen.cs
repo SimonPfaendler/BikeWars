@@ -14,6 +14,7 @@ using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled.Renderers;
 using BikeWars.Content.managers;
 using BikeWars.Content.events;
+using BikeWars.Content.entities.interfaces;
 
 namespace BikeWars.Content.screens
 {
@@ -127,7 +128,7 @@ namespace BikeWars.Content.screens
             _gameObjectManager.Player1.OnMoreXP += _statisticsManager.HandleExperience;
 
             _collisionManager = new CollisionManager(CELL_SIZE, worldBounds.Height);
-            var players = new List<Player>();
+            var players = new HashSet<Player>();
             if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);
             if (_gameObjectManager.Player2 != null) players.Add(_gameObjectManager.Player2);
 
@@ -239,7 +240,7 @@ namespace BikeWars.Content.screens
             _overlay.SetPaused(false, gameTime);
             _overlay.SetPaused(false, gameTime);
 
-            var players = new List<Player>();
+            var players = new HashSet<Player>();
             if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);
             if (_gameObjectManager.Player2 != null) players.Add(_gameObjectManager.Player2);
 
@@ -396,9 +397,14 @@ namespace BikeWars.Content.screens
                 // if R is pressed while in tech demo remove all characters exept the player
                 if (_isTechDemo)
                 {
-                    _gameObjectManager.Characters.RemoveAll(
-                        ch => ch != _gameObjectManager.Player1);
-
+                    foreach (CharacterBase ch in _gameObjectManager.Characters)
+                    {
+                        if (ch == _gameObjectManager.Player1)
+                        {
+                            continue;
+                        }
+                        _gameObjectManager.Characters.Remove(ch);
+                    }
                     _gameObjectManager.Projectiles.Clear();
 
                     Console.WriteLine("Tech demo reset: removed all enemies and projectiles.");
@@ -468,8 +474,6 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.AOEAttacks
                 );
             }
-
-
 
             // draws A* paths for enemies in tech demo
             if (_isTechDemo)

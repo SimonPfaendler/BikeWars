@@ -41,9 +41,9 @@ public static class SaveLoad
         public bool IsGameTimerPaused { get; set; } = false;
         public float PlayerX { get; set; } = _worldBounds;
         public float PlayerY { get; set; } = _worldBounds;
-        public List<ProjectileSaveModel> Projectiles {get; set;}
-        public List<CharacterSaveModel> Characters {get; set;}
-        public List<ItemSaveModel> Items {get; set;}
+        public HashSet<ProjectileSaveModel> Projectiles {get; set;}
+        public HashSet<CharacterSaveModel> Characters {get; set;}
+        public HashSet<ItemSaveModel> Items {get; set;}
         public List<Statistic> Statistics{get; set;}
         public Statistic Statistic{get; set;}
         public int GameMode { get; set; } = 0;
@@ -295,18 +295,18 @@ public static class SaveLoad
             Dog dg => new CharacterSaveModel(TYPES.DOG, character.Transform.Position, character.Transform.Size)
         };
     }
-    private static List<ProjectileSaveModel> MakeProjectileSaveList(List<ProjectileBase> pList)
+    private static HashSet<ProjectileSaveModel> MakeProjectileSaveList(HashSet<ProjectileBase> pList)
     {
-        List<ProjectileSaveModel> crtList = new List<ProjectileSaveModel>();
+        HashSet<ProjectileSaveModel> crtList = new HashSet<ProjectileSaveModel>();
         foreach (var p in pList)
         {
             crtList.Add(MakeProjectileSaveModel(p));
         }
         return crtList;
     }
-    private static List<CharacterSaveModel> MakeCharacterSaveList(List<CharacterBase> pList)
+    private static HashSet<CharacterSaveModel> MakeCharacterSaveList(HashSet<CharacterBase> pList)
     {
-        List<CharacterSaveModel> crtList = new List<CharacterSaveModel>();
+        HashSet<CharacterSaveModel> crtList = new HashSet<CharacterSaveModel>();
         foreach (var p in pList)
         {
             crtList.Add(MakeCharacterSaveModel(p));
@@ -314,9 +314,9 @@ public static class SaveLoad
         return crtList;
     }
 
-    private static List<ItemSaveModel> MakeItemSaveList(List<ItemBase> pList)
+    private static HashSet<ItemSaveModel> MakeItemSaveList(HashSet<ItemBase> pList)
     {
-        List<ItemSaveModel> crtList = new List<ItemSaveModel>();
+        HashSet<ItemSaveModel> crtList = new HashSet<ItemSaveModel>();
         foreach (var p in pList)
         {
             crtList.Add(MakeItemSaveModel(p));

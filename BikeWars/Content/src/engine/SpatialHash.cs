@@ -8,7 +8,7 @@ public class CellData
 {
     public HashSet<CollisionLayer> Layers = new();
     public int Count = 0;
-    public List<ICollider>? Colliders = null;
+    public HashSet<ICollider>? Colliders = null;
 }
 
 public class SpatialHash
@@ -66,7 +66,7 @@ public class SpatialHash
 
                 cell.Count++;
                 cell.Layers.Add(c.Layer); // Layer speichern
-                cell.Colliders ??= new List<ICollider>();
+                cell.Colliders ??= new HashSet<ICollider>();
                 cell.Colliders.Add(c);
             }
         }
@@ -104,10 +104,10 @@ public class SpatialHash
         }
     }
 
-    public List<ICollider> QueryNearby(Vector2 pos, int radius)
+    public HashSet<ICollider> QueryNearby(Vector2 pos, int radius)
     {
         var (cellX, cellY) = ToCellCoords(pos);
-        List<ICollider> results = new();
+        HashSet<ICollider> results = new();
 
         for (int x = cellX - radius; x <= cellX + radius; x++)
         {
@@ -117,7 +117,10 @@ public class SpatialHash
 
                 if (_cells.TryGetValue(key, out var cell) == false)
                     continue;
-                results.AddRange(cell.Colliders!);
+                foreach (ICollider c in cell.Colliders)
+                {
+                    results.Add(c);
+                }
             }
         }
         return results;

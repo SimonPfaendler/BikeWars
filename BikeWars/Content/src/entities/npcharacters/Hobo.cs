@@ -22,22 +22,6 @@ namespace BikeWars.Entities.Characters
 
         protected override string WalkingSound => AudioAssets.Walking;
 
-        public override void UpdateCollider()
-        {
-            Vector2 colliderPosition = new Vector2(
-                Transform.Position.X - Transform.Size.X / 2f,
-                Transform.Position.Y - Transform.Size.Y / 2f
-            );
-
-            Collider = new BoxCollider(
-                colliderPosition,
-                Transform.Size.X,
-                Transform.Size.Y,
-                CollisionLayer.CHARACTER,
-                this
-            );
-        }
-
         // 1x1 Texture to represent the enemy
         public static Texture2D pixel;
 

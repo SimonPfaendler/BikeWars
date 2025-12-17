@@ -20,20 +20,20 @@ public class GameObjectManager
     private Player _player2 {get; set;}
     public Player Player2{get => _player2; set => _player2 = value;}
 
-    private List<CharacterBase> _characters {get; set;}
-    public List<CharacterBase> Characters {get => _characters;}
+    private HashSet<CharacterBase> _characters {get; set;}
+    public HashSet<CharacterBase> Characters {get => _characters;}
 
-    private List<ItemBase> _items {get; set;}
-    public List<ItemBase> Items {get => _items; set => _items = value;}
+    private HashSet<ItemBase> _items {get; set;}
+    public HashSet<ItemBase> Items {get => _items; set => _items = value;}
 
-    private List<BoxCollider> _statics {get; set;}
-    public List<BoxCollider> Statics {get => _statics;}
+    private HashSet<BoxCollider> _statics {get; set;}
+    public HashSet<BoxCollider> Statics {get => _statics;}
 
-    private List<ProjectileBase> _projectiles {get; set;}
-    public List<ProjectileBase> Projectiles {get => _projectiles;}
+    private HashSet<ProjectileBase> _projectiles {get; set;}
+    public HashSet<ProjectileBase> Projectiles {get => _projectiles;}
 
-    private List<AreaOfEffectBase> _aoeAttacks = new();
-    public List<AreaOfEffectBase> AOEAttacks => _aoeAttacks;
+    private HashSet<AreaOfEffectBase> _aoeAttacks = new();
+    public HashSet<AreaOfEffectBase> AOEAttacks => _aoeAttacks;
 
 
     public ContentManager _contentManager {get; set;} // TODO do we need this one?
@@ -44,10 +44,10 @@ public class GameObjectManager
     {
         _contentManager = content;
 
-        _characters = new List<CharacterBase>();
-        _items = new List<ItemBase>();
-        _statics = new List<BoxCollider>();
-        _projectiles = new List<ProjectileBase>();
+        _characters = new HashSet<CharacterBase>();
+        _items = new HashSet<ItemBase>();
+        _statics = new HashSet<BoxCollider>();
+        _projectiles = new HashSet<ProjectileBase>();
     }
     public GameObjectManager(ContentManager content, Player player1, Player player2)
     {
@@ -56,10 +56,10 @@ public class GameObjectManager
         _contentManager = content;
 
         _contentManager = content;
-        _characters = new List<CharacterBase>();
-        _items = new List<ItemBase>();
-        _statics = new List<BoxCollider>();
-        _projectiles = new List<ProjectileBase>();
+        _characters = new HashSet<CharacterBase>();
+        _items = new HashSet<ItemBase>();
+        _statics = new HashSet<BoxCollider>();
+        _projectiles = new HashSet<ProjectileBase>();
 
         if (Player1 != null)
         {
@@ -76,7 +76,7 @@ public class GameObjectManager
         }
 
     }
-    public GameObjectManager(ContentManager content, List<CharacterBase> characters, List<ItemBase> items, List<BoxCollider> statics, List<ProjectileBase> projectiles) // TODO
+    public GameObjectManager(ContentManager content, HashSet<CharacterBase> characters, HashSet<ItemBase> items, HashSet<BoxCollider> statics, HashSet<ProjectileBase> projectiles) // TODO
     {
         _contentManager = content;
         _characters = characters;
@@ -183,17 +183,11 @@ public class GameObjectManager
         {
             p.Update(gameTime);
         }
-        for (int i = _aoeAttacks.Count - 1; i >= 0; i--)
+        foreach(var aoe in _aoeAttacks)
         {
-            var aoe = _aoeAttacks[i];
             aoe.Update(gameTime);
-
             if (aoe.IsExpired)
                 _aoeAttacks.Remove(aoe);
-        }
-        foreach (BoxCollider s in Statics)
-        {
-            // s.LoadContent();
         }
     }
 

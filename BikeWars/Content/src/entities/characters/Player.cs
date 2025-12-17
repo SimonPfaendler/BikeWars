@@ -97,23 +97,6 @@ namespace BikeWars.Entities.Characters
 
         public WeaponType CurrentWeapon { get; private set; } = WeaponType.Gun;
 
-
-        public override void UpdateCollider()
-        {
-            Vector2 colliderPosition = new Vector2(
-                Transform.Position.X - Transform.Size.X / 2f,
-                Transform.Position.Y - Transform.Size.Y / 2f
-            );
-
-            Collider = new BoxCollider(
-                colliderPosition,
-                Transform.Size.X,
-                Transform.Size.Y,
-                CollisionLayer.PLAYER,
-                this
-            );
-        }
-
         // 1x1 Texture to represent the player
         public static Texture2D pixel;
 
