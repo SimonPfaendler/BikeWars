@@ -200,9 +200,14 @@ namespace BikeWars.Content.screens
             _gameObjectManager.SetWorldAudioManager(_worldAudioManager);
 
             _levelUpScreen = new LevelUpScreen();
+            _levelUpScreen.Closed += () =>
+            {
+                _audioService.Sounds.ResumeAll();
+            };
             // checks if the event OnLevelUp is triggered if it is LevelUpSreen gets active
             _gameObjectManager.Player1.OnLevelUp += (int xp, int amount) =>
             {
+                _audioService.Sounds.PauseAll();
                 _levelUpScreen.Open(_gameObjectManager.Player1);
             };
 
@@ -513,8 +518,10 @@ namespace BikeWars.Content.screens
 
             _debugger.Draw(spriteBatch);
             DrawTimer(spriteBatch, gameTime);
-
-            _gameObjectManager.Player1.Inventory.Draw(spriteBatch, _pixel);
+            
+            var player = _gameObjectManager.Player1;
+            bool showSelection = (_inputMode == InputMode.Controller);
+            player.Inventory.Draw(spriteBatch, _pixel, player.SelectedInventoryIndex, showSelection);
             hud.Draw(spriteBatch, _gameObjectManager.Player1);
 
             if (_gameObjectManager.Player2 != null)

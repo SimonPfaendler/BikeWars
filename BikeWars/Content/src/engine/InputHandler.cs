@@ -53,7 +53,10 @@ namespace BikeWars.Content.engine
         UI_LEFT,
         UI_RIGHT,
         UI_CONFIRM,
-        UI_BACK
+        UI_BACK,
+        INVENTORY_NEXT,
+        INVENTORY_PREV,
+        INVENTORY_USE
     }
 
     public enum MouseButton
@@ -222,6 +225,9 @@ namespace BikeWars.Content.engine
 
             { GameAction.UI_CONFIRM, new[] { Buttons.A } },
             { GameAction.UI_BACK,    new[] { Buttons.B } },
+            { GameAction.INVENTORY_PREV, new[] { Buttons.LeftShoulder } },
+            { GameAction.INVENTORY_NEXT, new[] { Buttons.RightShoulder } },
+            { GameAction.INVENTORY_USE,  new[] { Buttons.A } },
             
             // Gameplay
             { GameAction.SAVE, new[]  {Buttons.DPadUp} },

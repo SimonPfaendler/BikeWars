@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using BikeWars.Content.engine;
 using BikeWars.Content.entities.interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -34,7 +35,7 @@ public class Inventory
         return _items[index];
     }
 
-    public void Draw(SpriteBatch spriteBatch, Texture2D pixel)
+    public void Draw(SpriteBatch spriteBatch, Texture2D pixel, int selectedIndex, bool showSelection)
     {
         int slotSize = 40;
         int slotGap = 8;
@@ -65,6 +66,11 @@ public class Inventory
 
             Rectangle slotRect = new Rectangle(x, y, slotSize, slotSize);
             spriteBatch.Draw(pixel, slotRect, Color.White);
+            
+            if (showSelection && i == selectedIndex)
+            {
+                spriteBatch.Draw(pixel, slotRect, Color.Green * 0.4f);
+            }
 
             var item = _items[i];
             if (item != null)
@@ -73,6 +79,7 @@ public class Inventory
                 spriteBatch.Draw(item.CurrentTex, iconRect, Color.White);
             }
         }
+
     }
     
     public void RemoveItem(ItemBase item)
