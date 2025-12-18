@@ -513,8 +513,10 @@ namespace BikeWars.Content.screens
 
             _debugger.Draw(spriteBatch);
             DrawTimer(spriteBatch, gameTime);
-
-            _gameObjectManager.Player1.Inventory.Draw(spriteBatch, _pixel);
+            
+            var player = _gameObjectManager.Player1;
+            bool showSelection = (_inputMode == InputMode.Controller);
+            player.Inventory.Draw(spriteBatch, _pixel, player.SelectedInventoryIndex, showSelection);
             hud.Draw(spriteBatch, _gameObjectManager.Player1);
 
             if (_gameObjectManager.Player2 != null)

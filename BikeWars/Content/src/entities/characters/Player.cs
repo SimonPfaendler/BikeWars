@@ -77,6 +77,9 @@ namespace BikeWars.Entities.Characters
         private const float BikeMountTime = 0.1f;
         private ItemBase _currentItemBeingUsed;
         private int _currentItemIndex = -1;
+        private int _selectedInventoryIndex = 0;
+        public int SelectedInventoryIndex => _selectedInventoryIndex;
+
 
 
         private struct GhostFrame
@@ -229,6 +232,7 @@ namespace BikeWars.Entities.Characters
             HandleWeaponSwitch();
             HandleShooting();
             UpdateMovement(gameTime);
+            HandleInventoryNavigation();
             HandleItemUsage(gameTime);
             HandleMovementSound();
             HandleAnimation(gameTime);
@@ -554,6 +558,11 @@ namespace BikeWars.Entities.Characters
                 else if (_input.IsPressed(GameAction.INVENTORY_3)) StartUsingItem(2);
                 else if (_input.IsPressed(GameAction.INVENTORY_4)) StartUsingItem(3);
                 else if (_input.IsPressed(GameAction.INVENTORY_5)) StartUsingItem(4);
+                
+                if (_input.IsPressed(GameAction.INVENTORY_USE))
+                {
+                    StartUsingItem(_selectedInventoryIndex);
+                }
             }
         }
 
@@ -719,6 +728,18 @@ namespace BikeWars.Entities.Characters
             _input = input;
             movement.SetInput(input);
         }
+        private void HandleInventoryNavigation()
+        {
+            if (_input.IsPressed(GameAction.INVENTORY_NEXT))
+            {
+                _selectedInventoryIndex = (_selectedInventoryIndex + 1) % 5;
+            }
+            else if (_input.IsPressed(GameAction.INVENTORY_PREV))
+            {
+                _selectedInventoryIndex = (_selectedInventoryIndex + 4) % 5;
+            }
+        }
+
 
     }
 }
