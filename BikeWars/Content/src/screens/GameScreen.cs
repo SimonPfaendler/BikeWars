@@ -200,9 +200,14 @@ namespace BikeWars.Content.screens
             _gameObjectManager.SetWorldAudioManager(_worldAudioManager);
 
             _levelUpScreen = new LevelUpScreen();
+            _levelUpScreen.Closed += () =>
+            {
+                _audioService.Sounds.ResumeAll();
+            };
             // checks if the event OnLevelUp is triggered if it is LevelUpSreen gets active
             _gameObjectManager.Player1.OnLevelUp += (int xp, int amount) =>
             {
+                _audioService.Sounds.PauseAll();
                 _levelUpScreen.Open(_gameObjectManager.Player1);
             };
 
