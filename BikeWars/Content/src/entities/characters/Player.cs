@@ -77,6 +77,9 @@ namespace BikeWars.Entities.Characters
         private const float BikeMountTime = 0.1f;
         private ItemBase _currentItemBeingUsed;
         private int _currentItemIndex = -1;
+        private int _selectedInventoryIndex = 0;
+        public int SelectedInventoryIndex => _selectedInventoryIndex;
+
 
 
         private struct GhostFrame
@@ -109,8 +112,9 @@ namespace BikeWars.Entities.Characters
         private void Shooting()
         {
             // Only shoot if we have a valid gaze direction
-            if (GazeDirection == Vector2.Zero)
-                return;
+            Vector2 finalDirection = GazeDirection == Vector2.Zero ? _facingDirection : GazeDirection;
+            
+            if (finalDirection == Vector2.Zero) return;
 
             switch (CurrentWeapon)
             {
@@ -229,6 +233,7 @@ namespace BikeWars.Entities.Characters
             HandleWeaponSwitch();
             HandleShooting();
             UpdateMovement(gameTime);
+            HandleInventoryNavigation();
             HandleItemUsage(gameTime);
             HandleMovementSound();
             HandleAnimation(gameTime);
@@ -554,6 +559,11 @@ namespace BikeWars.Entities.Characters
                 else if (_input.IsPressed(GameAction.INVENTORY_3)) StartUsingItem(2);
                 else if (_input.IsPressed(GameAction.INVENTORY_4)) StartUsingItem(3);
                 else if (_input.IsPressed(GameAction.INVENTORY_5)) StartUsingItem(4);
+                
+                if (_input.IsPressed(GameAction.INVENTORY_USE))
+                {
+                    StartUsingItem(_selectedInventoryIndex);
+                }
             }
         }
 
@@ -598,14 +608,10 @@ namespace BikeWars.Entities.Characters
             Vector2 eyePos = Transform.Position;
             Vector2 potentialGaze = _input.GetAimDirection(eyePos, _facingDirection);
 
-            if (potentialGaze != Vector2.Zero)
-            {
-                AimTarget = eyePos + potentialGaze * AimLength;
-            }
-
             // 3. Apply Angle Restriction (240 degrees total = +/- 120 degrees)
             if (potentialGaze != Vector2.Zero)
             {
+                AimTarget = eyePos + potentialGaze * AimLength;
                 // Check if the angle is within +/- 120 degrees
                 if (Vector2.Dot(_facingDirection, potentialGaze) > -0.5f)
                 {
@@ -623,9 +629,8 @@ namespace BikeWars.Entities.Characters
                     GazeDirection = new Vector2((float)Math.Cos(targetAngle), (float)Math.Sin(targetAngle));
                 }
             }
-            else
-            {
-                GazeDirection = Vector2.Zero;
+            if (GazeDirection == Vector2.Zero) {
+                GazeDirection = _facingDirection;
             }
         }
 
@@ -719,6 +724,18 @@ namespace BikeWars.Entities.Characters
             _input = input;
             movement.SetInput(input);
         }
+        private void HandleInventoryNavigation()
+        {
+            if (_input.IsPressed(GameAction.INVENTORY_NEXT))
+            {
+                _selectedInventoryIndex = (_selectedInventoryIndex + 1) % 5;
+            }
+            else if (_input.IsPressed(GameAction.INVENTORY_PREV))
+            {
+                _selectedInventoryIndex = (_selectedInventoryIndex + 4) % 5;
+            }
+        }
+
 
     }
 }

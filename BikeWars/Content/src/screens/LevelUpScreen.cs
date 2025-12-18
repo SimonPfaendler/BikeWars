@@ -24,6 +24,7 @@ public class LevelUpScreen : IScreen
     private int _selectedOption = 0;
 
     public event Action<SkillTree.SkillId> OnOptionSelected;
+    public event Action Closed;
 
     public LevelUpScreen()
     {
@@ -47,7 +48,12 @@ public class LevelUpScreen : IScreen
         }
         _option3 = SkillTree.SkillId.LongerSprintDuration;
     }
-    public void Close() => IsOpen = false; // Game runs again and LevelUpScreen is closed
+    public void Close()  // Game runs again and LevelUpScreen is closed
+    {
+        IsOpen = false;
+        Closed?.Invoke();
+    }
+
 
     public void Update(GameTime gameTime)
     {
