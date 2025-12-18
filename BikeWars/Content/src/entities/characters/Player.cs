@@ -112,8 +112,9 @@ namespace BikeWars.Entities.Characters
         private void Shooting()
         {
             // Only shoot if we have a valid gaze direction
-            if (GazeDirection == Vector2.Zero)
-                return;
+            Vector2 finalDirection = GazeDirection == Vector2.Zero ? _facingDirection : GazeDirection;
+            
+            if (finalDirection == Vector2.Zero) return;
 
             switch (CurrentWeapon)
             {
@@ -607,14 +608,10 @@ namespace BikeWars.Entities.Characters
             Vector2 eyePos = Transform.Position;
             Vector2 potentialGaze = _input.GetAimDirection(eyePos, _facingDirection);
 
-            if (potentialGaze != Vector2.Zero)
-            {
-                AimTarget = eyePos + potentialGaze * AimLength;
-            }
-
             // 3. Apply Angle Restriction (240 degrees total = +/- 120 degrees)
             if (potentialGaze != Vector2.Zero)
             {
+                AimTarget = eyePos + potentialGaze * AimLength;
                 // Check if the angle is within +/- 120 degrees
                 if (Vector2.Dot(_facingDirection, potentialGaze) > -0.5f)
                 {
@@ -632,9 +629,8 @@ namespace BikeWars.Entities.Characters
                     GazeDirection = new Vector2((float)Math.Cos(targetAngle), (float)Math.Sin(targetAngle));
                 }
             }
-            else
-            {
-                GazeDirection = Vector2.Zero;
+            if (GazeDirection == Vector2.Zero) {
+                GazeDirection = _facingDirection;
             }
         }
 
