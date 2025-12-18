@@ -106,6 +106,7 @@ namespace BikeWars.Entities.Characters
         }
         public override void Attack(ICombat target)
         {
+            if (!CanAttack()) return;
             base.Attack(target);
             _audio.Sounds.Play(AudioAssets.Punch);
         }
