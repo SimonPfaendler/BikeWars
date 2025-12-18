@@ -11,7 +11,13 @@ public abstract class Bike: ItemBase, IBike
     private Transform _lastTransform { get; set; }
     public Transform LastTransform { get => _lastTransform; set => _lastTransform = value; }
     private BikeAttributes _attributes {get;set;}
-    public BikeAttributes Attributes {get => _attributes; set => _attributes = value;}
+    public BikeAttributes Attributes {
+        get => _attributes;
+        set {
+            _attributes = value;
+            if (_attributes != null) _attributes.owner = this;
+        }
+    }
     public bool IsDestroyed => Attributes.Health <= 0;
     protected SpriteAnimation CurrentAnimation;
     protected AudioService _audio;

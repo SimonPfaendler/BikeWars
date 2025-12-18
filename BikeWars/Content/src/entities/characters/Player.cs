@@ -25,6 +25,7 @@ namespace BikeWars.Entities.Characters
     {
         public Inventory Inventory { get; private set; }
         private PlayerMovement movement { get; set; }
+        public Bike CurrentBike => movement?.CrtBike;
         private IPlayerInput _input;
         private CooldownWithDuration sprint { get; }
 
@@ -239,6 +240,33 @@ namespace BikeWars.Entities.Characters
             UpdateCollider();
         }
 
+        public override void TakeDamage(int amount)
+        {
+            // Deactivate Godmode for testing damage
+            // if (IsGodMode)
+            //    return;
+
+            if (IsDead) return;
+
+            if (movement.OwnsBike && movement.CrtBike != null)
+            {
+                var bike = movement.CrtBike;
+                bike.TakeDamage(amount);
+
+                int reducedDamage = Math.Max(0, amount - bike.Attributes.Armor);
+                base.TakeDamage(reducedDamage);
+
+                if (bike.IsDestroyed)
+                {
+                    Dismount();
+                }
+            }
+            else
+            {
+                base.TakeDamage(amount);
+            }
+        }
+
         public override void Draw(SpriteBatch spriteBatch)
         {
             foreach (var ghost in _ghostTrail)
@@ -417,7 +445,10 @@ namespace BikeWars.Entities.Characters
             movement.OwnsBike = false;
             movement.CrtBike.Transform.Position = Transform.Position;
             movement.CrtBike.Collider.Position = Collider.Position;
-            Dismounted?.Invoke(movement.CrtBike);
+            if (!movement.CrtBike.IsDestroyed)
+            {
+                Dismounted?.Invoke(movement.CrtBike);
+            }
             movement.CrtBike = null;
         }
 

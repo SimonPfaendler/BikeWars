@@ -11,6 +11,7 @@ namespace BikeWars.Content.screens
         private readonly Rectangle _hpfill;
         private readonly Rectangle _sprintIcon;
         private readonly Rectangle _xpfill;
+        private readonly Rectangle _bikefill;
         private SpriteFont _font;
 
 
@@ -25,6 +26,7 @@ namespace BikeWars.Content.screens
             _pixel.SetData(new[] { Color.White });
             _xpfill = new Rectangle(44, 25, 100, 5);
             _hpfill = new Rectangle(32, 34, 118, 17);
+            _bikefill = new Rectangle(48, 60, 102, 8);
             _sprintIcon = new Rectangle(12, 36, 16, 15);
             _font = Game1.Instance.Content.Load<SpriteFont>("assets/fonts/Arial");
             Position = new Vector2(0, 0);
@@ -39,6 +41,16 @@ namespace BikeWars.Content.screens
             DrawCover(sb, _hpfill, hpPercent);
             float xpPercent = (float)player.XpCounter / player.XpLevelUp;
             DrawCover(sb, _xpfill, xpPercent);
+
+            if (player.CurrentBike == null) {
+                DrawCover(sb, _bikefill, 0f);
+            }
+
+            if (player.CurrentBike != null)
+            {
+                float bikePercent = (float)player.CurrentBike.Attributes.Health / player.CurrentBike.Attributes.MaxHealth;
+                DrawCover(sb, _bikefill, bikePercent);
+            }
             sb.DrawString(
                 _font,
                 $"Lvl {player.CurrentLevel}",
