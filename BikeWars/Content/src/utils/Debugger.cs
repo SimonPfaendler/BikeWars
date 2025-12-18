@@ -40,7 +40,8 @@ namespace BikeWars.Utilities
                                $"Player Velocity: {_player.CurrentSpeed * _player.TerrainSpeedMultiplier}\n" +
                                $"Player Bounds: {_player.Transform.Size}\n" +
                                $"Player Sprint Cooldown: {(int)_player.CooldownTimer()}\n" +
-                               $"Player Health: {_player.Attributes.Health}";
+                               $"Player Health: {_player.Attributes.Health}" +
+                               (_player.CurrentBike != null ? $"\nBike Health: {_player.CurrentBike.Attributes.Health}" : "");
 
 
             spriteBatch.DrawString(_font, debugInfo, new Vector2(10, 600), Color.White);
