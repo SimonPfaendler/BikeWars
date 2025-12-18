@@ -14,6 +14,8 @@ public class BicycleMovement : IMoveable
     private float _sprintAcceleration { get; set; }
     private float _rotation { get; set; }
     private float _rotationAcceleration { get; set; }
+
+    private const float BreakAcceleration = 1.5f; // Right now this works for every bike but question would be to make it dynamic so other bikes can break faster or so
     public bool IsMoving { get => _isMoving; set => _isMoving = value; }
     public bool CanMove {
         get => _canMove;
@@ -148,7 +150,7 @@ public class BicycleMovement : IMoveable
                 case MoveDirection.FORWARD:
                     return MovingForward(currentSpeed, acceleration, minSpeed, maxSpeed);
                 case MoveDirection.BACKWARD:
-                    return MovingBackwards(currentSpeed, acceleration * 1.5f, minSpeed, maxSpeed);
+                    return MovingBackwards(currentSpeed, acceleration * BreakAcceleration, minSpeed, maxSpeed);
                 default:
                     break;
             }

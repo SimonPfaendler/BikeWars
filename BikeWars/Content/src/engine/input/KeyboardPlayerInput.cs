@@ -1,7 +1,5 @@
 using Microsoft.Xna.Framework;
 using BikeWars.Content.engine.interfaces;
-using System;
-using BikeWars.Content.components;
 
 namespace BikeWars.Content.engine.input
 {
@@ -11,7 +9,7 @@ namespace BikeWars.Content.engine.input
 
         public bool IsAnalog => false;
 
-        public KeyboardPlayerInput(Camera2D camera) 
+        public KeyboardPlayerInput(Camera2D camera)
         {
             _camera = camera;
         }
@@ -24,7 +22,7 @@ namespace BikeWars.Content.engine.input
             if (IsHeld(GameAction.MOVE_DOWN)) direction.Y += 1;
             if (IsHeld(GameAction.MOVE_LEFT)) direction.X -= 1;
             if (IsHeld(GameAction.MOVE_RIGHT)) direction.X += 1;
-            
+
             return direction;
         }
 
@@ -42,7 +40,6 @@ namespace BikeWars.Content.engine.input
 
         public bool IsPressed(GameAction action)
         {
-            // Check Mouse
             if (InputHandler.MouseMapping.TryGetValue(action, out var mouseButtons))
             {
                 foreach (var mb in mouseButtons)
@@ -51,7 +48,6 @@ namespace BikeWars.Content.engine.input
                         return true;
                 }
             }
-            // Check Keyboard
             if (InputHandler.KeyMapping.TryGetValue(action, out var keys))
             {
                 foreach (var key in keys)
@@ -65,7 +61,6 @@ namespace BikeWars.Content.engine.input
 
         public bool IsHeld(GameAction action)
         {
-            // Check Mouse
             if (InputHandler.MouseMapping.TryGetValue(action, out var mouseButtons))
             {
                 foreach (var mb in mouseButtons)
@@ -74,7 +69,6 @@ namespace BikeWars.Content.engine.input
                         return true;
                 }
             }
-            // Check Keyboard
             if (InputHandler.KeyMapping.TryGetValue(action, out var keys))
             {
                 foreach (var key in keys)
@@ -88,7 +82,7 @@ namespace BikeWars.Content.engine.input
 
         public void Update()
         {
-            
+
         }
     }
 }

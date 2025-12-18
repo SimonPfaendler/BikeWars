@@ -1,4 +1,3 @@
-using System;
 using BikeWars.Content.components;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework;
@@ -7,7 +6,7 @@ namespace BikeWars.Content.engine;
 public class CircleCollider : ColliderBase
 {
     private Circle _collisionShape { get; set; }
-    
+
     public CircleCollider(int r, Vector2 pos, CollisionLayer layer, object owner)
     {
         Radius = r;
@@ -35,7 +34,7 @@ public class CircleCollider : ColliderBase
 
         if (otherCollider is CircleCollider cc)
         {
-            return _collisionShape.Intersects(cc.CollisionShape);    
+            return _collisionShape.Intersects(cc.CollisionShape);
         }
         return false;
     }

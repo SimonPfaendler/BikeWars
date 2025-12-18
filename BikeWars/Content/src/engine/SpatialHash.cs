@@ -115,7 +115,7 @@ public class SpatialHash
             {
                 int key = To1DKey(x, y);
 
-                if (_cells.TryGetValue(key, out var cell) == false)
+                if (!_cells.TryGetValue(key, out var cell))
                     continue;
                 foreach (ICollider c in cell.Colliders)
                 {

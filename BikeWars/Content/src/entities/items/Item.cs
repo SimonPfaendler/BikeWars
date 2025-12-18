@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.engine.interfaces;
-using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.entities.items;
 public class Item: ItemBase

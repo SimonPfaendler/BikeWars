@@ -110,7 +110,6 @@ namespace BikeWars.Content.screens
             for (int i = 0; i < amount; i++)
             {
                 Vector2 spawnPos = playerPos;
-                bool found = false;
 
                 // Try up to 20 times to find a walkable spawn tile
                 for (int attempt = 0; attempt < 20; attempt++)
@@ -132,7 +131,6 @@ namespace BikeWars.Content.screens
 
                     // ok, this is a walkable tile → use it
                     spawnPos = candidate;
-                    found = true;
                     break;
                 }
 

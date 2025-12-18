@@ -1,4 +1,3 @@
-using System;
 using BikeWars.Content.engine.Audio;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -72,7 +71,7 @@ namespace BikeWars.Content.components
         {
             _isHovered = _collisionBounds.Contains(mouseState.Position);
         }
-        
+
         public bool ShowSelection { get; set; } = true;
 
         public void Draw(SpriteBatch spriteBatch)
@@ -90,7 +89,7 @@ namespace BikeWars.Content.components
             DrawText(spriteBatch, drawBounds);
         }
 
-        
+
         public bool IsClicked(MouseState currentMouseState, MouseState previousMouseState)
         {
             bool isClicked =
@@ -158,7 +157,7 @@ namespace BikeWars.Content.components
         private void DrawBorder(SpriteBatch spriteBatch, Rectangle rect, int thickness, Color color)
         {
             EnsurePixel(spriteBatch.GraphicsDevice);
-            
+
             spriteBatch.Draw(_pixel, new Rectangle(rect.X, rect.Y, rect.Width, thickness), color);
             spriteBatch.Draw(_pixel, new Rectangle(rect.X, rect.Bottom - thickness, rect.Width, thickness), color);
             spriteBatch.Draw(_pixel, new Rectangle(rect.X, rect.Y, thickness, rect.Height), color);

@@ -12,7 +12,6 @@ public interface IMoveable
     float MaxSpeed {get; set;}
     float SprintAcceleration {get; set;}
     float Rotation {get; set;}
-    // void Update(GameTime gameTime);
     void HandleMovement(List<MoveDirection> moveDirections, float currentSpeed, float speedAcceleration, float currentRotation, float rotationAcceleration, float minSpeed, float maxSpeed); // User or other input
     Vector2 HandleDirection(List<MoveDirection> moveDirections);
     float HandleSpeed(List<MoveDirection> moveDirections, float currentSpeed, float acceleration, float minSpeed, float maxSpeed);

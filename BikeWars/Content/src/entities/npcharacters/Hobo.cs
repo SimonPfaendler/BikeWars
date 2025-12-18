@@ -102,12 +102,7 @@ namespace BikeWars.Entities.Characters
 
         public void Immobalize(bool value)
         {
-            if (value) {
-                Movement.CanMove = false;
-            } else
-            {
-                Movement.CanMove = true;
-            }
+            Movement.CanMove = !value;
         }
         public override void Attack(ICombat target)
         {

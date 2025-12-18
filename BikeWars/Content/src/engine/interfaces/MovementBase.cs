@@ -88,22 +88,22 @@ public abstract class MovementBase : IMoveable
     public abstract void Update(GameTime gameTime);
     public abstract void HandleMovement(GameTime gameTime);
 
-    public void HandleMovement(List<MoveDirection> moveDirection, float currentSpeed, float speedAcceleration, float currentRotation, float rotationAcceleration, float minSpeed, float maxSpeed)
+    public void HandleMovement(List<MoveDirection> moveDirections, float currentSpeed, float speedAcceleration, float currentRotation, float rotationAcceleration, float minSpeed, float maxSpeed)
     {
 
     }
 
-    public Vector2 HandleDirection(List<MoveDirection> moveDirection)
+    public Vector2 HandleDirection(List<MoveDirection> moveDirections)
     {
         return Vector2.Zero;
     }
 
-    public float HandleSpeed(List<MoveDirection> direction, float currentSpeed, float acceleration, float minSpeed, float maxSpeed)
+    public float HandleSpeed(List<MoveDirection> directions, float currentSpeed, float acceleration, float minSpeed, float maxSpeed)
     {
         return 0f;
     }
 
-    public float HandleRotation(List<MoveDirection> moveDirections, float rotationAcceleration)
+    public float HandleRotation(List<MoveDirection> moveDirections, float currentRotation)
     {
         return 0f;
     }

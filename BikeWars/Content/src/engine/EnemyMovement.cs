@@ -60,7 +60,6 @@ public class EnemyMovement : MovementBase
         var enemyGrid= _gridMapper.WorldToGrid(EnemyPosition);
         var playerGrid= _gridMapper.WorldToGrid(PlayerPosition);
 
-        bool targetMoved = playerGrid != _lastPlayerGrid;
         bool timeUp = _repathTimer <= 0f;
 
         bool needNewPath =
@@ -199,29 +198,4 @@ public class EnemyMovement : MovementBase
         IsMoving = UpdateMoving();
     }
 
-    private PathFinding BuildLocalGrid(Point enemyGrid, Point targetGrid, int size)
-    {
-        int half = size / 2;
-        int width = _pathFinding._width;
-        int height = _pathFinding._height;
-
-        Node[,] localGrid = new Node[size, size];
-
-        for (int y = 0; y < size; y++)
-        {
-            for (int x = 0; x < size; x++)
-            {
-                int globalX = enemyGrid.X - half + x;
-                int globalY = enemyGrid.Y - half + y;
-
-                bool walkable = false;
-                if (globalX >= 0 && globalX < width && globalY >= 0 && globalY < height)
-                    walkable = _pathFinding.GetNode(globalX, globalY).Walkable;
-
-                localGrid[x, y] = new Node(x, y, walkable);
-            }
-        }
-
-        return new PathFinding(localGrid);
-    }
 }

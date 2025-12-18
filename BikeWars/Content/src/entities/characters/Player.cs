@@ -113,7 +113,7 @@ namespace BikeWars.Entities.Characters
         {
             // Only shoot if we have a valid gaze direction
             Vector2 finalDirection = GazeDirection == Vector2.Zero ? _facingDirection : GazeDirection;
-            
+
             if (finalDirection == Vector2.Zero) return;
 
             switch (CurrentWeapon)
@@ -559,7 +559,7 @@ namespace BikeWars.Entities.Characters
                 else if (_input.IsPressed(GameAction.INVENTORY_3)) StartUsingItem(2);
                 else if (_input.IsPressed(GameAction.INVENTORY_4)) StartUsingItem(3);
                 else if (_input.IsPressed(GameAction.INVENTORY_5)) StartUsingItem(4);
-                
+
                 if (_input.IsPressed(GameAction.INVENTORY_USE))
                 {
                     StartUsingItem(_selectedInventoryIndex);

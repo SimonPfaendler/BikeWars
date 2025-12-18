@@ -1,5 +1,4 @@
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 // ============================================================
 // Camera.cs
 // Defines a 2D camera with PlayerLock and FreeLook modes with
@@ -37,7 +36,7 @@ namespace BikeWars.Content.engine
             _viewportWidth = viewportWidth;
             _viewportHeight = viewportHeight;
             _worldBounds = worldBounds;
-            
+
         }
 
         public void Update(GameTime gameTime, Vector2 playerPosition, bool freeCamera)

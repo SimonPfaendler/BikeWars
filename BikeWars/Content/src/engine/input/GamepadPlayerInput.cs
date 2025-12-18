@@ -1,8 +1,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using BikeWars.Content.engine.interfaces;
-using System;
-using BikeWars.Content.components;
 
 namespace BikeWars.Content.engine.input
 {
@@ -30,14 +28,14 @@ namespace BikeWars.Content.engine.input
              var leftStick = _currentState.ThumbSticks.Left;
              leftStick.Y *= -1;
              if (leftStick.Length() < 0.2f) return Vector2.Zero;
-             
+
              return leftStick;
         }
 
         public Vector2 GetAimDirection(Vector2 currentPosition, Vector2 currentFacingDirection)
         {
             Vector2 rightStick = _currentState.ThumbSticks.Right;
-            rightStick.Y *= -1; 
+            rightStick.Y *= -1;
 
             if (rightStick.Length() > 0.2f)
             {

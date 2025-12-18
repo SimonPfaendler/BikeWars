@@ -1,5 +1,4 @@
 using Microsoft.Xna.Framework;
-using BikeWars.Content.engine;
 
 namespace BikeWars.Content.engine.interfaces
 {

@@ -30,14 +30,14 @@ public class BoxCollider : ColliderBase
     {
         _collisionShape = new EnhancedRectangle(new Rectangle((int)Position.X, (int)Position.Y, Width, Height));
     }
-    public override bool Intersects(ICollider other)
+    public override bool Intersects(ICollider otherCollider)
     {
-        if (other is BoxCollider bc)
+        if (otherCollider is BoxCollider bc)
         {
             return _collisionShape.Intersects(bc.CollisionShape);
         }
 
-        if (other is CircleCollider cc)
+        if (otherCollider is CircleCollider cc)
         {
             return _collisionShape.Intersects(cc.CollisionShape);
         }
