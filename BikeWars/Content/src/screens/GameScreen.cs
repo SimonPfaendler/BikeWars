@@ -23,7 +23,6 @@ namespace BikeWars.Content.screens
     {
         private LevelUpScreen _levelUpScreen;
         private BikeShopScreen _bikeShopScreen;
-        private readonly ItemManager _itemManager;
         private readonly Camera2D camera;
         private Rectangle worldBounds;
         private Overlay _overlay;
@@ -96,13 +95,7 @@ namespace BikeWars.Content.screens
 
             _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
             _gameMode = gameMode;
-
-            _itemManager = new ItemManager();
-            _itemManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
-            _itemManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 90), new Point(32, 32)));
-
-
-
+            
             _playerManager = new PlayerManager();
 
             // Decide mode
@@ -114,10 +107,11 @@ namespace BikeWars.Content.screens
 
             _gameObjectManager = new GameObjectManager(_contentManager, player, player2);
             // Initial spawning is now handled by SpawnManager
-
-            _gameObjectManager.Items = _itemManager.Items;
+            
             _gameObjectManager.AddItem(new Frelo(new Vector2(5700, 5700), new Point(32, 32)));
             _gameObjectManager.AddItem(new RacingBike(new Vector2(5800, 5800), new Point(32, 32)));
+            _gameObjectManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
+            _gameObjectManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 90), new Point(32, 32)));
 
             _freelook = false;
             // camera.Position is set by Update usually, but let's init it
@@ -138,7 +132,7 @@ namespace BikeWars.Content.screens
             if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);
             if (_gameObjectManager.Player2 != null) players.Add(_gameObjectManager.Player2);
 
-            _collisionManager.Insertions(_itemManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters);
+            _collisionManager.Insertions(_gameObjectManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters);
 
             GameEvents.OnResumeTimer += ResumeTimer;
             HandleLoadNonInGameData();
@@ -297,8 +291,7 @@ namespace BikeWars.Content.screens
             }
 
             _gameObjectManager.Update(gameTime, InputHandler.MakeMouseWorldPosByCamera(camera));
-            _collisionManager.Update(players, _itemManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters);
-            _itemManager.Update(gameTime);
+            _collisionManager.Update(players, _gameObjectManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters);
 
 
             if (InputHandler.IsPressed(GameAction.DEBUG_HEAL))
@@ -521,7 +514,7 @@ namespace BikeWars.Content.screens
                     _pixel,
                     _gameObjectManager.Player1,
                     _gameObjectManager.Characters,
-                    _itemManager.Items,
+                    _gameObjectManager.Items,
                     _gameObjectManager.Projectiles,
                     _gameObjectManager.AOEAttacks
                 );

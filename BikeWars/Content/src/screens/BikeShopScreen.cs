@@ -31,9 +31,7 @@ public class BikeShopScreen : IScreen
     private int _selectedOption = 0;
 
     private Player _player;
-    private BikeShop _shop;
-
-    public event Action<ShopOption> OnOptionSelected;
+    
     public event Action Closed;
 
     public BikeShopScreen()
@@ -50,7 +48,6 @@ public class BikeShopScreen : IScreen
         _selectedOption = 0;
 
         _player = player;
-        _shop = shop;
     }
 
     public void Close()
@@ -62,15 +59,13 @@ public class BikeShopScreen : IScreen
     public void Update(GameTime gameTime)
     {
         if (!IsOpen) return;
-
-        // schließen (wie gehabt)
+        var ks = Keyboard.GetState();
         if (InputHandler.IsPressed(GameAction.PAUSE))
         {
             Close();
             return;
         }
-
-        var ks = Keyboard.GetState();
+        
 
         if (ks.IsKeyDown(Keys.D1) || ks.IsKeyDown(Keys.NumPad1))
         {
@@ -90,7 +85,6 @@ public class BikeShopScreen : IScreen
         {
             ApplyOption(_option3);
             Close();
-            return;
         }
     }
     
@@ -101,6 +95,7 @@ public class BikeShopScreen : IScreen
 
         switch (option)
         {
+            //TODO Option don't change anything
             case ShopOption.HealFull:
                 _player.Attributes.Health = _player.Attributes.MaxHealth;
                 break;
@@ -150,13 +145,12 @@ public class BikeShopScreen : IScreen
         spriteBatch.DrawString(_font, message, position, color);
     }
 
-    // IScreen Boilerplate (wie bei LevelUpScreen)
+    // Just for IScreen
     public ScreenManager ScreenManager
     {
         get => null;
         set { }
     }
-
     public bool DrawLower => false;
     public bool UpdateLower => false;
 

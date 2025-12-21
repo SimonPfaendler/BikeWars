@@ -4,7 +4,6 @@ using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Entities.Characters;
-using BikeWars.Entities.Characters.MapObjects;
 using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
 using Microsoft.Xna.Framework;

@@ -11,11 +11,11 @@ namespace BikeWars.Entities.Characters
 {
     public class Dog: CharacterBase, IWorldAudioAware
     {
-        private SpriteAnimation _idleAnimation;
-        private SpriteAnimation _walkLeftAnimation;
-        private SpriteAnimation _walkRightAnimation;
-        private SpriteAnimation _walkUpAnimation;
-        private SpriteAnimation _walkDownAnimation;
+        private readonly SpriteAnimation _idleAnimation;
+        private readonly SpriteAnimation _walkLeftAnimation;
+        private readonly SpriteAnimation _walkRightAnimation;
+        private readonly SpriteAnimation _walkUpAnimation;
+        private readonly SpriteAnimation _walkDownAnimation;
         private SpriteAnimation _currentAnimation;
 
         private readonly PathFinding _pathFinding;
