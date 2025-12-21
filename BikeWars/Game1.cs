@@ -77,9 +77,6 @@ public class Game1 : Game
         ScreenManager.Update(gameTime);
         CurrentGameTime = gameTime;
 
-        if (InputHandler.IsPressed(GameAction.ESC))
-            Exit();
-
         _audioService.Update(gameTime);
 
         base.Update(gameTime);
