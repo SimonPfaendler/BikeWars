@@ -24,8 +24,8 @@ public class GameObjectManager
     private HashSet<CharacterBase> _characters {get; set;}
     public HashSet<CharacterBase> Characters {get => _characters;}
 
-    private HashSet<ItemBase> _items {get; set;}
-    public HashSet<ItemBase> Items {get => _items; set => _items = value;}
+    private readonly HashSet<ItemBase> _items = new();
+    public HashSet<ItemBase> Items => _items;
 
     private HashSet<BoxCollider> _statics {get; set;}
     public HashSet<BoxCollider> Statics {get => _statics;}
@@ -40,23 +40,13 @@ public class GameObjectManager
     public ContentManager _contentManager {get; set;} // TODO do we need this one?
 
     private WorldAudioManager _worldAudioManager;
-//TODO do we still need it?
-    public GameObjectManager(ContentManager content)
-    {
-        _contentManager = content;
-        
-        _characters = new HashSet<CharacterBase>();
-        _items = new HashSet<ItemBase>();
-        _statics = new HashSet<BoxCollider>();
-        _projectiles = new HashSet<ProjectileBase>();
-    }
+
     public GameObjectManager(ContentManager content, Player player1, Player player2)
     {
         Player1 = player1;
         Player2 = player2;
         _contentManager = content;
-
-        _contentManager = content;
+        
         _characters = new HashSet<CharacterBase>();
         _items = new HashSet<ItemBase>();
         _statics = new HashSet<BoxCollider>();
@@ -79,14 +69,7 @@ public class GameObjectManager
         }
 
     }
-    public GameObjectManager(ContentManager content, HashSet<CharacterBase> characters, HashSet<ItemBase> items, HashSet<BoxCollider> statics, HashSet<ProjectileBase> projectiles) // TODO
-    {
-        _contentManager = content;
-        _characters = characters;
-        _items = items;
-        _statics = statics;
-        _projectiles = projectiles;
-    }
+    
     public void AddCharacter(CharacterBase character)
     {
         if (_worldAudioManager != null && character is IWorldAudioAware wa)
@@ -164,10 +147,6 @@ public class GameObjectManager
     {
         if (Player1 != null) Player1.Update(gameTime, mouseWorldPos);
         if (Player2 != null) Player2.Update(gameTime, mouseWorldPos);
-        foreach (ProjectileBase p in Projectiles)
-        {
-            p.Update(gameTime);
-        }
         foreach (CharacterBase c in Characters)
         {
             if (c.Movement != null)
@@ -186,12 +165,11 @@ public class GameObjectManager
         {
             p.Update(gameTime);
         }
-        foreach(var aoe in _aoeAttacks)
+        _aoeAttacks.RemoveWhere(aoe =>
         {
             aoe.Update(gameTime);
-            if (aoe.IsExpired)
-                _aoeAttacks.Remove(aoe);
-        }
+            return aoe.IsExpired;
+        });
     }
 
     private void OnPlayerShotBullet(Player player)
@@ -264,6 +242,10 @@ public class GameObjectManager
             EnergyGel energyGel = new EnergyGel(pos, new Point(32, 32));
             AddItem(energyGel);
         }
+    }
+    public void Remove(ItemBase item)
+    {
+        _items.Remove(item);
     }
     
     public void SpawnFromTiledObjects(IEnumerable<TiledObjectInfo> spawns)

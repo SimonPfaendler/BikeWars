@@ -53,15 +53,15 @@ namespace BikeWars.Entities.Characters
         public event Action DamageCircle;
 
         public event Action<Bike> Dismounted;
-        private SpriteAnimation _bikeDownAnimation;
-        private SpriteAnimation _bikeUpAnimation;
-        private SpriteAnimation _bikeLeftAnimation;
-        private SpriteAnimation _bikeRightAnimation;
+        private readonly SpriteAnimation _bikeDownAnimation;
+        private readonly SpriteAnimation _bikeUpAnimation;
+        private readonly SpriteAnimation _bikeLeftAnimation;
+        private readonly SpriteAnimation _bikeRightAnimation;
 
-        private SpriteAnimation _walkDownAnimation;
-        private SpriteAnimation _walkUpAnimation;
-        private SpriteAnimation _walkLeftAnimation;
-        private SpriteAnimation _walkRightAnimation;
+        private readonly SpriteAnimation _walkDownAnimation;
+        private readonly SpriteAnimation _walkUpAnimation;
+        private readonly SpriteAnimation _walkLeftAnimation;
+        private readonly SpriteAnimation _walkRightAnimation;
 
         private SpriteAnimation _currentAnimation;
 

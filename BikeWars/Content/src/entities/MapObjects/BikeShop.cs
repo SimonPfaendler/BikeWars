@@ -9,8 +9,6 @@ namespace BikeWars.Entities.Characters.MapObjects;
 
 public class BikeShop: ItemBase
 {
-    public bool Interactable { get; private set; }
-    public int MaxHp { get; private set; }
     public BikeShop(Vector2 start, Point size, TiledObjectInfo attributes)
     {
         Transform = new Transform(start, size);
@@ -29,8 +27,8 @@ public class BikeShop: ItemBase
         // nichts
     }
     
-    public override bool Intersects(ICollider collider)
+    public override bool Intersects(ICollider other)
     {
-        return Collider.Intersects(collider);
+        return Collider.Intersects(other);
     }
 }
