@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
+using BikeWars.Entities.Characters.MapObjects;
 
 namespace BikeWars.Content.managers;
 public class GameObjectManager
@@ -39,11 +40,11 @@ public class GameObjectManager
     public ContentManager _contentManager {get; set;} // TODO do we need this one?
 
     private WorldAudioManager _worldAudioManager;
-
+//TODO do we still need it?
     public GameObjectManager(ContentManager content)
     {
         _contentManager = content;
-
+        
         _characters = new HashSet<CharacterBase>();
         _items = new HashSet<ItemBase>();
         _statics = new HashSet<BoxCollider>();
@@ -262,6 +263,35 @@ public class GameObjectManager
         {
             EnergyGel energyGel = new EnergyGel(pos, new Point(32, 32));
             AddItem(energyGel);
+        }
+    }
+    
+    public void SpawnFromTiledObjects(IEnumerable<TiledObjectInfo> spawns)
+    {
+        foreach (var spawn in spawns)
+        {
+            var created = CreateFromTiled(spawn);
+            if (created != null)
+            {
+                AddItem(created);
+            }
+        }
+    }
+    
+    private ItemBase? CreateFromTiled(TiledObjectInfo spawn)
+    {
+        var start = new Vector2(spawn.Rect.X, spawn.Rect.Y);
+        var size  = new Point(spawn.Rect.Width, spawn.Rect.Height);
+        
+        string type = spawn.Properties["type"];
+
+        switch (type)
+        {
+            case "Bike_Shop":
+                return new BikeShop(start, size, spawn);
+
+            default:
+                return null;
         }
     }
 
