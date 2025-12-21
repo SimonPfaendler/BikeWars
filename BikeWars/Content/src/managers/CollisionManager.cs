@@ -4,12 +4,17 @@ using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Entities.Characters;
+using BikeWars.Entities.Characters.MapObjects;
 using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace BikeWars.Content.managers;
+
+/*TODO we're loading the TileMap in this class. I think we should Load it in a separate class and
+ use Collision Manager only for Collision handling.
+ Especially, because we will Load destroyable Objects and other Map Objects with the Tilemap */
 public class CollisionManager
 {
     // Events that can be followed by other classes
@@ -18,32 +23,54 @@ public class CollisionManager
     public event Action<CharacterBase, CharacterBase> OnCharacterCollision;
     public event Action<CharacterBase, AreaOfEffectBase> OnAOEHit;
 
+    public List<TiledObjectInfo> ObjectSpawns { get; } = new();
+    private readonly GameObjectManager _gameObjectManager;
+
     private const string MAP = "assets/Map/Bike_Wars_Map";
     private const string TILED_MAP_LAYER = "Collision";
 
-    public int _cellSize {get; set;}
+    public int _cellSize { get; set; }
 
-    private SpatialHash _dynamicHash {get; set;}
-    public SpatialHash DynamicHash {get => _dynamicHash; set => _dynamicHash = value;}
+    private SpatialHash _dynamicHash { get; set; }
+
+    public SpatialHash DynamicHash
+    {
+        get => _dynamicHash;
+        set => _dynamicHash = value;
+    }
+
     public HashSet<ICollider> allDynamics = new();
     public HashSet<ICollider> activeDynamics = new();
-    private SpatialHash _staticHash {get; set;}
-    public SpatialHash StaticHash {get => _staticHash; set => _staticHash = value;}
+    private SpatialHash _staticHash { get; set; }
+
+    public SpatialHash StaticHash
+    {
+        get => _staticHash;
+        set => _staticHash = value;
+    }
 
     private TiledMap _tiledMap;
-    public TiledMap TiledMap {get => _tiledMap; set => _tiledMap = value;}
-    private HashSet<ICollider> _toRemoveColliders {get; set;}
+
+    public TiledMap TiledMap
+    {
+        get => _tiledMap;
+        set => _tiledMap = value;
+    }
+
+    private HashSet<ICollider> _toRemoveColliders { get; set; }
 
     // the grid for the pathfinding
     public Node[,] PathGrid { get; private set; }
 
-    public CollisionManager(int cellSize, int worldBounds)
+    public CollisionManager(int cellSize, int worldBounds, GameObjectManager gameObjectManager)
     {
         _cellSize = cellSize;
         DynamicHash = new SpatialHash(cellSize, worldBounds);
         StaticHash = new SpatialHash(cellSize, worldBounds);
         _toRemoveColliders = new HashSet<ICollider>();
+        _gameObjectManager = gameObjectManager;
     }
+
     public bool isColliding(ICollider collisionBox1, ICollider collisionBox2)
     {
         return collisionBox1.Intersects(collisionBox2);
@@ -55,7 +82,7 @@ public class CollisionManager
         var collisionLayer = TiledMap.GetLayer<TiledMapTileLayer>(TILED_MAP_LAYER);
         foreach (var tile in collisionLayer.Tiles)
         {
-            if(tile.GlobalIdentifier == 0) continue;
+            if (tile.GlobalIdentifier == 0) continue;
 
             int x = tile.X * _cellSize;
             int y = tile.Y * _cellSize;
@@ -73,7 +100,7 @@ public class CollisionManager
         {
             for (int x = 0; x < gridWidth; x++)
             {
-                var tile = collisionLayer.GetTile((ushort) x, (ushort) y);
+                var tile = collisionLayer.GetTile((ushort)x, (ushort)y);
 
                 bool walkable = tile.GlobalIdentifier == 0;
                 PathGrid[x, y] = new Node(x, y, walkable);
@@ -84,13 +111,15 @@ public class CollisionManager
         LoadTerrainLayer("Streets", TerrainType.ROAD);
         LoadTerrainLayer("Floor", TerrainType.GRASS);
         LoadSpawnLayer("Enemy_Spawn");
+        LoadObjectLayer("BIke_Shops_Layer");
+        _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
     }
 
     // takes a world position in pixels (Vector2) and returns which tile that position is inside
     public Point WorldToGrid(Vector2 worldPos)
     {
-        int gridX = (int) (worldPos.X / _cellSize);
-        int gridY = (int) (worldPos.Y / _cellSize);
+        int gridX = (int)(worldPos.X / _cellSize);
+        int gridY = (int)(worldPos.Y / _cellSize);
 
         return new Point(gridX, gridY);
     }
@@ -115,12 +144,12 @@ public class CollisionManager
     }
 
     // copy walkable grid
-    private bool [,] CopyWalkableGrid()
+    private bool[,] CopyWalkableGrid()
     {
         int width = PathGrid.GetLength(0);
         int height = PathGrid.GetLength(1);
 
-        bool [,] inflated =  new bool[width, height];
+        bool[,] inflated = new bool[width, height];
 
         for (int y = 0; y < height; y++)
         {
@@ -129,6 +158,7 @@ public class CollisionManager
                 inflated[x, y] = PathGrid[x, y].Walkable;
             }
         }
+
         return inflated;
     }
 
@@ -138,7 +168,7 @@ public class CollisionManager
         int width = PathGrid.GetLength(0);
         int height = PathGrid.GetLength(1);
 
-        int [,] dirs = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+        int[,] dirs = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
 
         for (int y = 0; y < height; y++)
         {
@@ -223,12 +253,14 @@ public class CollisionManager
         allDynamics.Add(c);
     }
 
-    public void Insertions(HashSet<ItemBase> items, HashSet<Player> players, HashSet<ProjectileBase> projectiles, HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters)
+    public void Insertions(HashSet<ItemBase> items, HashSet<Player> players, HashSet<ProjectileBase> projectiles,
+        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters)
     {
         foreach (ItemBase c in items)
         {
             AddDynamic(c.Collider);
         }
+
         foreach (var p in players)
         {
             if (p != null)
@@ -236,10 +268,12 @@ public class CollisionManager
                 AddDynamic(p.Collider);
             }
         }
-        foreach(ProjectileBase p in projectiles)
+
+        foreach (ProjectileBase p in projectiles)
         {
             AddDynamic(p.Collider);
         }
+
         foreach (var aoe in aoeAttacks)
         {
             foreach (var hitbox in aoe.GetHitboxes())
@@ -247,7 +281,8 @@ public class CollisionManager
                 AddDynamic(hitbox);
             }
         }
-        foreach(CharacterBase c in characters)
+
+        foreach (CharacterBase c in characters)
         {
             AddDynamic(c.Collider);
         }
@@ -304,6 +339,7 @@ public class CollisionManager
                     );
                 }
             }
+
             ch.UpdateCollider();
         }
     }
@@ -328,6 +364,7 @@ public class CollisionManager
             HandleProjectileWithStatic(b, c);
         }
     }
+
     private void HandleDynamics(ICollider c, HashSet<ICollider> dynamics)
     {
         foreach (var d in dynamics)
@@ -345,6 +382,7 @@ public class CollisionManager
                 OnItemPickup?.Invoke(p, i);
         }
     }
+
     public void OnRemoveItem(ItemBase item)
     {
         _toRemoveColliders.Add(item.Collider);
@@ -353,7 +391,8 @@ public class CollisionManager
 
     private void HandleCharacterCollision(ICollider c, ICollider d)
     {
-        if (c == d || c.GetHashCode() > d.GetHashCode() || (d.Layer != CollisionLayer.CHARACTER && d.Layer != CollisionLayer.PLAYER))
+        if (c == d || c.GetHashCode() > d.GetHashCode() ||
+            (d.Layer != CollisionLayer.CHARACTER && d.Layer != CollisionLayer.PLAYER))
         {
             return;
         }
@@ -387,6 +426,7 @@ public class CollisionManager
         {
             return;
         }
+
         ProjectileBase p = (ProjectileBase)d.Owner;
 
         // Make sure projectile cannot hit more than once
@@ -410,6 +450,7 @@ public class CollisionManager
         {
             _toRemoveColliders.Add(ch.Collider);
         }
+
         p.HasHit = true;
         _toRemoveColliders.Add(p.Collider);
     }
@@ -420,6 +461,7 @@ public class CollisionManager
         {
             return;
         }
+
         HandleCharacterCollision(c, d);
         HandleCharacterProjectiles(c, d);
         // AOE damage handling
@@ -427,6 +469,7 @@ public class CollisionManager
         {
             return;
         }
+
         AreaOfEffectBase aoe = (AreaOfEffectBase)d.Owner;
 
         // prevent hitting yourself
@@ -445,6 +488,7 @@ public class CollisionManager
                 _toRemoveColliders.Add(ch.Collider);
             }
         }
+
         return; // don't run projectile logic
     }
 
@@ -465,7 +509,8 @@ public class CollisionManager
         }
     }
 
-    public void Update(HashSet<Player> players, HashSet<ItemBase> items, HashSet<ProjectileBase> projectiles, HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters)
+    public void Update(HashSet<Player> players, HashSet<ItemBase> items, HashSet<ProjectileBase> projectiles,
+        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters)
     {
         allDynamics.Clear();
         DynamicHash.Clear();
@@ -473,12 +518,14 @@ public class CollisionManager
 
         foreach (var c in allDynamics)
         {
-            if (c.Layer != CollisionLayer.CHARACTER && c.Layer != CollisionLayer.PLAYER && c.Layer != CollisionLayer.PROJECTILE)
+            if (c.Layer != CollisionLayer.CHARACTER && c.Layer != CollisionLayer.PLAYER &&
+                c.Layer != CollisionLayer.PROJECTILE)
             {
                 continue;
             }
+
             var dynamics = DynamicHash.QueryNearby(c.Position, 1);
-            var statics  = StaticHash.QueryNearby(c.Position, 2);
+            var statics = StaticHash.QueryNearby(c.Position, 2);
 
             HandleDynamics(c, dynamics);
             HandleStatics(c, statics);
@@ -498,6 +545,7 @@ public class CollisionManager
                 case CharacterBase ch: removeCharacters.Add(ch); break;
             }
         }
+
         foreach (ProjectileBase p in removeProjectiles)
         {
             if (_toRemoveColliders.Contains(p.Collider))
@@ -527,22 +575,24 @@ public class CollisionManager
             DynamicHash.Remove(c);
             allDynamics.Remove(c);
         }
+
         _toRemoveColliders.Clear();
     }
 
     // makes the hitboxes visible for when in the tech demo
     public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
-                            Player player, HashSet<CharacterBase> characters,
-                            HashSet<ItemBase> items, HashSet<ProjectileBase> projectiles, HashSet<AreaOfEffectBase> aoeAttacks)
+        Player player, HashSet<CharacterBase> characters,
+        HashSet<ItemBase> items, HashSet<ProjectileBase> projectiles, HashSet<AreaOfEffectBase> aoeAttacks)
     {
         foreach (var cell in StaticHash._cells)
         {
-            foreach(var box in cell.Value.Colliders)
+            foreach (var box in cell.Value.Colliders)
             {
                 if (box.Layer != CollisionLayer.WALL)
                 {
                     continue;
                 }
+
                 var rect = new Rectangle(
                     (int)box.Position.X,
                     (int)box.Position.Y,
@@ -572,7 +622,7 @@ public class CollisionManager
             // Draw a small indicator for player position
             spriteBatch.Draw(pixel,
                 new Rectangle((int)player.Transform.Position.X - 2,
-                            (int)player.Transform.Position.Y - 2, 4, 4),
+                    (int)player.Transform.Position.Y - 2, 4, 4),
                 Color.Lime);
         }
 
@@ -583,6 +633,7 @@ public class CollisionManager
             {
                 continue;
             }
+
             var charRect = GetColliderRectangle(character.Collider);
             DrawRectOutline(spriteBatch, pixel, charRect, Color.Red * 0.7f);
         }
@@ -620,6 +671,7 @@ public class CollisionManager
                 box.Height
             );
         }
+
         return Rectangle.Empty;
     }
 
@@ -636,6 +688,7 @@ public class CollisionManager
         // right
         spriteBatch.Draw(pixel, new Rectangle(rect.Right - 1, rect.Top, 1, rect.Height), color);
     }
+
     private void LoadTerrainLayer(string layerName, TerrainType type)
     {
         var layer = TiledMap.GetLayer<TiledMapTileLayer>(layerName);
@@ -660,6 +713,7 @@ public class CollisionManager
             StaticHash.Insert(tc);
         }
     }
+
     private void LoadSpawnLayer(string layerName)
     {
         var layer = TiledMap.GetLayer<TiledMapTileLayer>(layerName);
@@ -685,5 +739,23 @@ public class CollisionManager
             StaticHash.Insert(spawnCollider);
         }
     }
-}
 
+    private void LoadObjectLayer(string layerName)
+    {
+        ObjectSpawns.Clear();
+
+        var objLayer = TiledMap.GetLayer<TiledMapObjectLayer>(layerName);
+        
+        foreach (var obj in objLayer.Objects)
+        {
+            var rect = new Rectangle(
+                (int)obj.Position.X,
+                (int)obj.Position.Y,
+                (int)obj.Size.Width,
+                (int)obj.Size.Height
+            );
+
+            ObjectSpawns.Add(new TiledObjectInfo(rect, obj.Properties));
+        }
+    }
+}

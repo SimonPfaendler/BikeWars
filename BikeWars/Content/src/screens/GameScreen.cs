@@ -22,6 +22,7 @@ namespace BikeWars.Content.screens
     public class GameScreen : IScreen
     {
         private LevelUpScreen _levelUpScreen;
+        private BikeShopScreen _bikeShopScreen;
         private readonly ItemManager _itemManager;
         private readonly Camera2D camera;
         private Rectangle worldBounds;
@@ -131,8 +132,8 @@ namespace BikeWars.Content.screens
             _gameObjectManager.Player1.OnTookDamage += _statisticsManager.HandleTookDamage;
             _gameObjectManager.Player1.OnLevelUp += _statisticsManager.HandleLevel;
             _gameObjectManager.Player1.OnMoreXP += _statisticsManager.HandleExperience;
-
-            _collisionManager = new CollisionManager(CELL_SIZE, worldBounds.Height);
+            
+            _collisionManager = new CollisionManager(CELL_SIZE, worldBounds.Height, _gameObjectManager);
             var players = new HashSet<Player>();
             if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);
             if (_gameObjectManager.Player2 != null) players.Add(_gameObjectManager.Player2);
@@ -210,6 +211,19 @@ namespace BikeWars.Content.screens
                 _audioService.Sounds.PauseAll();
                 _levelUpScreen.Open(_gameObjectManager.Player1);
             };
+            _bikeShopScreen = new BikeShopScreen();
+
+            _bikeShopScreen.Closed += () =>
+            {
+                _audioService.Sounds.ResumeAll();
+            };
+            
+
+            _gameObjectManager.Player1.OnBikeShopOpen += shop =>
+            {
+                _audioService.Sounds.PauseAll();
+                _bikeShopScreen.Open(_gameObjectManager.Player1, shop);
+            };
 
             _gameObjectManager.Player1.Dismounted += _gameObjectManager.AddItem;
 
@@ -260,10 +274,16 @@ namespace BikeWars.Content.screens
                 _levelUpScreen.Update(gameTime);
                 return;
             }
+            if (_bikeShopScreen.IsOpen)
+            {
+                _bikeShopScreen.Update(gameTime);
+                return;
+            }
             if (_worldAudioManager != null && _gameObjectManager.Player1 != null)
             {
                 _worldAudioManager.UpdateListenerPosition(_gameObjectManager.Player1.Transform.Position);
             }
+            
             _overlay.SetPaused(false, gameTime);
             _overlay.SetPaused(false, gameTime);
 
@@ -532,6 +552,10 @@ namespace BikeWars.Content.screens
             if (_levelUpScreen.IsOpen)
             {
                 _levelUpScreen.Draw(spriteBatch);
+            }
+            if (_bikeShopScreen.IsOpen)
+            {
+                _bikeShopScreen.Draw(spriteBatch);
             }
 
             spriteBatch.End();

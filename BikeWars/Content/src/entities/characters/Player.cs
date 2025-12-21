@@ -10,6 +10,7 @@ using BikeWars.Content.entities.Inventory;
 using BikeWars.Content.entities.items;
 using BikeWars.Content.entities.levelup;
 using BikeWars.Content.managers;
+using BikeWars.Entities.Characters.MapObjects;
 using BikeWars.Utilities;
 
 // ============================================================
@@ -68,6 +69,7 @@ namespace BikeWars.Entities.Characters
         private WorldAudioManager _worldAudioManager;
         private string _currentMovementSound = null;
         public event Action<int, int> OnLevelUp;
+        public event Action<BikeShop> OnBikeShopOpen;
         public event Action<int> OnMoreXP;
 
         private bool _isUsingItem = false;
@@ -182,6 +184,14 @@ namespace BikeWars.Entities.Characters
                     Mount((Bike)item);
                     item.IsPickedUp = true;
                     ItemPickedUp?.Invoke(item);
+                }
+                return;
+            }
+            if (item is BikeShop shop)
+            {
+                if (_input.IsPressed(GameAction.INTERACT))
+                {
+                    OnBikeShopOpen?.Invoke(shop);
                 }
                 return;
             }
@@ -410,7 +420,7 @@ namespace BikeWars.Entities.Characters
             XpCounter = XpCounter - XpLevelUp;
             XpLevelUp = XpLevelUp * 2;
             CurrentLevel++;
-            // level upscreen is triggered:
+            // level up screen is triggered:
             OnLevelUp?.Invoke(XpLevelUp, CurrentLevel);
         }
 
