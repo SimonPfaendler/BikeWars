@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+ <object name="Bike_Shop1" width="161" height="146">
+  <properties>
+   <property name="interactable" type="bool" value="true"/>
+   <property name="max_hp" type="int" value="1000"/>
+   <property name="sprite" value="bike_shop"/>
+   <property name="type" value="Bike_Shop"/>
+  </properties>
+ </object>
+</template>
