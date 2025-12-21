@@ -248,8 +248,8 @@ namespace BikeWars.Entities.Characters
         public override void TakeDamage(int amount)
         {
             // Deactivate Godmode for testing damage
-            // if (IsGodMode)
-            //    return;
+            if (IsGodMode)
+               return;
 
             if (IsDead) return;
 
