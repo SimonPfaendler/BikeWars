@@ -14,6 +14,9 @@ public class Node
     public int F_cost => G_cost + H_cost;
     public Node Parent_node { get; set; }
 
+    public int SearchId { get; set; } = -1;
+    public int ClosedId { get; set; }
+
     // constructor
     public Node(int x, int y, bool walkable)
     {
@@ -29,12 +32,14 @@ public class PathFinding
     private readonly Node[,] _grid;
     public readonly int _width;
     public readonly int _height;
+    private int _searchId;
 
     public PathFinding(Node[,] grid)
     {
         _grid = grid;
         _width = grid.GetLength(0);
         _height = grid.GetLength(1);
+        _searchId = 0;
     }
 
     public Node GetNode(int x, int y)
@@ -51,7 +56,7 @@ public class PathFinding
         dx != 0 && dy != 0;
 
     // checks whether a diagonal move is allowed by verifying the two side tiles
-    private bool IsDiagonalPassable(Node node, int dx, int dy)
+    private bool IsDiagonalPossible(Node node, int dx, int dy)
     {
         var side1 = _grid[node.X + dx, node.Y];
         var side2 = _grid[node.X, node.Y + dy];
@@ -76,7 +81,7 @@ public class PathFinding
         if (!neighbour.Walkable)
             return false;
 
-        if (IsDiagonal(dx, dy) && !IsDiagonalPassable(node, dx, dy))
+        if (IsDiagonal(dx, dy) && !IsDiagonalPossible(node, dx, dy))
             return false;
 
         return true;
@@ -118,26 +123,12 @@ public class PathFinding
 
             int dx = Math.Abs(neighbour.X - targetNode.X);
             int dy = Math.Abs(neighbour.Y - targetNode.Y);
+            int min = Math.Min(dx, dy);
+            int max = Math.Max(dx, dy);
 
-            neighbour.H_cost = (dx + dy) * 10;
+            neighbour.H_cost = 14 * min + 10 * (max - min);
             neighbour.Parent_node = currentNode;
         }
-    }
-
-    private static Node GetLowestFCostNode(List<Node> openList)
-    {
-        Node best = openList[0];
-
-        for (int i = 1; i < openList.Count; i++)
-        {
-            Node current = openList[i];
-
-            if (current.F_cost < best.F_cost || current.F_cost == best.F_cost && current.H_cost < best.H_cost)
-            {
-                best = current;
-            }
-        }
-        return best;
     }
 
     private static List<Node> ReconstructPath(Node startNode, Node endNode)
@@ -161,20 +152,21 @@ public class PathFinding
         return path;
     }
 
-    // Resets G_cost, H_cost, and Parent_node for every node in the grid
-    private void ResetAllNodes()
+    //Before using a node in a new pathfinding reset it
+    // if it is already reset start the A*
+    private void PrepareNodeForSearch(Node node)
     {
-        for (int x = 0; x < _width; x++)
-        {
-            for (int y = 0; y < _height; y++)
-            {
-                Node node = _grid[x, y];
-                node.G_cost = int.MaxValue;
-                node.H_cost = 0;
-                node.Parent_node = null;
-            }
-        }
+        if (node.SearchId == _searchId)
+            return;
+        
+        node.SearchId = _searchId;
+        node.G_cost = int.MaxValue;
+        node.H_cost = 0;
+        node.Parent_node = null;
+        
+        node.ClosedId = -1;
     }
+    
 
     // Initializes the starting node with G = 0 and heuristic (H-cost)
     private static void InitializeStartNode(Node startNode, Node targetNode)
@@ -183,31 +175,10 @@ public class PathFinding
 
         int dx = Math.Abs(startNode.X - targetNode.X);
         int dy = Math.Abs(startNode.Y - targetNode.Y);
+        int min = Math.Min(dx, dy);
+        int max = Math.Max(dx, dy);
 
-        startNode.H_cost = (dx + dy) * 10;
-    }
-
-    // Processes all valid neighbours of the current node (updates costs and open list)
-    private void ProcessNeighbours(
-        Node currentNode,
-        Node targetNode,
-        List<Node> openList,
-        HashSet<Node> closedSet)
-    {
-        foreach (Node neighbour in GetNeighbours(currentNode))
-        {
-            if (closedSet.Contains(neighbour))
-                continue;
-
-            int oldGCost = neighbour.G_cost;
-
-            CalculateCosts(currentNode, neighbour, targetNode);
-
-            if (neighbour.G_cost < oldGCost && !openList.Contains(neighbour))
-            {
-                openList.Add(neighbour);
-            }
-        }
+        startNode.H_cost = 14 * min + 10 * (max - min);
     }
 
     // Main A* pathfinding method
@@ -216,34 +187,54 @@ public class PathFinding
         // Validate that start and end positions are inside the map
         if (!IsInsideGrid(startX, startY) || !IsInsideGrid(endX, endY))
             return new List<Node>();
-
+        
         Node startNode = _grid[startX, startY];
         Node targetNode = _grid[endX, endY];
 
         // If either start or end is blocked, no path exists
         if (!startNode.Walkable || !targetNode.Walkable)
             return new List<Node>();
+        
+        _searchId++;
+        PrepareNodeForSearch(startNode);
+        PrepareNodeForSearch(targetNode);
 
-        ResetAllNodes();
-
-        var openList = new List<Node>();
-        var closedSet = new HashSet<Node>();
+        var openQueue = new PriorityQueue<Node, int>();
 
         InitializeStartNode(startNode, targetNode);
-        openList.Add(startNode);
+        int startPriority = startNode.F_cost * 100000 + startNode.H_cost;
+        openQueue.Enqueue(startNode, startPriority);
 
-        while (openList.Count > 0)
+        while (openQueue.Count > 0)
         {
-            Node currentNode = GetLowestFCostNode(openList);
+            Node currentNode = openQueue.Dequeue();
+            
+            if (currentNode.ClosedId == _searchId)
+                continue;
 
             // Path found → reconstruct and return it
             if (currentNode == targetNode)
                 return ReconstructPath(startNode, targetNode);
 
-            openList.Remove(currentNode);
-            closedSet.Add(currentNode);
+            currentNode.ClosedId = _searchId;
 
-            ProcessNeighbours(currentNode, targetNode, openList, closedSet);
+            foreach (Node neighbour in GetNeighbours(currentNode))
+            {
+                if (neighbour.ClosedId == _searchId)
+                    continue;
+
+                PrepareNodeForSearch(neighbour);
+
+                int oldG = neighbour.G_cost;
+                CalculateCosts(currentNode, neighbour, targetNode);
+
+                // If improved, push it with its new priority
+                if (neighbour.G_cost < oldG)
+                {
+                    int priority = neighbour.F_cost * 100000 + neighbour.H_cost;
+                    openQueue.Enqueue(neighbour, priority);
+                }
+            }
         }
 
         // No path found
