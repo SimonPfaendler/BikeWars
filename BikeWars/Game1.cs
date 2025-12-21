@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using BikeWars.Content.managers;
 using BikeWars.Content.screens;
 using BikeWars.Content.engine;
@@ -10,7 +9,7 @@ namespace BikeWars;
 
 public class Game1 : Game
 {
-    private GraphicsDeviceManager _graphics;
+    private readonly GraphicsDeviceManager _graphics;
     public SpriteBatch SpriteBatch { get; private set; }
     public ScreenManager ScreenManager;
     private AudioService _audioService;
@@ -38,7 +37,7 @@ public class Game1 : Game
         ScreenManager.OnReturnToMainMenu += CreateMainMenu;
         base.Initialize();
     }
-    
+
     private void CreateMainMenu()
     {
         SpriteFont font = Content.Load<SpriteFont>("assets/fonts/Arial");
@@ -49,29 +48,35 @@ public class Game1 : Game
     protected override void LoadContent()
     {
         this.SpriteBatch = new SpriteBatch(GraphicsDevice);
-        
+
         _audioService = new AudioService();
         _audioService.LoadContent(Content);
 
         background = Content.Load<Texture2D>("assets/images/Startbildschirm");
-        
+
         SpriteManager.LoadContent(Content);
-        
-        
-        Texture2D button = Content.Load<Texture2D>("assets/images/StartButton");
-        StartScreen startScreen = new StartScreen(background, _audioService);
+
+
+        SpriteFont font = Content.Load<SpriteFont>("assets/fonts/Arial");
+
+        StartScreen startScreen = new StartScreen(
+            background,
+            font,
+            _audioService
+        );
+
         ScreenManager.AddScreen(startScreen);
+
         ScreenManager.SetAudio(_audioService);
     }
 
     protected override void Update(GameTime gameTime)
     {
+        InputHandler.Update();
+
         ScreenManager.Update(gameTime);
         CurrentGameTime = gameTime;
 
-        if (InputHandler.IsPressed(GameAction.ESC))
-            Exit();
-        
         _audioService.Update(gameTime);
 
         base.Update(gameTime);

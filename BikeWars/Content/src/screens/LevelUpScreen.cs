@@ -20,8 +20,11 @@ public class LevelUpScreen : IScreen
     private SkillTree.SkillId _option1;
     private SkillTree.SkillId _option2;
     private SkillTree.SkillId _option3;
+    
+    private int _selectedOption = 0;
 
     public event Action<SkillTree.SkillId> OnOptionSelected;
+    public event Action Closed;
 
     public LevelUpScreen()
     {
@@ -33,6 +36,7 @@ public class LevelUpScreen : IScreen
     public void Open(Player player)
     {
         IsOpen = true;
+        _selectedOption = 0;
         // here different options can be listed, for example depending on which level it is or which where chosen before
         _option1 = SkillTree.SkillId.MoreHp;
         if (player.Attributes.CanAutoAttack)
@@ -44,28 +48,35 @@ public class LevelUpScreen : IScreen
         }
         _option3 = SkillTree.SkillId.LongerSprintDuration;
     }
-    public void Close() => IsOpen = false; // Game runs again and LevelUpScreen is closed
+    public void Close()  // Game runs again and LevelUpScreen is closed
+    {
+        IsOpen = false;
+        Closed?.Invoke();
+    }
+
 
     public void Update(GameTime gameTime)
     {
         if (!IsOpen) return;
         // three different Options
         // can be selected by the numbers, so multiple options can be selected
-        if (InputHandler.IsPressed(GameAction.INVENTORY_1))
-        {
-            OnOptionSelected?.Invoke(_option1);
-            Close();
-        }
+        
+        if (InputHandler.IsPressed(GameAction.UI_UP))
+            _selectedOption = (_selectedOption + 2) % 3; // wrap-around
+        else if (InputHandler.IsPressed(GameAction.UI_DOWN))
+            _selectedOption = (_selectedOption + 1) % 3;
 
-        else if (InputHandler.IsPressed(GameAction.INVENTORY_2))
+        if (InputHandler.IsPressed(GameAction.UI_CONFIRM))
         {
-            OnOptionSelected?.Invoke(_option2);
-            Close();
-        }
+            SkillTree.SkillId selected = _selectedOption switch
+            {
+                0 => _option1,
+                1 => _option2,
+                2 => _option3,
+                _ => _option1
+            };
 
-        else if (InputHandler.IsPressed(GameAction.INVENTORY_3))
-        {
-            OnOptionSelected?.Invoke(_option3);
+            OnOptionSelected?.Invoke(selected);
             Close();
         }
     }
@@ -73,16 +84,25 @@ public class LevelUpScreen : IScreen
     public void Draw(SpriteBatch spriteBatch)
     {
         if (!IsOpen) return;
-        // makes backgound a little bit darker
+        
         spriteBatch.Draw(_pixel, new Rectangle(0, 0, 1280, 720), Color.Black * 0.4f);
 
         Rectangle box = new Rectangle(440, 200, 400, 250);
         spriteBatch.Draw(_pixel, box, Color.DarkGray);
-        // shown text
+
+        // Header
         spriteBatch.DrawString(_font, "!!LEVEL UP!!", new Vector2(540, 230), Color.DarkRed);
-        spriteBatch.DrawString(_font, "1: " +SkillTree.All[_option1], new Vector2(480, 270), Color.White);
-        spriteBatch.DrawString(_font, "2: " +SkillTree.All[_option2],  new Vector2(480, 320), Color.White);
-        spriteBatch.DrawString(_font, "3: " +SkillTree.All[_option3], new Vector2(480, 370), Color.White);
+        
+        DrawOption(spriteBatch, _option1, new Vector2(480, 270), _selectedOption == 0);
+        DrawOption(spriteBatch, _option2, new Vector2(480, 320), _selectedOption == 1);
+        DrawOption(spriteBatch, _option3, new Vector2(480, 370), _selectedOption == 2);
+    }
+
+    private void DrawOption(SpriteBatch spriteBatch, SkillTree.SkillId option, Vector2 position, bool selected)
+    {
+        Color color = selected ? Color.Gold : Color.White;
+        string message = SkillTree.All.ContainsKey(option) ? SkillTree.All[option] : option.ToString();
+        spriteBatch.DrawString(_font, message, position, color);
     }
 
     // the code below doesn't do anything its just for IScreen

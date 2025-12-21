@@ -21,7 +21,7 @@ public class StatisticsScreen : MenuScreenBase, IScreen
     {
         _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
         var state = SaveLoad.LoadGame();
-        Statistics = state.Statistics;
+        Statistics = state.Statistics ?? new List<Statistic>();
         InitializeButtons();
     }
 
@@ -47,6 +47,8 @@ public class StatisticsScreen : MenuScreenBase, IScreen
             font: _font,
             audioService: _audioService
         ));
+        
+        UpdateSelection(0);
     }
 
     protected override void HandleButtonClick(MenuButton button)

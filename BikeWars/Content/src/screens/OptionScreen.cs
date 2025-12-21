@@ -85,6 +85,7 @@ public class OptionScreen : MenuScreenBase, IScreen
                 audioService: _audioService
             ));
             
+            UpdateSelection(0);
         }
 
         

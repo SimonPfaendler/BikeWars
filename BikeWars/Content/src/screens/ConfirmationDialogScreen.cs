@@ -60,6 +60,7 @@ namespace BikeWars.Content.screens
             ));
             
             _overlayTexture = CreateOverlayTexture(game.GraphicsDevice, screenWidth, screenHeight);
+            UpdateSelection(0);
         }
 
         protected override void HandleButtonClick(MenuButton button)

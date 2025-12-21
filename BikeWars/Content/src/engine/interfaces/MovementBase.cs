@@ -9,6 +9,7 @@ public abstract class MovementBase : IMoveable
     private bool _isMoving { get; set; }
     private bool _canMove { get; set; }
     private float _rotation { get; set; }
+    private float _sprintAcceleration { get; set; }
 
     public bool IsMoving { get => _isMoving; set => _isMoving = value; }
     public bool CanMove {
@@ -44,6 +45,32 @@ public abstract class MovementBase : IMoveable
             _speed = value;
         }
     }
+    public float SprintAcceleration {
+        get => _sprintAcceleration;
+        set
+        {
+            if (value < 0)
+            {
+                _sprintAcceleration = 0;
+                return;
+            }
+            _sprintAcceleration = value;
+        }
+    }
+
+    private float _maxSpeed { get; set; }
+    public float MaxSpeed {
+        get => _maxSpeed;
+        set
+        {
+            if (value < 0)
+            {
+                _maxSpeed = 0;
+                return;
+            }
+            _maxSpeed = value;
+        }
+    }
 
     public float Rotation {
         get => _rotation;
@@ -61,22 +88,22 @@ public abstract class MovementBase : IMoveable
     public abstract void Update(GameTime gameTime);
     public abstract void HandleMovement(GameTime gameTime);
 
-    public void HandleMovement(List<MoveDirection> moveDirection, float currentSpeed, float speedAcceleration, float currentRotation, float rotationAcceleration, float minSpeed, float maxSpeed)
+    public void HandleMovement(List<MoveDirection> moveDirections, float currentSpeed, float speedAcceleration, float currentRotation, float rotationAcceleration, float minSpeed, float maxSpeed)
     {
 
     }
 
-    public Vector2 HandleDirection(List<MoveDirection> moveDirection)
+    public Vector2 HandleDirection(List<MoveDirection> moveDirections)
     {
         return Vector2.Zero;
     }
 
-    public float HandleSpeed(List<MoveDirection> direction, float currentSpeed, float acceleration, float minSpeed, float maxSpeed)
+    public float HandleSpeed(List<MoveDirection> directions, float currentSpeed, float acceleration, float minSpeed, float maxSpeed)
     {
         return 0f;
     }
 
-    public float HandleRotation(List<MoveDirection> moveDirections)
+    public float HandleRotation(List<MoveDirection> moveDirections, float currentRotation)
     {
         return 0f;
     }

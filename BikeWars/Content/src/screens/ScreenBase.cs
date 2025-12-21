@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
+using BikeWars.Content.engine;
 using BikeWars.Content.managers;
 
 namespace BikeWars.Content.screens
@@ -21,6 +22,8 @@ namespace BikeWars.Content.screens
         
         protected double _clickCooldown = 300;
         protected double _lastClickTime = -9999; 
+        protected int _selectedIndex = 0;
+        protected bool _usingMouse = true;
         
         protected MenuScreenBase(Texture2D background, SpriteFont font)
         {
@@ -33,6 +36,25 @@ namespace BikeWars.Content.screens
 
         public virtual void Update(GameTime gameTime)
         {
+            // Controller / Keyboard Navigation
+            if (InputHandler.IsPressed(GameAction.UI_DOWN))
+            {
+                _usingMouse = false;
+                UpdateSelection(_selectedIndex + 1);
+            }
+            else if (InputHandler.IsPressed(GameAction.UI_UP))
+            {
+                _usingMouse = false;
+                UpdateSelection(_selectedIndex - 1);
+            }
+
+            if (InputHandler.IsPressed(GameAction.UI_CONFIRM))
+            {
+                _usingMouse = false;
+                HandleButtonClick(_buttons[_selectedIndex]);
+                return;
+            }
+
             _currentGameTime = gameTime;
 
             MouseState currentMouseState = Mouse.GetState();
@@ -40,9 +62,15 @@ namespace BikeWars.Content.screens
             
             foreach (var button in _buttons)
             {
-                button.Update(currentMouseState);
-                
-                if (button.IsClicked(currentMouseState, _previousMouseState))
+                button.Update(currentMouseState, gameTime);
+
+                if (button.IsHovered)
+                {
+                    _usingMouse = true;
+                    UpdateSelection(_buttons.IndexOf(button));
+                }
+
+                if (_usingMouse && button.IsClicked(currentMouseState, _previousMouseState))
                 {
                     if (now - _lastClickTime >= _clickCooldown)
                     {
@@ -86,6 +114,18 @@ namespace BikeWars.Content.screens
         
         // Every screen has to handle their own button clicks
         protected abstract void HandleButtonClick(MenuButton button);
+        
+        // helper-method for selecting a button
+        protected void UpdateSelection(int newIndex)
+        {
+            if (_buttons.Count == 0) return;
+
+            _selectedIndex = (newIndex + _buttons.Count) % _buttons.Count;
+
+            for (int i = 0; i < _buttons.Count; i++)
+                _buttons[i].IsSelected = (i == _selectedIndex);
+        }
+
 
         public virtual bool DrawLower => false;
         public virtual bool UpdateLower => false;

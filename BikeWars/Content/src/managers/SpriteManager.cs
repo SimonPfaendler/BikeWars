@@ -41,20 +41,23 @@ namespace BikeWars.Content.managers
 
 
             // HUD
-            { "HUD_Sheet", "assets/sprites/HUD/HUD_sheet" },
+            { "HUD_Sheet", "assets/sprites/HUD/Hud_sheet2" },
 
             // ITEMS
             { "Chest", "assets/sprites/chest_texture" },
+            { "Frelo", "assets/images/Frelo" },
+            { "RacingBike", "assets/images/RacingBike" },
             { "XP_Beer", "assets/sprites/XP/xp_beer_texture" },
             { "XP_Money", "assets/sprites/XP/xp_money_texture" },
             { "EnergyGel", "assets/images/EnergyGel" },
+            //MAP OBJECTS
+            { "Fahrradwerkstatt", "assets/Map/Fahrradwerkstatt_Tile"}
         };
         // hier sollte irgendwann auch auf atlas strukturen gewechselt werden
 
         // liste aller animationen, die beim start gecached werden
         private static readonly List<string> AnimationKeys = new List<string>
         {
-            // SPIELER 1
             // SPIELER 1
             "Character1_BikeDown",
             "Character1_BikeLeft",
@@ -76,7 +79,7 @@ namespace BikeWars.Content.managers
             "BikeThief_Idle",
             "BikeThief_WalkLeft",
             "BikeThief_WalkRight",
-            
+
             //DOG
             "Dog_Idle",
             "Dog_WalkLeft",

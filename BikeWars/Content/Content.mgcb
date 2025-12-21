@@ -34,6 +34,18 @@
 /processorParam:TextureFormat=Color
 /build:assets/images/EnergyGel.png
 
+#begin assets/images/Frelo.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/Frelo.png
+
 #begin assets/images/PlainButton.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -45,6 +57,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:assets/images/PlainButton.png
+
+#begin assets/images/RacingBike.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/RacingBike.png
 
 #begin assets/images/Startbildschirm.png
 /importer:TextureImporter
@@ -69,6 +93,9 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:assets/images/StartButton.png
+
+#begin assets/Map/Bike_Shop_Template.tx
+/copy:assets/Map/Bike_Shop_Template.tx
 
 #begin assets/Map/Bike_Wars_Map.tmx
 /importer:TiledMapImporter
@@ -109,6 +136,18 @@
 /processorParam:TextureFormat=Color
 /build:assets/Map/tilemap_2.png
 
+#begin assets/Map/Fahrradwerkstatt_Tile.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/Map/Fahrradwerkstatt_Tile.png
+
 #begin assets/sounds/Bike_Driving.mp3
 /importer:Mp3Importer
 /processor:SoundEffectProcessor
@@ -138,6 +177,12 @@
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:assets/sounds/CarHorn.mp3
+
+#begin assets/sounds/damage_circle.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/damage_circle.wav
 
 #begin assets/sounds/flamethrower.wav
 /importer:WavImporter
@@ -241,6 +286,18 @@
 /processorParam:TextureFormat=Color
 /build:assets/sprites/HUD/HUD_sheet.png
 
+#begin assets/sprites/HUD/Hud_sheet2.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/sprites/HUD/Hud_sheet2.png;assets/sprites/HUD/Hud_sheet2
+
 #begin assets/sprites/projectiles/bullet.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -252,6 +309,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:assets/sprites/projectiles/bullet.png
+
+#begin assets/sprites/projectiles/damage_circle.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/sprites/projectiles/damage_circle.png
 
 #begin assets/sprites/projectiles/flamethrower.png
 /importer:TextureImporter

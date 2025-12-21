@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.engine.interfaces;
-using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.entities.items;
 public class Item: ItemBase
@@ -20,6 +19,7 @@ public class Item: ItemBase
     {
         Transform = new Transform(start, size);
         _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.ITEM, this);
+        IsPickedUp = false;
     }
 
     public override void Update(GameTime gameTime)

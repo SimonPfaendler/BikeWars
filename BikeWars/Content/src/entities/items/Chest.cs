@@ -9,16 +9,10 @@ public class Chest: ItemBase, IPickable
 {
     public override bool InventoryItem => true;
 
-    private BoxCollider _collider { get; set; }
-    public override BoxCollider Collider
-    {
-        get { return _collider; }
-    }
-
     public Chest(Vector2 start, Point size)
     {
         Transform = new Transform(start, size);
-        _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.ITEM, this);
+        Collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.ITEM, this);
 
         TexRight = managers.SpriteManager.GetTexture("Chest");
         CurrentTex = TexRight;
@@ -34,6 +28,6 @@ public class Chest: ItemBase, IPickable
     }
     public override bool Intersects(ICollider collider)
     {
-        return _collider.Intersects(collider);
+        return Collider.Intersects(collider);
     }
 }

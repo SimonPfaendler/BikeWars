@@ -20,6 +20,7 @@ namespace BikeWars.Content.engine
 {
     public enum GameAction
     {
+        // Gameplay
         MOVE_LEFT,
         MOVE_RIGHT,
         MOVE_UP,
@@ -43,7 +44,19 @@ namespace BikeWars.Content.engine
         INVENTORY_2,
         INVENTORY_3,
         INVENTORY_4,
-        INVENTORY_5
+        INVENTORY_5,
+        MODE_SWITCH,
+        
+        // UI
+        UI_UP,
+        UI_DOWN,
+        UI_LEFT,
+        UI_RIGHT,
+        UI_CONFIRM,
+        UI_BACK,
+        INVENTORY_NEXT,
+        INVENTORY_PREV,
+        INVENTORY_USE
     }
 
     public enum MouseButton
@@ -179,7 +192,7 @@ namespace BikeWars.Content.engine
             { GameAction.ESC, new[] {Keys.Escape } },
             { GameAction.SPRINT, new[] { Keys.LeftShift, Keys.RightShift } },
             { GameAction.PAUSE, new[] { Keys.Escape, Keys.P } },
-            { GameAction.SHOOT, new[] {Keys.None } },
+            { GameAction.SHOOT, new Keys[0] },
             { GameAction.INTERACT, new[] {Keys.Q } },
             { GameAction.SWITCH, new[] {Keys.X } },
             { GameAction.DEBUG_HEAL, new[] {Keys.M } },
@@ -191,6 +204,11 @@ namespace BikeWars.Content.engine
             { GameAction.INVENTORY_3, new[] { Keys.D3 } },
             { GameAction.INVENTORY_4, new[] { Keys.D4 } },
             { GameAction.INVENTORY_5, new[] { Keys.D5 } },
+            { GameAction.UI_UP, new[] { Keys.W, Keys.Up } },
+            { GameAction.UI_DOWN, new[] { Keys.S, Keys.Down } },
+            { GameAction.UI_CONFIRM, new[] { Keys.Enter, Keys.Space } },
+            { GameAction.MODE_SWITCH, new[] { Keys.J} },
+            
         };
         public static Dictionary<GameAction, MouseButton[]> MouseMapping { get; } = new()
         {
@@ -198,20 +216,32 @@ namespace BikeWars.Content.engine
         };
 
         public static Dictionary<GameAction, Buttons[]> GamepadMap { get; } = new()
-        {
+        {   
+            // UI
+            { GameAction.UI_UP,    new[] { Buttons.DPadUp } },
+            { GameAction.UI_DOWN,  new[] { Buttons.DPadDown } },
+            { GameAction.UI_LEFT,  new[] { Buttons.DPadLeft } },
+            { GameAction.UI_RIGHT, new[] { Buttons.DPadRight } },
 
+            { GameAction.UI_CONFIRM, new[] { Buttons.A } },
+            { GameAction.UI_BACK,    new[] { Buttons.B } },
+            { GameAction.INVENTORY_PREV, new[] { Buttons.LeftShoulder } },
+            { GameAction.INVENTORY_NEXT, new[] { Buttons.RightShoulder } },
+            { GameAction.INVENTORY_USE,  new[] { Buttons.A } },
+            
+            // Gameplay
             { GameAction.SAVE, new[]  {Buttons.DPadUp} },
             { GameAction.LOAD, new[] {Buttons.DPadRight} },
             { GameAction.RESET, new[] {Buttons.DPadLeft} },
             //{ GameAction.DEBUG_TOGGLE, new[] {Buttons.DPadDown} },  no need for debug in controller we dont have much buttons
-            { GameAction.TOGGLE_CAMERA,new [] {Buttons.A} },
-            { GameAction.ESC, new[] { Buttons.B} },
+            { GameAction.TOGGLE_CAMERA,new [] {Buttons.DPadDown} },
+            //{ GameAction.ESC, new[] { Buttons.B} },
             { GameAction.SPRINT, new[] { Buttons.LeftTrigger} },
             { GameAction.PAUSE, new[] { Buttons.Start} },
             { GameAction.SHOOT, new[] { Buttons.RightTrigger } },
-            { GameAction.INTERACT, new[] { Buttons.X } },
+            { GameAction.INTERACT, new[] { Buttons.A } },
             { GameAction.SWITCH_WEAPON, new[] {Buttons.Y} },
-            { GameAction.SWITCH, new[] {Buttons.DPadDown } }
+            { GameAction.SWITCH, new[] {Buttons.X } }
             /* INTERACT should be A not X, but X is already used and I m not sure for what.
              Should be fixed later*/
 

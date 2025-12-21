@@ -36,7 +36,7 @@ namespace BikeWars.Content.screens
         private readonly System.Random _random = new System.Random();
 
         public TechDemoScreen(AudioService audioService)
-            : base(audioService, true)
+            : base(audioService, GameMode.SinglePlayer, true)
         {
             LoadContent(Game1.Instance.Content);
         }
@@ -69,7 +69,7 @@ namespace BikeWars.Content.screens
                 font: _font,
                 audioService: AudioService
             );
-            
+
             _spawnDogBtn = new MenuButton(
                 id: 1,
                 texture: _buttonTex,
@@ -86,16 +86,16 @@ namespace BikeWars.Content.screens
 
             MouseState mouse = Mouse.GetState();
 
-            _spawnHoboBtn.Update(mouse);
-            _spawnBikeBtn.Update(mouse);
-            _spawnDogBtn.Update(mouse);
+            _spawnHoboBtn.Update(mouse, gameTime);
+            _spawnBikeBtn.Update(mouse, gameTime);
+            _spawnDogBtn.Update(mouse, gameTime);
 
             if(_spawnHoboBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Hobo, 100);
 
             if (_spawnBikeBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.BikeThief, 15);
-            
+
             if(_spawnDogBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Dog, 50);
 
@@ -110,7 +110,6 @@ namespace BikeWars.Content.screens
             for (int i = 0; i < amount; i++)
             {
                 Vector2 spawnPos = playerPos;
-                bool found = false;
 
                 // Try up to 20 times to find a walkable spawn tile
                 for (int attempt = 0; attempt < 20; attempt++)
@@ -132,10 +131,9 @@ namespace BikeWars.Content.screens
 
                     // ok, this is a walkable tile → use it
                     spawnPos = candidate;
-                    found = true;
                     break;
                 }
-                
+
                 CharacterBase enemy;
 
                 switch (type)

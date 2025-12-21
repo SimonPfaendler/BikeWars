@@ -60,7 +60,7 @@ namespace BikeWars.Content.managers
 
             if (_timeSinceLastSwarm >= SWARM_INTERVAL)
             {
-                
+
                 SpawnSwarm(progress);
                 _timeSinceLastSwarm = 0;
             }
@@ -158,17 +158,14 @@ namespace BikeWars.Content.managers
             // Use 32x32 size (enemy size)
             BoxCollider checkCollider = new BoxCollider(pos, 32, 32, CollisionLayer.CHARACTER, null);
 
-            var nearby = _collisionManager.StaticHash.QueryNearby(pos, 1);
+            var nearby = _collisionManager.StaticHash.QueryNearby(pos, 3);
             foreach (var col in nearby)
             {
                 if (col.Layer == CollisionLayer.SPAWNENEMIES && col.Intersects(checkCollider))
                 {
-                    
                     return true;
-                    
                 }
             }
-
             return false;
         }
 

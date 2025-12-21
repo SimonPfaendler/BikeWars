@@ -10,33 +10,17 @@ namespace BikeWars.Entities.Characters
 {
     public class Hobo: CharacterBase, IWorldAudioAware
     {
-        private SpriteAnimation _idleAnimation;
-        private SpriteAnimation _walkLeftAnimation;
-        private SpriteAnimation _walkRightAnimation;
-        private SpriteAnimation _walkUpAnimation;
-        private SpriteAnimation _walkDownAnimation;
+        private readonly SpriteAnimation _idleAnimation;
+        private readonly SpriteAnimation _walkLeftAnimation;
+        private readonly SpriteAnimation _walkRightAnimation;
+        private readonly SpriteAnimation _walkUpAnimation;
+        private readonly SpriteAnimation _walkDownAnimation;
         private SpriteAnimation _currentAnimation;
 
         private readonly PathFinding _pathFinding;
         private readonly CollisionManager _collisionManager;
 
         protected override string WalkingSound => AudioAssets.Walking;
-
-        public override void UpdateCollider()
-        {
-            Vector2 colliderPosition = new Vector2(
-                Transform.Position.X - Transform.Size.X / 2f,
-                Transform.Position.Y - Transform.Size.Y / 2f
-            );
-
-            Collider = new BoxCollider(
-                colliderPosition,
-                Transform.Size.X,
-                Transform.Size.Y,
-                CollisionLayer.CHARACTER,
-                this
-            );
-        }
 
         // 1x1 Texture to represent the enemy
         public static Texture2D pixel;
@@ -94,7 +78,6 @@ namespace BikeWars.Entities.Characters
                 _currentAnimation = _idleAnimation;
             }
 
-
             if (_currentAnimation != null)
             {
                 _currentAnimation.Update(gameTime, Movement.IsMoving);
@@ -119,15 +102,11 @@ namespace BikeWars.Entities.Characters
 
         public void Immobalize(bool value)
         {
-            if (value) {
-                Movement.CanMove = false;
-            } else
-            {
-                Movement.CanMove = true;
-            }
+            Movement.CanMove = !value;
         }
         public override void Attack(ICombat target)
         {
+            if (!CanAttack()) return;
             base.Attack(target);
             _audio.Sounds.Play(AudioAssets.Punch);
         }

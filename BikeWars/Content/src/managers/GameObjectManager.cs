@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
+using BikeWars.Entities.Characters.MapObjects;
 
 namespace BikeWars.Content.managers;
 public class GameObjectManager
@@ -20,60 +21,55 @@ public class GameObjectManager
     private Player _player2 {get; set;}
     public Player Player2{get => _player2; set => _player2 = value;}
 
-    private List<CharacterBase> _characters {get; set;}
-    public List<CharacterBase> Characters {get => _characters;}
+    private HashSet<CharacterBase> _characters {get; set;}
+    public HashSet<CharacterBase> Characters {get => _characters;}
 
-    private List<ItemBase> _items {get; set;}
-    public List<ItemBase> Items {get => _items; set => _items = value;}
+    private readonly HashSet<ItemBase> _items = new();
+    public HashSet<ItemBase> Items => _items;
 
-    private List<BoxCollider> _statics {get; set;}
-    public List<BoxCollider> Statics {get => _statics;}
+    private HashSet<BoxCollider> _statics {get; set;}
+    public HashSet<BoxCollider> Statics {get => _statics;}
 
-    private List<ProjectileBase> _projectiles {get; set;}
-    public List<ProjectileBase> Projectiles {get => _projectiles;}
+    private HashSet<ProjectileBase> _projectiles {get; set;}
+    public HashSet<ProjectileBase> Projectiles {get => _projectiles;}
 
-    private List<AreaOfEffectBase> _aoeAttacks = new();
-    public List<AreaOfEffectBase> AOEAttacks => _aoeAttacks;
+    private HashSet<AreaOfEffectBase> _aoeAttacks = new();
+    public HashSet<AreaOfEffectBase> AOEAttacks => _aoeAttacks;
 
 
     public ContentManager _contentManager {get; set;} // TODO do we need this one?
 
     private WorldAudioManager _worldAudioManager;
 
-    public GameObjectManager(ContentManager content)
-    {
-        _contentManager = content;
-
-        _characters = new List<CharacterBase>();
-        _items = new List<ItemBase>();
-        _statics = new List<BoxCollider>();
-        _projectiles = new List<ProjectileBase>();
-    }
     public GameObjectManager(ContentManager content, Player player1, Player player2)
     {
         Player1 = player1;
         Player2 = player2;
         _contentManager = content;
+        
+        _characters = new HashSet<CharacterBase>();
+        _items = new HashSet<ItemBase>();
+        _statics = new HashSet<BoxCollider>();
+        _projectiles = new HashSet<ProjectileBase>();
 
-        _contentManager = content;
-        _characters = new List<CharacterBase>();
-        _items = new List<ItemBase>();
-        _statics = new List<BoxCollider>();
-        _projectiles = new List<ProjectileBase>();
+        if (Player1 != null)
+        {
+            Player1.ShotBullet += () => OnPlayerShotBullet(Player1);
+            Player1.Flamethrower += () => OnPlayerFlamethrower(Player1);
+            Player1.IceTrail += () => OnPlayerIceTrail(Player1);
+            Player1.DamageCircle += () => OnPlayerDamageCircle(Player1);
+        }
 
-        Player1.ShotBullet += OnPlayerShotBullet;
-        Player1.Flamethrower += OnPlayerFlamethrower;
-        Player1.IceTrail += OnPlayerIceTrail;
+        if (Player2 != null)
+        {
+            Player2.ShotBullet += () => OnPlayerShotBullet(Player2);
+            Player2.Flamethrower += () => OnPlayerFlamethrower(Player2);
+            Player2.IceTrail += () => OnPlayerIceTrail(Player2);
+            Player2.DamageCircle += () => OnPlayerDamageCircle(Player2);
+        }
 
     }
-    public GameObjectManager(ContentManager content, List<CharacterBase> characters, List<ItemBase> items, List<BoxCollider> statics, List<ProjectileBase> projectiles) // TODO
-    {
-        _contentManager = content;
-        _characters = characters;
-        _items = items;
-        _statics = statics;
-        _projectiles = projectiles;
-    }
+    
     public void AddCharacter(CharacterBase character)
     {
         if (_worldAudioManager != null && character is IWorldAudioAware wa)
@@ -123,8 +119,8 @@ public class GameObjectManager
 
     public void Draw(SpriteBatch spriteBatch)
     {
-        Player1.Draw(spriteBatch); // Maybe put it in characters too?
-        // Player2.Draw(spriteBatch);
+        if (Player1 != null) Player1.Draw(spriteBatch);
+        if (Player2 != null) Player2.Draw(spriteBatch);
         foreach (CharacterBase c in Characters)
         {
             c.Draw(spriteBatch);
@@ -149,11 +145,8 @@ public class GameObjectManager
 
     public void Update(GameTime gameTime, Vector2 mouseWorldPos)
     {
-        Player1.Update(gameTime, mouseWorldPos);
-        foreach (ProjectileBase p in Projectiles)
-        {
-            p.Update(gameTime);
-        }
+        if (Player1 != null) Player1.Update(gameTime, mouseWorldPos);
+        if (Player2 != null) Player2.Update(gameTime, mouseWorldPos);
         foreach (CharacterBase c in Characters)
         {
             if (c.Movement != null)
@@ -172,44 +165,45 @@ public class GameObjectManager
         {
             p.Update(gameTime);
         }
-        for (int i = _aoeAttacks.Count - 1; i >= 0; i--)
+        _aoeAttacks.RemoveWhere(aoe =>
         {
-            var aoe = _aoeAttacks[i];
             aoe.Update(gameTime);
-
-            if (aoe.IsExpired)
-                _aoeAttacks.Remove(aoe);
-        }
-        foreach (BoxCollider s in Statics)
-        {
-            // s.LoadContent();
-        }
+            return aoe.IsExpired;
+        });
     }
 
-    private void OnPlayerShotBullet()
+    private void OnPlayerShotBullet(Player player)
     {
-        Vector2 spawnPos = Player1.Transform.Position;
-        Vector2 direction = Player1.GazeDirection;
+        Vector2 spawnPos = player.Transform.Position;
+        Vector2 direction = player.GazeDirection;
 
-        Bullet b = new Bullet(spawnPos, new Point(8, 8), Player1);
+        Bullet b = new Bullet(spawnPos, new Point(8, 8), player);
         b.Movement.Direction = direction; // Set the movement direction
         AddProjectile(b);
     }
 
-        private void OnPlayerFlamethrower()
+    private void OnPlayerFlamethrower(Player player)
     {
-        Vector2 direction = Player1.GazeDirection;
-        Flamethrower f = new Flamethrower(Player1, direction);
+        Vector2 direction = player.GazeDirection;
+        Flamethrower f = new Flamethrower(player, direction);
         f.LoadContent(_contentManager);
         AddAOE(f);
     }
 
-        private void OnPlayerIceTrail()
+    private void OnPlayerIceTrail(Player player)
     {
-        Vector2 direction = Player1.GazeDirection;
-        IceTrail ice = new IceTrail(Player1, direction);
+        Vector2 direction = player.GazeDirection;
+        IceTrail ice = new IceTrail(player, direction);
         ice.LoadContent(_contentManager);
         AddAOE(ice);
+    }
+
+    private void OnPlayerDamageCircle(Player player)
+    {
+        Vector2 direction = player.GazeDirection;
+        DamageCircle dc = new DamageCircle(player);
+        dc.LoadContent(_contentManager);
+        AddAOE(dc);
     }
 
     public void SetWorldAudioManager(WorldAudioManager worldAudioManager)
@@ -218,6 +212,8 @@ public class GameObjectManager
 
         if (Player1 is IWorldAudioAware pa)
             pa.SetWorldAudioManager(worldAudioManager);
+        if (Player2 is IWorldAudioAware pa2)
+            pa2.SetWorldAudioManager(worldAudioManager);
 
         foreach (var c in Characters)
         {
@@ -245,6 +241,39 @@ public class GameObjectManager
         {
             EnergyGel energyGel = new EnergyGel(pos, new Point(32, 32));
             AddItem(energyGel);
+        }
+    }
+    public void Remove(ItemBase item)
+    {
+        _items.Remove(item);
+    }
+    
+    public void SpawnFromTiledObjects(IEnumerable<TiledObjectInfo> spawns)
+    {
+        foreach (var spawn in spawns)
+        {
+            var created = CreateFromTiled(spawn);
+            if (created != null)
+            {
+                AddItem(created);
+            }
+        }
+    }
+    
+    private ItemBase? CreateFromTiled(TiledObjectInfo spawn)
+    {
+        var start = new Vector2(spawn.Rect.X, spawn.Rect.Y);
+        var size  = new Point(spawn.Rect.Width, spawn.Rect.Height);
+        
+        string type = spawn.Properties["type"];
+
+        switch (type)
+        {
+            case "Bike_Shop":
+                return new BikeShop(start, size, spawn);
+
+            default:
+                return null;
         }
     }
 

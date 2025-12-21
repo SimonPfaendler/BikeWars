@@ -2,95 +2,156 @@ using Microsoft.Xna.Framework;
 using BikeWars.Content.components;
 using BikeWars.Content.engine.interfaces;
 using System.Collections.Generic;
+using BikeWars.Content.entities.interfaces;
+using System;
 
 namespace BikeWars.Content.engine;
 public class PlayerMovement
 {
     private IMoveable _currentMovement {get; set;}
     public IMoveable CurrentMovement {get => _currentMovement; set => _currentMovement = value;}
+    private IPlayerInput _input;
+
+    private Bike _bike {get; set;}
+    public Bike CrtBike {get => _bike; set => _bike = value;}
+
+    public event Action<Bike> OnDismounted;
+
+    private bool owns_bike {get; set;}
+    public bool OwnsBike {
+        get => owns_bike;
+        set => owns_bike = value;
+    }
+
+    public float WalkingSpeed = 120f;
+    public float SprintAcceleration = 1.5f;
 
     public float Rotation = 0.0f; // in Radiant
-
     public float RotationAcceleration = 0.1f;
     public float SpeedAcceleration = 4f;
-    public float MaxSpeed = 200f;
-    public float Friction = 0.95f;
 
-    public PlayerMovement(bool canMove, bool isMoving)
+    public PlayerMovement(bool canMove, bool isMoving, IPlayerInput input)
     {
-        CurrentMovement = new BicycleMovement(canMove, isMoving, RotationAcceleration);
+        _input = input;
+        if (OwnsBike && CrtBike != null)
+        {
+            CurrentMovement = new BicycleMovement(canMove, isMoving, 0, CrtBike.Attributes.MaxSpeed, CrtBike.Attributes.SpeedAcceleration, CrtBike.Attributes.SprintAcceleration, CrtBike.Attributes.RotationAcceleration);
+            return;
+        }
+        CurrentMovement = new WalkingMovement(canMove, isMoving, WalkingSpeed, SprintAcceleration);
+    }
+
+    public void SwitchBicycle(Bike b)
+    {
+        if (CurrentMovement is WalkingMovement)
+        {
+            CurrentMovement = new BicycleMovement(CurrentMovement.CanMove, CurrentMovement.IsMoving, 0, b.Attributes.MaxSpeed, b.Attributes.SpeedAcceleration, b.Attributes.SprintAcceleration, b.Attributes.RotationAcceleration);
+            switch (b) {
+                case Frelo:
+                    CrtBike = new Frelo(b.Transform.Position, b.Transform.Size);
+                    break;
+                case RacingBike:
+                    CrtBike = new RacingBike(b.Transform.Position, b.Transform.Size);
+                    break;
+            }
+            OwnsBike = true;
+            return;
+        }
+    }
+
+    public void Dismount()
+    {
+        CurrentMovement = new WalkingMovement(CurrentMovement.CanMove, CurrentMovement.IsMoving, WalkingSpeed, SprintAcceleration);
+        OwnsBike = false;
+        OnDismounted?.Invoke(CrtBike);
+        CrtBike = null;
     }
     private List<MoveDirection> MakeMoveDirections()
     {
         List<MoveDirection> directions = new List<MoveDirection>();
-        if (InputHandler.IsHeld(GameAction.MOVE_UP))
-        {
-            directions.Add(MoveDirection.UP);
-            directions.Add(MoveDirection.FORWARD);
-        }
-        if (InputHandler.IsHeld(GameAction.MOVE_DOWN))
-        {
-            directions.Add(MoveDirection.DOWN);
-            directions.Add(MoveDirection.BACKWARD);
-        }
-        if (InputHandler.IsHeld(GameAction.MOVE_LEFT))
-        {
-            directions.Add(MoveDirection.LEFT);
-        }
-        if (InputHandler.IsHeld(GameAction.MOVE_RIGHT))
-        {
-            directions.Add(MoveDirection.RIGHT);
-        }
 
+        Vector2 inputDir = _input.GetMovementDirection(CurrentMovement);
 
-        var leftStick = InputHandler.GamePad.LeftStick;
+        if (inputDir == Vector2.Zero)
+            return directions;
 
-        if (leftStick != Vector2.Zero)
+        if (CurrentMovement is BicycleMovement)
         {
-            if (CurrentMovement is BicycleMovement)
+             // Bicycle Logic Mapping
+             // Check if input is Analog (Gamepad) for special Steering Logic
+             if (_input.IsAnalog)
+             {
+                 // Analog Stick Logic
+
+                 float targetAngle = (float)Math.Atan2(inputDir.Y, inputDir.X);
+                 float currentRotation = CurrentMovement.Rotation;
+
+                 // Normalize difference to -Pi to +Pi
+                 float diff = targetAngle - currentRotation;
+                 while (diff <= -MathHelper.Pi) diff += MathHelper.TwoPi;
+                 while (diff > MathHelper.Pi) diff -= MathHelper.TwoPi;
+
+                 // Only accelerate if we are roughly facing the target direction (< 90 degrees difference)
+                 // This allows the bike to slow down for sharp turns
+                 if (Math.Abs(diff) < MathHelper.PiOver2)
+                 {
+                     directions.Add(MoveDirection.FORWARD);
+                 }
+
+                 // Deadzone for rotation stability
+                 if (Math.Abs(diff) > 0.05f)
+                 {
+                     if (diff > 0)
+                         directions.Add(MoveDirection.RIGHT);
+                     else
+                         directions.Add(MoveDirection.LEFT);
+                 }
+             }
+             else
+             {
+
+                 if (inputDir.Y < -0.3f) // UP / Accelerate
+                 {
+                     directions.Add(MoveDirection.UP);
+                     directions.Add(MoveDirection.FORWARD);
+                 }
+                 if (inputDir.Y > 0.3f) // DOWN / Brake
+                 {
+                     directions.Add(MoveDirection.DOWN);
+                     directions.Add(MoveDirection.BACKWARD);
+                 }
+
+                 // Rotation
+                 if (inputDir.X < -0.3f)
+                 {
+                     directions.Add(MoveDirection.LEFT);
+                 }
+                 if (inputDir.X > 0.3f)
+                 {
+                     directions.Add(MoveDirection.RIGHT);
+                 }
+             }
+        }
+        else
+        {
+            // Walking Logic
+            if (inputDir.Y < -0.3f)
             {
-                // Bicycle Logic: Steer towards stick direction, always accelerate (Forward)
+                directions.Add(MoveDirection.UP);
                 directions.Add(MoveDirection.FORWARD);
-
-                float targetAngle = (float)System.Math.Atan2(leftStick.Y, leftStick.X);
-                float currentRotation = CurrentMovement.Rotation;
-
-                // Normalize difference to -Pi to +Pi
-                float diff = targetAngle - currentRotation;
-                while (diff <= -MathHelper.Pi) diff += MathHelper.TwoPi;
-                while (diff > MathHelper.Pi) diff -= MathHelper.TwoPi;
-
-                // Deadzone for rotation stability
-                if (System.Math.Abs(diff) > 0.1f)
-                {
-                    if (diff > 0)
-                        directions.Add(MoveDirection.RIGHT);
-                    else
-                        directions.Add(MoveDirection.LEFT);
-                }
             }
-            else
+            if (inputDir.Y > 0.3f)
             {
-                // Walking Movement Logic: Move in stick direction
-                if (leftStick.Y < -0.5f)
-                {
-                    directions.Add(MoveDirection.UP);
-                    directions.Add(MoveDirection.FORWARD);
-                }
-                else if (leftStick.Y > 0.5f)
-                {
-                    directions.Add(MoveDirection.DOWN);
-                    directions.Add(MoveDirection.BACKWARD);
-                }
-
-                if (leftStick.X < -0.5f)
-                {
-                    directions.Add(MoveDirection.LEFT);
-                }
-                else if (leftStick.X > 0.5f)
-                {
-                    directions.Add(MoveDirection.RIGHT);
-                }
+                directions.Add(MoveDirection.DOWN);
+                directions.Add(MoveDirection.BACKWARD);
+            }
+            if (inputDir.X < -0.3f)
+            {
+                directions.Add(MoveDirection.LEFT);
+            }
+            if (inputDir.X > 0.3f)
+            {
+                directions.Add(MoveDirection.RIGHT);
             }
         }
 
@@ -98,11 +159,18 @@ public class PlayerMovement
     }
     public void Update()
     {
-        CurrentMovement.HandleMovement(MakeMoveDirections(), CurrentMovement.Speed, SpeedAcceleration, Rotation, RotationAcceleration, 0, MaxSpeed);
+        _input.Update();
+        CurrentMovement.HandleMovement(MakeMoveDirections(), CurrentMovement.Speed, SpeedAcceleration, Rotation, RotationAcceleration, 0, CurrentMovement.MaxSpeed);
     }
 
     public bool IsMoving()
     {
         return CurrentMovement.IsMoving;
     }
+
+    public void SetInput(IPlayerInput input)
+    {
+        _input = input;
+    }
+
 }

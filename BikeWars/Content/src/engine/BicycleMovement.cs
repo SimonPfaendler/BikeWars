@@ -10,8 +10,12 @@ public class BicycleMovement : IMoveable
     private bool _isMoving { get; set; }
     private bool _canMove { get; set; }
     private float _speed { get; set; }
+    private float _maxSpeed { get; set; }
+    private float _sprintAcceleration { get; set; }
     private float _rotation { get; set; }
     private float _rotationAcceleration { get; set; }
+
+    private const float BreakAcceleration = 1.5f; // Right now this works for every bike but question would be to make it dynamic so other bikes can break faster or so
     public bool IsMoving { get => _isMoving; set => _isMoving = value; }
     public bool CanMove {
         get => _canMove;
@@ -55,7 +59,7 @@ public class BicycleMovement : IMoveable
         }
     }
 
-    public float RotationAcceleration {
+     public float RotationAcceleration {
         get => _rotationAcceleration;
         set
         {
@@ -63,11 +67,39 @@ public class BicycleMovement : IMoveable
         }
     }
 
-    public BicycleMovement(bool canMove, bool isMoving, float rotationAcceleration)
+    public float MaxSpeed {
+        get => _maxSpeed;
+        set
+        {
+            _maxSpeed = value;
+        }
+    }
+
+    public float SprintAcceleration {
+        get => _sprintAcceleration;
+        set
+        {
+            if (value < 0)
+            {
+                _sprintAcceleration = 0;
+                return;
+            }
+            _sprintAcceleration = value;
+        }
+    }
+
+    private SteeringCurve _steeringCurve;
+    public SteeringCurve Curve => _steeringCurve;
+
+    public BicycleMovement(bool canMove, bool isMoving, float speed, float maxSpeed, float speedAcceleration, float sprintAcceleration, float rotationAcceleration)
     {
         CanMove = canMove;
         IsMoving = isMoving;
+        Speed = speed;
+        MaxSpeed = maxSpeed;
+        SprintAcceleration = sprintAcceleration;
         RotationAcceleration = rotationAcceleration;
+        _steeringCurve = new SteeringCurve();
     }
     private bool MakeIsMoving()
     {
@@ -83,17 +115,20 @@ public class BicycleMovement : IMoveable
         return MathHelper.Clamp(currentSpeed - acceleration, minSpeed, maxSpeed);
     }
 
-    public float HandleRotation(List<MoveDirection> moveDirections)
+    public float HandleRotation(List<MoveDirection> moveDirections, float rotationAcceleration)
     {
+        float steerFactor = _steeringCurve.Evaluate(Speed);
+        float adjustedRotation = rotationAcceleration * steerFactor;
+
         foreach (var dir in moveDirections)
         {
             if (dir == MoveDirection.LEFT)
             {
-                Rotation -= RotationAcceleration;
+                Rotation -= adjustedRotation;
             }
             if (dir == MoveDirection.RIGHT)
             {
-                Rotation += RotationAcceleration;
+                Rotation += adjustedRotation;
             }
         }
         return Rotation;
@@ -115,7 +150,7 @@ public class BicycleMovement : IMoveable
                 case MoveDirection.FORWARD:
                     return MovingForward(currentSpeed, acceleration, minSpeed, maxSpeed);
                 case MoveDirection.BACKWARD:
-                    return MovingBackwards(currentSpeed, acceleration * 1.5f, minSpeed, maxSpeed);
+                    return MovingBackwards(currentSpeed, acceleration * BreakAcceleration, minSpeed, maxSpeed);
                 default:
                     break;
             }
@@ -125,7 +160,7 @@ public class BicycleMovement : IMoveable
 
     public void HandleMovement(List<MoveDirection> moveDirections, float currentSpeed, float speedAcceleration, float currentRotation, float rotationAcceleration, float minSpeed, float maxSpeed)
     {
-        Rotation = HandleRotation(moveDirections);
+        Rotation = HandleRotation(moveDirections, rotationAcceleration);
         Direction = HandleDirection(moveDirections);
         IsMoving = MakeIsMoving();
         Speed = HandleSpeed(moveDirections, currentSpeed, speedAcceleration, minSpeed, maxSpeed);

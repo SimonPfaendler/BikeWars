@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework;
 
@@ -9,7 +8,7 @@ public class CellData
 {
     public HashSet<CollisionLayer> Layers = new();
     public int Count = 0;
-    public List<ICollider>? Colliders = null;
+    public HashSet<ICollider>? Colliders = null;
 }
 
 public class SpatialHash
@@ -42,10 +41,16 @@ public class SpatialHash
 
     public void Insert(ICollider c)
     {
-        int minX = (int)MathF.Floor(c.Position.X / _cellSize);
-        int maxX = (int)MathF.Floor(c.Position.X / _cellSize);
-        int minY = (int)MathF.Floor(c.Position.Y / _cellSize);
-        int maxY = (int)MathF.Floor(c.Position.Y / _cellSize);
+        float left   = c.Position.X;
+        float right  = c.Position.X + c.Width;
+        float top    = c.Position.Y;
+        float bottom = c.Position.Y + c.Height;
+
+        int minX = (int)MathF.Floor(left / _cellSize);
+        int maxX = (int)MathF.Floor((right  - 1) / _cellSize);
+        int minY = (int)MathF.Floor(top / _cellSize);
+        int maxY = (int)MathF.Floor((bottom - 1) / _cellSize);
+
 
         for (int x = minX; x <= maxX; x++)
         {
@@ -61,7 +66,7 @@ public class SpatialHash
 
                 cell.Count++;
                 cell.Layers.Add(c.Layer); // Layer speichern
-                cell.Colliders ??= new List<ICollider>();
+                cell.Colliders ??= new HashSet<ICollider>();
                 cell.Colliders.Add(c);
             }
         }
@@ -99,10 +104,10 @@ public class SpatialHash
         }
     }
 
-    public List<ICollider> QueryNearby(Vector2 pos, int radius)
+    public HashSet<ICollider> QueryNearby(Vector2 pos, int radius)
     {
         var (cellX, cellY) = ToCellCoords(pos);
-        List<ICollider> results = new();
+        HashSet<ICollider> results = new();
 
         for (int x = cellX - radius; x <= cellX + radius; x++)
         {
@@ -110,9 +115,12 @@ public class SpatialHash
             {
                 int key = To1DKey(x, y);
 
-                if (_cells.TryGetValue(key, out var cell) == false)
+                if (!_cells.TryGetValue(key, out var cell))
                     continue;
-                results.AddRange(cell.Colliders!);
+                foreach (ICollider c in cell.Colliders)
+                {
+                    results.Add(c);
+                }
             }
         }
         return results;

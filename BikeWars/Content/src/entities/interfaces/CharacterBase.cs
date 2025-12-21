@@ -5,7 +5,6 @@ using BikeWars.Content.engine.Audio;
 using BikeWars.Content.managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Content;
 using BikeWars.Entities.Characters;
 
 namespace BikeWars.Content.entities.interfaces;
@@ -59,7 +58,6 @@ public abstract class CharacterBase : ICharacter, ICombat
         OnTookDamage?.Invoke(this, amount);
         Attributes.Health -= amount;
     }
-
     public bool CanAttack()
     {
         return _attackCooldownTimer <= 0f;
@@ -91,7 +89,28 @@ public abstract class CharacterBase : ICharacter, ICombat
         _attackCooldownTimer = Attributes.AttackCooldown;
     }
 
-    public abstract void UpdateCollider();
+    public void UpdateCollider()
+    {
+        Vector2 colliderPosition = new Vector2(
+            Transform.Position.X - Transform.Size.X / 2f,
+            Transform.Position.Y - Transform.Size.Y / 2f
+        );
+
+        if (Collider == null)
+        {
+            Collider = new BoxCollider(
+                colliderPosition,
+                Transform.Size.X,
+                Transform.Size.Y,
+                CollisionLayer.PLAYER,
+                this
+            );
+            return;
+        }
+        Collider.Position = colliderPosition;
+        Collider.Width = Transform.Size.X;
+        Collider.Height = Transform.Size.Y;
+    }
     public abstract void Update(GameTime gameTime); // Use this to update the logic like where the position is or resize the collision box
     public abstract void Draw(SpriteBatch spriteBatch);
     public bool Intersects(ICollider other)

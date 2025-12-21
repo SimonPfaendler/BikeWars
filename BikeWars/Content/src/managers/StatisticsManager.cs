@@ -48,6 +48,12 @@ public class StatisticsManager
     }
     public void SaveStatistic()
     {
+        if (Statistics == null)
+            Statistics = new List<Statistic>();
+
+        if (Statistic == null)
+            Statistic = new Statistic();
+
         Statistics.Add(Statistic);
     }
 }

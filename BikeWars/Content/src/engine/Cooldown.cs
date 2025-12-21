@@ -20,7 +20,6 @@ public class CooldownWithDuration
         _cooldown = cooldownSeconds;
         _durationTimer = 0;
         _cooldownTimer = 0;
-
     }
 
     public void Activate()

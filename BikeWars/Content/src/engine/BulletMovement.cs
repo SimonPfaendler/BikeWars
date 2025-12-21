@@ -2,7 +2,7 @@ using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework;
 
 namespace BikeWars.Content.engine;
-public class BulletMovement: MovementBase, IMoveable
+public class BulletMovement: MovementBase
 {
     public BulletMovement(bool canMove, bool isMoving)
     {

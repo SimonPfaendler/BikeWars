@@ -10,10 +10,7 @@ namespace BikeWars.Content.entities.items
     {
         public override bool InventoryItem => true;
         public override bool IsConsumable => true;
-        public override int HealAmount => 30;            // +30 HP
-
-        private BoxCollider _collider;
-        public override ICollider Collider => _collider;
+        public override int HealAmount => 30;
 
         public EnergyGel(Vector2 start, Point size)
         {
@@ -21,7 +18,7 @@ namespace BikeWars.Content.entities.items
 
             int pickupRange = 40;
 
-            _collider = new BoxCollider(
+            Collider = new BoxCollider(
                 new Vector2(Transform.Position.X - pickupRange / 2f,
                     Transform.Position.Y - pickupRange / 2f),
                 Transform.Size.X + pickupRange,
@@ -47,7 +44,7 @@ namespace BikeWars.Content.entities.items
 
         public override bool Intersects(ICollider collider)
         {
-            return _collider.Intersects(collider);
+            return Collider.Intersects(collider);
         }
     }
 }
