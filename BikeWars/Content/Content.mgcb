@@ -94,6 +94,9 @@
 /processorParam:TextureFormat=Color
 /build:assets/images/StartButton.png
 
+#begin assets/Map/Bike_Shop_Template.tx
+/copy:assets/Map/Bike_Shop_Template.tx
+
 #begin assets/Map/Bike_Wars_Map.tmx
 /importer:TiledMapImporter
 /processor:TiledMapProcessor
