@@ -227,7 +227,14 @@ namespace BikeWars.Entities.Characters
             _walkRightAnimation = SpriteManager.GetAnimation("Character1_WalkRight");
             _walkUpAnimation = SpriteManager.GetAnimation("Character1_WalkUp");
 
-            _currentAnimation = _bikeRightAnimation;
+            if (movement.OwnsBike && movement.CrtBike != null)
+            {
+                _currentAnimation = _bikeUpAnimation;
+            } else
+            {
+                _currentAnimation = _walkRightAnimation;
+            }
+
             UpdateCollider();
         }
 
