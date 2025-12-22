@@ -90,7 +90,7 @@ public abstract class CharacterBase : ICharacter, ICombat
     }
 
     protected float _hitFlashTimer = 0f;
-    protected Color _hitColor = Color.Gray;
+    protected Color _hitColor = Color.DarkRed;
 
     public virtual void TakeDamage(int amount)
     {

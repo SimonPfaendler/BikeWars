@@ -197,7 +197,7 @@ public class GameObjectManager
         Vector2 spawnPos = player.Transform.Position;
         Vector2 direction = player.GazeDirection;
 
-        Bullet b = new Bullet(spawnPos, new Point(12, 12), player);
+        Bullet b = new Bullet(spawnPos, new Point(10, 10), player);
         b.Movement.Direction = direction; // Set the movement direction
         AddProjectile(b);
     }

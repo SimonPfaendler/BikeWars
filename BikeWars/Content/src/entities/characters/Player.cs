@@ -122,7 +122,7 @@ namespace BikeWars.Entities.Characters
             switch (CurrentWeapon)
             {
                 case WeaponType.Gun:
-                    Attributes.AttackCooldown = 0.2f;
+                    Attributes.AttackCooldown = 0.25f;
                     ShotBullet?.Invoke();
                     _audio.Sounds.Play(AudioAssets.GunShot);
                     break;

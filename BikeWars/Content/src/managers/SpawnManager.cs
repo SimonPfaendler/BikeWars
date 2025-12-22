@@ -17,12 +17,12 @@ namespace BikeWars.Content.managers
         private double _timeSinceLastSpawn;
         private double _timeSinceLastSwarm;
         private double _timeSinceLastCircle;
-        private const double SWARM_INTERVAL = 145.0;
-        private const double CIRCLE_SPAWN_INTERVAL = 160.0;
+        private const double SWARM_INTERVAL = 65.0;
+        private const double CIRCLE_SPAWN_INTERVAL = 100.0;
 
         private const double GAME_DURATION = 15 * 60; // 15 minutes in seconds
-        private const double START_SPAWN_INTERVAL = 2; // Start with 4 seconds
-        private const double END_SPAWN_INTERVAL = 0.25;   // End with 0.5 seconds
+        private const double START_SPAWN_INTERVAL = 4; // Start with 4 seconds
+        private const double END_SPAWN_INTERVAL = 0.5;   // End with 0.5 seconds
         private double _spawnInterval;
         private const float MIN_SPAWN_RADIUS = 300f;
         private const float MAX_SPAWN_RADIUS = 700f;

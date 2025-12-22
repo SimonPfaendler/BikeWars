@@ -65,11 +65,11 @@ public class CombatManager
         Vector2 knockbackDir = target.Transform.Position - projectile.Transform.Position;
         if(knockbackDir != Vector2.Zero)
             knockbackDir.Normalize();
-        target.ApplyKnockback(knockbackDir, 300f); // "Slightly" knockback
+        target.ApplyKnockback(knockbackDir, 220f); // "Slightly" knockback
 
         _audio.Sounds.Play(AudioAssets.BulletHit);
 
-        OnHitStopRequested?.Invoke(0.05f); // Pause for 0.1 sec
+        OnHitStopRequested?.Invoke(0.1f); // Pause for 0.1 sec
 
         if (target.Attributes.Health <= 0)
         {
