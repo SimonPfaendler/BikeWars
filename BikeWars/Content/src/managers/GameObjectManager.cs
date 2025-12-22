@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
+using BikeWars.Content.engine.ui;
 
 namespace BikeWars.Content.managers;
 public class GameObjectManager
@@ -33,7 +34,12 @@ public class GameObjectManager
     public HashSet<ProjectileBase> Projectiles {get => _projectiles;}
 
     private HashSet<AreaOfEffectBase> _aoeAttacks = new();
+
+    
     public HashSet<AreaOfEffectBase> AOEAttacks => _aoeAttacks;
+    
+    private HashSet<DamageNumber> _damageNumbers = new HashSet<DamageNumber>();
+    private SpriteFont _damageFont;
 
 
     public ContentManager _contentManager {get; set;} // TODO do we need this one?
@@ -131,6 +137,7 @@ public class GameObjectManager
         {
             a.LoadContent(content);
         }
+        _damageFont = content.Load<SpriteFont>("assets/fonts/Arial"); // Using existing Arial font for now
     }
 
     public void Draw(SpriteBatch spriteBatch)
@@ -153,6 +160,12 @@ public class GameObjectManager
         {
             aoe.Draw(spriteBatch);
         }
+        
+        foreach (var dn in _damageNumbers)
+        {
+            dn.Draw(spriteBatch, _damageFont);
+        }
+
         foreach (BoxCollider s in Statics)
         {
             // s.LoadContent();
@@ -191,6 +204,18 @@ public class GameObjectManager
             if (aoe.IsExpired)
                 _aoeAttacks.Remove(aoe);
         }
+
+        HashSet<DamageNumber> expiredNumbers = new HashSet<DamageNumber>();
+        foreach(var dn in _damageNumbers)
+        {
+            dn.Update(gameTime);
+            if(dn.IsExpired)
+                expiredNumbers.Add(dn);
+        }
+        foreach(var dn in expiredNumbers)
+        {
+            _damageNumbers.Remove(dn);
+        }
     }
 
     private void OnPlayerShotBullet(Player player)
@@ -198,7 +223,7 @@ public class GameObjectManager
         Vector2 spawnPos = player.Transform.Position;
         Vector2 direction = player.GazeDirection;
 
-        Bullet b = new Bullet(spawnPos, new Point(8, 8), player);
+        Bullet b = new Bullet(spawnPos, new Point(12, 12), player);
         b.Movement.Direction = direction; // Set the movement direction
         AddProjectile(b);
     }
@@ -263,6 +288,47 @@ public class GameObjectManager
             EnergyGel energyGel = new EnergyGel(pos, new Point(32, 32));
             AddItem(energyGel);
         }
+    }
+
+    public void SpawnDamageNumber(Vector2 position, int amount, bool isCrit = false)
+    {
+        // Calculate direction away from Player1
+        Vector2 direction = Vector2.Zero;
+        if (Player1 != null)
+        {
+            direction = position - Player1.Transform.Position;
+            if (direction != Vector2.Zero)
+            {
+                direction.Normalize();
+            }
+            else
+            {
+                direction = new Vector2(0, -1); // Default up if on top of player
+            }
+        }
+        else
+        {
+             direction = new Vector2(0, -1);
+        }
+
+        // Create a velocity: Move OUT and UP
+        // Randomize slightly for "juice"
+        Random rnd = new Random();
+        float angle = (float)(rnd.NextDouble() * 0.5f - 0.25f); // +/- ~15 degrees variation
+        
+        // Rotate direction slightly
+        float cos = MathF.Cos(angle);
+        float sin = MathF.Sin(angle);
+        Vector2 rotatedDir = new Vector2(direction.X * cos - direction.Y * sin, direction.X * sin + direction.Y * cos);
+
+        float speed = 200f;
+        float upSpeed = 100f;
+        
+        Vector2 velocity = rotatedDir * speed + new Vector2(0, -upSpeed); 
+
+        if (isCrit) velocity *= 1.5f; // Bigger pop for crits
+
+        _damageNumbers.Add(new DamageNumber(position, amount, isCrit, velocity));
     }
 
 }

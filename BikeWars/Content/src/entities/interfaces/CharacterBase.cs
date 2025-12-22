@@ -39,6 +39,46 @@ public abstract class CharacterBase : ICharacter, ICombat
 
     public event Action<CharacterBase, int> OnTookDamage;
 
+    protected Vector2 _knockbackVelocity;
+    private const float KnockbackDecay = 10f; // Velocity decay per second
+
+    public void ApplyKnockback(Vector2 direction, float force)
+    {
+        if (IsGodMode || IsDead) return;
+        if (direction != Vector2.Zero)
+        {
+            direction.Normalize();
+            _knockbackVelocity += direction * force;
+        }
+    }
+
+    protected void UpdateKnockback(GameTime gameTime)
+    {
+        if (_knockbackVelocity == Vector2.Zero) return;
+
+        float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+        // Apply fallback movement
+        LastTransform = new Transform(Transform.Position, Transform.Size);
+        Transform.Position += _knockbackVelocity * dt;
+
+        // Decay velocity
+        // Can be improved with linear or exponential decay
+        float speed = _knockbackVelocity.Length();
+        speed -= KnockbackDecay * speed * dt; // Exponential-ish decay
+
+        if (speed <= 0.5f) // Threshold to stop
+        {
+            _knockbackVelocity = Vector2.Zero;
+        }
+        else
+        {
+            _knockbackVelocity.Normalize();
+            _knockbackVelocity *= speed;
+        }
+        
+    }
+
     public void UpdateAttackCooldown(GameTime gameTime)
     {
         if (_attackCooldownTimer > 0f)
@@ -49,6 +89,9 @@ public abstract class CharacterBase : ICharacter, ICombat
         }
     }
 
+    protected float _hitFlashTimer = 0f;
+    protected Color _hitColor = Color.Gray;
+
     public virtual void TakeDamage(int amount)
     {
         if (IsGodMode)
@@ -57,6 +100,7 @@ public abstract class CharacterBase : ICharacter, ICombat
         if (IsDead) return;
         OnTookDamage?.Invoke(this, amount);
         Attributes.Health -= amount;
+        _hitFlashTimer = 0.2f; // Flash for 0.2 seconds
     }
     public bool CanAttack()
     {
@@ -110,6 +154,13 @@ public abstract class CharacterBase : ICharacter, ICombat
         Collider.Position = colliderPosition;
         Collider.Width = Transform.Size.X;
         Collider.Height = Transform.Size.Y;
+    }
+    public void UpdateHitFlash(GameTime gameTime)
+    {
+        if (_hitFlashTimer > 0f)
+        {
+            _hitFlashTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+        }
     }
     public abstract void Update(GameTime gameTime); // Use this to update the logic like where the position is or resize the collision box
     public abstract void Draw(SpriteBatch spriteBatch);

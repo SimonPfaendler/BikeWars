@@ -210,7 +210,7 @@ namespace BikeWars.Content.managers
             return _frames[_frameIndex];
         }
 
-        public void Draw(SpriteBatch spriteBatch, Vector2 position, Point size, float rotation)
+        public void Draw(SpriteBatch spriteBatch, Vector2 position, Point size, float rotation, Color? color = null)
         {
             Rectangle source = _frames[_frameIndex];
             Rectangle dest = new Rectangle(
@@ -219,7 +219,7 @@ namespace BikeWars.Content.managers
                 size.X,
                 size.Y
             );
-            spriteBatch.Draw(_sheet, dest, source, Color.White, rotation: rotation, new Vector2(source.Width / 2f, source.Height / 2f), SpriteEffects.None, layerDepth:0f);
+            spriteBatch.Draw(_sheet, dest, source, color ?? Color.White, rotation: rotation, new Vector2(source.Width / 2f, source.Height / 2f), SpriteEffects.None, layerDepth:0f);
         }
 
         public SpriteAnimation Clone()

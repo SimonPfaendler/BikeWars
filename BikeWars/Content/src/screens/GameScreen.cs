@@ -86,6 +86,12 @@ namespace BikeWars.Content.screens
         public bool IsMultiplayer => _gameMode == GameMode.MultiPlayer; // might be helpful later
         private InputMode _inputMode = InputMode.Keyboard;
 
+        private float _hitStopTimer = 0f;
+
+        public void TriggerHitStop(float duration)
+        {
+            _hitStopTimer = duration;
+        }
 
         public GameScreen(AudioService audioService, GameMode gameMode, bool isTechDemo = false)
         {
@@ -167,6 +173,8 @@ namespace BikeWars.Content.screens
             _collisionManager.OnCharacterCollision += _combatManager.HandleCharacterCollision;
             _collisionManager.OnItemPickup += _gameObjectManager.Player1.OnPickUpItem;
             _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
+
+            _combatManager.OnHitStopRequested += TriggerHitStop;
 
             if (_gameObjectManager.Player2 != null)
             {   _collisionManager.OnItemPickup += _gameObjectManager.Player2.OnPickUpItem;
@@ -266,6 +274,21 @@ namespace BikeWars.Content.screens
             }
             _overlay.SetPaused(false, gameTime);
             _overlay.SetPaused(false, gameTime);
+
+            // Hit Stop Logic
+            if (_hitStopTimer > 0f)
+            {
+                _hitStopTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                if (_hitStopTimer > 0f)
+                {
+                    // Skip updates for game objects and collision to simulate pause
+                     _tiledMapRenderer.Update(gameTime); // keep map rendering updating if needed or freeze it too
+                    // We still might want to process input or camera?
+                    // For "Juice", typically everything freezes.
+                    return; 
+                }
+            }
+
 
             var players = new HashSet<Player>();
             if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);

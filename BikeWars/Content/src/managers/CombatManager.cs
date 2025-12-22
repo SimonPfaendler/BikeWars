@@ -3,6 +3,7 @@ using BikeWars.Content.entities.interfaces;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.entities.items;
+using Microsoft.Xna.Framework;
 
 namespace BikeWars.Content.managers;
 
@@ -13,6 +14,7 @@ public class CombatManager
 
     private readonly AudioService _audio;
     private readonly GameObjectManager _gameObjects; // used for spawning items
+    public event Action<float> OnHitStopRequested;
 
     public CombatManager(AudioService audio, GameObjectManager gameObjects)
     {
@@ -39,11 +41,35 @@ public class CombatManager
         }
         if (target == projectile.Owner) return;
 
+        // Initialize random manually or use a shared instance if available. Good practice to have a shared Random.
+        // Assuming a shared Random or just creating one for now. Performance impact is negligible here.
+        Random rnd = new Random();
+        bool isCrit = false; 
+        int damage = projectile.Damage;
+
+        if (projectile.Owner is CharacterBase owner)
+        {
+            if (rnd.NextDouble() < owner.Attributes.CritChance)
+            {
+                isCrit = true;
+                damage = (int)(damage * owner.Attributes.CritMultiplier);
+            }
+        }
+
         // Apply Damage
-        target.TakeDamage(projectile.Damage);
+        target.TakeDamage(damage);
         projectile.HasHit = true;
+        _gameObjects.SpawnDamageNumber(target.Transform.Position, damage, isCrit);
+
+        // Apply Knockback
+        Vector2 knockbackDir = target.Transform.Position - projectile.Transform.Position;
+        if(knockbackDir != Vector2.Zero)
+            knockbackDir.Normalize();
+        target.ApplyKnockback(knockbackDir, 300f); // "Slightly" knockback
 
         _audio.Sounds.Play(AudioAssets.BulletHit);
+
+        OnHitStopRequested?.Invoke(0.05f); // Pause for 0.1 sec
 
         if (target.Attributes.Health <= 0)
         {
@@ -62,6 +88,16 @@ public class CombatManager
 
         // Apply Damage
         target.TakeDamage(aoe.Damage);
+        _gameObjects.SpawnDamageNumber(target.Transform.Position, aoe.Damage);
+
+        /*
+        // Apply Knockback for AOE
+        // Direction is from AOE center to character
+        Vector2 knockbackDir = target.Transform.Position - aoe.Transform.Position;
+        if (knockbackDir != Vector2.Zero)
+            knockbackDir.Normalize();
+        target.ApplyKnockback(knockbackDir, 150f); // "Slightly" knockback
+        */
 
         if (aoe is IceTrail)
         {

@@ -72,6 +72,9 @@ public class CharacterAttributes
         set  => _canAutoAttack = value;
     }
 
+    public float CritChance { get; set; } = 0.1f; // 10% chance
+    public float CritMultiplier { get; set; } = 2.0f; // 2x damage
+
     public CharacterAttributes(object o, int maxHealth, int health, int attackDamage, float attackCoolDown, bool canAutoAttack)
     {
         owner = o;
