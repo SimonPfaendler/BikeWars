@@ -200,6 +200,8 @@ public class GameObjectManager
         Bullet b = new Bullet(spawnPos, new Point(10, 10), player);
         b.Movement.Direction = direction; // Set the movement direction
         AddProjectile(b);
+
+        OnScreenShakeRequested?.Invoke(0.75f, 0.05f);
     }
 
     private void OnPlayerFlamethrower(Player player)
@@ -218,12 +220,19 @@ public class GameObjectManager
         AddAOE(ice);
     }
 
+    public event Action<float, float> OnScreenShakeRequested;
+
     private void OnPlayerDamageCircle(Player player)
     {
         Vector2 direction = player.GazeDirection;
         DamageCircle dc = new DamageCircle(player);
         dc.LoadContent(_contentManager);
         AddAOE(dc);
+        
+        // Shake screen on cast
+        //OnScreenShakeRequested?.Invoke(6f, 0.8f);
+        OnScreenShakeRequested?.Invoke(7f, 2.0f);
+
     }
 
     public void SetWorldAudioManager(WorldAudioManager worldAudioManager)

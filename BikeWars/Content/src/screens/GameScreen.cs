@@ -170,6 +170,8 @@ namespace BikeWars.Content.screens
             _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
 
             _combatManager.OnHitStopRequested += TriggerHitStop;
+            _combatManager.OnScreenShakeRequested += (intensity, duration) => camera.Shake(intensity, duration);
+            _gameObjectManager.OnScreenShakeRequested += (intensity, duration) => camera.Shake(intensity, duration);
 
             if (_gameObjectManager.Player2 != null)
             {   _collisionManager.OnItemPickup += _gameObjectManager.Player2.OnPickUpItem;

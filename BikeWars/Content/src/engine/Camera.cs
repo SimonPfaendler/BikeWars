@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 // ============================================================
 // Camera.cs
@@ -39,6 +40,18 @@ namespace BikeWars.Content.engine
 
         }
 
+        // Screen Shake
+        private float _shakeTimer;
+        private float _shakeIntensity;
+        private Vector2 _shakeOffset;
+        private Random _rnd = new Random();
+
+        public void Shake(float intensity, float duration)
+        {
+            _shakeIntensity = intensity;
+            _shakeTimer = duration;
+        }
+
         public void Update(GameTime gameTime, Vector2 playerPosition, bool freeCamera)
         {
             // switch between FreeLook & PlayerLock
@@ -56,6 +69,23 @@ namespace BikeWars.Content.engine
                 SmoothFollow(playerPosition);
             else
                 HandleFreeLookInput();
+
+            // Handle Shake
+            if (_shakeTimer > 0)
+            {
+                _shakeTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                if (_shakeTimer <= 0)
+                {
+                    _shakeTimer = 0;
+                    _shakeOffset = Vector2.Zero;
+                }
+                else
+                {
+                    float x = (float)(_rnd.NextDouble() * 2 - 1) * _shakeIntensity;
+                    float y = (float)(_rnd.NextDouble() * 2 - 1) * _shakeIntensity;
+                    _shakeOffset = new Vector2(x, y);
+                }
+            }
 
             // Make sure camera does not leave gameworld
             ClampToWorld();
@@ -107,9 +137,12 @@ namespace BikeWars.Content.engine
         {
 
             Vector2 screenCenter = new Vector2(_viewportWidth / 2f, _viewportHeight / 2f);
+            
+            // Add shake offset to position
+            Vector2 transformPos = Position + _shakeOffset;
 
             return
-                Matrix.CreateTranslation(new Vector3(-Position, 0f)) *
+                Matrix.CreateTranslation(new Vector3(-transformPos, 0f)) *
                 Matrix.CreateScale(Zoom, Zoom, 1f) *
                 Matrix.CreateTranslation(new Vector3(screenCenter, 0f));
 

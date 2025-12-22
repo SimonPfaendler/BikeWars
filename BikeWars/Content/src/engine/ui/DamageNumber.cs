@@ -28,17 +28,18 @@ namespace BikeWars.Content.engine.ui
             // randomize color
             if (IsCrit)
             {
-                _tint = Color.Yellow;
+                _tint = Color.Red;
             }
             else
             {
                 // Simple color variation
-                int variant = _rnd.Next(0, 3);
+                int variant = _rnd.Next(0, 4);
                 switch(variant)
                 {
                     case 0: _tint = Color.Orange; break;
-                    case 1: _tint = Color.OrangeRed; break;
+                    case 1: _tint = Color.Yellow; break;
                     case 2: _tint = Color.DarkOrange; break;
+                    case 3: _tint = Color.Gold; break;
                 }
             }
         }
@@ -52,7 +53,7 @@ namespace BikeWars.Content.engine.ui
             
             // Optional: Friction or Gravity?
             // Let's add slight "friction" so they pop out fast and slow down
-            Velocity *= 0.95f; 
+            Velocity *= 0.98f; 
 
             // Decay
             Lifetime -= dt;

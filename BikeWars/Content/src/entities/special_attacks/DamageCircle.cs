@@ -48,7 +48,7 @@ namespace BikeWars.Content.entities.items
 
 
         public DamageCircle(Player player)
-            : base(owner: player, damage: 1, duration: 3.0f)
+            : base(owner: player, damage: 1, duration: 2.0f)
         {
             _player = player;
             // add regular hitbox for collision manager

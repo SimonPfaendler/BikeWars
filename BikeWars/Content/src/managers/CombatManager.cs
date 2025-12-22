@@ -15,6 +15,7 @@ public class CombatManager
     private readonly AudioService _audio;
     private readonly GameObjectManager _gameObjects; // used for spawning items
     public event Action<float> OnHitStopRequested;
+    public event Action<float, float> OnScreenShakeRequested;
 
     public CombatManager(AudioService audio, GameObjectManager gameObjects)
     {
@@ -61,6 +62,9 @@ public class CombatManager
         projectile.HasHit = true;
         _gameObjects.SpawnDamageNumber(target.Transform.Position, damage, isCrit);
 
+        // Notify GameScreen to Shake
+        OnScreenShakeRequested?.Invoke(1.25f, 0.10f);
+
         // Apply Knockback
         Vector2 knockbackDir = target.Transform.Position - projectile.Transform.Position;
         if(knockbackDir != Vector2.Zero)
@@ -69,7 +73,7 @@ public class CombatManager
 
         _audio.Sounds.Play(AudioAssets.BulletHit);
 
-        OnHitStopRequested?.Invoke(0.1f); // Pause for 0.1 sec
+        OnHitStopRequested?.Invoke(0.05f); // Pause for 0.05 sec
 
         if (target.Attributes.Health <= 0)
         {
