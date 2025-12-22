@@ -50,6 +50,8 @@ namespace BikeWars.Content.managers
             { "XP_Beer", "assets/sprites/XP/xp_beer_texture" },
             { "XP_Money", "assets/sprites/XP/xp_money_texture" },
             { "EnergyGel", "assets/images/EnergyGel" },
+            //MAP OBJECTS
+            { "Fahrradwerkstatt", "assets/Map/Fahrradwerkstatt_Tile"}
         };
         // hier sollte irgendwann auch auf atlas strukturen gewechselt werden
 

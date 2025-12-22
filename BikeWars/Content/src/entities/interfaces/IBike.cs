@@ -1,6 +1,6 @@
-using BikeWars.Entities.Characters;
-using Microsoft.Xna.Framework;
 
+using Microsoft.Xna.Framework;
+namespace BikeWars.Content.entities.interfaces;
 public interface IBike
 {
     public void Update(GameTime gameTime);

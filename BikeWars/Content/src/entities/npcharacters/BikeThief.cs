@@ -10,9 +10,9 @@ namespace BikeWars.Entities.Characters
 {
     public class BikeThief : CharacterBase, IWorldAudioAware
     {
-        private SpriteAnimation _idleAnimation;
-        private SpriteAnimation _walkLeftAnimation;
-        private SpriteAnimation _walkRightAnimation;
+        private readonly SpriteAnimation _idleAnimation;
+        private readonly SpriteAnimation _walkLeftAnimation;
+        private readonly SpriteAnimation _walkRightAnimation;
         private SpriteAnimation _currentAnimation;
         protected override string WalkingSound => AudioAssets.Walking;
 

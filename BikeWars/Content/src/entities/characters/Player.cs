@@ -10,6 +10,7 @@ using BikeWars.Content.entities.Inventory;
 using BikeWars.Content.entities.items;
 using BikeWars.Content.entities.levelup;
 using BikeWars.Content.managers;
+using BikeWars.Entities.Characters.MapObjects;
 using BikeWars.Utilities;
 
 // ============================================================
@@ -52,15 +53,15 @@ namespace BikeWars.Entities.Characters
         public event Action DamageCircle;
 
         public event Action<Bike> Dismounted;
-        private SpriteAnimation _bikeDownAnimation;
-        private SpriteAnimation _bikeUpAnimation;
-        private SpriteAnimation _bikeLeftAnimation;
-        private SpriteAnimation _bikeRightAnimation;
+        private readonly SpriteAnimation _bikeDownAnimation;
+        private readonly SpriteAnimation _bikeUpAnimation;
+        private readonly SpriteAnimation _bikeLeftAnimation;
+        private readonly SpriteAnimation _bikeRightAnimation;
 
-        private SpriteAnimation _walkDownAnimation;
-        private SpriteAnimation _walkUpAnimation;
-        private SpriteAnimation _walkLeftAnimation;
-        private SpriteAnimation _walkRightAnimation;
+        private readonly SpriteAnimation _walkDownAnimation;
+        private readonly SpriteAnimation _walkUpAnimation;
+        private readonly SpriteAnimation _walkLeftAnimation;
+        private readonly SpriteAnimation _walkRightAnimation;
 
         private SpriteAnimation _currentAnimation;
 
@@ -68,6 +69,7 @@ namespace BikeWars.Entities.Characters
         private WorldAudioManager _worldAudioManager;
         private string _currentMovementSound = null;
         public event Action<int, int> OnLevelUp;
+        public event Action<BikeShop> OnBikeShopOpen;
         public event Action<int> OnMoreXP;
 
         private bool _isUsingItem = false;
@@ -185,6 +187,14 @@ namespace BikeWars.Entities.Characters
                 }
                 return;
             }
+            if (item is BikeShop shop)
+            {
+                if (_input.IsPressed(GameAction.INTERACT))
+                {
+                    OnBikeShopOpen?.Invoke(shop);
+                }
+                return;
+            }
             item.IsPickedUp = true;
             ItemPickedUp?.Invoke(item);
         }
@@ -217,7 +227,14 @@ namespace BikeWars.Entities.Characters
             _walkRightAnimation = SpriteManager.GetAnimation("Character1_WalkRight");
             _walkUpAnimation = SpriteManager.GetAnimation("Character1_WalkUp");
 
-            _currentAnimation = _bikeRightAnimation;
+            if (movement.OwnsBike && movement.CrtBike != null)
+            {
+                _currentAnimation = _bikeUpAnimation;
+            } else
+            {
+                _currentAnimation = _walkRightAnimation;
+            }
+
             UpdateCollider();
         }
 
@@ -248,8 +265,8 @@ namespace BikeWars.Entities.Characters
         public override void TakeDamage(int amount)
         {
             // Deactivate Godmode for testing damage
-            // if (IsGodMode)
-            //    return;
+            if (IsGodMode)
+               return;
 
             if (IsDead) return;
 
@@ -410,7 +427,7 @@ namespace BikeWars.Entities.Characters
             XpCounter = XpCounter - XpLevelUp;
             XpLevelUp = XpLevelUp * 2;
             CurrentLevel++;
-            // level upscreen is triggered:
+            // level up screen is triggered:
             OnLevelUp?.Invoke(XpLevelUp, CurrentLevel);
         }
 

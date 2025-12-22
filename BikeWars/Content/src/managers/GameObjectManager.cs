@@ -9,7 +9,9 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
+using BikeWars.Entities.Characters.MapObjects;
 using BikeWars.Content.engine.ui;
+
 
 namespace BikeWars.Content.managers;
 public class GameObjectManager
@@ -24,8 +26,8 @@ public class GameObjectManager
     private HashSet<CharacterBase> _characters {get; set;}
     public HashSet<CharacterBase> Characters {get => _characters;}
 
-    private HashSet<ItemBase> _items {get; set;}
-    public HashSet<ItemBase> Items {get => _items; set => _items = value;}
+    private readonly HashSet<ItemBase> _items = new();
+    public HashSet<ItemBase> Items => _items;
 
     private HashSet<BoxCollider> _statics {get; set;}
     public HashSet<BoxCollider> Statics {get => _statics;}
@@ -46,22 +48,12 @@ public class GameObjectManager
 
     private WorldAudioManager _worldAudioManager;
 
-    public GameObjectManager(ContentManager content)
-    {
-        _contentManager = content;
-
-        _characters = new HashSet<CharacterBase>();
-        _items = new HashSet<ItemBase>();
-        _statics = new HashSet<BoxCollider>();
-        _projectiles = new HashSet<ProjectileBase>();
-    }
     public GameObjectManager(ContentManager content, Player player1, Player player2)
     {
         Player1 = player1;
         Player2 = player2;
         _contentManager = content;
-
-        _contentManager = content;
+        
         _characters = new HashSet<CharacterBase>();
         _items = new HashSet<ItemBase>();
         _statics = new HashSet<BoxCollider>();
@@ -84,14 +76,7 @@ public class GameObjectManager
         }
 
     }
-    public GameObjectManager(ContentManager content, HashSet<CharacterBase> characters, HashSet<ItemBase> items, HashSet<BoxCollider> statics, HashSet<ProjectileBase> projectiles) // TODO
-    {
-        _contentManager = content;
-        _characters = characters;
-        _items = items;
-        _statics = statics;
-        _projectiles = projectiles;
-    }
+    
     public void AddCharacter(CharacterBase character)
     {
         if (_worldAudioManager != null && character is IWorldAudioAware wa)
@@ -176,10 +161,6 @@ public class GameObjectManager
     {
         if (Player1 != null) Player1.Update(gameTime, mouseWorldPos);
         if (Player2 != null) Player2.Update(gameTime, mouseWorldPos);
-        foreach (ProjectileBase p in Projectiles)
-        {
-            p.Update(gameTime);
-        }
         foreach (CharacterBase c in Characters)
         {
             if (c.Movement != null)
@@ -198,24 +179,17 @@ public class GameObjectManager
         {
             p.Update(gameTime);
         }
-        foreach(var aoe in _aoeAttacks)
+        _aoeAttacks.RemoveWhere(aoe =>
         {
             aoe.Update(gameTime);
-            if (aoe.IsExpired)
-                _aoeAttacks.Remove(aoe);
-        }
+            return aoe.IsExpired;
+        });
 
-        HashSet<DamageNumber> expiredNumbers = new HashSet<DamageNumber>();
-        foreach(var dn in _damageNumbers)
+        _damageNumbers.RemoveWhere(dn =>
         {
             dn.Update(gameTime);
-            if(dn.IsExpired)
-                expiredNumbers.Add(dn);
-        }
-        foreach(var dn in expiredNumbers)
-        {
-            _damageNumbers.Remove(dn);
-        }
+            return dn.IsExpired;
+        });
     }
 
     private void OnPlayerShotBullet(Player player)
@@ -329,6 +303,39 @@ public class GameObjectManager
         if (isCrit) velocity *= 1.5f; // Bigger pop for crits
 
         _damageNumbers.Add(new DamageNumber(position, amount, isCrit, velocity));
+    }
+    public void Remove(ItemBase item)
+    {
+        _items.Remove(item);
+    }
+    
+    public void SpawnFromTiledObjects(IEnumerable<TiledObjectInfo> spawns)
+    {
+        foreach (var spawn in spawns)
+        {
+            var created = CreateFromTiled(spawn);
+            if (created != null)
+            {
+                AddItem(created);
+            }
+        }
+    }
+    
+    private ItemBase? CreateFromTiled(TiledObjectInfo spawn)
+    {
+        var start = new Vector2(spawn.Rect.X, spawn.Rect.Y);
+        var size  = new Point(spawn.Rect.Width, spawn.Rect.Height);
+        
+        string type = spawn.Properties["type"];
+
+        switch (type)
+        {
+            case "Bike_Shop":
+                return new BikeShop(start, size, spawn);
+
+            default:
+                return null;
+        }
     }
 
 }

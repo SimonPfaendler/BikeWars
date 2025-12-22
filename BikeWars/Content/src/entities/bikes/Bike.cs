@@ -26,6 +26,7 @@ public abstract class Bike: ItemBase, IBike
     protected virtual string WalkingSound => AudioAssets.Driving;
 
     public event Action<Bike, int> OnTookDamage;
+    public bool IsGodMode { get; set; }
 
     public Bike(Vector2 start, Point size, BikeAttributes attributes)
     {
@@ -44,6 +45,8 @@ public abstract class Bike: ItemBase, IBike
 
     public virtual void TakeDamage(int amount)
     {
+        if (IsGodMode) return;  
+        if (Attributes == null) return;
         if (IsDestroyed) return;
         // OnTookDamage?.Invoke(this, amount);
         Attributes.Health -= amount;
