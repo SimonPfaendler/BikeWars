@@ -1,3 +1,5 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using BikeWars.Content.engine;
@@ -16,12 +18,12 @@ using BikeWars.Content.engine.ui;
 namespace BikeWars.Content.managers;
 public class GameObjectManager
 {
-    public event Action<CharacterBase> OnCharacterDied;
-    public event Action<CharacterBase, int> OnTookDamage;
-    private Player _player1 {get; set;}
-    public Player Player1{get => _player1; set => _player1 = value;}
-    private Player _player2 {get; set;}
-    public Player Player2{get => _player2; set => _player2 = value;}
+    public event Action<CharacterBase>? OnCharacterDied;
+    public event Action<CharacterBase, int>? OnTookDamage;
+    private Player? _player1 {get; set;}
+    public Player? Player1{get => _player1; set => _player1 = value;}
+    private Player? _player2 {get; set;}
+    public Player? Player2{get => _player2; set => _player2 = value;}
 
     private HashSet<CharacterBase> _characters {get; set;}
     public HashSet<CharacterBase> Characters {get => _characters;}
@@ -41,14 +43,14 @@ public class GameObjectManager
     public HashSet<AreaOfEffectBase> AOEAttacks => _aoeAttacks;
     
     private HashSet<DamageNumber> _damageNumbers = new HashSet<DamageNumber>();
-    private SpriteFont _damageFont;
+    private SpriteFont? _damageFont;
 
 
     public ContentManager _contentManager {get; set;} // TODO do we need this one?
 
-    private WorldAudioManager _worldAudioManager;
+    private WorldAudioManager? _worldAudioManager;
 
-    public GameObjectManager(ContentManager content, Player player1, Player player2)
+    public GameObjectManager(ContentManager content, Player? player1, Player? player2)
     {
         Player1 = player1;
         Player2 = player2;
@@ -148,7 +150,8 @@ public class GameObjectManager
         
         foreach (var dn in _damageNumbers)
         {
-            dn.Draw(spriteBatch, _damageFont);
+            if (_damageFont != null)
+                dn.Draw(spriteBatch, _damageFont);
         }
 
         foreach (BoxCollider s in Statics)
@@ -163,7 +166,7 @@ public class GameObjectManager
         if (Player2 != null) Player2.Update(gameTime, mouseWorldPos);
         foreach (CharacterBase c in Characters)
         {
-            if (c.Movement != null)
+            if (c.Movement != null && Player1 != null)
             {
                 c.Movement.PlayerPosition = Player1.Transform.Position;
                 c.Movement.EnemyPosition = c.Transform.Position;
@@ -220,7 +223,7 @@ public class GameObjectManager
         AddAOE(ice);
     }
 
-    public event Action<float, float> OnScreenShakeRequested;
+    public event Action<float, float>? OnScreenShakeRequested;
 
     private void OnPlayerDamageCircle(Player player)
     {

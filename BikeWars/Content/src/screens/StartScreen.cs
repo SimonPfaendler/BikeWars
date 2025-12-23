@@ -73,6 +73,6 @@ public class StartScreen : MenuScreenBase, IScreen
     }
 
     
-    public bool DrawLower => false;
-    public bool UpdateLower => false;
+    public override bool DrawLower => false;
+    public override bool UpdateLower => false;
 }

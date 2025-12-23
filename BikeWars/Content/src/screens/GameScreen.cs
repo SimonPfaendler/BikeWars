@@ -16,6 +16,7 @@ using MonoGame.Extended.Tiled.Renderers;
 using BikeWars.Content.managers;
 using BikeWars.Content.events;
 using BikeWars.Content.entities.interfaces;
+using BikeWars.Entities.Characters.MapObjects;
 
 namespace BikeWars.Content.screens
 {
@@ -428,25 +429,32 @@ namespace BikeWars.Content.screens
             _gameObjectManager.Items.Clear();
             foreach (var p in state.Items)
             {
+                Vector2 pos = p.Position.ToVector2();
+                Point size = p.Size.ToPoint();
+
                 if (p.Type == SaveLoad.TYPES.CHEST)
                 {
-                    Chest b = new Chest(p.Position.ToVector2(), p.Size.ToPoint());
-                    _gameObjectManager.AddItem(b);
+                    _gameObjectManager.AddItem(new Chest(pos, size));
                 }
-                if (p.Type == SaveLoad.TYPES.BEER)
+                else if (p.Type == SaveLoad.TYPES.BEER)
                 {
-                    Xp_Beer b = new Xp_Beer(p.Position.ToVector2(), p.Size.ToPoint());
-                    _gameObjectManager.AddItem(b);
+                    _gameObjectManager.AddItem(new Xp_Beer(pos, size));
                 }
-                if (p.Type == SaveLoad.TYPES.MONEY)
+                else if (p.Type == SaveLoad.TYPES.MONEY)
                 {
-                    Xp_Money b = new Xp_Money(p.Position.ToVector2(), p.Size.ToPoint());
-                    _gameObjectManager.AddItem(b);
+                    _gameObjectManager.AddItem(new Xp_Money(pos, size));
                 }
-                if (p.Type == SaveLoad.TYPES.ENERGY_GEL)
+                else if (p.Type == SaveLoad.TYPES.ENERGY_GEL)
                 {
-                    EnergyGel b = new EnergyGel(p.Position.ToVector2(), p.Size.ToPoint());
-                    _gameObjectManager.AddItem(b);
+                    _gameObjectManager.AddItem(new EnergyGel(pos, size));
+                }
+                else if (p.Type == SaveLoad.TYPES.FRELO)
+                {
+                    _gameObjectManager.AddItem(new Frelo(pos, size));
+                }
+                else if (p.Type == SaveLoad.TYPES.RACINGBIKE)
+                {
+                    _gameObjectManager.AddItem(new RacingBike(pos, size));
                 }
             }
             _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level);
