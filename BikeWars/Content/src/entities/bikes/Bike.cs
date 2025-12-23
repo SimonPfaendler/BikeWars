@@ -25,7 +25,7 @@ public abstract class Bike: ItemBase, IBike
 
     protected virtual string WalkingSound => AudioAssets.Driving;
 
-    public event Action<Bike, int> OnTookDamage;
+    // public event Action<Bike, int> OnTookDamage; isn't used, not sure if it's still neded
     public bool IsGodMode { get; set; }
 
     public Bike(Vector2 start, Point size, BikeAttributes attributes)

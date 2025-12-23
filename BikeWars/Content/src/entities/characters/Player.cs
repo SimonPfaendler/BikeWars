@@ -36,7 +36,6 @@ namespace BikeWars.Entities.Characters
         public int CurrentLevel { get; private set; } = 1;
         public Vector2 AimTarget { get; private set; }
         private Vector2 _facingDirection = Vector2.UnitX; // Default to right
-        private bool _usingControllerAim = false;
         private Vector2 _lastGazeDirection = Vector2.UnitX;
         private const float AimLength = 100f;
 
@@ -44,7 +43,7 @@ namespace BikeWars.Entities.Characters
         public float TerrainSpeedMultiplier = 1.0f;
         private const float IncreaseSpeed = 1.1f;
         private const float DecreaseSpeed = 0.9f;
-        public bool IsGodMode { get; set; }
+        public new bool IsGodMode { get; set; }
 
         public event Action ShotBullet;
         public event Action<ItemBase> ItemPickedUp;
@@ -65,8 +64,8 @@ namespace BikeWars.Entities.Characters
 
         private SpriteAnimation _currentAnimation;
 
-        private readonly AudioService _audio;
-        private WorldAudioManager _worldAudioManager;
+        private new readonly AudioService _audio;
+        private new WorldAudioManager _worldAudioManager;
         private string _currentMovementSound = null;
         public event Action<int, int> OnLevelUp;
         public event Action<BikeShop> OnBikeShopOpen;
@@ -78,7 +77,6 @@ namespace BikeWars.Entities.Characters
 
         private float _bikeMountTime = 0f;
         private const float BikeMountTime = 0.1f;
-        private ItemBase _currentItemBeingUsed;
         private int _currentItemIndex = -1;
         private int _selectedInventoryIndex = 0;
         public int SelectedInventoryIndex => _selectedInventoryIndex;
