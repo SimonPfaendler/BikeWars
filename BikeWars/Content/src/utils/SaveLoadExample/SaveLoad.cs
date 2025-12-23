@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.IO;
 using System.Text.Json;
 using Microsoft.Xna.Framework;
@@ -8,6 +10,7 @@ using BikeWars.Content.entities.items;
 using BikeWars.Content.managers;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
+using BikeWars.Entities.Characters.MapObjects;
 
 namespace BikeWars.Content.src.utils.SaveLoadExample;
 
@@ -23,7 +26,10 @@ public static class SaveLoad
         CHEST,
         ENERGY_GEL,
         BEER,
-        MONEY
+        MONEY,
+        FRELO,
+        RACINGBIKE,
+        BIKESHOP
     }
     // save file path in the user's Documents folder
     private static readonly string SAVE_PATH = Path.Combine(
@@ -40,11 +46,11 @@ public static class SaveLoad
         public bool IsGameTimerPaused { get; set; } = false;
         public float PlayerX { get; set; } = _worldBounds;
         public float PlayerY { get; set; } = _worldBounds;
-        public HashSet<ProjectileSaveModel> Projectiles {get; set;}
-        public HashSet<CharacterSaveModel> Characters {get; set;}
-        public HashSet<ItemSaveModel> Items {get; set;}
-        public List<Statistic> Statistics{get; set;}
-        public Statistic Statistic{get; set;}
+        public HashSet<ProjectileSaveModel> Projectiles {get; set;} = new();
+        public HashSet<CharacterSaveModel> Characters {get; set;} = new();
+        public HashSet<ItemSaveModel> Items {get; set;} = new();
+        public List<Statistic> Statistics{get; set;} = new();
+        public Statistic Statistic{get; set;} = new();
         public int GameMode { get; set; } = 0;
     }
 
@@ -52,9 +58,9 @@ public static class SaveLoad
     {
         public TYPES Type {get; set;} // Type of the projectile. Like bullet
 
-        public Vector2Save Position {get;set;}
+        public Vector2Save Position {get;set;} = new();
 
-        public PointSave Size {get;set;}
+        public PointSave Size {get;set;} = new();
 
         public BasicSaveModel()
         {
@@ -69,13 +75,13 @@ public static class SaveLoad
     }
     public class ProjectileSaveModel
     {
-        public BasicSaveModel Basic {get;set;}
+        public BasicSaveModel Basic {get;set;} = new();
         public ProjectileSaveModel() {}
 
         public int Damage {get; set;}
         public bool HasHit {get; set;}
 
-        public Vector2Save Direction {get; set;}
+        public Vector2Save Direction {get; set;} = new();
         public bool IsMoving {get; set;}
         public bool CanMove {get; set;}
         public float Rotation {get; set;}
@@ -96,9 +102,9 @@ public static class SaveLoad
     {
         public TYPES Type {get; set;} // Character Type Like Hobo
 
-        public Vector2Save Position {get;set;}
+        public Vector2Save Position { get; set; } = new();
 
-        public PointSave Size {get;set;}
+        public PointSave Size {get;set;}  = new();
 
         public CharacterSaveModel() {}
 
@@ -114,9 +120,9 @@ public static class SaveLoad
     {
         public TYPES Type {get; set;} // Item Type Like Chest
 
-        public Vector2Save Position {get;set;}
+        public Vector2Save Position {get;set;}  = new();
 
-        public PointSave Size {get;set;}
+        public PointSave Size {get;set;}  = new();
 
         public ItemSaveModel() {}
 
@@ -162,6 +168,14 @@ public static class SaveLoad
     {
         try
         {
+            float playerX = _worldBounds;
+            float playerY = _worldBounds;
+            if (gameObjectManager.Player1 != null)
+            {
+                playerX = gameObjectManager.Player1.Transform.Position.X;
+                playerY = gameObjectManager.Player1.Transform.Position.Y;
+            }
+            
             // serialize the current info into JSON text
             GameState state = new GameState
             {
@@ -171,8 +185,8 @@ public static class SaveLoad
                 IsGameTimerRunning = gameTimer.IsRunning,
                 IsGameTimerPaused = gameTimer.IsPaused,
 
-                PlayerX = gameObjectManager.Player1.Transform.Position.X,
-                PlayerY = gameObjectManager.Player1.Transform.Position.Y,
+                PlayerX = playerX,
+                PlayerY = playerY,
 
                 Projectiles = MakeProjectileSaveList(gameObjectManager.Projectiles),
                 Characters = MakeCharacterSaveList(gameObjectManager.Characters),
@@ -184,7 +198,7 @@ public static class SaveLoad
 
             // get the folder where the JSON file will be saved
             // if it doesn't exist yet, it creates one
-            string dir = Path.GetDirectoryName(SAVE_PATH);
+            string? dir = Path.GetDirectoryName(SAVE_PATH);
             if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
 
             // write the JSON file and print a message in the console when it's saved successfully
@@ -228,7 +242,7 @@ public static class SaveLoad
 
             // get the folder where the JSON file will be saved
             // if it doesn't exist yet, it creates one
-            string dir = Path.GetDirectoryName(SAVE_PATH);
+            string? dir = Path.GetDirectoryName(SAVE_PATH);
             if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
 
             // write the JSON file and print a message in the console when it's saved successfully
@@ -273,6 +287,7 @@ public static class SaveLoad
         return projectile switch
         {
             Bullet b => new ProjectileSaveModel(new BasicSaveModel(TYPES.BULLET, projectile.Transform.Position, projectile.Transform.Size), b.Damage, b.HasHit, b.Movement.Direction, b.Movement.IsMoving, b.Movement.CanMove, b.Movement.Rotation),
+            _ => throw new NotSupportedException($"Projectile type {projectile.GetType().Name} is not supported for saving.")
         };
     }
     private static ItemSaveModel MakeItemSaveModel(ItemBase item)
@@ -282,7 +297,11 @@ public static class SaveLoad
             Chest c => new ItemSaveModel(TYPES.CHEST, item.Transform.Position, item.Transform.Size),
             Xp_Beer b => new ItemSaveModel(TYPES.BEER, item.Transform.Position, item.Transform.Size),
             Xp_Money b => new ItemSaveModel(TYPES.MONEY, item.Transform.Position, item.Transform.Size),
-            EnergyGel e => new ItemSaveModel(TYPES.ENERGY_GEL, item.Transform.Position, item.Transform.Size)
+            EnergyGel e => new ItemSaveModel(TYPES.ENERGY_GEL, item.Transform.Position, item.Transform.Size),
+            Frelo f => new ItemSaveModel(TYPES.FRELO, item.Transform.Position, item.Transform.Size),
+            RacingBike r => new ItemSaveModel(TYPES.RACINGBIKE, item.Transform.Position, item.Transform.Size),
+            BikeShop bs => new ItemSaveModel(TYPES.BIKESHOP, item.Transform.Position, item.Transform.Size),
+            _ => throw new NotSupportedException($"Item type {item.GetType().Name} is not supported for saving.")
         };
     }
     private static CharacterSaveModel MakeCharacterSaveModel(CharacterBase character)
@@ -291,7 +310,8 @@ public static class SaveLoad
         {
             Hobo h => new CharacterSaveModel(TYPES.HOBO, character.Transform.Position, character.Transform.Size),
             BikeThief bt => new CharacterSaveModel(TYPES.BIKETHIEF, character.Transform.Position, character.Transform.Size),
-            Dog dg => new CharacterSaveModel(TYPES.DOG, character.Transform.Position, character.Transform.Size)
+            Dog dg => new CharacterSaveModel(TYPES.DOG, character.Transform.Position, character.Transform.Size),
+            _ => throw new NotSupportedException($"Character type {character.GetType().Name} is not supported for saving.")
         };
     }
     private static HashSet<ProjectileSaveModel> MakeProjectileSaveList(HashSet<ProjectileBase> pList)

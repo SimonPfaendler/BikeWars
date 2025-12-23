@@ -1,3 +1,5 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using BikeWars.Content.engine.interfaces;
@@ -117,9 +119,12 @@ public class SpatialHash
 
                 if (!_cells.TryGetValue(key, out var cell))
                     continue;
-                foreach (ICollider c in cell.Colliders)
+                if (cell.Colliders != null)
                 {
-                    results.Add(c);
+                    foreach (ICollider c in cell.Colliders)
+                    {
+                        results.Add(c);
+                    }
                 }
             }
         }
