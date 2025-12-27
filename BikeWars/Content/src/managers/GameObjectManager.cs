@@ -67,14 +67,15 @@ public class GameObjectManager
             Player1.Flamethrower += () => OnPlayerFlamethrower(Player1);
             Player1.IceTrail += () => OnPlayerIceTrail(Player1);
             Player1.DamageCircle += () => OnPlayerDamageCircle(Player1);
+            Player1.OnTookDamage += HandleTookDamage;
         }
 
         if (Player2 != null)
         {
-            Player2.ShotBullet += () => OnPlayerShotBullet(Player2);
             Player2.Flamethrower += () => OnPlayerFlamethrower(Player2);
             Player2.IceTrail += () => OnPlayerIceTrail(Player2);
             Player2.DamageCircle += () => OnPlayerDamageCircle(Player2);
+            Player2.OnTookDamage += HandleTookDamage;
         }
 
     }
@@ -96,6 +97,11 @@ public class GameObjectManager
     private void HandleTookDamage(CharacterBase c, int amount)
     {
         OnTookDamage?.Invoke(c, amount);
+        
+        if (c is Player || c == Player1 || c == Player2)
+        {
+             OnScreenShakeRequested?.Invoke(5.5f, 0.2f);
+        }
     }
 
     public void AddItem(ItemBase item)

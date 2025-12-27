@@ -261,6 +261,15 @@ namespace BikeWars.Content.screens
         }
         public virtual void Update(GameTime gameTime)
         {
+            // Update HUD and Timer alignment for resolution changes
+            int viewW = Game1.Instance.GraphicsDevice.Viewport.Width;
+            int viewH = Game1.Instance.GraphicsDevice.Viewport.Height;
+            
+            if (_hudP2 != null)
+            {
+                _hudP2.Position = new Vector2(viewW - 350, viewH - 170);
+            }
+            _timerPosition = new Vector2(viewW / 2f, 40f);
             
             if (InputHandler.IsPressed(GameAction.MODE_SWITCH))
             {

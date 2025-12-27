@@ -25,6 +25,15 @@ namespace BikeWars.Content.components
         AchievementsCharacter1 = 20,
         AchievementsCharacter2 = 21,
         ConfirmYes = 22,
-        ConfirmNo = 23
+        ConfirmNo = 23,
+        Resolution1920x1080 = 24,
+        Resolution1280x720 = 25,
+        Resolution800x600 = 27,
+        Resolution1536x864 = 28,
+        ResolutionPortrait720x1280 = 29,
+        ResolutionPortrait600x800 = 30,
+        ResolutionPortrait864x1536 = 31,
+        ResolutionPortrait1080x1920 = 32,
+        ToggleFullscreen = 26
     }
 }

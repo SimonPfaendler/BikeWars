@@ -29,7 +29,6 @@ namespace BikeWars.Entities.Characters
         public Bike CurrentBike => movement?.CrtBike;
         private IPlayerInput _input;
         private CooldownWithDuration sprint { get; }
-
         public Vector2 GazeDirection { get; private set; }
         public int XpCounter { get; private set; } = 0;
         public int XpLevelUp = 10;
@@ -271,7 +270,7 @@ namespace BikeWars.Entities.Characters
             if (movement.OwnsBike && movement.CrtBike != null)
             {
                 var bike = movement.CrtBike;
-                bike.TakeDamage(amount);
+                bike.TakeDamage(amount);               
 
                 int reducedDamage = Math.Max(0, amount - bike.Attributes.Armor);
                 base.TakeDamage(reducedDamage);
@@ -283,7 +282,7 @@ namespace BikeWars.Entities.Characters
             }
             else
             {
-                base.TakeDamage(amount);
+                base.TakeDamage(amount);             
             }
         }
 
