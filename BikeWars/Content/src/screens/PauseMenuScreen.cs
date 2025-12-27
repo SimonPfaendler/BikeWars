@@ -13,7 +13,6 @@ namespace BikeWars.Content.screens
 {
     public class PauseMenuScreen : MenuScreenBase, IScreen
     {
-        private Overlay _overlay; 
         private readonly AudioService _audioService;
         public string DesiredMusic => AudioAssets.GameMusic;
         public float MusicVolume => 0.5f;

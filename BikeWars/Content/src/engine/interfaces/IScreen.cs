@@ -1,3 +1,5 @@
+#nullable enable
+
 using BikeWars.Content.managers;
 using Microsoft.Xna.Framework;
 

@@ -16,6 +16,7 @@ using MonoGame.Extended.Tiled.Renderers;
 using BikeWars.Content.managers;
 using BikeWars.Content.events;
 using BikeWars.Content.entities.interfaces;
+using BikeWars.Entities.Characters.MapObjects;
 
 namespace BikeWars.Content.screens
 {
@@ -86,6 +87,12 @@ namespace BikeWars.Content.screens
         public bool IsMultiplayer => _gameMode == GameMode.MultiPlayer; // might be helpful later
         private InputMode _inputMode = InputMode.Keyboard;
 
+        private float _hitStopTimer = 0f;
+
+        public void TriggerHitStop(float duration)
+        {
+            _hitStopTimer = duration;
+        }
 
         public GameScreen(AudioService audioService, GameMode gameMode, bool isTechDemo = false)
         {
@@ -167,6 +174,10 @@ namespace BikeWars.Content.screens
             _collisionManager.OnCharacterCollision += _combatManager.HandleCharacterCollision;
             _collisionManager.OnItemPickup += _gameObjectManager.Player1.OnPickUpItem;
             _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
+
+            _combatManager.OnHitStopRequested += TriggerHitStop;
+            _combatManager.OnScreenShakeRequested += (intensity, duration) => camera.Shake(intensity, duration);
+            _gameObjectManager.OnScreenShakeRequested += (intensity, duration) => camera.Shake(intensity, duration);
 
             if (_gameObjectManager.Player2 != null)
             {   _collisionManager.OnItemPickup += _gameObjectManager.Player2.OnPickUpItem;
@@ -286,6 +297,21 @@ namespace BikeWars.Content.screens
             _overlay.SetPaused(false, gameTime);
             _overlay.SetPaused(false, gameTime);
 
+            // Hit Stop Logic
+            if (_hitStopTimer > 0f)
+            {
+                _hitStopTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                if (_hitStopTimer > 0f)
+                {
+                    // Skip updates for game objects and collision to simulate pause
+                     _tiledMapRenderer.Update(gameTime); // keep map rendering updating if needed or freeze it too
+                    // We still might want to process input or camera?
+                    // For "Juice", typically everything freezes.
+                    return; 
+                }
+            }
+
+
             var players = new HashSet<Player>();
             if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);
             if (_gameObjectManager.Player2 != null) players.Add(_gameObjectManager.Player2);
@@ -333,10 +359,10 @@ namespace BikeWars.Content.screens
             }
             if (_gameObjectManager.Player2 == null)
             {
-                camera.Update(gameTime, _gameObjectManager.Player1.Transform.Position, _freelook, null);
+                camera.Update(gameTime, _gameObjectManager.Player1.Transform.Position, null, _freelook);
             } else
             {
-                camera.Update(gameTime, _gameObjectManager.Player1.Transform.Position, _freelook, _gameObjectManager.Player2.Transform.Position);
+                camera.Update(gameTime, _gameObjectManager.Player1.Transform.Position, _gameObjectManager.Player2.Transform.Position, _freelook);
             }
 
             _tiledMapRenderer.Update(gameTime);
@@ -414,25 +440,32 @@ namespace BikeWars.Content.screens
             _gameObjectManager.Items.Clear();
             foreach (var p in state.Items)
             {
+                Vector2 pos = p.Position.ToVector2();
+                Point size = p.Size.ToPoint();
+
                 if (p.Type == SaveLoad.TYPES.CHEST)
                 {
-                    Chest b = new Chest(p.Position.ToVector2(), p.Size.ToPoint());
-                    _gameObjectManager.AddItem(b);
+                    _gameObjectManager.AddItem(new Chest(pos, size));
                 }
-                if (p.Type == SaveLoad.TYPES.BEER)
+                else if (p.Type == SaveLoad.TYPES.BEER)
                 {
-                    Xp_Beer b = new Xp_Beer(p.Position.ToVector2(), p.Size.ToPoint());
-                    _gameObjectManager.AddItem(b);
+                    _gameObjectManager.AddItem(new Xp_Beer(pos, size));
                 }
-                if (p.Type == SaveLoad.TYPES.MONEY)
+                else if (p.Type == SaveLoad.TYPES.MONEY)
                 {
-                    Xp_Money b = new Xp_Money(p.Position.ToVector2(), p.Size.ToPoint());
-                    _gameObjectManager.AddItem(b);
+                    _gameObjectManager.AddItem(new Xp_Money(pos, size));
                 }
-                if (p.Type == SaveLoad.TYPES.ENERGY_GEL)
+                else if (p.Type == SaveLoad.TYPES.ENERGY_GEL)
                 {
-                    EnergyGel b = new EnergyGel(p.Position.ToVector2(), p.Size.ToPoint());
-                    _gameObjectManager.AddItem(b);
+                    _gameObjectManager.AddItem(new EnergyGel(pos, size));
+                }
+                else if (p.Type == SaveLoad.TYPES.FRELO)
+                {
+                    _gameObjectManager.AddItem(new Frelo(pos, size));
+                }
+                else if (p.Type == SaveLoad.TYPES.RACINGBIKE)
+                {
+                    _gameObjectManager.AddItem(new RacingBike(pos, size));
                 }
             }
             _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level);

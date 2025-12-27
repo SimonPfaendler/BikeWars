@@ -1,3 +1,5 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using BikeWars.Content.engine;
@@ -10,16 +12,18 @@ using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Entities.Characters.MapObjects;
+using BikeWars.Content.engine.ui;
+
 
 namespace BikeWars.Content.managers;
 public class GameObjectManager
 {
-    public event Action<CharacterBase> OnCharacterDied;
-    public event Action<CharacterBase, int> OnTookDamage;
-    private Player _player1 {get; set;}
-    public Player Player1{get => _player1; set => _player1 = value;}
-    private Player _player2 {get; set;}
-    public Player Player2{get => _player2; set => _player2 = value;}
+    public event Action<CharacterBase>? OnCharacterDied;
+    public event Action<CharacterBase, int>? OnTookDamage;
+    private Player? _player1 {get; set;}
+    public Player? Player1{get => _player1; set => _player1 = value;}
+    private Player? _player2 {get; set;}
+    public Player? Player2{get => _player2; set => _player2 = value;}
 
     private HashSet<CharacterBase> _characters {get; set;}
     public HashSet<CharacterBase> Characters {get => _characters;}
@@ -34,14 +38,19 @@ public class GameObjectManager
     public HashSet<ProjectileBase> Projectiles {get => _projectiles;}
 
     private HashSet<AreaOfEffectBase> _aoeAttacks = new();
+
+    
     public HashSet<AreaOfEffectBase> AOEAttacks => _aoeAttacks;
+    
+    private HashSet<DamageNumber> _damageNumbers = new HashSet<DamageNumber>();
+    private SpriteFont? _damageFont;
 
 
     public ContentManager _contentManager {get; set;} // TODO do we need this one?
 
-    private WorldAudioManager _worldAudioManager;
+    private WorldAudioManager? _worldAudioManager;
 
-    public GameObjectManager(ContentManager content, Player player1, Player player2)
+    public GameObjectManager(ContentManager content, Player? player1, Player? player2)
     {
         Player1 = player1;
         Player2 = player2;
@@ -115,6 +124,7 @@ public class GameObjectManager
         {
             a.LoadContent(content);
         }
+        _damageFont = content.Load<SpriteFont>("assets/fonts/Arial"); // Using existing Arial font for now
     }
 
     public void Draw(SpriteBatch spriteBatch)
@@ -137,6 +147,13 @@ public class GameObjectManager
         {
             aoe.Draw(spriteBatch);
         }
+        
+        foreach (var dn in _damageNumbers)
+        {
+            if (_damageFont != null)
+                dn.Draw(spriteBatch, _damageFont);
+        }
+
         foreach (BoxCollider s in Statics)
         {
             // s.LoadContent();
@@ -149,7 +166,7 @@ public class GameObjectManager
         if (Player2 != null) Player2.Update(gameTime, mouseWorldPos);
         foreach (CharacterBase c in Characters)
         {
-            if (c.Movement != null)
+            if (c.Movement != null && Player1 != null)
             {
                 c.Movement.PlayerPosition = Player1.Transform.Position;
                 c.Movement.EnemyPosition = c.Transform.Position;
@@ -170,6 +187,12 @@ public class GameObjectManager
             aoe.Update(gameTime);
             return aoe.IsExpired;
         });
+
+        _damageNumbers.RemoveWhere(dn =>
+        {
+            dn.Update(gameTime);
+            return dn.IsExpired;
+        });
     }
 
     private void OnPlayerShotBullet(Player player)
@@ -177,9 +200,11 @@ public class GameObjectManager
         Vector2 spawnPos = player.Transform.Position;
         Vector2 direction = player.GazeDirection;
 
-        Bullet b = new Bullet(spawnPos, new Point(8, 8), player);
+        Bullet b = new Bullet(spawnPos, new Point(10, 10), player);
         b.Movement.Direction = direction; // Set the movement direction
         AddProjectile(b);
+
+        OnScreenShakeRequested?.Invoke(0.75f, 0.05f);
     }
 
     private void OnPlayerFlamethrower(Player player)
@@ -198,12 +223,19 @@ public class GameObjectManager
         AddAOE(ice);
     }
 
+    public event Action<float, float>? OnScreenShakeRequested;
+
     private void OnPlayerDamageCircle(Player player)
     {
         Vector2 direction = player.GazeDirection;
         DamageCircle dc = new DamageCircle(player);
         dc.LoadContent(_contentManager);
         AddAOE(dc);
+        
+        // Shake screen on cast
+        //OnScreenShakeRequested?.Invoke(6f, 0.8f);
+        OnScreenShakeRequested?.Invoke(7f, 2.0f);
+
     }
 
     public void SetWorldAudioManager(WorldAudioManager worldAudioManager)
@@ -242,6 +274,47 @@ public class GameObjectManager
             EnergyGel energyGel = new EnergyGel(pos, new Point(32, 32));
             AddItem(energyGel);
         }
+    }
+
+    public void SpawnDamageNumber(Vector2 position, int amount, bool isCrit = false)
+    {
+        // Calculate direction away from Player1
+        Vector2 direction = Vector2.Zero;
+        if (Player1 != null)
+        {
+            direction = position - Player1.Transform.Position;
+            if (direction != Vector2.Zero)
+            {
+                direction.Normalize();
+            }
+            else
+            {
+                direction = new Vector2(0, -1); // Default up if on top of player
+            }
+        }
+        else
+        {
+             direction = new Vector2(0, -1);
+        }
+
+        // Create a velocity: Move OUT and UP
+        // Randomize slightly for "juice"
+        Random rnd = new Random();
+        float angle = (float)(rnd.NextDouble() * 0.5f - 0.25f); // +/- ~15 degrees variation
+        
+        // Rotate direction slightly
+        float cos = MathF.Cos(angle);
+        float sin = MathF.Sin(angle);
+        Vector2 rotatedDir = new Vector2(direction.X * cos - direction.Y * sin, direction.X * sin + direction.Y * cos);
+
+        float speed = 200f;
+        float upSpeed = 100f;
+        
+        Vector2 velocity = rotatedDir * speed + new Vector2(0, -upSpeed); 
+
+        if (isCrit) velocity *= 1.5f; // Bigger pop for crits
+
+        _damageNumbers.Add(new DamageNumber(position, amount, isCrit, velocity));
     }
     public void Remove(ItemBase item)
     {

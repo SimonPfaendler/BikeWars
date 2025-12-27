@@ -20,14 +20,14 @@ namespace BikeWars.Content.engine
         public float Zoom { get; set; } = 1f;
 
         private const float MIN_ZOOM = 0.5f;
-        private const float MAX_ZOOM = 1.25f;
+        private const float MAX_ZOOM = 1.1f;
 
         public CameraMode Mode { get; set; } = CameraMode.PlayerLock;
 
         // Defines the visible screen window size
         private readonly int _viewportWidth;
         private readonly int _viewportHeight;
-        private const float _TWO_PLAYER_CAMERA_PADDING = 0.75f; // padding to the viewport
+        private const float _TWO_PLAYER_CAMERA_PADDING = 300f; // padding to the viewport
 
         // Defines the border of the game world so the camera doesnt leave the visible game
         private readonly Rectangle _worldBounds;
@@ -37,6 +37,8 @@ namespace BikeWars.Content.engine
         private const float MoveSpeed = 8f;
         private const float LerpFactor = 0.1f;
 
+        private readonly float worldMinZoom;
+
         private Vector2 _lastCameraPosition;
 
         public Camera2D(int viewportWidth, int viewportHeight, Rectangle worldBounds)
@@ -44,9 +46,24 @@ namespace BikeWars.Content.engine
             _viewportWidth = viewportWidth;
             _viewportHeight = viewportHeight;
             _worldBounds = worldBounds;
+            float minZoomX = (float)_viewportWidth  / _worldBounds.Width;
+            float minZoomY = (float)_viewportHeight / _worldBounds.Height;
+            worldMinZoom = Math.Max(minZoomX, minZoomY);
         }
 
-        public void Update(GameTime gameTime, Vector2 playerPosition, bool freeCamera, Vector2? player2Position)
+        // Screen Shake
+        private float _shakeTimer;
+        private float _shakeIntensity;
+        private Vector2 _shakeOffset;
+        private Random _rnd = new Random();
+
+        public void Shake(float intensity, float duration)
+        {
+            _shakeIntensity = intensity;
+            _shakeTimer = duration;
+        }
+
+        public void Update(GameTime gameTime, Vector2 playerPosition, Vector2? player2Position, bool freeCamera)
         {
             // switch between FreeLook & PlayerLock
             if (freeCamera)
@@ -67,13 +84,30 @@ namespace BikeWars.Content.engine
                 }
                 if (player2Position != null)
                 {
-                    AdjustZoom(playerPosition, (Vector2)player2Position, MIN_ZOOM, MAX_ZOOM);
+                    AdjustZoom(playerPosition, (Vector2)player2Position, 0.2f, MAX_ZOOM);
                 }
                 SmoothFollow(_lastCameraPosition);
             }
             else
             {
                 HandleFreeLookInput();
+            }
+
+            // Handle Shake
+            if (_shakeTimer > 0)
+            {
+                _shakeTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                if (_shakeTimer <= 0)
+                {
+                    _shakeTimer = 0;
+                    _shakeOffset = Vector2.Zero;
+                }
+                else
+                {
+                    float x = (float)(_rnd.NextDouble() * 2 - 1) * _shakeIntensity;
+                    float y = (float)(_rnd.NextDouble() * 2 - 1) * _shakeIntensity;
+                    _shakeOffset = new Vector2(x, y);
+                }
             }
 
             // Make sure camera does not leave gameworld
@@ -104,13 +138,11 @@ namespace BikeWars.Content.engine
             _lastCameraPosition = Maths.Middle(playerPosition, player2Position);
             float xDistance = Math.Abs(playerPosition.X - player2Position.X);
             float yDistance = Math.Abs(playerPosition.Y - player2Position.Y);
-            float zoomX = (_viewportWidth * _TWO_PLAYER_CAMERA_PADDING) / xDistance;
-            float zoomY = (_viewportHeight * _TWO_PLAYER_CAMERA_PADDING) / yDistance;
+            float zoomX = Math.Abs(_viewportWidth - _TWO_PLAYER_CAMERA_PADDING) / xDistance;
+            float zoomY = Math.Abs(_viewportHeight - _TWO_PLAYER_CAMERA_PADDING) / yDistance;
 
             float targetZoom = Math.Min(zoomX, zoomY);
-            targetZoom = MathHelper.Clamp(targetZoom, minZoom, MAX_ZOOM);
-
-            Zoom = MathHelper.Lerp(Zoom, targetZoom, 0.1f);
+            Zoom = MathHelper.Clamp(targetZoom, minZoom, maxZoom);
         }
 
         // This is mainly used to handle the Zoom of one player
@@ -140,8 +172,10 @@ namespace BikeWars.Content.engine
         public Matrix GetTransform()
         {
             Vector2 screenCenter = new Vector2(_viewportWidth / 2f, _viewportHeight / 2f);
+            // Add shake offset to position
+            Vector2 transformPos = Position + _shakeOffset;
             return
-                Matrix.CreateTranslation(new Vector3(-Position, 0f)) *
+                Matrix.CreateTranslation(new Vector3(-transformPos, 0f)) *
                 Matrix.CreateScale(Zoom, Zoom, 1f) *
                 Matrix.CreateTranslation(new Vector3(screenCenter, 0f));
         }

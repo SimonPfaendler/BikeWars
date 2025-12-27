@@ -19,16 +19,12 @@ namespace BikeWars.Content.entities.items
         private int _frameCount = 5;
         private int _currentFrame = 0;
 
-        private float _frameTime = 0.18f; // How fast he animation runs
+        private float _frameTime = 0.18f; // How fast the animation runs
         private float _frameTimer = 0f;
 
         private Player _player;
-        private Vector2 _dir;
         private float _rotation;
         private Vector2 _spritePos;
-
-        private float _spawnTimer = 0f;
-        private float _spawnInterval = 0.15f; // spawn every X seconds
 
         private List<Vector2> _boxPositions = new()
         {
@@ -48,9 +44,10 @@ namespace BikeWars.Content.entities.items
 
 
         public DamageCircle(Player player)
-            : base(owner: player, damage: 1, duration: 3.0f)
+            : base(owner: player, damage: 1, duration: 2.0f)
         {
             _player = player;
+            _rotation = 0f;
             // add regular hitbox for collision manager
             foreach (Vector2 boxPosition in _boxPositions)
             {

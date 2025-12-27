@@ -50,6 +50,7 @@ namespace BikeWars.Content.entities.items
         {
             _player = player;
             _dir = Vector2.Normalize(dir);
+            _rotation = 0f;
         }
 
         public override void LoadContent(ContentManager content)
