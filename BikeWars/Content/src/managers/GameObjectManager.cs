@@ -72,6 +72,7 @@ public class GameObjectManager
 
         if (Player2 != null)
         {
+            Player2.ShotBullet += () => OnPlayerShotBullet(Player2);
             Player2.Flamethrower += () => OnPlayerFlamethrower(Player2);
             Player2.IceTrail += () => OnPlayerIceTrail(Player2);
             Player2.DamageCircle += () => OnPlayerDamageCircle(Player2);
