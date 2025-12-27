@@ -1,3 +1,5 @@
+using System;
+using BikeWars.Utilities;
 using Microsoft.Xna.Framework;
 // ============================================================
 // Camera.cs
@@ -17,11 +19,15 @@ namespace BikeWars.Content.engine
         public Vector2 Position { get; set; } = Vector2.Zero; // Where the camera points to
         public float Zoom { get; set; } = 1f;
 
+        private const float MIN_ZOOM = 0.5f;
+        private const float MAX_ZOOM = 1.25f;
+
         public CameraMode Mode { get; set; } = CameraMode.PlayerLock;
 
         // Defines the visible screen window size
         private readonly int _viewportWidth;
         private readonly int _viewportHeight;
+        private const float _TWO_PLAYER_CAMERA_PADDING = 0.75f; // padding to the viewport
 
         // Defines the border of the game world so the camera doesnt leave the visible game
         private readonly Rectangle _worldBounds;
@@ -31,15 +37,16 @@ namespace BikeWars.Content.engine
         private const float MoveSpeed = 8f;
         private const float LerpFactor = 0.1f;
 
+        private Vector2 _lastCameraPosition;
+
         public Camera2D(int viewportWidth, int viewportHeight, Rectangle worldBounds)
         {
             _viewportWidth = viewportWidth;
             _viewportHeight = viewportHeight;
             _worldBounds = worldBounds;
-
         }
 
-        public void Update(GameTime gameTime, Vector2 playerPosition, bool freeCamera)
+        public void Update(GameTime gameTime, Vector2 playerPosition, bool freeCamera, Vector2? player2Position)
         {
             // switch between FreeLook & PlayerLock
             if (freeCamera)
@@ -49,13 +56,25 @@ namespace BikeWars.Content.engine
 
             // Zoom via Mousewheel
             int scrollDelta = InputHandler.Mouse.ScrollDelta;
-            AdjustZoom(scrollDelta * ZoomSpeed);
+            AdjustZoom(scrollDelta * ZoomSpeed, MIN_ZOOM, MAX_ZOOM);
 
             // Select camera mode
             if (Mode == CameraMode.PlayerLock)
-                SmoothFollow(playerPosition);
+            {
+                if (player2Position == null)
+                {
+                    _lastCameraPosition = playerPosition;
+                }
+                if (player2Position != null)
+                {
+                    AdjustZoom(playerPosition, (Vector2)player2Position, MIN_ZOOM, MAX_ZOOM);
+                }
+                SmoothFollow(_lastCameraPosition);
+            }
             else
+            {
                 HandleFreeLookInput();
+            }
 
             // Make sure camera does not leave gameworld
             ClampToWorld();
@@ -79,10 +98,25 @@ namespace BikeWars.Content.engine
             Position = pos;
         }
 
-        private void AdjustZoom(float amount)
+        // This is mainly used to handle the Zoom while having 2 players
+        private void AdjustZoom(Vector2 playerPosition, Vector2 player2Position, float minZoom, float maxZoom)
         {
-            Zoom += amount;
-            Zoom = MathHelper.Clamp(Zoom, 0.5f, 3f);
+            _lastCameraPosition = Maths.Middle(playerPosition, player2Position);
+            float xDistance = Math.Abs(playerPosition.X - player2Position.X);
+            float yDistance = Math.Abs(playerPosition.Y - player2Position.Y);
+            float zoomX = (_viewportWidth * _TWO_PLAYER_CAMERA_PADDING) / xDistance;
+            float zoomY = (_viewportHeight * _TWO_PLAYER_CAMERA_PADDING) / yDistance;
+
+            float targetZoom = Math.Min(zoomX, zoomY);
+            targetZoom = MathHelper.Clamp(targetZoom, minZoom, MAX_ZOOM);
+
+            Zoom = MathHelper.Lerp(Zoom, targetZoom, 0.1f);
+        }
+
+        // This is mainly used to handle the Zoom of one player
+        private void AdjustZoom(float amount, float minV, float maxV)
+        {
+            Zoom = MathHelper.Clamp(Zoom + amount, minV, maxV);
         }
 
         // Defines borders for camera movement in gameworld
@@ -105,14 +139,11 @@ namespace BikeWars.Content.engine
         // Calculates new size and position of all objects on screen
         public Matrix GetTransform()
         {
-
             Vector2 screenCenter = new Vector2(_viewportWidth / 2f, _viewportHeight / 2f);
-
             return
                 Matrix.CreateTranslation(new Vector3(-Position, 0f)) *
                 Matrix.CreateScale(Zoom, Zoom, 1f) *
                 Matrix.CreateTranslation(new Vector3(screenCenter, 0f));
-
         }
     }
 }

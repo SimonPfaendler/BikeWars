@@ -12,5 +12,9 @@ namespace BikeWars.Utilities
             float distance = Vector2.Distance(new Vector2(circ.Location.X, circ.Location.Y), new Vector2(closestX, closestY));
             return distance < circ.Radius;
         }
+        public static Vector2 Middle(Vector2 first, Vector2 second)
+        {
+            return (first + second) / 2;
+        }
     }
 }

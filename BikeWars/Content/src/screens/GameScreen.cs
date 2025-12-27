@@ -115,11 +115,16 @@ namespace BikeWars.Content.screens
 
             _freelook = false;
             // camera.Position is set by Update usually, but let's init it
-            camera.Position = player.Transform.Position;
+            if (player2 == null)
+            {
+                camera.Position = player.Transform.Position;
+            } else
+            {
+                camera.Position = Maths.Middle(player.Transform.Position, (Vector2)player2.Transform.Position);
+            }
 
             _statisticsManager = new StatisticsManager();
             _gameTimer = new GameTimer(GAME_TIME_LIMIT);
-
 
             _gameObjectManager.OnCharacterDied += _statisticsManager.HandleCharacterDied;
             _gameObjectManager.OnTookDamage += _statisticsManager.HandleTookDamage;
@@ -326,7 +331,13 @@ namespace BikeWars.Content.screens
                 _freelook = !_freelook;
                 _gameObjectManager.Player1.Immobalize(_freelook);
             }
-            camera.Update(gameTime, _gameObjectManager.Player1.Transform.Position, _freelook);
+            if (_gameObjectManager.Player2 == null)
+            {
+                camera.Update(gameTime, _gameObjectManager.Player1.Transform.Position, _freelook, null);
+            } else
+            {
+                camera.Update(gameTime, _gameObjectManager.Player1.Transform.Position, _freelook, _gameObjectManager.Player2.Transform.Position);
+            }
 
             _tiledMapRenderer.Update(gameTime);
             HandleSaveLoadInput();
