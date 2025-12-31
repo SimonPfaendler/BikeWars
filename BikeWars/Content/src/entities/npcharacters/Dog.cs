@@ -97,7 +97,7 @@ namespace BikeWars.Entities.Characters
             if (_currentAnimation == null)
                 return;
             Color drawColor = (_hitFlashTimer > 0f) ? _hitColor : Color.White;
-            _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, 0f, drawColor);
+            _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, 0f, _renderScale, drawColor);
         }
 
         public void SetWorldAudioManager(WorldAudioManager manager)

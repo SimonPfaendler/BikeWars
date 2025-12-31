@@ -14,6 +14,7 @@ namespace BikeWars.Content.engine.ui
         public Vector2 Velocity { get; private set; }
         private Color _tint;
         private static Random _rnd = new Random();
+        private float _scaleAnim = 0f;
 
         private const float MaxLifetime = 0.8f;
 
@@ -48,11 +49,15 @@ namespace BikeWars.Content.engine.ui
         {
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
             
+            // Pop-in animation
+            _scaleAnim = MathHelper.Lerp(_scaleAnim, 2.0f, 20f * dt);
+            if (_scaleAnim > 1.2f && Lifetime < MaxLifetime - 0.05f)
+            {
+                _scaleAnim = MathHelper.Lerp(_scaleAnim, 1.0f, 10f * dt); // Elastic snap back
+            }
+
             // Apply Velocity
             Position += Velocity * dt;
-            
-            // Optional: Friction or Gravity?
-            // Let's add slight "friction" so they pop out fast and slow down
             Velocity *= 0.98f; 
 
             // Decay
@@ -70,14 +75,22 @@ namespace BikeWars.Content.engine.ui
             float alpha = Lifetime / MaxLifetime;
             Color color = _tint * alpha;
 
-            float scale = IsCrit ? 2.5f : 1.75f;
+            float baseScale = IsCrit ? 2.5f : 1.75f;
+            
+            // Calculate Squash and Stretch
+
+            float stretchFactor = _scaleAnim - 1.0f; 
+            float scaleX = _scaleAnim * (1.0f - stretchFactor * 0.5f);
+            float scaleY = _scaleAnim * (1.0f + stretchFactor * 0.5f);
+
+            Vector2 finalScale = new Vector2(scaleX, scaleY) * baseScale;
 
             string text = Value.ToString();
             Vector2 origin = font.MeasureString(text) / 2f;
 
             // Draw with simple drop shadow/outline for readability
-            spriteBatch.DrawString(font, text, Position + new Vector2(2, 2), Color.Black * alpha, 0f, origin, scale, SpriteEffects.None, 0f);
-            spriteBatch.DrawString(font, text, Position, color, 0f, origin, scale, SpriteEffects.None, 0f);
+            spriteBatch.DrawString(font, text, Position + new Vector2(2, 2), Color.Black * alpha, 0f, origin, finalScale, SpriteEffects.None, 0f);
+            spriteBatch.DrawString(font, text, Position, color, 0f, origin, finalScale, SpriteEffects.None, 0f);
         }
     }
 }

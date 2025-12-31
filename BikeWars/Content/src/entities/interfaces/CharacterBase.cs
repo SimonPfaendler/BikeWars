@@ -92,16 +92,69 @@ public abstract class CharacterBase : ICharacter, ICombat
     protected float _hitFlashTimer = 0f;
     protected Color _hitColor = Color.DarkRed;
 
-    public virtual void TakeDamage(int amount)
-    {
-        if (IsGodMode)
-            return;
+    // Tweening props
+    protected Vector2 _renderScale = Vector2.One;
+    protected float _pulseTimer = 0f;
 
-        if (IsDead) return;
+    public void TriggerSquash(float x, float y)
+    {
+        _renderScale = new Vector2(x, y);
+    }
+
+    protected void UpdateTweens(GameTime gameTime)
+    {
+        float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+        // Squash Recovery
+        // Lerp back to (1,1)
+        _renderScale = Vector2.Lerp(_renderScale, Vector2.One, 10f * dt);
+
+        // Continuous Pulse (only if close to 1,1 to avoid conflict with squash)
+        if (Vector2.Distance(_renderScale, Vector2.One) < 0.15f)
+        {
+            _pulseTimer += dt * 5f; 
+            float intensity = 0.1f * GetPulseMultiplier();
+            float pulse = MathF.Sin(_pulseTimer) * intensity;
+            _renderScale = new Vector2(1f + pulse, 1f - pulse); 
+        }
+        else
+        {
+            // If squashing heavily, sync timer so it doesn't jump
+            _pulseTimer = 0f;
+        }
+    }
+
+    public virtual bool IsCharacterMoving()
+    {
+        return Movement != null && Movement.IsMoving;
+    }
+
+    public virtual float GetPulseMultiplier()
+    {
+        return 1.0f;
+    }
+
+    public virtual void TakeDamage(int amount, bool shouldSquash = true)
+    {
+        if (IsGodMode || IsDead) return;
+
         OnTookDamage?.Invoke(this, amount);
         Attributes.Health -= amount;
-        _hitFlashTimer = 0.2f; // Flash for 0.2 seconds
+        _hitFlashTimer = 0.2f; 
+        
+        // Squash effect on hit
+        if (shouldSquash)
+        {
+            TriggerSquash(1.3f, 0.7f); 
+        }
     }
+
+    // Explicit interface implementation to satisfy ICombat
+    void ICombat.TakeDamage(int amount)
+    {
+        TakeDamage(amount, true);
+    }
+
     public bool CanAttack()
     {
         return _attackCooldownTimer <= 0f;
@@ -161,8 +214,9 @@ public abstract class CharacterBase : ICharacter, ICombat
         {
             _hitFlashTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
         }
+        UpdateTweens(gameTime);
     }
-    public abstract void Update(GameTime gameTime); // Use this to update the logic like where the position is or resize the collision box
+    public abstract void Update(GameTime gameTime); 
     public abstract void Draw(SpriteBatch spriteBatch);
     public bool Intersects(ICollider other)
     {

@@ -256,14 +256,26 @@ namespace BikeWars.Entities.Characters
             HandleGhostTrail(gameTime);
             HandleSwitchMovement();
 
+            UpdateHitFlash(gameTime);
             UpdateCollider();
         }
 
-        public override void TakeDamage(int amount)
+        public override bool IsCharacterMoving()
+        {
+            return movement.IsMoving();
+        }
+
+        public override float GetPulseMultiplier()
+        {
+            // Reduce pulse significantly when on bike, as it looks weird if the bike breathes
+            return movement.OwnsBike ? 0.5f : 1.0f; 
+        }
+
+        public override void TakeDamage(int amount, bool shouldSquash = true)
         {
             // Deactivate Godmode for testing damage
             if (IsGodMode)
-               return;
+                return;
 
             if (IsDead) return;
 
@@ -273,7 +285,7 @@ namespace BikeWars.Entities.Characters
                 bike.TakeDamage(amount);               
 
                 int reducedDamage = Math.Max(0, amount - bike.Attributes.Armor);
-                base.TakeDamage(reducedDamage);
+                base.TakeDamage(reducedDamage, shouldSquash);
 
                 if (bike.IsDestroyed)
                 {
@@ -282,7 +294,7 @@ namespace BikeWars.Entities.Characters
             }
             else
             {
-                base.TakeDamage(amount);             
+                base.TakeDamage(amount, shouldSquash);             
             }
         }
 
@@ -326,12 +338,12 @@ namespace BikeWars.Entities.Characters
                 typeof(WalkingMovement)) // TODO THIS IS ONLY INSERTED TO SHOW. BUT NOT GOOD!
             {
                 _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size,
-                    movement.CurrentMovement.Rotation);
+                    movement.CurrentMovement.Rotation, _renderScale);
             }
             else
             {
                 _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size,
-                    movement.CurrentMovement.Rotation + MathHelper.PiOver2);
+                    movement.CurrentMovement.Rotation + MathHelper.PiOver2, _renderScale);
             }
 
             // Draw line from eye position only if GazeDirection is valid (non-zero)

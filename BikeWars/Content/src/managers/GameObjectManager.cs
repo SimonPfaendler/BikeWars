@@ -91,12 +91,25 @@ public class GameObjectManager
         character.OnTookDamage += HandleTookDamage;
     }
 
+    private Dictionary<CharacterBase, int> _pendingDamage = new Dictionary<CharacterBase, int>();
+    private float _damageAggregationTimer = 0f;
+    private const float AggregationInterval = 0.3f; // every 0.3s
+
     private void HandleCharacterDeath(CharacterBase c)
     {
         OnCharacterDied?.Invoke(c);
+        if (_pendingDamage.ContainsKey(c)) _pendingDamage.Remove(c);
     }
+
     private void HandleTookDamage(CharacterBase c, int amount)
     {
+        // Aggregate damage
+        if (!_pendingDamage.ContainsKey(c))
+        {
+            _pendingDamage[c] = 0;
+        }
+        _pendingDamage[c] += amount;
+
         OnTookDamage?.Invoke(c, amount);
         
         if (c is Player || c == Player1 || c == Player2)
@@ -200,6 +213,26 @@ public class GameObjectManager
             dn.Update(gameTime);
             return dn.IsExpired;
         });
+
+        // Flush Aggregated Damage
+        _damageAggregationTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+        if (_damageAggregationTimer <= 0f)
+        {
+            foreach (var kvp in _pendingDamage)
+            {
+                var character = kvp.Key;
+                var totalDamage = kvp.Value;
+                
+                // Only spawn if damage > 0 and character is valid
+                if (totalDamage > 0)
+                {
+                    bool isCrit = false;
+                    SpawnDamageNumber(character.Transform.Position, totalDamage, isCrit);
+                }
+            }
+            _pendingDamage.Clear();
+            _damageAggregationTimer = AggregationInterval;
+        }
     }
 
     private void OnPlayerShotBullet(Player player)

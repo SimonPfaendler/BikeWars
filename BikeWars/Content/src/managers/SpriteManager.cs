@@ -214,14 +214,28 @@ namespace BikeWars.Content.managers
 
         public void Draw(SpriteBatch spriteBatch, Vector2 position, Point size, float rotation, Color? color = null)
         {
+            Draw(spriteBatch, position, size, rotation, Vector2.One, color);
+        }
+
+        public void Draw(SpriteBatch spriteBatch, Vector2 position, Point size, float rotation, Vector2 scale, Color? color = null)
+        {
             Rectangle source = _frames[_frameIndex];
+            
+            // Apply scale to dimensions
+            float width = size.X * scale.X;
+            float height = size.Y * scale.Y;
+            
             Rectangle dest = new Rectangle(
                 (int)MathF.Round(position.X),
                 (int)MathF.Round(position.Y),
-                size.X,
-                size.Y
+                (int)width,
+                (int)height
             );
-            spriteBatch.Draw(_sheet, dest, source, color ?? Color.White, rotation: rotation, new Vector2(source.Width / 2f, source.Height / 2f), SpriteEffects.None, layerDepth:0f);
+            
+            // Adjust origin to center for proper scaling
+            Vector2 origin = new Vector2(source.Width / 2f, source.Height / 2f);
+            
+            spriteBatch.Draw(_sheet, dest, source, color ?? Color.White, rotation: rotation, origin, SpriteEffects.None, layerDepth:0f);
         }
 
         public SpriteAnimation Clone()
