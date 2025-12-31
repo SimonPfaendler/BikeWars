@@ -17,10 +17,19 @@ namespace BikeWars.Content.screens
         public string DesiredMusic => AudioAssets.GameMusic;
         public float MusicVolume => 0.5f;
 
+        private Texture2D _pixel;
+        private int _lastWidth;
+        private int _lastHeight;
+
         public PauseMenuScreen(SpriteFont font, AudioService audioService)
             :base(null, font)
         {
             _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
+            
+            // Create single pixel structure for overlay
+            _pixel = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
+            _pixel.SetData(new[] { Color.White });
+
             InitializeButtons();
         }
         
@@ -29,6 +38,9 @@ namespace BikeWars.Content.screens
             Game1 game = Game1.Instance;
             int screenWidth = game.GraphicsDevice.Viewport.Width;
             int screenHeight = game.GraphicsDevice.Viewport.Height;
+            
+            _lastWidth = screenWidth;
+            _lastHeight = screenHeight;
     
             int buttonWidth = 300;
             int buttonHeight = 60;
@@ -36,8 +48,11 @@ namespace BikeWars.Content.screens
             int startY = screenHeight / 4;
             int verticalSpacing = 20;
 
+            
             _buttonTexture = CreateSimpleTexture(game.GraphicsDevice, buttonWidth, buttonHeight);
             
+            _buttons.Clear();
+
             var buttonDefinitions = new[]
             {
                 (id: ButtonAction.Resume, text: "Spiel fortsetzen"),
@@ -61,6 +76,18 @@ namespace BikeWars.Content.screens
             }
             
             UpdateSelection(0);
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+
+            // Check for resolution change
+            var vp = Game1.Instance.GraphicsDevice.Viewport;
+            if (vp.Width != _lastWidth || vp.Height != _lastHeight)
+            {
+                 InitializeButtons();
+            }
         }
         
         protected override void HandleButtonClick(MenuButton button)
@@ -109,11 +136,12 @@ namespace BikeWars.Content.screens
         {
             Game1 game = Game1.Instance;
             SpriteBatch spriteBatch = game.SpriteBatch;
+            var viewport = game.GraphicsDevice.Viewport;
             
             spriteBatch.Begin();
             
-            Texture2D overlay = CreateOverlayTexture(game.GraphicsDevice, game.GraphicsDevice.Viewport.Width, game.GraphicsDevice.Viewport.Height);
-            spriteBatch.Draw(overlay, Vector2.Zero, Color.White * 0.7f);
+            
+            spriteBatch.Draw(_pixel, new Rectangle(0, 0, viewport.Width, viewport.Height), Color.Black * 0.7f);
             
             foreach (var button in _buttons)
             {
@@ -123,15 +151,6 @@ namespace BikeWars.Content.screens
             spriteBatch.End();
         }
         
-        private Texture2D CreateOverlayTexture(GraphicsDevice graphicsDevice, int width, int height)
-        {
-            Texture2D texture = new Texture2D(graphicsDevice, width, height);
-            Color[] data = new Color[width * height];
-            for (int i = 0; i < data.Length; i++) 
-                data[i] = Color.Black;
-            texture.SetData(data);
-            return texture;
-        }
         public override bool DrawLower => true;    // GameScreen gets drawn
         public override bool UpdateLower => false; // GameScreen doesn't get updated
     }
