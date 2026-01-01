@@ -45,14 +45,14 @@ public class CombatManager
         // Initialize random manually or use a shared instance if available. Good practice to have a shared Random.
         // Assuming a shared Random or just creating one for now. Performance impact is negligible here.
         Random rnd = new Random();
-        bool isCrit = false; 
+        //bool isCrit = false; // isn't used, maybe unnecessary 
         int damage = projectile.Damage;
 
         if (projectile.Owner is CharacterBase owner)
         {
             if (rnd.NextDouble() < owner.Attributes.CritChance)
             {
-                isCrit = true;
+                // isCrit = true;
                 damage = (int)(damage * owner.Attributes.CritMultiplier);
             }
         }
