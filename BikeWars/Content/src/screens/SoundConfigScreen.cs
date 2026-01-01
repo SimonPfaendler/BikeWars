@@ -15,14 +15,19 @@ namespace BikeWars.Content.screens
         
         private Rectangle _musicTrackRect;
         private Rectangle _sfxTrackRect;
-        
         private Texture2D _sliderTexture;
         
         private bool _isDraggingMusic;
         private bool _isDraggingSfx;
         
+        private float _uiScale;
+        private int _knobWidth;
+        private int _knobHeight;
+        
         public string DesiredMusic => AudioAssets.MenuMusic;
         public float MusicVolume => 1f;
+        public override bool DrawLower => false;
+        public override bool UpdateLower => false;
 
         public SoundConfigScreen(Texture2D background, SpriteFont font, AudioService audioService)
             : base(background, font)
@@ -40,9 +45,12 @@ namespace BikeWars.Content.screens
             _buttons.Clear();
             var viewport = Game1.Instance.GraphicsDevice.Viewport;
             
-            int btnWidth = 200;
-            int btnHeight = 50;
-            int margin = 40;
+            _uiScale = viewport.Height / 1080f;
+
+            // scale button
+            int btnWidth = (int)(250 * _uiScale);
+            int btnHeight = (int)(60 * _uiScale);
+            int margin = (int)(50 * _uiScale);
             
             _buttons.Add(new MenuButton(
                 id: (int)ButtonAction.Back,
@@ -52,14 +60,22 @@ namespace BikeWars.Content.screens
                 font: _font,
                 audioService: _audioService
             ));
+
+            // scale slider
+            int trackWidth = (int)(viewport.Width * 0.45f);
+            int trackHeight = (int)(20 * _uiScale);
             
-            int trackWidth = (int)(viewport.Width * 0.3f);
-            int trackHeight = 16;
-            int sliderY = (int)(viewport.Height * 0.4f);
+            _knobWidth = (int)(30 * _uiScale);
+            _knobHeight = (int)(50 * _uiScale);
             
-            _musicTrackRect = new Rectangle(viewport.Width / 3 - trackWidth / 2, sliderY, trackWidth, trackHeight);
+            int centerX = viewport.Width / 2 - trackWidth / 2;
             
-            _sfxTrackRect = new Rectangle(2 * viewport.Width / 3 - trackWidth / 2, sliderY, trackWidth, trackHeight);
+            int musicY = (int)(viewport.Height * 0.35f);
+            _musicTrackRect = new Rectangle(centerX, musicY, trackWidth, trackHeight);
+            
+            int sfxY = (int)(viewport.Height * 0.55f);
+            _sfxTrackRect = new Rectangle(centerX, sfxY, trackWidth, trackHeight);
+            
             UpdateSelection(0);
         }
 
@@ -72,7 +88,7 @@ namespace BikeWars.Content.screens
             
             if (mouse.LeftButton == ButtonState.Pressed)
             {
-                // Music Volume
+                // music
                 if (_musicTrackRect.Contains(mousePos) || _isDraggingMusic)
                 {
                     _isDraggingMusic = true;
@@ -80,7 +96,7 @@ namespace BikeWars.Content.screens
                     _audioService.Music.MasterVolume = newValue;
                 }
                 
-                // Sound Effect Volume
+                // sounds
                 if (_sfxTrackRect.Contains(mousePos) || _isDraggingSfx)
                 {
                     _isDraggingSfx = true;
@@ -101,9 +117,9 @@ namespace BikeWars.Content.screens
             
             var spriteBatch = Game1.Instance.SpriteBatch;
             spriteBatch.Begin();
-            
+
             DrawSlider(spriteBatch, _musicTrackRect, _audioService.Music.MasterVolume, "Musik");
-            DrawSlider(spriteBatch, _sfxTrackRect, _audioService.Sounds.MasterVolume, "Sound Effekte");
+            DrawSlider(spriteBatch, _sfxTrackRect, _audioService.Sounds.MasterVolume, "Effekte");
 
             spriteBatch.End();
         }
@@ -112,20 +128,29 @@ namespace BikeWars.Content.screens
         {
             sb.Draw(_sliderTexture, track, Color.Gray * 0.5f);
             
-            // knob for sliding
-            int knobWidth = 24;
-            int knobHeight = 40;
-            int knobX = track.X + (int)(track.Width * volume) - (knobWidth / 2);
-            Rectangle knobRect = new Rectangle(knobX, track.Y + (track.Height / 2) - (knobHeight / 2), knobWidth, knobHeight);
-            
+            // knob
+            int knobX = track.X + (int)(track.Width * volume) - (_knobWidth / 2);
+            Rectangle knobRect = new Rectangle(knobX, track.Y + (track.Height / 2) - (_knobHeight / 2), _knobWidth, _knobHeight);
             sb.Draw(_sliderTexture, knobRect, Color.Gold);
-
-            // label and percent value
+            
+            // scale text
             string text = $"{label}: {(int)(volume * 100)}%";
-            Vector2 textSize = _font.MeasureString(text);
-            sb.DrawString(_font, text, new Vector2(track.Center.X - (textSize.X * 1.2f) / 2, track.Y - 50), Color.White, 0f, Vector2.Zero, 1.2f, SpriteEffects.None, 0f);
+            float fontScale = 1.4f * _uiScale;
+            Vector2 textSize = _font.MeasureString(text) * fontScale;
+            
+            sb.DrawString(
+                _font, 
+                text, 
+                new Vector2(track.Center.X - textSize.X / 2, track.Y - (65 * _uiScale)), 
+                Color.Black, 
+                0f, 
+                Vector2.Zero, 
+                fontScale, 
+                SpriteEffects.None, 
+                0f
+            );
         }
-
+        
         protected override void HandleButtonClick(MenuButton button)
         {
             if (button.Id == (int)ButtonAction.Back)
@@ -133,8 +158,5 @@ namespace BikeWars.Content.screens
                 ScreenManager.RemoveScreen(this);
             }
         }
-        
-        public override bool DrawLower => false;
-        public override bool UpdateLower => false;
     }
 }

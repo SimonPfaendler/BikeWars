@@ -30,6 +30,7 @@ namespace BikeWars.Content.screens
             _backgroundTexture = background;
             _font = font;
             _buttons = new List<MenuButton>();
+            _previousMouseState = Mouse.GetState();
         }
         
         protected abstract void InitializeButtons();
@@ -59,6 +60,11 @@ namespace BikeWars.Content.screens
 
             MouseState currentMouseState = Mouse.GetState();
             double now = gameTime.TotalGameTime.TotalMilliseconds;
+            
+            if (_lastClickTime < 0) 
+            {
+                _lastClickTime = now;
+            }
             
             foreach (var button in _buttons)
             {
