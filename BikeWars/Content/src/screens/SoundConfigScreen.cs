@@ -3,6 +3,7 @@ using BikeWars.Content.engine.Audio;
 using BikeWars.Content.components;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.managers;
+using BikeWars.Content.engine;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -23,6 +24,9 @@ namespace BikeWars.Content.screens
         private float _uiScale;
         private int _knobWidth;
         private int _knobHeight;
+        
+        private int _selectedItem = 1; 
+        private float _volumeStep = 0.01f;
         
         public string DesiredMusic => AudioAssets.MenuMusic;
         public float MusicVolume => 1f;
@@ -75,33 +79,73 @@ namespace BikeWars.Content.screens
             
             int sfxY = (int)(viewport.Height * 0.55f);
             _sfxTrackRect = new Rectangle(centerX, sfxY, trackWidth, trackHeight);
-            
-            UpdateSelection(0);
         }
 
         public override void Update(GameTime gameTime)
         {
-            base.Update(gameTime);
-
-            MouseState mouse = Mouse.GetState();
-            Point mousePos = mouse.Position;
+            HandleControllerInput();
+            HandleMouseInput();
             
+            base.Update(gameTime);
+            
+            if (_selectedIndex == 0 && _usingMouse) _selectedItem = 0;
+        }
+        
+        private void HandleControllerInput()
+        {
+            // Navigation up/down
+            if (InputHandler.IsPressed(GameAction.UI_UP))
+            {
+                _selectedItem--;
+                if (_selectedItem < 0) _selectedItem = 2;
+                _usingMouse = false;
+            }
+            if (InputHandler.IsPressed(GameAction.UI_DOWN))
+            {
+                _selectedItem++;
+                if (_selectedItem > 2) _selectedItem = 0;
+                _usingMouse = false;
+            }
+            
+            if (!_usingMouse)
+            {
+                _selectedIndex = (_selectedItem == 0) ? 0 : -1;
+                UpdateSelection(_selectedIndex);
+            }
+
+            // set volume
+            if (_selectedItem == 1) // Music
+            {
+                if (InputHandler.IsHeld(GameAction.UI_LEFT)) _audioService.Music.MasterVolume -= _volumeStep;
+                if (InputHandler.IsHeld(GameAction.UI_RIGHT)) _audioService.Music.MasterVolume += _volumeStep;
+            }
+            else if (_selectedItem == 2) // SFX
+            {
+                if (InputHandler.IsHeld(GameAction.UI_LEFT)) _audioService.Sounds.MasterVolume -= _volumeStep;
+                if (InputHandler.IsHeld(GameAction.UI_RIGHT)) _audioService.Sounds.MasterVolume += _volumeStep;
+            }
+            
+            _audioService.Music.MasterVolume = MathHelper.Clamp(_audioService.Music.MasterVolume, 0, 1);
+            _audioService.Sounds.MasterVolume = MathHelper.Clamp(_audioService.Sounds.MasterVolume, 0, 1);
+        }
+        
+        private void HandleMouseInput()
+        {
+            MouseState mouse = Mouse.GetState();
             if (mouse.LeftButton == ButtonState.Pressed)
             {
-                // music
-                if (_musicTrackRect.Contains(mousePos) || _isDraggingMusic)
+                _usingMouse = true;
+                if (_musicTrackRect.Contains(mouse.Position) || _isDraggingMusic)
                 {
                     _isDraggingMusic = true;
-                    float newValue = MathHelper.Clamp((float)(mousePos.X - _musicTrackRect.X) / _musicTrackRect.Width, 0f, 1f);
-                    _audioService.Music.MasterVolume = newValue;
+                    _selectedItem = 1;
+                    _audioService.Music.MasterVolume = MathHelper.Clamp((float)(mouse.X - _musicTrackRect.X) / _musicTrackRect.Width, 0f, 1f);
                 }
-                
-                // sounds
-                if (_sfxTrackRect.Contains(mousePos) || _isDraggingSfx)
+                if (_sfxTrackRect.Contains(mouse.Position) || _isDraggingSfx)
                 {
                     _isDraggingSfx = true;
-                    float newValue = MathHelper.Clamp((float)(mousePos.X - _sfxTrackRect.X) / _sfxTrackRect.Width, 0f, 1f);
-                    _audioService.Sounds.MasterVolume = newValue;
+                    _selectedItem = 2;
+                    _audioService.Sounds.MasterVolume = MathHelper.Clamp((float)(mouse.X - _sfxTrackRect.X) / _sfxTrackRect.Width, 0f, 1f);
                 }
             }
             else
@@ -118,37 +162,33 @@ namespace BikeWars.Content.screens
             var spriteBatch = Game1.Instance.SpriteBatch;
             spriteBatch.Begin();
 
-            DrawSlider(spriteBatch, _musicTrackRect, _audioService.Music.MasterVolume, "Musik");
-            DrawSlider(spriteBatch, _sfxTrackRect, _audioService.Sounds.MasterVolume, "Effekte");
+            DrawSlider(spriteBatch, _musicTrackRect, _audioService.Music.MasterVolume, "Musik Lautstaerke", _selectedItem == 1);
+            DrawSlider(spriteBatch, _sfxTrackRect, _audioService.Sounds.MasterVolume, "Effekt Lautstaerke", _selectedItem == 2);
 
             spriteBatch.End();
         }
 
-        private void DrawSlider(SpriteBatch sb, Rectangle track, float volume, string label)
+        private void DrawSlider(SpriteBatch sb, Rectangle track, float volume, string label, bool isSelected)
         {
-            sb.Draw(_sliderTexture, track, Color.Gray * 0.5f);
+            // track
+            Color trackColor = isSelected ? Color.White * 0.8f : Color.Gray * 0.5f;
+            sb.Draw(_sliderTexture, track, trackColor);
             
-            // knob
             int knobX = track.X + (int)(track.Width * volume) - (_knobWidth / 2);
             Rectangle knobRect = new Rectangle(knobX, track.Y + (track.Height / 2) - (_knobHeight / 2), _knobWidth, _knobHeight);
-            sb.Draw(_sliderTexture, knobRect, Color.Gold);
             
-            // scale text
+            // knob
+            sb.Draw(_sliderTexture, knobRect, isSelected ? Color.Gold : Color.DarkGoldenrod);
+
             string text = $"{label}: {(int)(volume * 100)}%";
             float fontScale = 1.4f * _uiScale;
             Vector2 textSize = _font.MeasureString(text) * fontScale;
             
-            sb.DrawString(
-                _font, 
-                text, 
-                new Vector2(track.Center.X - textSize.X / 2, track.Y - (65 * _uiScale)), 
-                Color.Black, 
-                0f, 
-                Vector2.Zero, 
-                fontScale, 
-                SpriteEffects.None, 
-                0f
-            );
+            // text
+            Color textColor = isSelected ? Color.Yellow : Color.White;
+
+            sb.DrawString(_font, text, new Vector2(track.Center.X - textSize.X / 2, track.Y - (70 * _uiScale)), 
+                textColor, 0f, Vector2.Zero, fontScale, SpriteEffects.None, 0f);
         }
         
         protected override void HandleButtonClick(MenuButton button)
