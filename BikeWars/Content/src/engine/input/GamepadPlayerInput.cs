@@ -1,15 +1,15 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using BikeWars.Content.engine.interfaces;
+using BikeWars.Content.engine;
 
 namespace BikeWars.Content.engine.input
 {
     public class GamepadPlayerInput : IPlayerInput
     {
         private PlayerIndex _playerIndex;
-        private GamePadState _currentState;
-        private GamePadState _previousState;
-
+        
+        
         public bool IsAnalog => true;
 
         public GamepadPlayerInput(PlayerIndex playerIndex)
@@ -19,24 +19,24 @@ namespace BikeWars.Content.engine.input
 
         public void Update()
         {
-            _previousState = _currentState;
-            _currentState = GamePad.GetState(_playerIndex);
+
         }
+
+        private GamePadInfo GetPad() => InputHandler.GetGamePad(_playerIndex);
 
         public Vector2 GetMovementDirection(IMoveable currentMovement)
         {
-             var leftStick = _currentState.ThumbSticks.Left;
-             leftStick.Y *= -1;
-             if (leftStick.Length() < 0.2f) return Vector2.Zero;
-
-             return leftStick;
+             var pad = GetPad();
+             return pad.LeftStick;
         }
 
         public Vector2 GetAimDirection(Vector2 currentPosition, Vector2 currentFacingDirection)
         {
-            Vector2 rightStick = _currentState.ThumbSticks.Right;
+            var pad = GetPad();
+            var rightStick = pad.RightStick;
             rightStick.Y *= -1;
 
+            
             if (rightStick.Length() > 0.2f)
             {
                 return Vector2.Normalize(rightStick);
@@ -47,11 +47,13 @@ namespace BikeWars.Content.engine.input
         public bool IsPressed(GameAction action)
         {
             Buttons[] buttons;
+            var pad = GetPad();
+            
             if (InputHandler.GamepadMap.TryGetValue(action, out buttons))
             {
                  foreach (var b in buttons)
                  {
-                     if (_currentState.IsButtonDown(b) && !_previousState.IsButtonDown(b))
+                     if (pad.Pressed(b))
                         return true;
                  }
             }
@@ -61,11 +63,13 @@ namespace BikeWars.Content.engine.input
         public bool IsHeld(GameAction action)
         {
             Buttons[] buttons;
+            var pad = GetPad();
+            
             if (InputHandler.GamepadMap.TryGetValue(action, out buttons))
             {
                  foreach (var b in buttons)
                  {
-                     if (_currentState.IsButtonDown(b))
+                     if (pad.Held(b))
                         return true;
                  }
             }

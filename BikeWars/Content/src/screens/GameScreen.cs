@@ -276,6 +276,7 @@ namespace BikeWars.Content.screens
                 if (_inputMode == InputMode.Keyboard)
                 {
                     _inputMode = InputMode.Controller;
+                    // Strict Controller Mode for Player1 on Pad 1
                     _gameObjectManager.Player1.SetInput(new GamepadPlayerInput(PlayerIndex.One));
                 }
                 else

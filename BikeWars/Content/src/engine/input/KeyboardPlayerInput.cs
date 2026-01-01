@@ -1,5 +1,7 @@
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using BikeWars.Content.engine.interfaces;
+using BikeWars.Content.engine;
 
 namespace BikeWars.Content.engine.input
 {

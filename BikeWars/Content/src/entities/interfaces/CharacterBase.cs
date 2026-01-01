@@ -145,7 +145,7 @@ public abstract class CharacterBase : ICharacter, ICombat
         // Squash effect on hit
         if (shouldSquash)
         {
-            TriggerSquash(1.3f, 0.7f); 
+            TriggerSquash(1.2f, 0.8f); 
         }
     }
 
