@@ -83,12 +83,20 @@ namespace BikeWars.Content.screens
 
         public override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
+            
             HandleControllerInput();
             HandleMouseInput();
             
-            base.Update(gameTime);
+            if (_buttons.Count > 0)
+            {
+                _buttons[0].IsSelected = (_selectedItem == 0);
+            }
             
-            if (_selectedIndex == 0 && _usingMouse) _selectedItem = 0;
+            if (_selectedIndex == 0 && _usingMouse) 
+            {
+                _selectedItem = 0;
+            }
         }
         
         private void HandleControllerInput()
@@ -110,7 +118,6 @@ namespace BikeWars.Content.screens
             if (!_usingMouse)
             {
                 _selectedIndex = (_selectedItem == 0) ? 0 : -1;
-                UpdateSelection(_selectedIndex);
             }
 
             // set volume
@@ -185,7 +192,7 @@ namespace BikeWars.Content.screens
             Vector2 textSize = _font.MeasureString(text) * fontScale;
             
             // text
-            Color textColor = isSelected ? Color.Yellow : Color.White;
+            Color textColor = isSelected ? Color.Yellow : Color.Black;
 
             sb.DrawString(_font, text, new Vector2(track.Center.X - textSize.X / 2, track.Y - (70 * _uiScale)), 
                 textColor, 0f, Vector2.Zero, fontScale, SpriteEffects.None, 0f);
