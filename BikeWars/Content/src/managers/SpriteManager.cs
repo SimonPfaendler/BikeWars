@@ -65,12 +65,7 @@ namespace BikeWars.Content.managers
             { "Fahrradwerkstatt", "assets/Map/Fahrradwerkstatt_Tile"}
         };
 
-        // Add individual map sprites (single-image assets)
-        private static readonly IReadOnlyDictionary<string, string> MapSingleTexturePaths = new Dictionary<string, string>
-        {
-            { "tree", "assets/Map/tree" }
-        };
-        // hier sollte irgendwann auch auf atlas strukturen gewechselt werden
+        // No single-image map sprites here; map sprites are loaded from atlas JSON.
 
         // Atlas regions for large map atlases (tilemap_1 etc.)
         private static Dictionary<string, Rectangle> _mapAtlasEntries = new Dictionary<string, Rectangle>();
@@ -161,11 +156,7 @@ namespace BikeWars.Content.managers
                 var texture = content.Load<Texture2D>(kv.Value);
                 _textureCache.Add(kv.Key, texture);
             }
-            foreach (var kv in MapSingleTexturePaths)
-            {
-                var texture = content.Load<Texture2D>(kv.Value);
-                _textureCache.Add(kv.Key, texture);
-            }
+            // Note: single-image map sprites were removed — map objects use atlas regions now.
 
             // Try to load map atlas JSON (tilemap_1_regions.json) — prefer Content/sprites, fallback to Content/assets/sprites
             try

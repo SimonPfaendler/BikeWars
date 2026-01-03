@@ -1,4 +1,5 @@
 using System;
+#nullable enable
 using BikeWars.Content.engine;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.managers;
@@ -28,25 +29,22 @@ public class DestructibleObject : ItemBase
         catch { }
         Health = Math.Max(1, hp);
 
-        // Try to load a texture via SpriteManager using property "sprite" (key)
-        Texture2D? tex = null;
+        // Load atlas region via SpriteManager using property "sprite" (key)
         _usesAtlas = false;
         try
         {
-            string key = attributes.Properties.ContainsKey("sprite") ? attributes.Properties["sprite"] : "Chest";
-            // First try atlas regions (tilemap_1_regions.json) using filename conventions
+            string key = attributes.Properties.ContainsKey("sprite") ? attributes.Properties["sprite"] : "";
+            // Try filename with and without .png
             if (SpriteManager.TryGetMapAtlasRegion(key, out var atlasTex, out var atlasRect) || SpriteManager.TryGetMapAtlasRegion(key + ".png", out atlasTex, out atlasRect))
             {
                 _atlas = atlasTex;
                 _atlasRect = atlasRect;
                 _usesAtlas = _atlas != null && !_atlasRect.IsEmpty;
             }
-
-            // Fallback to single texture path
-            if (!_usesAtlas)
+            else
             {
-                tex = SpriteManager.GetTexture(key);
-                CurrentTex = tex;
+                // No atlas region found; leave CurrentTex null — we no longer use single-image fallbacks.
+                CurrentTex = null;
             }
         }
         catch
@@ -60,10 +58,6 @@ public class DestructibleObject : ItemBase
             if (_usesAtlas && _atlasRect != Rectangle.Empty)
             {
                 Transform.Size = new Point(_atlasRect.Width, _atlasRect.Height);
-            }
-            else if (tex != null)
-            {
-                Transform.Size = new Point(tex.Width, tex.Height);
             }
         }
 
@@ -88,9 +82,7 @@ public class DestructibleObject : ItemBase
             spriteBatch.Draw(_atlas, Transform.Bounds, _atlasRect, Color.White);
             return;
         }
-
-        if (CurrentTex == null) return;
-        spriteBatch.Draw(CurrentTex, Transform.Bounds, Color.White);
+        // No single-image fallback supported; nothing to draw if atlas not found
     }
 
     public override bool Intersects(BikeWars.Content.engine.interfaces.ICollider other)
