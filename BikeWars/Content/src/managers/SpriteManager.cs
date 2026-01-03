@@ -64,6 +64,12 @@ namespace BikeWars.Content.managers
             //MAP OBJECTS
             { "Fahrradwerkstatt", "assets/Map/Fahrradwerkstatt_Tile"}
         };
+
+        // Add individual map sprites (single-image assets)
+        private static readonly IReadOnlyDictionary<string, string> MapSingleTexturePaths = new Dictionary<string, string>
+        {
+            { "tree", "assets/Map/tree" }
+        };
         // hier sollte irgendwann auch auf atlas strukturen gewechselt werden
 
         // liste aller animationen, die beim start gecached werden
@@ -147,6 +153,11 @@ namespace BikeWars.Content.managers
             }
 
             foreach (var kv in SimpleTexturePaths)
+            {
+                var texture = content.Load<Texture2D>(kv.Value);
+                _textureCache.Add(kv.Key, texture);
+            }
+            foreach (var kv in MapSingleTexturePaths)
             {
                 var texture = content.Load<Texture2D>(kv.Value);
                 _textureCache.Add(kv.Key, texture);

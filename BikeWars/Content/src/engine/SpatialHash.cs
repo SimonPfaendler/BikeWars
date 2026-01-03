@@ -76,10 +76,16 @@ public class SpatialHash
 
     public void Remove(ICollider c)
     {
-        int minX = (int)MathF.Floor(c.Position.X / _cellSize);
-        int maxX = (int)MathF.Floor(c.Position.X / _cellSize);
-        int minY = (int)MathF.Floor(c.Position.Y / _cellSize);
-        int maxY = (int)MathF.Floor(c.Position.Y / _cellSize);
+        // Compute the range of cells covered by this collider (same logic as Insert)
+        float left = c.Position.X;
+        float right = c.Position.X + c.Width;
+        float top = c.Position.Y;
+        float bottom = c.Position.Y + c.Height;
+
+        int minX = (int)MathF.Floor(left / _cellSize);
+        int maxX = (int)MathF.Floor((right - 1) / _cellSize);
+        int minY = (int)MathF.Floor(top / _cellSize);
+        int maxY = (int)MathF.Floor((bottom - 1) / _cellSize);
 
         for (int x = minX; x <= maxX; x++)
         {
@@ -89,18 +95,22 @@ public class SpatialHash
 
                 if (_cells.TryGetValue(key, out var cell))
                 {
-                    cell.Colliders!.Remove(c);
+                    if (cell.Colliders != null)
+                        cell.Colliders.Remove(c);
                     cell.Count--;
 
-                    if (cell.Count == 0)
+                    if (cell.Count <= 0)
                     {
                         _cells.Remove(key);
                         continue;
                     }
 
                     cell.Layers.Clear();
-                    foreach (var col in cell.Colliders)
-                        cell.Layers.Add(col.Layer);
+                    if (cell.Colliders != null)
+                    {
+                        foreach (var col in cell.Colliders)
+                            cell.Layers.Add(col.Layer);
+                    }
                 }
             }
         }

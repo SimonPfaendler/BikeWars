@@ -4,6 +4,7 @@ using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Entities.Characters;
+using BikeWars.Entities.Characters.MapObjects;
 using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
 using Microsoft.Xna.Framework;
@@ -111,7 +112,18 @@ public class CollisionManager
         LoadTerrainLayer("Floor", TerrainType.GRASS);
         LoadSpawnLayer("Enemy_Spawn");
         LoadObjectLayer("BIke_Shops_Layer");
+        // spawn shops/objects
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
+
+        // Also load destructible objects from a dedicated Tiled object layer
+        LoadObjectLayer("Destructibles");
+        _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
+
+        // Insert any statics registered by the GameObjectManager (e.g. destructibles)
+        foreach (var s in _gameObjectManager.Statics)
+        {
+            StaticHash.Insert(s);
+        }
     }
 
     // takes a world position in pixels (Vector2) and returns which tile that position is inside
@@ -347,11 +359,29 @@ public class CollisionManager
     {
         if (b.Layer == CollisionLayer.WALL && c.Layer == CollisionLayer.PROJECTILE)
         {
-            if (c.Intersects(b))
+            if (!c.Intersects(b)) return;
+
+            ProjectileBase p = (ProjectileBase)c.Owner;
+
+            // If the wall belongs to a destructible map object, apply damage
+            if (b.Owner is DestructibleObject destructible)
             {
-                ProjectileBase p = (ProjectileBase)c.Owner;
+                destructible.TakeDamage(p.Damage);
                 _toRemoveColliders.Add(p.Collider);
+
+                // if destroyed: remove from static hash and from gameobject manager statics, and remove drawing item
+                if (destructible.Health <= 0)
+                {
+                    StaticHash.Remove(b);
+                    _gameObjectManager.Statics.Remove((BoxCollider)b);
+                    _gameObjectManager.Remove(destructible);
+                }
+
+                return;
             }
+
+            // default: projectile hits a normal wall -> destroy projectile
+            _toRemoveColliders.Add(p.Collider);
         }
     }
 

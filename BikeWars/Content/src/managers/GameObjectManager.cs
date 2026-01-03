@@ -368,7 +368,17 @@ public class GameObjectManager
             var created = CreateFromTiled(spawn);
             if (created != null)
             {
-                AddItem(created);
+                // Destructible objects should both be drawable (items) and registered as statics
+                if (created is BikeWars.Entities.Characters.MapObjects.DestructibleObject)
+                {
+                    AddItem(created);
+                    if (created.Collider is BoxCollider box)
+                        AddStatic(box);
+                }
+                else
+                {
+                    AddItem(created);
+                }
             }
         }
     }
@@ -384,6 +394,8 @@ public class GameObjectManager
         {
             case "Bike_Shop":
                 return new BikeShop(start, size, spawn);
+            case "Destructible":
+                return new BikeWars.Entities.Characters.MapObjects.DestructibleObject(start, size, spawn);
 
             default:
                 return null;
