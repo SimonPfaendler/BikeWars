@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using BikeWars.Content.engine;
 
 namespace BikeWars.Content.utils
 {
@@ -13,7 +14,7 @@ namespace BikeWars.Content.utils
     /// Liest die Koordinaten automatisch aus dem TexturePacker JSON.
     /// 
     /// TO DO bei neuen Sprites:
-    /// 1. Sprite im TexturePacker hinzufügen & JSON (character_atlas_koordinaten) updaten.
+    /// 1. Sprite im TexturePacker hinzufügen & JSON (character_atlas.json) updaten.
     /// 2. Hier in 'InitializeAnimations()' neuen Eintrag hinzufügen:
     ///    AnimationFrames["Name"] = GetFramesFromAtlas("Dateiname.png", cols, rows);
     /// 3. Falls Frame-Anzahl ungleich Grid (z.B. 3 Frames in 2x2 Grid), nutze .Take(n).ToList().
@@ -21,8 +22,8 @@ namespace BikeWars.Content.utils
     /// </summary>
     public static class SpriteFrameDictionary
     {
-        // Cache für die geladenen Atlas-Daten: Filename -> AtlasRect
-        private static Dictionary<string, AtlasRect> _atlasEntries = new Dictionary<string, AtlasRect>();
+        // Cache für die geladenen Atlas-Daten: Filename -> TexturePackerRect
+        private static Dictionary<string, TexturePackerRect> _atlasEntries = new Dictionary<string, TexturePackerRect>();
 
         // ZENTRALES DICTIONARY
         public static readonly Dictionary<string, List<Rectangle>> AnimationFrames = new Dictionary<string, List<Rectangle>>();
@@ -35,23 +36,23 @@ namespace BikeWars.Content.utils
 
         private static void LoadAtlasData()
         {
-            string basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content", "assets", "sprites", "characters", "character_atlas_koordinaten");
-            string path = File.Exists(basePath) ? basePath : basePath + ".json";
+            string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content", "assets", "sprites", "characters", "character_atlas.json");
 
             if (!File.Exists(path))
             {
-                System.Diagnostics.Debug.WriteLine($"[SpriteFrameDictionary] ERROR: Atlas JSON not found at {basePath}");
+                System.Diagnostics.Debug.WriteLine($"[SpriteFrameDictionary] ERROR: Atlas JSON not found at {path}");
                 return;
             }
 
             try 
             {
-                var root = JsonSerializer.Deserialize<AtlasRoot>(File.ReadAllText(path), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                if (root?.frames != null)
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var root = JsonSerializer.Deserialize<TexturePackerRoot>(File.ReadAllText(path), options);
+                if (root?.Frames != null)
                 {
-                    foreach (var f in root.frames)
+                    foreach (var f in root.Frames)
                     {
-                        if (f.filename != null) _atlasEntries[f.filename] = f.frame;
+                        if (f.Filename != null) _atlasEntries[f.Filename] = f.Frame;
                     }
                 }
             }
@@ -63,7 +64,7 @@ namespace BikeWars.Content.utils
 
         private static List<Rectangle> GetFramesFromAtlas(string filename, int cols, int rows)
         {
-            if (!_atlasEntries.TryGetValue(filename, out AtlasRect rect))
+            if (!_atlasEntries.TryGetValue(filename, out TexturePackerRect rect))
             {
                 // Return empty list
                 System.Diagnostics.Debug.WriteLine($"[SpriteFrameDictionary] Missing frame: {filename}");
@@ -73,18 +74,18 @@ namespace BikeWars.Content.utils
             var frames = new List<Rectangle>();
             
              // Calculate frame size
-            int cellW = rect.w / cols;
-            int cellH = rect.h / rows;
+            int cellW = rect.W / cols;
+            int cellH = rect.H / rows;
 
             for (int r = 0; r < rows; r++)
             {
                 for (int c = 0; c < cols; c++)
                 {
                     // for TexturePackerGUI
-                    int x = rect.x + (int)((double)rect.w / cols * c);
-                    int y = rect.y + (int)((double)rect.h / rows * r);
-                    int w = (int)((double)rect.w / cols * (c + 1)) - (int)((double)rect.w / cols * c);
-                    int h = (int)((double)rect.h / rows * (r + 1)) - (int)((double)rect.h / rows * r);
+                    int x = rect.X + (int)((double)rect.W / cols * c);
+                    int y = rect.Y + (int)((double)rect.H / rows * r);
+                    int w = (int)((double)rect.W / cols * (c + 1)) - (int)((double)rect.W / cols * c);
+                    int h = (int)((double)rect.H / rows * (r + 1)) - (int)((double)rect.H / rows * r);
 
                     frames.Add(new Rectangle(x, y, w, h));
                 }
@@ -166,10 +167,5 @@ namespace BikeWars.Content.utils
         {
             return AnimationFrames.TryGetValue(key, out var frames) ? frames : throw new KeyNotFoundException($"Key '{key}' not found.");
         }
-
-        // JSON Data Structures
-        private class AtlasRoot { public List<AtlasFrame> frames { get; set; } }
-        private class AtlasFrame { public string filename { get; set; } public AtlasRect frame { get; set; } }
-        private class AtlasRect { public int x { get; set; } public int y { get; set; } public int w { get; set; } public int h { get; set; } }
     }
 }
