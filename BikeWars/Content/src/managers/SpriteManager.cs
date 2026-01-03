@@ -67,6 +67,15 @@ namespace BikeWars.Content.managers
             "Character1_WalkLeft",
             "Character1_WalkRight",
             "Character1_WalkUp",
+            "Character1_Idle",
+
+            // SPIELER 2
+            "Character2_BikeUp",
+            "Character2_WalkDown",
+            "Character2_WalkLeft",
+            "Character2_WalkRight",
+            "Character2_WalkUp",
+            "Character2_Idle",
 
             // HOBO
             "Hobo_Idle",
@@ -79,8 +88,8 @@ namespace BikeWars.Content.managers
             "BikeThief_Idle",
             "BikeThief_WalkLeft",
             "BikeThief_WalkRight",
-
-            //DOG
+            
+            // DOG
             "Dog_Idle",
             "Dog_WalkLeft",
             "Dog_WalkRight",
