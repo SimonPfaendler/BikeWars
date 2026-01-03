@@ -52,6 +52,14 @@ public class EnemyMovement : MovementBase
        _gridMapper = gridMapper;
    }
 
+    // Force a repath on the next update
+    public void ForceRepath()
+    {
+        _repathTimer = 0f;
+        _currentPath.Clear();
+        _pathIndex = 0;
+    }
+
 
    // runs every frame: updates path, chooses direction, and moves the enemy.
    // A* doesn't run every frame

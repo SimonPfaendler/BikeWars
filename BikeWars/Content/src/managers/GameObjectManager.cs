@@ -294,6 +294,26 @@ public class GameObjectManager
         }
     }
 
+    // Notify characters that the path grid changed (force enemies to recalculate paths)
+    public void NotifyPathGridChanged()
+    {
+        foreach (var c in Characters)
+        {
+            try
+            {
+                var em = c.Movement;
+                if (em != null)
+                {
+                    em.ForceRepath();
+                }
+            }
+            catch
+            {
+                // ignore
+            }
+        }
+    }
+
     public void SpawnXp(CharacterBase character)
     {
         ItemBase xp;

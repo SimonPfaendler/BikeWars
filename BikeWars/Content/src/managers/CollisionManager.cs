@@ -124,6 +124,41 @@ public class CollisionManager
         {
             StaticHash.Insert(s);
         }
+
+        // Mark destructible items as non-walkable in the path grid
+        if (PathGrid != null)
+        {
+            foreach (var item in _gameObjectManager.Items)
+            {
+                if (item is DestructibleObject d)
+                {
+                    SetWalkableForRect(d.Transform.Bounds, false);
+                }
+            }
+            // Re-apply wall padding so corners are inflated (prevents corner-cutting)
+            WallPadding();
+        }
+    }
+
+    private void SetWalkableForRect(Rectangle rect, bool walkable)
+    {
+        if (PathGrid == null) return;
+
+        int width = PathGrid.GetLength(0);
+        int height = PathGrid.GetLength(1);
+
+        int startX = Math.Max(0, rect.Left / _cellSize);
+        int startY = Math.Max(0, rect.Top / _cellSize);
+        int endX = Math.Min(width - 1, (rect.Right - 1) / _cellSize);
+        int endY = Math.Min(height - 1, (rect.Bottom - 1) / _cellSize);
+
+        for (int y = startY; y <= endY; y++)
+        {
+            for (int x = startX; x <= endX; x++)
+            {
+                PathGrid[x, y].Walkable = walkable;
+            }
+        }
     }
 
     // takes a world position in pixels (Vector2) and returns which tile that position is inside
@@ -372,9 +407,16 @@ public class CollisionManager
                 // if destroyed: remove from static hash and from gameobject manager statics, and remove drawing item
                 if (destructible.Health <= 0)
                 {
+                    // restore path grid walkability for this object's area
+                    SetWalkableForRect(destructible.Transform.Bounds, true);
+                    // Re-apply wall padding locally/globally to update neighbours
+                    WallPadding();
+
                     StaticHash.Remove(b);
                     _gameObjectManager.Statics.Remove((BoxCollider)b);
                     _gameObjectManager.Remove(destructible);
+                    // Notify enemies to recalculate paths immediately
+                    _gameObjectManager.NotifyPathGridChanged();
                 }
 
                 return;
