@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 using BikeWars.Content.utils;
+using BikeWars.Content.engine;
 
 namespace BikeWars.Content.managers
 {
@@ -22,6 +23,16 @@ namespace BikeWars.Content.managers
         private static Dictionary<string, SpriteAnimation> _animationCache;
         // für nicht animierte Sprites: Kugel, Geld, etc.
         private static Dictionary<string, Texture2D> _textureCache;
+
+        // Data-driven animation speeds
+        private static readonly Dictionary<string, float> AnimationSpeeds = new Dictionary<string, float>
+        {
+            { "Hobo_Idle", 0.4f },
+            { "Dog_Idle", 0.5f }
+        };
+
+        private const float DefaultSpeed = 0.15f;
+        private const float Character1Speed = 0.16f;
 
         // Stellt gecachten Character Atlas zur verfügung für ghosttrail unteranderem
         public static Texture2D GetCharacterAtlas()
@@ -97,6 +108,19 @@ namespace BikeWars.Content.managers
             "Dog_WalkUp",
         };
 
+        private static float GetAnimationSpeed(string key)
+        {
+            if (AnimationSpeeds.TryGetValue(key, out float speed))
+            {
+                return speed;
+            }
+            if (key.StartsWith("Character1"))
+            {
+                return Character1Speed;
+            }
+            return DefaultSpeed;
+        }
+
         /// <summary>
         /// Lädt Texture Atlas einmalig, caching
         /// </summary>
@@ -117,24 +141,7 @@ namespace BikeWars.Content.managers
             foreach (var key in AnimationKeys)
             {
                 var frames = SpriteFrameDictionary.GetFrames(key);
-
-                float speed = 0.15f;
-
-                // "ausnahmen", kann man später evtl abändern um die zyklomatische komplexität zu verringern
-                if (key.Contains("Hobo_Idle"))
-                {
-                    speed = 0.4f;
-                }
-                if (key.Contains("Character1"))
-                {
-                    speed = 0.16f;
-                }
-
-                if (key.Contains("Dog_Idle"))
-                {
-                    speed = 0.5f;
-                }
-
+                float speed = GetAnimationSpeed(key);
                 var animation = new SpriteAnimation(_characterAtlas, frames, speed);
                 _animationCache.Add(key, animation);
             }
@@ -177,79 +184,6 @@ namespace BikeWars.Content.managers
             }
 
             throw new KeyNotFoundException("texture '" + name + "' not found");
-        }
-    }
-
-    //  abspielen Sprite-Animation
-    public class SpriteAnimation
-    {
-        private readonly Texture2D _sheet;
-        private readonly List<Rectangle> _frames;
-        private readonly float _secondsPerFrame;
-        private int _frameIndex;
-        private float _timer;
-
-        public SpriteAnimation(Texture2D sheet, List<Rectangle> frames, float secondsPerFrame)
-        {
-            _sheet = sheet;
-            _frames = frames;
-            _secondsPerFrame = secondsPerFrame;
-            _frameIndex = 0;
-            _timer = 0f;
-        }
-
-        public void Update(GameTime gameTime, bool isMoving)
-        {
-            if (isMoving)
-            {
-                _timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-                if (_timer >= _secondsPerFrame)
-                {
-                    _timer -= _secondsPerFrame;
-                    _frameIndex = (_frameIndex + 1) % _frames.Count;
-                }
-            }
-            else
-            {
-                _frameIndex = 0;
-                _timer = 0f;
-            }
-        }
-
-        public Rectangle GetCurrentFrame()
-        {
-            return _frames[_frameIndex];
-        }
-
-        public void Draw(SpriteBatch spriteBatch, Vector2 position, Point size, float rotation, Color? color = null)
-        {
-            Draw(spriteBatch, position, size, rotation, Vector2.One, color);
-        }
-
-        public void Draw(SpriteBatch spriteBatch, Vector2 position, Point size, float rotation, Vector2 scale, Color? color = null)
-        {
-            Rectangle source = _frames[_frameIndex];
-            
-            // Apply scale to dimensions
-            float width = size.X * scale.X;
-            float height = size.Y * scale.Y;
-            
-            Rectangle dest = new Rectangle(
-                (int)MathF.Round(position.X),
-                (int)MathF.Round(position.Y),
-                (int)width,
-                (int)height
-            );
-            
-            // Adjust origin to center for proper scaling
-            Vector2 origin = new Vector2(source.Width / 2f, source.Height / 2f);
-            
-            spriteBatch.Draw(_sheet, dest, source, color ?? Color.White, rotation: rotation, origin, SpriteEffects.None, layerDepth:0f);
-        }
-
-        public SpriteAnimation Clone()
-        {
-            return new SpriteAnimation(_sheet, _frames, _secondsPerFrame);
         }
     }
 }
