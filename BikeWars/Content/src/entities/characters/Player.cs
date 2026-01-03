@@ -51,15 +51,14 @@ namespace BikeWars.Entities.Characters
         public event Action DamageCircle;
 
         public event Action<Bike> Dismounted;
-        private readonly SpriteAnimation _bikeDownAnimation;
+
         private readonly SpriteAnimation _bikeUpAnimation;
-        private readonly SpriteAnimation _bikeLeftAnimation;
-        private readonly SpriteAnimation _bikeRightAnimation;
 
         private readonly SpriteAnimation _walkDownAnimation;
         private readonly SpriteAnimation _walkUpAnimation;
         private readonly SpriteAnimation _walkLeftAnimation;
         private readonly SpriteAnimation _walkRightAnimation;
+        private readonly SpriteAnimation _idleAnimation;
 
         private SpriteAnimation _currentAnimation;
 
@@ -196,7 +195,7 @@ namespace BikeWars.Entities.Characters
             ItemPickedUp?.Invoke(item);
         }
 
-        public Player(Vector2 start, Point size, AudioService audio, IPlayerInput input)
+        public Player(Vector2 start, Point size, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")
         {
             Attributes = new CharacterAttributes(this, 300, 0, 10, 2f, false);
             Transform = new Transform(start, size);
@@ -214,22 +213,20 @@ namespace BikeWars.Entities.Characters
             }
 
             // LOAD BOTH ANIMATION SETS
-            _bikeDownAnimation = SpriteManager.GetAnimation("Character1_BikeDown");
-            _bikeLeftAnimation = SpriteManager.GetAnimation("Character1_BikeLeft");
-            _bikeRightAnimation = SpriteManager.GetAnimation("Character1_BikeRight");
-            _bikeUpAnimation = SpriteManager.GetAnimation("Character1_BikeUp");
+            _bikeUpAnimation = SpriteManager.GetAnimation($"{characterPrefix}_BikeUp");
 
-            _walkDownAnimation = SpriteManager.GetAnimation("Character1_WalkDown");
-            _walkLeftAnimation = SpriteManager.GetAnimation("Character1_WalkLeft");
-            _walkRightAnimation = SpriteManager.GetAnimation("Character1_WalkRight");
-            _walkUpAnimation = SpriteManager.GetAnimation("Character1_WalkUp");
+            _walkDownAnimation = SpriteManager.GetAnimation($"{characterPrefix}_WalkDown");
+            _walkLeftAnimation = SpriteManager.GetAnimation($"{characterPrefix}_WalkLeft");
+            _walkRightAnimation = SpriteManager.GetAnimation($"{characterPrefix}_WalkRight");
+            _walkUpAnimation = SpriteManager.GetAnimation($"{characterPrefix}_WalkUp");
+            _idleAnimation = SpriteManager.GetAnimation($"{characterPrefix}_Idle");
 
             if (movement.OwnsBike && movement.CrtBike != null)
             {
                 _currentAnimation = _bikeUpAnimation;
             } else
             {
-                _currentAnimation = _walkRightAnimation;
+                _currentAnimation = _idleAnimation;
             }
 
             UpdateCollider();
@@ -774,6 +771,18 @@ namespace BikeWars.Entities.Characters
                 }
 
                 _currentAnimation?.Update(gameTime, movement.IsMoving());
+            } 
+            else
+            {
+                 if (movement.CurrentMovement is WalkingMovement)
+                 {
+                     _currentAnimation = _idleAnimation;
+                     _currentAnimation?.Update(gameTime, true);
+                 }
+                 else
+                 {
+                     _currentAnimation = _bikeUpAnimation;
+                 }
             }
         }
         public void SetInput(IPlayerInput input)
