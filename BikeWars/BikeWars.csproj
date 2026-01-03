@@ -28,6 +28,9 @@
         <None Update="Content\assets\sprites\characters\character_atlas.json">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+        <None Update="Content\sprites\tilemap_1_regions.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory> 
+        </None>
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="Icon.ico">

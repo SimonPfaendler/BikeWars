@@ -10,6 +10,9 @@ namespace BikeWars.Entities.Characters.MapObjects;
 public class DestructibleObject : ItemBase
 {
     public int Health { get; private set; }
+    private bool _usesAtlas = false;
+    private Texture2D? _atlas;
+    private Rectangle _atlasRect = Rectangle.Empty;
 
     public DestructibleObject(Vector2 start, Point size, TiledObjectInfo attributes)
     {
@@ -27,11 +30,24 @@ public class DestructibleObject : ItemBase
 
         // Try to load a texture via SpriteManager using property "sprite" (key)
         Texture2D? tex = null;
+        _usesAtlas = false;
         try
         {
             string key = attributes.Properties.ContainsKey("sprite") ? attributes.Properties["sprite"] : "Chest";
-            tex = SpriteManager.GetTexture(key);
-            CurrentTex = tex;
+            // First try atlas regions (tilemap_1_regions.json) using filename conventions
+            if (SpriteManager.TryGetMapAtlasRegion(key, out var atlasTex, out var atlasRect) || SpriteManager.TryGetMapAtlasRegion(key + ".png", out atlasTex, out atlasRect))
+            {
+                _atlas = atlasTex;
+                _atlasRect = atlasRect;
+                _usesAtlas = _atlas != null && !_atlasRect.IsEmpty;
+            }
+
+            // Fallback to single texture path
+            if (!_usesAtlas)
+            {
+                tex = SpriteManager.GetTexture(key);
+                CurrentTex = tex;
+            }
         }
         catch
         {
@@ -39,9 +55,16 @@ public class DestructibleObject : ItemBase
         }
 
         // If the Tiled object had no explicit size, use the texture size so it's visible
-        if ((Transform.Size.X == 0 || Transform.Size.Y == 0) && tex != null)
+        if ((Transform.Size.X == 0 || Transform.Size.Y == 0))
         {
-            Transform.Size = new Point(tex.Width, tex.Height);
+            if (_usesAtlas && _atlasRect != Rectangle.Empty)
+            {
+                Transform.Size = new Point(_atlasRect.Width, _atlasRect.Height);
+            }
+            else if (tex != null)
+            {
+                Transform.Size = new Point(tex.Width, tex.Height);
+            }
         }
 
         // Use WALL layer so this object blocks movement like other map objects
@@ -60,6 +83,12 @@ public class DestructibleObject : ItemBase
 
     public override void Draw(SpriteBatch spriteBatch)
     {
+        if (_usesAtlas && _atlas != null && _atlasRect != Rectangle.Empty)
+        {
+            spriteBatch.Draw(_atlas, Transform.Bounds, _atlasRect, Color.White);
+            return;
+        }
+
         if (CurrentTex == null) return;
         spriteBatch.Draw(CurrentTex, Transform.Bounds, Color.White);
     }

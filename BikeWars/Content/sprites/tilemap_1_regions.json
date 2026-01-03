@@ -1,0 +1,27 @@
+{
+  "frames": [
+    {
+      "filename": "tree.png",
+      "frame": { "x": 0, "y": 48, "w": 48, "h": 80 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 48, "h": 80 },
+      "sourceSize": { "w": 48, "h": 80 },
+      "pivot": { "x": 0.5, "y": 0.5 }
+    },
+
+    {
+      "filename": "red_house.png",
+      "frame": { "x": 320, "y": 176, "w": 144, "h": 192 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 192 },
+      "sourceSize": { "w": 144, "h": 192 },
+      "pivot": { "x": 0.5, "y": 0.5 }
+    }
+  ],
+  "meta": {
+    "image": "tilemap_1.png",
+    "size": { "w": 1500, "h": 1500 }
+  }
+}

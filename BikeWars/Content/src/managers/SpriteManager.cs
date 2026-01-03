@@ -72,6 +72,10 @@ namespace BikeWars.Content.managers
         };
         // hier sollte irgendwann auch auf atlas strukturen gewechselt werden
 
+        // Atlas regions for large map atlases (tilemap_1 etc.)
+        private static Dictionary<string, Rectangle> _mapAtlasEntries = new Dictionary<string, Rectangle>();
+        private static Texture2D _mapAtlasTexture;
+
         // liste aller animationen, die beim start gecached werden
         private static readonly List<string> AnimationKeys = new List<string>
         {
@@ -162,6 +166,61 @@ namespace BikeWars.Content.managers
                 var texture = content.Load<Texture2D>(kv.Value);
                 _textureCache.Add(kv.Key, texture);
             }
+
+            // Try to load map atlas JSON (tilemap_1_regions.json) — prefer Content/sprites, fallback to Content/assets/sprites
+            try
+            {
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string candidate1 = System.IO.Path.Combine(baseDir, "Content", "sprites", "tilemap_1_regions");
+                string path = System.IO.File.Exists(candidate1) ? candidate1 : candidate1 + ".json";
+
+                if (!System.IO.File.Exists(path))
+                {
+                    string candidate2 = System.IO.Path.Combine(baseDir, "Content", "assets", "sprites", "tilemap_1_regions");
+                    path = System.IO.File.Exists(candidate2) ? candidate2 : candidate2 + ".json";
+                }
+
+                if (System.IO.File.Exists(path))
+                {
+                    var root = System.Text.Json.JsonSerializer.Deserialize<MapAtlasRoot>(System.IO.File.ReadAllText(path), new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    if (root?.frames != null && root.meta?.image != null)
+                    {
+                        // load atlas texture by name (strip extension)
+                        string imageName = System.IO.Path.GetFileNameWithoutExtension(root.meta.image);
+                        try
+                        {
+                            _mapAtlasTexture = content.Load<Texture2D>("assets/Map/" + imageName);
+                        }
+                        catch { _mapAtlasTexture = null; }
+
+                        foreach (var f in root.frames)
+                        {
+                            if (f.filename != null && f.frame != null)
+                            {
+                                _mapAtlasEntries[f.filename] = new Rectangle(f.frame.x, f.frame.y, f.frame.w, f.frame.h);
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// Try to retrieve an atlas region from the loaded map atlas.
+        /// Returns the atlas Texture2D (if loaded) and the source rectangle.
+        /// </summary>
+        public static bool TryGetMapAtlasRegion(string filename, out Texture2D atlas, out Rectangle rect)
+        {
+            atlas = null;
+            rect = Rectangle.Empty;
+            if (_mapAtlasTexture == null) return false;
+            if (_mapAtlasEntries.TryGetValue(filename, out rect))
+            {
+                atlas = _mapAtlasTexture;
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -198,3 +257,9 @@ namespace BikeWars.Content.managers
         }
     }
 }
+
+    // Structures for map atlas JSON deserialization
+    internal class MapAtlasRoot { public List<MapAtlasFrame> frames { get; set; } public MapAtlasMeta meta { get; set; } }
+    internal class MapAtlasFrame { public string filename { get; set; } public MapAtlasRect frame { get; set; } }
+    internal class MapAtlasMeta { public string image { get; set; } }
+    internal class MapAtlasRect { public int x { get; set; } public int y { get; set; } public int w { get; set; } public int h { get; set; } }
