@@ -46,7 +46,7 @@ namespace BikeWars.Content.entities.items
 
 
         public IceTrail(Player player, Vector2 dir)
-            : base(owner: player, damage: 1, duration: 3.0f)
+            : base(owner: player, damage: 10, duration: 3.0f)
         {
             _player = player;
             _dir = Vector2.Normalize(dir);

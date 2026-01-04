@@ -31,11 +31,34 @@ namespace BikeWars.Content.entities.interfaces
         /// All colliders that represent this AOE shape
         protected readonly List<ICollider> _hitboxes = new();
 
+        /// Tracks last damage time per target to enforce damage interval
+        private readonly Dictionary<CharacterBase, float> _lastDamageTime = new();
+
+        /// Damage is applied once per this interval (in seconds)
+        protected float DamageInterval { get; set; } = 1.0f;
+
         public AreaOfEffectBase(CharacterBase owner, int damage, float duration)
         {
             Owner = owner;
             Damage = damage;
             Duration = duration;
+        }
+
+        /// Checks if enough time has passed since last damage to this target
+        public bool CanDamage(CharacterBase target)
+        {
+            if (target == null)
+                return false;
+
+            if (!_lastDamageTime.ContainsKey(target))
+                _lastDamageTime[target] = 0f;
+
+            if (timeAlive - _lastDamageTime[target] >= DamageInterval)
+            {
+                _lastDamageTime[target] = timeAlive;
+                return true;
+            }
+            return false;
         }
 
         public virtual void Update(GameTime gameTime)

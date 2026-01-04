@@ -556,8 +556,12 @@ public class CollisionManager
         {
             CharacterBase ch = (CharacterBase)c.Owner;
 
-            // Call proper AOE damage event
-            OnAOEHit?.Invoke(ch, aoe);
+            // Only apply damage if enough time has passed (once per DamageInterval)
+            if (aoe.CanDamage(ch))
+            {
+                // Call proper AOE damage event
+                OnAOEHit?.Invoke(ch, aoe);
+            }
 
             if (ch.IsDead)
             {
