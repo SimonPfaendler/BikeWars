@@ -58,6 +58,8 @@ public class CollisionManager
     }
 
     private HashSet<ICollider> _toRemoveColliders { get; set; }
+    private HashSet<ICollider> _toRemoveStaticColliders { get; set; }
+    private List<Rectangle> _toUpdateWalkableRects { get; set; }
 
     // the grid for the pathfinding
     public Node[,] PathGrid { get; private set; }
@@ -68,6 +70,8 @@ public class CollisionManager
         DynamicHash = new SpatialHash(cellSize, worldBounds);
         StaticHash = new SpatialHash(cellSize, worldBounds);
         _toRemoveColliders = new HashSet<ICollider>();
+        _toRemoveStaticColliders = new HashSet<ICollider>();
+        _toUpdateWalkableRects = new List<Rectangle>();
         _gameObjectManager = gameObjectManager;
     }
 
@@ -404,18 +408,19 @@ public class CollisionManager
                 destructible.TakeDamage(p.Damage);
                 _toRemoveColliders.Add(p.Collider);
 
-                // if destroyed: remove from static hash and from gameobject manager statics, and remove drawing item
+                // if destroyed: defer static collider removal and defer path grid update
                 if (destructible.Health <= 0)
                 {
-                    // restore path grid walkability for this object's area
-                    SetWalkableForRect(destructible.Transform.Bounds, true);
-                    // Re-apply wall padding locally/globally to update neighbours
-                    WallPadding();
+                    // defer path grid walkability update for this object's area
+                    _toUpdateWalkableRects.Add(destructible.Transform.Bounds);
 
-                    StaticHash.Remove(b);
-                    _gameObjectManager.Statics.Remove((BoxCollider)b);
+                    // queue static collider for removal at end of frame
+                    _toRemoveStaticColliders.Add(b);
+
+                    // remove drawable/game object now
                     _gameObjectManager.Remove(destructible);
-                    // Notify enemies to recalculate paths immediately
+
+                    // Notify enemies to recalculate paths (they will see grid changes after deferred apply)
                     _gameObjectManager.NotifyPathGridChanged();
                 }
 
@@ -647,7 +652,25 @@ public class CollisionManager
             allDynamics.Remove(c);
         }
 
+        foreach (var c in _toRemoveStaticColliders)
+        {
+            StaticHash.Remove(c);
+            _gameObjectManager.Statics.Remove((BoxCollider)c);
+        }
+
+        // Apply deferred grid updates
+        foreach (var rect in _toUpdateWalkableRects)
+        {
+            SetWalkableForRect(rect, true);
+        }
+        if (_toUpdateWalkableRects.Count > 0)
+        {
+            WallPadding(); // Re-apply wall padding globally after updates
+        }
+
         _toRemoveColliders.Clear();
+        _toRemoveStaticColliders.Clear();
+        _toUpdateWalkableRects.Clear();
     }
 
     // makes the hitboxes visible for when in the tech demo
