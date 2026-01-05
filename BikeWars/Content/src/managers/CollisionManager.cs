@@ -64,6 +64,9 @@ public class CollisionManager
     // the grid for the pathfinding
     public Node[,] PathGrid { get; private set; }
 
+    // base (unpadded) walkability snapshot to support cheap local updates
+    private bool[,] _baseWalkableGrid;
+
     public CollisionManager(int cellSize, int worldBounds, GameObjectManager gameObjectManager)
     {
         _cellSize = cellSize;
@@ -99,6 +102,7 @@ public class CollisionManager
         int gridWidth = collisionLayer.Width;
         int gridHeight = collisionLayer.Height;
         PathGrid = new Node[gridWidth, gridHeight];
+        _baseWalkableGrid = new bool[gridWidth, gridHeight];
 
         for (int y = 0; y < gridHeight; y++)
         {
@@ -108,10 +112,9 @@ public class CollisionManager
 
                 bool walkable = tile.GlobalIdentifier == 0;
                 PathGrid[x, y] = new Node(x, y, walkable);
+                _baseWalkableGrid[x, y] = walkable;
             }
         }
-
-        WallPadding();
         LoadTerrainLayer("Streets", TerrainType.ROAD);
         LoadTerrainLayer("Floor", TerrainType.GRASS);
         LoadSpawnLayer("Enemy_Spawn");
@@ -129,27 +132,27 @@ public class CollisionManager
             StaticHash.Insert(s);
         }
 
-        // Mark destructible items as non-walkable in the path grid
-        if (PathGrid != null)
+        // Mark destructible items as non-walkable in the base grid, then pad once
+        if (PathGrid != null && _baseWalkableGrid != null)
         {
             foreach (var item in _gameObjectManager.Items)
             {
                 if (item is DestructibleObject d)
                 {
-                    SetWalkableForRect(d.Transform.Bounds, false);
+                    SetBaseWalkableForRect(d.Transform.Bounds, false);
                 }
             }
-            // Re-apply wall padding so corners are inflated (prevents corner-cutting)
-            WallPadding();
+
+            ApplyGlobalPaddingFromBase();
         }
     }
 
-    private void SetWalkableForRect(Rectangle rect, bool walkable)
+    private void SetBaseWalkableForRect(Rectangle rect, bool walkable)
     {
-        if (PathGrid == null) return;
+        if (_baseWalkableGrid == null) return;
 
-        int width = PathGrid.GetLength(0);
-        int height = PathGrid.GetLength(1);
+        int width = _baseWalkableGrid.GetLength(0);
+        int height = _baseWalkableGrid.GetLength(1);
 
         int startX = Math.Max(0, rect.Left / _cellSize);
         int startY = Math.Max(0, rect.Top / _cellSize);
@@ -160,7 +163,95 @@ public class CollisionManager
         {
             for (int x = startX; x <= endX; x++)
             {
-                PathGrid[x, y].Walkable = walkable;
+                _baseWalkableGrid[x, y] = walkable;
+            }
+        }
+    }
+
+    private void ApplyGlobalPaddingFromBase(int padding = 1)
+    {
+        if (PathGrid == null || _baseWalkableGrid == null) return;
+
+        int width = PathGrid.GetLength(0);
+        int height = PathGrid.GetLength(1);
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                PathGrid[x, y].Walkable = _baseWalkableGrid[x, y];
+            }
+        }
+
+        WallPadding(padding);
+    }
+
+    private void ApplyWalkabilityChange(Rectangle rect, bool walkable, bool fullRepad)
+    {
+        SetBaseWalkableForRect(rect, walkable);
+
+        if (fullRepad)
+        {
+            ApplyGlobalPaddingFromBase();
+        }
+        else
+        {
+            UpdatePaddedRegion(rect);
+        }
+    }
+
+    private void UpdatePaddedRegion(Rectangle rect, int padding = 1)
+    {
+        if (PathGrid == null || _baseWalkableGrid == null) return;
+
+        int width = PathGrid.GetLength(0);
+        int height = PathGrid.GetLength(1);
+        int margin = padding * 2; // include neighbours that previously got padded
+
+        int startX = Math.Max(0, rect.Left / _cellSize - margin);
+        int startY = Math.Max(0, rect.Top / _cellSize - margin);
+        int endX = Math.Min(width - 1, (rect.Right - 1) / _cellSize + margin);
+        int endY = Math.Min(height - 1, (rect.Bottom - 1) / _cellSize + margin);
+
+        for (int y = startY; y <= endY; y++)
+        {
+            for (int x = startX; x <= endX; x++)
+            {
+                PathGrid[x, y].Walkable = _baseWalkableGrid[x, y];
+            }
+        }
+
+        for (int y = startY; y <= endY; y++)
+        {
+            for (int x = startX; x <= endX; x++)
+            {
+                if (!_baseWalkableGrid[x, y])
+                {
+                    PadLocalNeighbours(x, y, startX, startY, endX, endY, padding);
+                }
+            }
+        }
+    }
+
+    private void PadLocalNeighbours(int x, int y, int startX, int startY, int endX, int endY, int padding)
+    {
+        for (int dy = -padding; dy <= padding; dy++)
+        {
+            for (int dx = -padding; dx <= padding; dx++)
+            {
+                if (dx == 0 && dy == 0)
+                    continue;
+
+                int nx = x + dx;
+                int ny = y + dy;
+
+                if (nx < startX || nx > endX || ny < startY || ny > endY)
+                    continue;
+
+                if (nx < 0 || nx >= PathGrid.GetLength(0) || ny < 0 || ny >= PathGrid.GetLength(1))
+                    continue;
+
+                PathGrid[nx, ny].Walkable = false;
             }
         }
     }
@@ -662,14 +753,10 @@ public class CollisionManager
             _gameObjectManager.Statics.Remove((BoxCollider)c);
         }
 
-        // Apply deferred grid updates
+        // Apply deferred grid updates (localized to avoid full-grid stalls)
         foreach (var rect in _toUpdateWalkableRects)
         {
-            SetWalkableForRect(rect, true);
-        }
-        if (_toUpdateWalkableRects.Count > 0)
-        {
-            WallPadding(); // Re-apply wall padding globally after updates
+            ApplyWalkabilityChange(rect, true, fullRepad: false);
         }
 
         _toRemoveColliders.Clear();
