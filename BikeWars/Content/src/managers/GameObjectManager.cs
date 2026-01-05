@@ -244,7 +244,7 @@ public class GameObjectManager
         b.Movement.Direction = direction; // Set the movement direction
         AddProjectile(b);
 
-        OnScreenShakeRequested?.Invoke(0.75f, 0.05f);
+        OnScreenShakeRequested?.Invoke(1.5f, 0.05f);
     }
 
     private void OnPlayerFlamethrower(Player player)

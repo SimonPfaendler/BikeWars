@@ -63,7 +63,7 @@ public class CombatManager
         
 
         // Notify GameScreen to Shake
-        OnScreenShakeRequested?.Invoke(1.25f, 0.10f);
+        OnScreenShakeRequested?.Invoke(2.75f, 0.10f);
 
         // Apply Knockback
         Vector2 knockbackDir = target.Transform.Position - projectile.Transform.Position;
