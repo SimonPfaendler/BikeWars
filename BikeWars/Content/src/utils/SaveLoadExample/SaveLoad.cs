@@ -123,6 +123,10 @@ public static class SaveLoad
         public Vector2Save Position {get;set;}  = new();
 
         public PointSave Size {get;set;}  = new();
+        
+        public bool? IsOpen { get; set; }
+        
+        public string? Item { get; set; }
 
         public ItemSaveModel() {}
 
@@ -294,7 +298,10 @@ public static class SaveLoad
     {
         return item switch
         {
-            Chest c => new ItemSaveModel(TYPES.CHEST, item.Transform.Position, item.Transform.Size),
+            Chest c => new ItemSaveModel(TYPES.CHEST, item.Transform.Position, item.Transform.Size)
+            {
+                IsOpen = c.Open,
+            },
             Xp_Beer b => new ItemSaveModel(TYPES.BEER, item.Transform.Position, item.Transform.Size),
             Xp_Money b => new ItemSaveModel(TYPES.MONEY, item.Transform.Position, item.Transform.Size),
             EnergyGel e => new ItemSaveModel(TYPES.ENERGY_GEL, item.Transform.Position, item.Transform.Size),

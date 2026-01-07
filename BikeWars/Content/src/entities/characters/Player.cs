@@ -49,6 +49,7 @@ namespace BikeWars.Entities.Characters
         public event Action Flamethrower;
         public event Action IceTrail;
         public event Action DamageCircle;
+        
 
         public event Action<Bike> Dismounted;
 
@@ -68,6 +69,8 @@ namespace BikeWars.Entities.Characters
         public event Action<int, int> OnLevelUp;
         public event Action<BikeShop> OnBikeShopOpen;
         public event Action<int> OnMoreXP;
+        
+        public event Action<ItemBase> ChestItemSpawn;
 
         private bool _isUsingItem = false;
         private float _itemUseTimer = 0f;
@@ -189,6 +192,20 @@ namespace BikeWars.Entities.Characters
                 {
                     OnBikeShopOpen?.Invoke(shop);
                 }
+                return;
+            }
+
+            if (item is Chest chest)
+            {
+                if (_input.IsPressed(GameAction.INTERACT))
+                {
+                    var drop = chest.OpenChest();
+                    if (drop != null)
+                    {
+                        ChestItemSpawn?.Invoke(drop);
+                    }
+                }
+
                 return;
             }
             item.IsPickedUp = true;
