@@ -121,10 +121,14 @@ public class CollisionManager
         LoadObjectLayer("BIke_Shops_Layer");
         // spawn shops/objects
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
-
         // Also load destructible objects from a dedicated Tiled object layer
         LoadObjectLayer("Destructibles");
+        // spawn shops/objects
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
+        
+        LoadObjectLayer("Chests");
+        _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
+        
 
         // Insert any statics registered by the GameObjectManager (e.g. destructibles)
         foreach (var s in _gameObjectManager.Statics)

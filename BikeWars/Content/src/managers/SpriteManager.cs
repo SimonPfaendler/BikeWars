@@ -56,6 +56,7 @@ namespace BikeWars.Content.managers
 
             // ITEMS
             { "Chest", "assets/sprites/chest_texture" },
+            {"Chest_open", "assets/sprites/chest_open_texture"},
             { "Frelo", "assets/images/Frelo" },
             { "RacingBike", "assets/images/RacingBike" },
             { "XP_Beer", "assets/sprites/XP/xp_beer_texture" },

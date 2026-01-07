@@ -416,6 +416,9 @@ public class GameObjectManager
                 return new BikeShop(start, size, spawn);
             case "Destructible":
                 return new BikeWars.Entities.Characters.MapObjects.DestructibleObject(start, size, spawn);
+            case "chest":
+                string item = spawn.Properties["item"];
+                return new Chest(start, size, item);
 
             default:
                 return null;
