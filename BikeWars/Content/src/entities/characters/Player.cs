@@ -29,14 +29,12 @@ namespace BikeWars.Entities.Characters
         public Bike CurrentBike => movement?.CrtBike;
         private IPlayerInput _input;
         private CooldownWithDuration sprint { get; }
-
         public Vector2 GazeDirection { get; private set; }
         public int XpCounter { get; private set; } = 0;
         public int XpLevelUp = 10;
         public int CurrentLevel { get; private set; } = 1;
         public Vector2 AimTarget { get; private set; }
         private Vector2 _facingDirection = Vector2.UnitX; // Default to right
-        private bool _usingControllerAim = false;
         private Vector2 _lastGazeDirection = Vector2.UnitX;
         private const float AimLength = 100f;
 
@@ -44,33 +42,35 @@ namespace BikeWars.Entities.Characters
         public float TerrainSpeedMultiplier = 1.0f;
         private const float IncreaseSpeed = 1.1f;
         private const float DecreaseSpeed = 0.9f;
-        public bool IsGodMode { get; set; }
+        public new bool IsGodMode { get; set; }
 
         public event Action ShotBullet;
         public event Action<ItemBase> ItemPickedUp;
         public event Action Flamethrower;
         public event Action IceTrail;
         public event Action DamageCircle;
+        
 
         public event Action<Bike> Dismounted;
-        private readonly SpriteAnimation _bikeDownAnimation;
+
         private readonly SpriteAnimation _bikeUpAnimation;
-        private readonly SpriteAnimation _bikeLeftAnimation;
-        private readonly SpriteAnimation _bikeRightAnimation;
 
         private readonly SpriteAnimation _walkDownAnimation;
         private readonly SpriteAnimation _walkUpAnimation;
         private readonly SpriteAnimation _walkLeftAnimation;
         private readonly SpriteAnimation _walkRightAnimation;
+        private readonly SpriteAnimation _idleAnimation;
 
         private SpriteAnimation _currentAnimation;
 
-        private readonly AudioService _audio;
-        private WorldAudioManager _worldAudioManager;
+        private new readonly AudioService _audio;
+        private new WorldAudioManager _worldAudioManager;
         private string _currentMovementSound = null;
         public event Action<int, int> OnLevelUp;
         public event Action<BikeShop> OnBikeShopOpen;
         public event Action<int> OnMoreXP;
+        
+        public event Action<ItemBase> ChestItemSpawn;
 
         private bool _isUsingItem = false;
         private float _itemUseTimer = 0f;
@@ -78,7 +78,6 @@ namespace BikeWars.Entities.Characters
 
         private float _bikeMountTime = 0f;
         private const float BikeMountTime = 0.1f;
-        private ItemBase _currentItemBeingUsed;
         private int _currentItemIndex = -1;
         private int _selectedInventoryIndex = 0;
         public int SelectedInventoryIndex => _selectedInventoryIndex;
@@ -122,7 +121,7 @@ namespace BikeWars.Entities.Characters
             switch (CurrentWeapon)
             {
                 case WeaponType.Gun:
-                    Attributes.AttackCooldown = 0.5f;
+                    Attributes.AttackCooldown = 0.25f;
                     ShotBullet?.Invoke();
                     _audio.Sounds.Play(AudioAssets.GunShot);
                     break;
@@ -195,11 +194,25 @@ namespace BikeWars.Entities.Characters
                 }
                 return;
             }
+
+            if (item is Chest chest)
+            {
+                if (_input.IsPressed(GameAction.INTERACT))
+                {
+                    var drop = chest.OpenChest();
+                    if (drop != null)
+                    {
+                        ChestItemSpawn?.Invoke(drop);
+                    }
+                }
+
+                return;
+            }
             item.IsPickedUp = true;
             ItemPickedUp?.Invoke(item);
         }
 
-        public Player(Vector2 start, Point size, AudioService audio, IPlayerInput input)
+        public Player(Vector2 start, Point size, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")
         {
             Attributes = new CharacterAttributes(this, 300, 0, 10, 2f, false);
             Transform = new Transform(start, size);
@@ -217,17 +230,22 @@ namespace BikeWars.Entities.Characters
             }
 
             // LOAD BOTH ANIMATION SETS
-            _bikeDownAnimation = SpriteManager.GetAnimation("Character1_BikeDown");
-            _bikeLeftAnimation = SpriteManager.GetAnimation("Character1_BikeLeft");
-            _bikeRightAnimation = SpriteManager.GetAnimation("Character1_BikeRight");
-            _bikeUpAnimation = SpriteManager.GetAnimation("Character1_BikeUp");
+            _bikeUpAnimation = SpriteManager.GetAnimation($"{characterPrefix}_BikeUp");
 
-            _walkDownAnimation = SpriteManager.GetAnimation("Character1_WalkDown");
-            _walkLeftAnimation = SpriteManager.GetAnimation("Character1_WalkLeft");
-            _walkRightAnimation = SpriteManager.GetAnimation("Character1_WalkRight");
-            _walkUpAnimation = SpriteManager.GetAnimation("Character1_WalkUp");
+            _walkDownAnimation = SpriteManager.GetAnimation($"{characterPrefix}_WalkDown");
+            _walkLeftAnimation = SpriteManager.GetAnimation($"{characterPrefix}_WalkLeft");
+            _walkRightAnimation = SpriteManager.GetAnimation($"{characterPrefix}_WalkRight");
+            _walkUpAnimation = SpriteManager.GetAnimation($"{characterPrefix}_WalkUp");
+            _idleAnimation = SpriteManager.GetAnimation($"{characterPrefix}_Idle");
 
-            _currentAnimation = _bikeRightAnimation;
+            if (movement.OwnsBike && movement.CrtBike != null)
+            {
+                _currentAnimation = _bikeUpAnimation;
+            } else
+            {
+                _currentAnimation = _idleAnimation;
+            }
+
             UpdateCollider();
         }
 
@@ -252,24 +270,36 @@ namespace BikeWars.Entities.Characters
             HandleGhostTrail(gameTime);
             HandleSwitchMovement();
 
+            UpdateHitFlash(gameTime);
             UpdateCollider();
         }
 
-        public override void TakeDamage(int amount)
+        public override bool IsCharacterMoving()
+        {
+            return movement.IsMoving();
+        }
+
+        public override float GetPulseMultiplier()
+        {
+            // Reduce pulse significantly when on bike, as it looks weird if the bike breathes
+            return movement.OwnsBike ? 0.5f : 1.0f; 
+        }
+
+        public override void TakeDamage(int amount, bool shouldSquash = true)
         {
             // Deactivate Godmode for testing damage
             if (IsGodMode)
-               return;
+                return;
 
             if (IsDead) return;
 
             if (movement.OwnsBike && movement.CrtBike != null)
             {
                 var bike = movement.CrtBike;
-                bike.TakeDamage(amount);
+                bike.TakeDamage(amount);               
 
                 int reducedDamage = Math.Max(0, amount - bike.Attributes.Armor);
-                base.TakeDamage(reducedDamage);
+                base.TakeDamage(reducedDamage, shouldSquash);
 
                 if (bike.IsDestroyed)
                 {
@@ -278,7 +308,7 @@ namespace BikeWars.Entities.Characters
             }
             else
             {
-                base.TakeDamage(amount);
+                base.TakeDamage(amount, shouldSquash);             
             }
         }
 
@@ -322,12 +352,12 @@ namespace BikeWars.Entities.Characters
                 typeof(WalkingMovement)) // TODO THIS IS ONLY INSERTED TO SHOW. BUT NOT GOOD!
             {
                 _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size,
-                    movement.CurrentMovement.Rotation);
+                    movement.CurrentMovement.Rotation, _renderScale);
             }
             else
             {
                 _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size,
-                    movement.CurrentMovement.Rotation + MathHelper.PiOver2);
+                    movement.CurrentMovement.Rotation + MathHelper.PiOver2, _renderScale);
             }
 
             // Draw line from eye position only if GazeDirection is valid (non-zero)
@@ -758,6 +788,18 @@ namespace BikeWars.Entities.Characters
                 }
 
                 _currentAnimation?.Update(gameTime, movement.IsMoving());
+            } 
+            else
+            {
+                 if (movement.CurrentMovement is WalkingMovement)
+                 {
+                     _currentAnimation = _idleAnimation;
+                     _currentAnimation?.Update(gameTime, true);
+                 }
+                 else
+                 {
+                     _currentAnimation = _bikeUpAnimation;
+                 }
             }
         }
         public void SetInput(IPlayerInput input)

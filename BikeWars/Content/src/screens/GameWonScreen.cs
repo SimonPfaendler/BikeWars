@@ -72,7 +72,7 @@ namespace BikeWars.Content.screens
                     string jsonString = File.ReadAllText(jsonPathWin);
                     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                     var root = JsonSerializer.Deserialize<TexturePackerRoot>(jsonString, options);
-                    var rawFrames = root?.frames;
+                    var rawFrames = root?.Frames;
 
                     if (rawFrames != null && rawFrames.Count > 0)
                     {
@@ -95,7 +95,7 @@ namespace BikeWars.Content.screens
                     string jsonString = File.ReadAllText(jsonPathBeer);
                     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                     var root = JsonSerializer.Deserialize<TexturePackerRoot>(jsonString, options);
-                    var rawFrames = root?.frames;
+                    var rawFrames = root?.Frames;
 
                     if (rawFrames != null && rawFrames.Count > 0)
                     {

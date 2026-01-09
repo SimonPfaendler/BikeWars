@@ -36,7 +36,7 @@ namespace BikeWars.Entities.Characters
             Attributes = new CharacterAttributes(this, 40, 0, 5, 2f, false);
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
-            Speed = 100f;
+            Speed = 130f;
             Movement = new EnemyMovement(canMove: true, isMoving: false, pathFinding: _pathFinding,
                 gridMapper: _collisionManager);
             _idleAnimation = SpriteManager.GetAnimation("Hobo_Idle");
@@ -51,6 +51,8 @@ namespace BikeWars.Entities.Characters
         public override void Update(GameTime gameTime)
         {
             UpdateAttackCooldown(gameTime);
+            UpdateKnockback(gameTime);
+            UpdateHitFlash(gameTime);
             // Sound- and Movement-Control
             Movement.HandleMovement(gameTime);
             HandleSound(Movement.IsMoving);
@@ -92,7 +94,9 @@ namespace BikeWars.Entities.Characters
                 return;
             if (_currentAnimation == null)
                 return;
-            _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, 0f);
+            
+            Color drawColor = (_hitFlashTimer > 0f) ? _hitColor : Color.White;
+            _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, 0f, _renderScale, drawColor);
         }
 
         public void SetWorldAudioManager(WorldAudioManager manager)

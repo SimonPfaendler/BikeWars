@@ -24,8 +24,7 @@ public abstract class TransformBase : ITransform
             Update();
         }
     }
-
-    private Rectangle _bounds;
+    
     public Rectangle Bounds { get; protected set; }
     protected abstract void Update();
 }

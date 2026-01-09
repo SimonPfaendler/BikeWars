@@ -10,7 +10,7 @@ public class Bullet: ProjectileBase
 {
 
     private BoxCollider _collider { get; set; }
-    public float Speed = 400f;
+    public float Speed = 600f;
     public override BoxCollider Collider
     {
         get { return _collider; }

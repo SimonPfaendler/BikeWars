@@ -16,7 +16,6 @@ namespace BikeWars.Content.screens
 {
     public class GameOverScreen : MenuScreenBase, IScreen
     {
-        private Overlay _overlay;
         private readonly AudioService _audioService;
         public string DesiredMusic => null;
         public float MusicVolume => 1.0f;
@@ -57,7 +56,7 @@ namespace BikeWars.Content.screens
 
                     var root = JsonSerializer.Deserialize<TexturePackerRoot>(jsonString, options);
 
-                    var rawFrames = root?.frames;
+                    var rawFrames = root?.Frames;
 
                     if (rawFrames != null && rawFrames.Count > 0)
                     {
@@ -100,8 +99,6 @@ namespace BikeWars.Content.screens
             const int horizontalMargin = 10;
 
             int startY = screenHeight / 2 + 50;
-
-            int verticalSpacing = 20;
 
             _buttonTexture = CreateSimpleTexture(game.GraphicsDevice, buttonWidth, buttonHeight);
 

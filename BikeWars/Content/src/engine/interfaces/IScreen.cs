@@ -1,3 +1,5 @@
+#nullable enable
+
 using BikeWars.Content.managers;
 using Microsoft.Xna.Framework;
 
@@ -6,7 +8,7 @@ namespace BikeWars.Content.engine.interfaces;
 public interface IScreen
 {
     public void Update(GameTime gameTime);
-    
+
     public void Draw(GameTime gameTime);
 
     // Decide whether the Screen below (on the Stack) should be Drawn and/or updated

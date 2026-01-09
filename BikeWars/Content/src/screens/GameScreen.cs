@@ -16,6 +16,7 @@ using MonoGame.Extended.Tiled.Renderers;
 using BikeWars.Content.managers;
 using BikeWars.Content.events;
 using BikeWars.Content.entities.interfaces;
+using BikeWars.Entities.Characters.MapObjects;
 
 namespace BikeWars.Content.screens
 {
@@ -86,6 +87,12 @@ namespace BikeWars.Content.screens
         public bool IsMultiplayer => _gameMode == GameMode.MultiPlayer; // might be helpful later
         private InputMode _inputMode = InputMode.Keyboard;
 
+        private float _hitStopTimer = 0f;
+
+        public void TriggerHitStop(float duration)
+        {
+            _hitStopTimer = duration;
+        }
 
         public GameScreen(AudioService audioService, GameMode gameMode, bool isTechDemo = false)
         {
@@ -110,16 +117,22 @@ namespace BikeWars.Content.screens
             
             _gameObjectManager.AddItem(new Frelo(new Vector2(5700, 5700), new Point(32, 32)));
             _gameObjectManager.AddItem(new RacingBike(new Vector2(5800, 5800), new Point(32, 32)));
-            _gameObjectManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
-            _gameObjectManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 90), new Point(32, 32)));
+            string energy = "Energygel";
+            _gameObjectManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32), energy));
+            _gameObjectManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 90), new Point(32, 32), energy));
 
             _freelook = false;
             // camera.Position is set by Update usually, but let's init it
-            camera.Position = player.Transform.Position;
+            if (player2 == null)
+            {
+                camera.Position = player.Transform.Position;
+            } else
+            {
+                camera.Position = Maths.Middle(player.Transform.Position, (Vector2)player2.Transform.Position);
+            }
 
             _statisticsManager = new StatisticsManager();
             _gameTimer = new GameTimer(GAME_TIME_LIMIT);
-
 
             _gameObjectManager.OnCharacterDied += _statisticsManager.HandleCharacterDied;
             _gameObjectManager.OnTookDamage += _statisticsManager.HandleTookDamage;
@@ -162,6 +175,10 @@ namespace BikeWars.Content.screens
             _collisionManager.OnCharacterCollision += _combatManager.HandleCharacterCollision;
             _collisionManager.OnItemPickup += _gameObjectManager.Player1.OnPickUpItem;
             _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
+
+            _combatManager.OnHitStopRequested += TriggerHitStop;
+            _combatManager.OnScreenShakeRequested += (intensity, duration) => camera.Shake(intensity, duration);
+            _gameObjectManager.OnScreenShakeRequested += (intensity, duration) => camera.Shake(intensity, duration);
 
             if (_gameObjectManager.Player2 != null)
             {   _collisionManager.OnItemPickup += _gameObjectManager.Player2.OnPickUpItem;
@@ -220,6 +237,9 @@ namespace BikeWars.Content.screens
             };
 
             _gameObjectManager.Player1.Dismounted += _gameObjectManager.AddItem;
+            
+            _gameObjectManager.Player1.ChestItemSpawn += _gameObjectManager.AddItem;
+
 
 
             // the Option selected gets upgraded
@@ -245,12 +265,22 @@ namespace BikeWars.Content.screens
         }
         public virtual void Update(GameTime gameTime)
         {
+            // Update HUD and Timer alignment for resolution changes
+            int viewW = Game1.Instance.GraphicsDevice.Viewport.Width;
+            int viewH = Game1.Instance.GraphicsDevice.Viewport.Height;
+            
+            if (_hudP2 != null)
+            {
+                _hudP2.Position = new Vector2(viewW - 350, viewH - 170);
+            }
+            _timerPosition = new Vector2(viewW / 2f, 40f);
             
             if (InputHandler.IsPressed(GameAction.MODE_SWITCH))
             {
                 if (_inputMode == InputMode.Keyboard)
                 {
                     _inputMode = InputMode.Controller;
+                    // Strict Controller Mode for Player1 on Pad 1
                     _gameObjectManager.Player1.SetInput(new GamepadPlayerInput(PlayerIndex.One));
                 }
                 else
@@ -280,6 +310,21 @@ namespace BikeWars.Content.screens
             
             _overlay.SetPaused(false, gameTime);
             _overlay.SetPaused(false, gameTime);
+
+            // Hit Stop Logic
+            if (_hitStopTimer > 0f)
+            {
+                _hitStopTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                if (_hitStopTimer > 0f)
+                {
+                    // Skip updates for game objects and collision to simulate pause
+                     _tiledMapRenderer.Update(gameTime); // keep map rendering updating if needed or freeze it too
+                    // We still might want to process input or camera?
+                    // For "Juice", typically everything freezes.
+                    return; 
+                }
+            }
+
 
             var players = new HashSet<Player>();
             if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);
@@ -326,7 +371,13 @@ namespace BikeWars.Content.screens
                 _freelook = !_freelook;
                 _gameObjectManager.Player1.Immobalize(_freelook);
             }
-            camera.Update(gameTime, _gameObjectManager.Player1.Transform.Position, _freelook);
+            if (_gameObjectManager.Player2 == null)
+            {
+                camera.Update(gameTime, _gameObjectManager.Player1.Transform.Position, null, _freelook);
+            } else
+            {
+                camera.Update(gameTime, _gameObjectManager.Player1.Transform.Position, _gameObjectManager.Player2.Transform.Position, _freelook);
+            }
 
             _tiledMapRenderer.Update(gameTime);
             HandleSaveLoadInput();
@@ -403,25 +454,32 @@ namespace BikeWars.Content.screens
             _gameObjectManager.Items.Clear();
             foreach (var p in state.Items)
             {
+                Vector2 pos = p.Position.ToVector2();
+                Point size = p.Size.ToPoint();
+
                 if (p.Type == SaveLoad.TYPES.CHEST)
                 {
-                    Chest b = new Chest(p.Position.ToVector2(), p.Size.ToPoint());
-                    _gameObjectManager.AddItem(b);
+                    _gameObjectManager.AddItem(new Chest(pos, size, p.Item, p.IsOpen ?? false));
                 }
-                if (p.Type == SaveLoad.TYPES.BEER)
+                else if (p.Type == SaveLoad.TYPES.BEER)
                 {
-                    Xp_Beer b = new Xp_Beer(p.Position.ToVector2(), p.Size.ToPoint());
-                    _gameObjectManager.AddItem(b);
+                    _gameObjectManager.AddItem(new Xp_Beer(pos, size));
                 }
-                if (p.Type == SaveLoad.TYPES.MONEY)
+                else if (p.Type == SaveLoad.TYPES.MONEY)
                 {
-                    Xp_Money b = new Xp_Money(p.Position.ToVector2(), p.Size.ToPoint());
-                    _gameObjectManager.AddItem(b);
+                    _gameObjectManager.AddItem(new Xp_Money(pos, size));
                 }
-                if (p.Type == SaveLoad.TYPES.ENERGY_GEL)
+                else if (p.Type == SaveLoad.TYPES.ENERGY_GEL)
                 {
-                    EnergyGel b = new EnergyGel(p.Position.ToVector2(), p.Size.ToPoint());
-                    _gameObjectManager.AddItem(b);
+                    _gameObjectManager.AddItem(new EnergyGel(pos, size));
+                }
+                else if (p.Type == SaveLoad.TYPES.FRELO)
+                {
+                    _gameObjectManager.AddItem(new Frelo(pos, size));
+                }
+                else if (p.Type == SaveLoad.TYPES.RACINGBIKE)
+                {
+                    _gameObjectManager.AddItem(new RacingBike(pos, size));
                 }
             }
             _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level);

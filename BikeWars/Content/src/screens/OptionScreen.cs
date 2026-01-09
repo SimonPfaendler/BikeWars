@@ -106,11 +106,11 @@ public class OptionScreen : MenuScreenBase, IScreen
                 break;
 
             case ButtonAction.GraphicOptions:
-                // TODO: open graphic option screen
+                ScreenManager.AddScreen(new GraphicsConfigScreen(_backgroundTexture, _font, _audioService));
                 break;
 
             case ButtonAction.SoundOptions:
-                // TODO: open Sound options screen
+                ScreenManager.AddScreen(new SoundConfigScreen(_backgroundTexture, _font, _audioService));
                 break;
         }
     }
