@@ -21,4 +21,15 @@ public class StatisticsComponent
         spriteBatch.DrawString(font, $"Erfahrungspunkte: {statistic.XP}", new Vector2(box.Left, box.Top + 60), Color.White);
         spriteBatch.DrawString(font, $"Level: {statistic.Level}", new Vector2(box.Left, box.Top + 80), Color.White);
     }
+
+    // This one can be used to create the elements in a scrollbox
+    public void Draw(SpriteBatch spriteBatch, Texture2D overlay, Vector2 drawArea, SpriteFont font)
+    {
+        spriteBatch.Draw(overlay, drawArea, Color.DarkSlateGray);
+        spriteBatch.DrawString(font, $"Kills: {statistic.Kills}", new Vector2(drawArea.X, drawArea.Y), Color.White);
+        spriteBatch.DrawString(font, $"Schaden hinzugefuegt: {statistic.DealtDamage}", new Vector2(drawArea.X, drawArea.Y + 20), Color.White);
+        spriteBatch.DrawString(font, $"Schaden erhalten: {statistic.TookDamage}", new Vector2(drawArea.X, drawArea.Y + 40), Color.White);
+        spriteBatch.DrawString(font, $"Erfahrungspunkte: {statistic.XP}", new Vector2(drawArea.X, drawArea.Y + 60), Color.White);
+        spriteBatch.DrawString(font, $"Level: {statistic.Level}", new Vector2(drawArea.X, drawArea.Y + 80), Color.White);
+    }
 }

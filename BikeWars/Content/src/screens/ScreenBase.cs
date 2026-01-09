@@ -1,4 +1,3 @@
-using System;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.components;
 using Microsoft.Xna.Framework;

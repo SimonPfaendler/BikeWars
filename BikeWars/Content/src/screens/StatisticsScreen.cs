@@ -11,6 +11,9 @@ using BikeWars.Content.src.utils.SaveLoadExample;
 namespace BikeWars.Content.screens;
 public class StatisticsScreen : MenuScreenBase, IScreen
 {
+
+    private float scrollOffset = 0f;
+
     private readonly AudioService _audioService;
     public string DesiredMusic => AudioAssets.MenuMusic;
     public float MusicVolume => 1f;
@@ -60,18 +63,15 @@ public class StatisticsScreen : MenuScreenBase, IScreen
                 break;
         }
     }
-
-    private void MakeAchievementList(SpriteBatch sp)
+    private void MakeAchievementList(SpriteBatch sp, Texture2D overlay)
     {
         int row = 0;
-        Texture2D overlay = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
-        overlay.SetData(new[] { Color.White });
         if (Statistics == null)
         {
             return;
         }
         foreach (Statistic statistic in Statistics) {
-            new StatisticsComponent(statistic).Draw(sp, overlay, 400, row, _font);
+            new StatisticsComponent(statistic).Draw(sp, overlay, new Vector2(400, row - scrollOffset), _font);
             row += 110;
         }
     }
@@ -82,15 +82,48 @@ public class StatisticsScreen : MenuScreenBase, IScreen
         SpriteBatch spriteBatch = game.SpriteBatch;
 
         spriteBatch.Begin();
-
         Rectangle destinationRect = new Rectangle(0, 0, game.GraphicsDevice.Viewport.Width, game.GraphicsDevice.Viewport.Height);
         spriteBatch.Draw(_backgroundTexture, destinationRect, Color.White);
-
+        
         foreach (var button in _buttons)
         {
             button.Draw(spriteBatch);
         }
-        MakeAchievementList(spriteBatch);
+
+        spriteBatch.End();
+
+        RasterizerState scissorRaster = new RasterizerState();
+        scissorRaster.MultiSampleAntiAlias = false;
+        scissorRaster.ScissorTestEnable = true;
+        
+        Rectangle scrollArea = new Rectangle(400, 100, 500, 300);
+        game.GraphicsDevice.ScissorRectangle = scrollArea;
+
+        spriteBatch.Begin(
+            SpriteSortMode.Deferred,
+            BlendState.AlphaBlend,
+            SamplerState.PointClamp,
+            DepthStencilState.None,
+            scissorRaster
+        );
+
+        if (InputHandler.IsHeld(GameAction.UI_DOWN))
+        {
+            scrollOffset += 5f;
+        }
+        if (InputHandler.IsHeld(GameAction.UI_UP))
+        {
+            scrollOffset -= 5f;
+        }
+        scrollOffset = MathHelper.Clamp(scrollOffset, 0, 1000f);
+        Texture2D overlay = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
+        overlay.SetData(new[] { Color.White });
+        MakeAchievementList(spriteBatch, overlay);
+        /*spriteBatch.Draw(
+            overlay, 
+            new Vector2(scrollArea.X, scrollArea.Y - scrollOffset), 
+            Color.White
+        );*/
         spriteBatch.End();
     }
     public override bool DrawLower => false;
