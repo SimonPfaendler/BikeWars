@@ -5,6 +5,23 @@ using BikeWars.Content.engine;
 using BikeWars.Content.managers;
 using System;
 
+// The Scrollbox should be used in the ui if we need more space. Or for space we don't know
+// how much it will render.
+// How to use:
+
+// Example in StatisticsScreen:
+// _statistics = new ScrollBox(
+//     bg,
+//     _font,
+//     new Rectangle(400, 100, 500, 300),
+//     Game1.Instance.SpriteBatch,
+//     MakeAchievementList,
+//     GetStatisticsHeight
+// );
+
+// MakeAchievementList and GetStatisticsHeight have to swtiched. because they are the main content
+// That means we need a function to produce the content that should be rendered and a function on how much space in height will be used
+// If necessary create new constructors!
 namespace BikeWars.Content.components
 {
     public class ScrollBox : IScreen
