@@ -117,8 +117,9 @@ namespace BikeWars.Content.screens
             
             _gameObjectManager.AddItem(new Frelo(new Vector2(5700, 5700), new Point(32, 32)));
             _gameObjectManager.AddItem(new RacingBike(new Vector2(5800, 5800), new Point(32, 32)));
-            _gameObjectManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32)));
-            _gameObjectManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 90), new Point(32, 32)));
+            string energy = "Energygel";
+            _gameObjectManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32), energy));
+            _gameObjectManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 90), new Point(32, 32), energy));
 
             _freelook = false;
             // camera.Position is set by Update usually, but let's init it
@@ -236,6 +237,9 @@ namespace BikeWars.Content.screens
             };
 
             _gameObjectManager.Player1.Dismounted += _gameObjectManager.AddItem;
+            
+            _gameObjectManager.Player1.ChestItemSpawn += _gameObjectManager.AddItem;
+
 
 
             // the Option selected gets upgraded
@@ -261,12 +265,22 @@ namespace BikeWars.Content.screens
         }
         public virtual void Update(GameTime gameTime)
         {
+            // Update HUD and Timer alignment for resolution changes
+            int viewW = Game1.Instance.GraphicsDevice.Viewport.Width;
+            int viewH = Game1.Instance.GraphicsDevice.Viewport.Height;
+            
+            if (_hudP2 != null)
+            {
+                _hudP2.Position = new Vector2(viewW - 350, viewH - 170);
+            }
+            _timerPosition = new Vector2(viewW / 2f, 40f);
             
             if (InputHandler.IsPressed(GameAction.MODE_SWITCH))
             {
                 if (_inputMode == InputMode.Keyboard)
                 {
                     _inputMode = InputMode.Controller;
+                    // Strict Controller Mode for Player1 on Pad 1
                     _gameObjectManager.Player1.SetInput(new GamepadPlayerInput(PlayerIndex.One));
                 }
                 else
@@ -445,7 +459,7 @@ namespace BikeWars.Content.screens
 
                 if (p.Type == SaveLoad.TYPES.CHEST)
                 {
-                    _gameObjectManager.AddItem(new Chest(pos, size));
+                    _gameObjectManager.AddItem(new Chest(pos, size, p.Item, p.IsOpen ?? false));
                 }
                 else if (p.Type == SaveLoad.TYPES.BEER)
                 {

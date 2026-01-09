@@ -20,15 +20,17 @@ public class EnemyMovement : MovementBase
    private readonly CollisionManager _gridMapper;
 
 
-   private List<Node> _currentPath = new();
+    private List<Node> _currentPath = new();
    private int _pathIndex = 0;
    public IReadOnlyList<Node> CurrentPath => _currentPath;
    public int CurrentPathIndex => _pathIndex;
    private const int QueryRadius = 3; // nearby collisions
    private const int LocalGridSize = 40; // 7x7 nodes A*
    private Point _lastPlayerGrid = new Point(-1, -1);
-   private float _repathTimer = 0f;
+    private float _repathTimer = 0f;
    private const float RepathInterval = 1f;
+
+    private static readonly Random _rng = new();
 
 
    private const float NodeReachDistance = 18f;
@@ -50,7 +52,17 @@ public class EnemyMovement : MovementBase
 
        _pathFinding = pathFinding;
        _gridMapper = gridMapper;
+        // Stagger initial repath timers to distribute load
+        _repathTimer = (float)(_rng.NextDouble() * RepathInterval);
    }
+
+    // Force a repath on the next update
+    public void ForceRepath()
+    {
+        _repathTimer = 0f;
+        _currentPath.Clear();
+        _pathIndex = 0;
+    }
 
 
    // runs every frame: updates path, chooses direction, and moves the enemy.

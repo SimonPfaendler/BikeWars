@@ -67,6 +67,7 @@ public class GameObjectManager
             Player1.Flamethrower += () => OnPlayerFlamethrower(Player1);
             Player1.IceTrail += () => OnPlayerIceTrail(Player1);
             Player1.DamageCircle += () => OnPlayerDamageCircle(Player1);
+            Player1.OnTookDamage += HandleTookDamage;
         }
 
         if (Player2 != null)
@@ -75,6 +76,7 @@ public class GameObjectManager
             Player2.Flamethrower += () => OnPlayerFlamethrower(Player2);
             Player2.IceTrail += () => OnPlayerIceTrail(Player2);
             Player2.DamageCircle += () => OnPlayerDamageCircle(Player2);
+            Player2.OnTookDamage += HandleTookDamage;
         }
 
     }
@@ -89,13 +91,31 @@ public class GameObjectManager
         character.OnTookDamage += HandleTookDamage;
     }
 
+    private Dictionary<CharacterBase, int> _pendingDamage = new Dictionary<CharacterBase, int>();
+    private float _damageAggregationTimer = 0f;
+    private const float AggregationInterval = 0.3f; // every 0.3s
+
     private void HandleCharacterDeath(CharacterBase c)
     {
         OnCharacterDied?.Invoke(c);
+        if (_pendingDamage.ContainsKey(c)) _pendingDamage.Remove(c);
     }
+
     private void HandleTookDamage(CharacterBase c, int amount)
     {
+        // Aggregate damage
+        if (!_pendingDamage.ContainsKey(c))
+        {
+            _pendingDamage[c] = 0;
+        }
+        _pendingDamage[c] += amount;
+
         OnTookDamage?.Invoke(c, amount);
+        
+        if (c is Player || c == Player1 || c == Player2)
+        {
+             OnScreenShakeRequested?.Invoke(5.5f, 0.2f);
+        }
     }
 
     public void AddItem(ItemBase item)
@@ -193,6 +213,26 @@ public class GameObjectManager
             dn.Update(gameTime);
             return dn.IsExpired;
         });
+
+        // Flush Aggregated Damage
+        _damageAggregationTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+        if (_damageAggregationTimer <= 0f)
+        {
+            foreach (var kvp in _pendingDamage)
+            {
+                var character = kvp.Key;
+                var totalDamage = kvp.Value;
+                
+                // Only spawn if damage > 0 and character is valid
+                if (totalDamage > 0)
+                {
+                    bool isCrit = false;
+                    SpawnDamageNumber(character.Transform.Position, totalDamage, isCrit);
+                }
+            }
+            _pendingDamage.Clear();
+            _damageAggregationTimer = AggregationInterval;
+        }
     }
 
     private void OnPlayerShotBullet(Player player)
@@ -204,7 +244,7 @@ public class GameObjectManager
         b.Movement.Direction = direction; // Set the movement direction
         AddProjectile(b);
 
-        OnScreenShakeRequested?.Invoke(0.75f, 0.05f);
+        OnScreenShakeRequested?.Invoke(1.5f, 0.05f);
     }
 
     private void OnPlayerFlamethrower(Player player)
@@ -251,6 +291,26 @@ public class GameObjectManager
         {
             if (c is IWorldAudioAware wa)
                 wa.SetWorldAudioManager(worldAudioManager);
+        }
+    }
+
+    // Notify characters that the path grid changed (force enemies to recalculate paths)
+    public void NotifyPathGridChanged()
+    {
+        foreach (var c in Characters)
+        {
+            try
+            {
+                var em = c.Movement;
+                if (em != null)
+                {
+                    em.ForceRepath();
+                }
+            }
+            catch
+            {
+                // ignore
+            }
         }
     }
 
@@ -328,7 +388,17 @@ public class GameObjectManager
             var created = CreateFromTiled(spawn);
             if (created != null)
             {
-                AddItem(created);
+                // Destructible objects should both be drawable (items) and registered as statics
+                if (created is BikeWars.Entities.Characters.MapObjects.DestructibleObject)
+                {
+                    AddItem(created);
+                    if (created.Collider is BoxCollider box)
+                        AddStatic(box);
+                }
+                else
+                {
+                    AddItem(created);
+                }
             }
         }
     }
@@ -344,6 +414,11 @@ public class GameObjectManager
         {
             case "Bike_Shop":
                 return new BikeShop(start, size, spawn);
+            case "Destructible":
+                return new BikeWars.Entities.Characters.MapObjects.DestructibleObject(start, size, spawn);
+            case "chest":
+                string item = spawn.Properties["item"];
+                return new Chest(start, size, item);
 
             default:
                 return null;

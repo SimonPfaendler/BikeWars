@@ -56,7 +56,7 @@ namespace BikeWars.Content.screens
 
                     var root = JsonSerializer.Deserialize<TexturePackerRoot>(jsonString, options);
 
-                    var rawFrames = root?.frames;
+                    var rawFrames = root?.Frames;
 
                     if (rawFrames != null && rawFrames.Count > 0)
                     {

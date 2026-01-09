@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 using BikeWars.Content.utils;
+using BikeWars.Content.engine;
 
 namespace BikeWars.Content.managers
 {
@@ -22,6 +23,16 @@ namespace BikeWars.Content.managers
         private static Dictionary<string, SpriteAnimation> _animationCache;
         // für nicht animierte Sprites: Kugel, Geld, etc.
         private static Dictionary<string, Texture2D> _textureCache;
+
+        // Data-driven animation speeds
+        private static readonly Dictionary<string, float> AnimationSpeeds = new Dictionary<string, float>
+        {
+            { "Hobo_Idle", 0.4f },
+            { "Dog_Idle", 0.5f }
+        };
+
+        private const float DefaultSpeed = 0.15f;
+        private const float Character1Speed = 0.16f;
 
         // Stellt gecachten Character Atlas zur verfügung für ghosttrail unteranderem
         public static Texture2D GetCharacterAtlas()
@@ -45,6 +56,7 @@ namespace BikeWars.Content.managers
 
             // ITEMS
             { "Chest", "assets/sprites/chest_texture" },
+            {"Chest_open", "assets/sprites/chest_open_texture"},
             { "Frelo", "assets/images/Frelo" },
             { "RacingBike", "assets/images/RacingBike" },
             { "XP_Beer", "assets/sprites/XP/xp_beer_texture" },
@@ -53,7 +65,12 @@ namespace BikeWars.Content.managers
             //MAP OBJECTS
             { "Fahrradwerkstatt", "assets/Map/Fahrradwerkstatt_Tile"}
         };
-        // hier sollte irgendwann auch auf atlas strukturen gewechselt werden
+
+        // No single-image map sprites here; map sprites are loaded from atlas JSON.
+
+        // Atlas regions for large map atlases (tilemap_1 etc.)
+        private static Dictionary<string, Rectangle> _mapAtlasEntries = new Dictionary<string, Rectangle>();
+        private static Texture2D _mapAtlasTexture;
 
         // liste aller animationen, die beim start gecached werden
         private static readonly List<string> AnimationKeys = new List<string>
@@ -67,6 +84,15 @@ namespace BikeWars.Content.managers
             "Character1_WalkLeft",
             "Character1_WalkRight",
             "Character1_WalkUp",
+            "Character1_Idle",
+
+            // SPIELER 2
+            "Character2_BikeUp",
+            "Character2_WalkDown",
+            "Character2_WalkLeft",
+            "Character2_WalkRight",
+            "Character2_WalkUp",
+            "Character2_Idle",
 
             // HOBO
             "Hobo_Idle",
@@ -79,14 +105,27 @@ namespace BikeWars.Content.managers
             "BikeThief_Idle",
             "BikeThief_WalkLeft",
             "BikeThief_WalkRight",
-
-            //DOG
+            
+            // DOG
             "Dog_Idle",
             "Dog_WalkLeft",
             "Dog_WalkRight",
             "Dog_WalkDown",
             "Dog_WalkUp",
         };
+
+        private static float GetAnimationSpeed(string key)
+        {
+            if (AnimationSpeeds.TryGetValue(key, out float speed))
+            {
+                return speed;
+            }
+            if (key.StartsWith("Character1"))
+            {
+                return Character1Speed;
+            }
+            return DefaultSpeed;
+        }
 
         /// <summary>
         /// Lädt Texture Atlas einmalig, caching
@@ -108,24 +147,7 @@ namespace BikeWars.Content.managers
             foreach (var key in AnimationKeys)
             {
                 var frames = SpriteFrameDictionary.GetFrames(key);
-
-                float speed = 0.15f;
-
-                // "ausnahmen", kann man später evtl abändern um die zyklomatische komplexität zu verringern
-                if (key.Contains("Hobo_Idle"))
-                {
-                    speed = 0.4f;
-                }
-                if (key.Contains("Character1"))
-                {
-                    speed = 0.16f;
-                }
-
-                if (key.Contains("Dog_Idle"))
-                {
-                    speed = 0.5f;
-                }
-
+                float speed = GetAnimationSpeed(key);
                 var animation = new SpriteAnimation(_characterAtlas, frames, speed);
                 _animationCache.Add(key, animation);
             }
@@ -135,6 +157,62 @@ namespace BikeWars.Content.managers
                 var texture = content.Load<Texture2D>(kv.Value);
                 _textureCache.Add(kv.Key, texture);
             }
+            // Note: single-image map sprites were removed — map objects use atlas regions now.
+
+            // Try to load map atlas JSON (tilemap_1_regions.json) — prefer Content/sprites, fallback to Content/assets/sprites
+            try
+            {
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string candidate1 = System.IO.Path.Combine(baseDir, "Content", "sprites", "tilemap_1_regions");
+                string path = System.IO.File.Exists(candidate1) ? candidate1 : candidate1 + ".json";
+
+                if (!System.IO.File.Exists(path))
+                {
+                    string candidate2 = System.IO.Path.Combine(baseDir, "Content", "assets", "sprites", "tilemap_1_regions");
+                    path = System.IO.File.Exists(candidate2) ? candidate2 : candidate2 + ".json";
+                }
+
+                if (System.IO.File.Exists(path))
+                {
+                    var root = System.Text.Json.JsonSerializer.Deserialize<MapAtlasRoot>(System.IO.File.ReadAllText(path), new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    if (root?.frames != null && root.meta?.image != null)
+                    {
+                        // load atlas texture by name (strip extension)
+                        string imageName = System.IO.Path.GetFileNameWithoutExtension(root.meta.image);
+                        try
+                        {
+                            _mapAtlasTexture = content.Load<Texture2D>("assets/Map/" + imageName);
+                        }
+                        catch { _mapAtlasTexture = null; }
+
+                        foreach (var f in root.frames)
+                        {
+                            if (f.filename != null && f.frame != null)
+                            {
+                                _mapAtlasEntries[f.filename] = new Rectangle(f.frame.x, f.frame.y, f.frame.w, f.frame.h);
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// Try to retrieve an atlas region from the loaded map atlas.
+        /// Returns the atlas Texture2D (if loaded) and the source rectangle.
+        /// </summary>
+        public static bool TryGetMapAtlasRegion(string filename, out Texture2D atlas, out Rectangle rect)
+        {
+            atlas = null;
+            rect = Rectangle.Empty;
+            if (_mapAtlasTexture == null) return false;
+            if (_mapAtlasEntries.TryGetValue(filename, out rect))
+            {
+                atlas = _mapAtlasTexture;
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -170,63 +248,10 @@ namespace BikeWars.Content.managers
             throw new KeyNotFoundException("texture '" + name + "' not found");
         }
     }
-
-    //  abspielen Sprite-Animation
-    public class SpriteAnimation
-    {
-        private readonly Texture2D _sheet;
-        private readonly List<Rectangle> _frames;
-        private readonly float _secondsPerFrame;
-        private int _frameIndex;
-        private float _timer;
-
-        public SpriteAnimation(Texture2D sheet, List<Rectangle> frames, float secondsPerFrame)
-        {
-            _sheet = sheet;
-            _frames = frames;
-            _secondsPerFrame = secondsPerFrame;
-            _frameIndex = 0;
-            _timer = 0f;
-        }
-
-        public void Update(GameTime gameTime, bool isMoving)
-        {
-            if (isMoving)
-            {
-                _timer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-                if (_timer >= _secondsPerFrame)
-                {
-                    _timer -= _secondsPerFrame;
-                    _frameIndex = (_frameIndex + 1) % _frames.Count;
-                }
-            }
-            else
-            {
-                _frameIndex = 0;
-                _timer = 0f;
-            }
-        }
-
-        public Rectangle GetCurrentFrame()
-        {
-            return _frames[_frameIndex];
-        }
-
-        public void Draw(SpriteBatch spriteBatch, Vector2 position, Point size, float rotation, Color? color = null)
-        {
-            Rectangle source = _frames[_frameIndex];
-            Rectangle dest = new Rectangle(
-                (int)MathF.Round(position.X),
-                (int)MathF.Round(position.Y),
-                size.X,
-                size.Y
-            );
-            spriteBatch.Draw(_sheet, dest, source, color ?? Color.White, rotation: rotation, new Vector2(source.Width / 2f, source.Height / 2f), SpriteEffects.None, layerDepth:0f);
-        }
-
-        public SpriteAnimation Clone()
-        {
-            return new SpriteAnimation(_sheet, _frames, _secondsPerFrame);
-        }
-    }
 }
+
+    // Structures for map atlas JSON deserialization
+    internal class MapAtlasRoot { public List<MapAtlasFrame> frames { get; set; } public MapAtlasMeta meta { get; set; } }
+    internal class MapAtlasFrame { public string filename { get; set; } public MapAtlasRect frame { get; set; } }
+    internal class MapAtlasMeta { public string image { get; set; } }
+    internal class MapAtlasRect { public int x { get; set; } public int y { get; set; } public int w { get; set; } public int h { get; set; } }

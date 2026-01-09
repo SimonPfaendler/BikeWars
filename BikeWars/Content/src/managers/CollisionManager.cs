@@ -4,6 +4,7 @@ using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Entities.Characters;
+using BikeWars.Entities.Characters.MapObjects;
 using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
 using Microsoft.Xna.Framework;
@@ -57,9 +58,14 @@ public class CollisionManager
     }
 
     private HashSet<ICollider> _toRemoveColliders { get; set; }
+    private HashSet<ICollider> _toRemoveStaticColliders { get; set; }
+    private List<Rectangle> _toUpdateWalkableRects { get; set; }
 
     // the grid for the pathfinding
     public Node[,] PathGrid { get; private set; }
+
+    // base (unpadded) walkability snapshot to support cheap local updates
+    private bool[,] _baseWalkableGrid;
 
     public CollisionManager(int cellSize, int worldBounds, GameObjectManager gameObjectManager)
     {
@@ -67,6 +73,8 @@ public class CollisionManager
         DynamicHash = new SpatialHash(cellSize, worldBounds);
         StaticHash = new SpatialHash(cellSize, worldBounds);
         _toRemoveColliders = new HashSet<ICollider>();
+        _toRemoveStaticColliders = new HashSet<ICollider>();
+        _toUpdateWalkableRects = new List<Rectangle>();
         _gameObjectManager = gameObjectManager;
     }
 
@@ -94,6 +102,7 @@ public class CollisionManager
         int gridWidth = collisionLayer.Width;
         int gridHeight = collisionLayer.Height;
         PathGrid = new Node[gridWidth, gridHeight];
+        _baseWalkableGrid = new bool[gridWidth, gridHeight];
 
         for (int y = 0; y < gridHeight; y++)
         {
@@ -103,15 +112,152 @@ public class CollisionManager
 
                 bool walkable = tile.GlobalIdentifier == 0;
                 PathGrid[x, y] = new Node(x, y, walkable);
+                _baseWalkableGrid[x, y] = walkable;
             }
         }
-
-        WallPadding();
         LoadTerrainLayer("Streets", TerrainType.ROAD);
         LoadTerrainLayer("Floor", TerrainType.GRASS);
         LoadSpawnLayer("Enemy_Spawn");
         LoadObjectLayer("BIke_Shops_Layer");
+        // spawn shops/objects
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
+        // Also load destructible objects from a dedicated Tiled object layer
+        LoadObjectLayer("Destructibles");
+        // spawn shops/objects
+        _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
+        
+        LoadObjectLayer("Chests");
+        _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
+        
+
+        // Insert any statics registered by the GameObjectManager (e.g. destructibles)
+        foreach (var s in _gameObjectManager.Statics)
+        {
+            StaticHash.Insert(s);
+        }
+
+        // Mark destructible items as non-walkable in the base grid, then pad once
+        if (PathGrid != null && _baseWalkableGrid != null)
+        {
+            foreach (var item in _gameObjectManager.Items)
+            {
+                if (item is DestructibleObject d)
+                {
+                    SetBaseWalkableForRect(d.Transform.Bounds, false);
+                }
+            }
+
+            ApplyGlobalPaddingFromBase();
+        }
+    }
+
+    private void SetBaseWalkableForRect(Rectangle rect, bool walkable)
+    {
+        if (_baseWalkableGrid == null) return;
+
+        int width = _baseWalkableGrid.GetLength(0);
+        int height = _baseWalkableGrid.GetLength(1);
+
+        int startX = Math.Max(0, rect.Left / _cellSize);
+        int startY = Math.Max(0, rect.Top / _cellSize);
+        int endX = Math.Min(width - 1, (rect.Right - 1) / _cellSize);
+        int endY = Math.Min(height - 1, (rect.Bottom - 1) / _cellSize);
+
+        for (int y = startY; y <= endY; y++)
+        {
+            for (int x = startX; x <= endX; x++)
+            {
+                _baseWalkableGrid[x, y] = walkable;
+            }
+        }
+    }
+
+    private void ApplyGlobalPaddingFromBase(int padding = 1)
+    {
+        if (PathGrid == null || _baseWalkableGrid == null) return;
+
+        int width = PathGrid.GetLength(0);
+        int height = PathGrid.GetLength(1);
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                PathGrid[x, y].Walkable = _baseWalkableGrid[x, y];
+            }
+        }
+
+        WallPadding(padding);
+    }
+
+    private void ApplyWalkabilityChange(Rectangle rect, bool walkable, bool fullRepad)
+    {
+        SetBaseWalkableForRect(rect, walkable);
+
+        if (fullRepad)
+        {
+            ApplyGlobalPaddingFromBase();
+        }
+        else
+        {
+            UpdatePaddedRegion(rect);
+        }
+    }
+
+    private void UpdatePaddedRegion(Rectangle rect, int padding = 1)
+    {
+        if (PathGrid == null || _baseWalkableGrid == null) return;
+
+        int width = PathGrid.GetLength(0);
+        int height = PathGrid.GetLength(1);
+        int margin = padding * 2; // include neighbours that previously got padded
+
+        int startX = Math.Max(0, rect.Left / _cellSize - margin);
+        int startY = Math.Max(0, rect.Top / _cellSize - margin);
+        int endX = Math.Min(width - 1, (rect.Right - 1) / _cellSize + margin);
+        int endY = Math.Min(height - 1, (rect.Bottom - 1) / _cellSize + margin);
+
+        for (int y = startY; y <= endY; y++)
+        {
+            for (int x = startX; x <= endX; x++)
+            {
+                PathGrid[x, y].Walkable = _baseWalkableGrid[x, y];
+            }
+        }
+
+        for (int y = startY; y <= endY; y++)
+        {
+            for (int x = startX; x <= endX; x++)
+            {
+                if (!_baseWalkableGrid[x, y])
+                {
+                    PadLocalNeighbours(x, y, startX, startY, endX, endY, padding);
+                }
+            }
+        }
+    }
+
+    private void PadLocalNeighbours(int x, int y, int startX, int startY, int endX, int endY, int padding)
+    {
+        for (int dy = -padding; dy <= padding; dy++)
+        {
+            for (int dx = -padding; dx <= padding; dx++)
+            {
+                if (dx == 0 && dy == 0)
+                    continue;
+
+                int nx = x + dx;
+                int ny = y + dy;
+
+                if (nx < startX || nx > endX || ny < startY || ny > endY)
+                    continue;
+
+                if (nx < 0 || nx >= PathGrid.GetLength(0) || ny < 0 || ny >= PathGrid.GetLength(1))
+                    continue;
+
+                PathGrid[nx, ny].Walkable = false;
+            }
+        }
     }
 
     // takes a world position in pixels (Vector2) and returns which tile that position is inside
@@ -347,11 +493,37 @@ public class CollisionManager
     {
         if (b.Layer == CollisionLayer.WALL && c.Layer == CollisionLayer.PROJECTILE)
         {
-            if (c.Intersects(b))
+            if (!c.Intersects(b)) return;
+
+            ProjectileBase p = (ProjectileBase)c.Owner;
+
+            // If the wall belongs to a destructible map object, apply damage
+            if (b.Owner is DestructibleObject destructible)
             {
-                ProjectileBase p = (ProjectileBase)c.Owner;
+                destructible.TakeDamage(p.Damage);
                 _toRemoveColliders.Add(p.Collider);
+
+                // if destroyed: defer static collider removal and defer path grid update
+                if (destructible.Health <= 0)
+                {
+                    // defer path grid walkability update for this object's area
+                    _toUpdateWalkableRects.Add(destructible.Transform.Bounds);
+
+                    // queue static collider for removal at end of frame
+                    _toRemoveStaticColliders.Add(b);
+
+                    // remove drawable/game object now
+                    _gameObjectManager.Remove(destructible);
+
+                    // Notify enemies to recalculate paths (they will see grid changes after deferred apply)
+                    _gameObjectManager.NotifyPathGridChanged();
+                }
+
+                return;
             }
+
+            // default: projectile hits a normal wall -> destroy projectile
+            _toRemoveColliders.Add(p.Collider);
         }
     }
 
@@ -479,8 +651,12 @@ public class CollisionManager
         {
             CharacterBase ch = (CharacterBase)c.Owner;
 
-            // Call proper AOE damage event
-            OnAOEHit?.Invoke(ch, aoe);
+            // Only apply damage if enough time has passed (once per DamageInterval)
+            if (aoe.CanDamage(ch))
+            {
+                // Call proper AOE damage event
+                OnAOEHit?.Invoke(ch, aoe);
+            }
 
             if (ch.IsDead)
             {
@@ -575,7 +751,21 @@ public class CollisionManager
             allDynamics.Remove(c);
         }
 
+        foreach (var c in _toRemoveStaticColliders)
+        {
+            StaticHash.Remove(c);
+            _gameObjectManager.Statics.Remove((BoxCollider)c);
+        }
+
+        // Apply deferred grid updates (localized to avoid full-grid stalls)
+        foreach (var rect in _toUpdateWalkableRects)
+        {
+            ApplyWalkabilityChange(rect, true, fullRepad: false);
+        }
+
         _toRemoveColliders.Clear();
+        _toRemoveStaticColliders.Clear();
+        _toUpdateWalkableRects.Clear();
     }
 
     // makes the hitboxes visible for when in the tech demo

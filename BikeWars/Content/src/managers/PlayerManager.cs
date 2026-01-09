@@ -37,11 +37,12 @@ namespace BikeWars.Content.managers
                 Player1.IsGodMode = true;
             }
 
-            // Player 2 - Gamepad (Only in MultiPlayer)
+            // Player 2 - Gamepad
             if (mode == GameMode.MultiPlayer)
             {
-                var inputP2 = new GamepadPlayerInput(PlayerIndex.One);
-                Player2 = new Player(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2), new Point(32, 32), audioService, inputP2);
+                // Assign Player 2 to the second controller. Player 1 starts on Keyboard but can switch to Pad 1.
+                var inputP2 = new GamepadPlayerInput(PlayerIndex.Two);
+                Player2 = new Player(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2), new Point(32, 32), audioService, inputP2, "Character2");
                 
                 if (isTechDemo)
                 {

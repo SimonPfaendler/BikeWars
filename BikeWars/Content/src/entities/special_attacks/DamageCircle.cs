@@ -44,7 +44,7 @@ namespace BikeWars.Content.entities.items
 
 
         public DamageCircle(Player player)
-            : base(owner: player, damage: 1, duration: 2.0f)
+            : base(owner: player, damage: 20, duration: 2.0f)
         {
             _player = player;
             _rotation = 0f;

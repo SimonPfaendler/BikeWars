@@ -205,8 +205,17 @@ public class PathFinding
         int startPriority = startNode.F_cost * 100000 + startNode.H_cost;
         openQueue.Enqueue(startNode, startPriority);
 
+        // Safety cap to prevent pathological cases from locking the game
+        int maxIterations = 5000;
+        int iterations = 0;
+
         while (openQueue.Count > 0)
         {
+            // iteration safety
+            iterations++;
+            if (iterations > maxIterations)
+                return new List<Node>();
+
             Node currentNode = openQueue.Dequeue();
 
             if (currentNode.ClosedId == _searchId)

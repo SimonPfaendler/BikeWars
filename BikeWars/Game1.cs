@@ -28,7 +28,15 @@ public class Game1 : Game
 
         _graphics.PreferredBackBufferWidth = 1280;
         _graphics.PreferredBackBufferHeight = 720;
+        _graphics.HardwareModeSwitch = false; // Use borderless full screen for smoother transitions
+    }
 
+    public void SetResolution(int width, int height, bool fullscreen)
+    {
+        _graphics.PreferredBackBufferWidth = width;
+        _graphics.PreferredBackBufferHeight = height;
+        _graphics.IsFullScreen = fullscreen;
+        _graphics.ApplyChanges();
     }
 
     protected override void Initialize()

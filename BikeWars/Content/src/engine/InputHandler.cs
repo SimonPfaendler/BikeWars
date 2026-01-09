@@ -174,7 +174,25 @@ namespace BikeWars.Content.engine
     {
         public static readonly KeyboardInfo Keyboard = new();
         public static readonly MouseInfo Mouse = new();
-        public static readonly GamePadInfo GamePad = new();
+        // Changed to array to support multiple controllers.
+        public static readonly GamePadInfo[] GamePads = new GamePadInfo[4];
+
+        static InputHandler()
+        {
+            // Initialize the 4 slots
+            for (int i = 0; i < 4; i++)
+            {
+                GamePads[i] = new GamePadInfo((PlayerIndex)i);
+            }
+        }
+        
+        // Helper to get specific gamepad
+        public static GamePadInfo GetGamePad(PlayerIndex index)
+        {
+            int i = (int)index;
+            if (i >= 0 && i < 4) return GamePads[i];
+            return GamePads[0]; // fallback
+        }
 
 
         // Keyboard Mapping
@@ -251,9 +269,13 @@ namespace BikeWars.Content.engine
         {
             Keyboard.Update();
             Mouse.Update();
-            GamePad.Update();
+            foreach (var pad in GamePads)
+            {
+                pad.Update();
+            }
         }
 
+        
         public static bool IsHeld(GameAction action)
         {
             if (MouseMapping.TryGetValue(action, out var mouseButtons))
@@ -274,9 +296,10 @@ namespace BikeWars.Content.engine
             }
             if (GamepadMap.TryGetValue(action, out var buttons))
             {
+                var pad = GamePads[(int)PlayerIndex.One];
                 foreach (var button in buttons)
                 {
-                    if (GamePad.Held(button))
+                    if (pad.Held(button))
                         return true;
                 }
 
@@ -306,9 +329,10 @@ namespace BikeWars.Content.engine
             }
             if (GamepadMap.TryGetValue(action, out var buttons))
             {
+                var pad = GamePads[(int)PlayerIndex.One];
                 foreach (var button in buttons)
                 {
-                    if (GamePad.Pressed(button))
+                    if (pad.Pressed(button))
                         return true;
                 }
             }

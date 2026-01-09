@@ -85,17 +85,39 @@ public class LevelUpScreen : IScreen
     {
         if (!IsOpen) return;
         
-        spriteBatch.Draw(_pixel, new Rectangle(0, 0, 1280, 720), Color.Black * 0.4f);
+        var viewport = Game1.Instance.GraphicsDevice.Viewport;
+        int screenW = viewport.Width;
+        int screenH = viewport.Height;
 
-        Rectangle box = new Rectangle(440, 200, 400, 250);
+        // Fullscreen overlay
+        spriteBatch.Draw(_pixel, new Rectangle(0, 0, screenW, screenH), Color.Black * 0.4f);
+
+        int boxW = 400;
+        int boxH = 250;
+        int boxX = (screenW - boxW) / 2;
+        int boxY = (screenH - boxH) / 2;
+
+        Rectangle box = new Rectangle(boxX, boxY, boxW, boxH);
         spriteBatch.Draw(_pixel, box, Color.DarkGray);
 
         // Header
-        spriteBatch.DrawString(_font, "!!LEVEL UP!!", new Vector2(540, 230), Color.DarkRed);
+        string title = "!!LEVEL UP!!";
+        Vector2 titleSize = _font.MeasureString(title);
+        Vector2 titlePos = new Vector2(
+            boxX + (boxW - titleSize.X) / 2,
+            boxY + 30
+        );
+        spriteBatch.DrawString(_font, title, titlePos, Color.DarkRed);
         
-        DrawOption(spriteBatch, _option1, new Vector2(480, 270), _selectedOption == 0);
-        DrawOption(spriteBatch, _option2, new Vector2(480, 320), _selectedOption == 1);
-        DrawOption(spriteBatch, _option3, new Vector2(480, 370), _selectedOption == 2);
+        // Options
+        int startOptionY = boxY + 70;
+        int optionSpacing = 50;
+        // Center text in box - approximate X offset or use generic padding
+        int textX = boxX + 40; 
+
+        DrawOption(spriteBatch, _option1, new Vector2(textX, startOptionY), _selectedOption == 0);
+        DrawOption(spriteBatch, _option2, new Vector2(textX, startOptionY + optionSpacing), _selectedOption == 1);
+        DrawOption(spriteBatch, _option3, new Vector2(textX, startOptionY + optionSpacing * 2), _selectedOption == 2);
     }
 
     private void DrawOption(SpriteBatch spriteBatch, SkillTree.SkillId option, Vector2 position, bool selected)

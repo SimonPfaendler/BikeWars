@@ -45,14 +45,14 @@ public class CombatManager
         // Initialize random manually or use a shared instance if available. Good practice to have a shared Random.
         // Assuming a shared Random or just creating one for now. Performance impact is negligible here.
         Random rnd = new Random();
-        bool isCrit = false; 
+        //bool isCrit = false; // isn't used, maybe unnecessary 
         int damage = projectile.Damage;
 
         if (projectile.Owner is CharacterBase owner)
         {
             if (rnd.NextDouble() < owner.Attributes.CritChance)
             {
-                isCrit = true;
+                // isCrit = true;
                 damage = (int)(damage * owner.Attributes.CritMultiplier);
             }
         }
@@ -60,20 +60,20 @@ public class CombatManager
         // Apply Damage
         target.TakeDamage(damage);
         projectile.HasHit = true;
-        _gameObjects.SpawnDamageNumber(target.Transform.Position, damage, isCrit);
+        
 
         // Notify GameScreen to Shake
-        OnScreenShakeRequested?.Invoke(1.25f, 0.10f);
+        OnScreenShakeRequested?.Invoke(2.75f, 0.10f);
 
         // Apply Knockback
         Vector2 knockbackDir = target.Transform.Position - projectile.Transform.Position;
         if(knockbackDir != Vector2.Zero)
             knockbackDir.Normalize();
-        target.ApplyKnockback(knockbackDir, 220f); // "Slightly" knockback
+        target.ApplyKnockback(knockbackDir, 220f); // knockback
 
         _audio.Sounds.Play(AudioAssets.BulletHit);
 
-        OnHitStopRequested?.Invoke(0.05f); // Pause for 0.05 sec
+        OnHitStopRequested?.Invoke(0.075f); // Pause for 0.075 sec
 
         if (target.Attributes.Health <= 0)
         {
@@ -91,8 +91,8 @@ public class CombatManager
         if (target == aoe.Owner) return;
 
         // Apply Damage
-        target.TakeDamage(aoe.Damage);
-        _gameObjects.SpawnDamageNumber(target.Transform.Position, aoe.Damage);
+        target.TakeDamage(aoe.Damage, shouldSquash: false);
+        // _gameObjects.SpawnDamageNumber(target.Transform.Position, aoe.Damage); // HANDLED BY GameObjectManager AGGREGATION
 
         /*
         // Apply Knockback for AOE
