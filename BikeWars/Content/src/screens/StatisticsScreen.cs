@@ -11,8 +11,7 @@ using BikeWars.Content.src.utils.SaveLoadExample;
 namespace BikeWars.Content.screens;
 public class StatisticsScreen : MenuScreenBase, IScreen
 {
-
-    private float scrollOffset = 0f;
+    private ScrollBox _statistics;
 
     private readonly AudioService _audioService;
     public string DesiredMusic => AudioAssets.MenuMusic;
@@ -25,7 +24,24 @@ public class StatisticsScreen : MenuScreenBase, IScreen
         _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
         var state = SaveLoad.LoadGame();
         Statistics = state.Statistics ?? new List<Statistic>();
+
+        Texture2D bg = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
+        bg.SetData(new[] { Color.Black });
+
+        _statistics = new ScrollBox(
+            bg,
+            _font,
+            new Rectangle(400, 100, 500, 300),
+            Game1.Instance.SpriteBatch,
+            MakeAchievementList,
+            GetStatisticsHeight
+        );
         InitializeButtons();
+    }
+
+    private float GetStatisticsHeight()
+    {
+        return Statistics.Count * 110f; // Content of every entry right now.
     }
 
     protected sealed override void InitializeButtons()
@@ -50,7 +66,7 @@ public class StatisticsScreen : MenuScreenBase, IScreen
             font: _font,
             audioService: _audioService
         ));
-        
+
         UpdateSelection(0);
     }
 
@@ -63,15 +79,19 @@ public class StatisticsScreen : MenuScreenBase, IScreen
                 break;
         }
     }
-    private void MakeAchievementList(SpriteBatch sp, Texture2D overlay)
+    private void MakeAchievementList(SpriteBatch sb, Vector2 startPos)
     {
         int row = 0;
         if (Statistics == null)
         {
             return;
         }
+
+        Texture2D overlay = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
+        overlay.SetData(new[] { Color.White });
         foreach (Statistic statistic in Statistics) {
-            new StatisticsComponent(statistic).Draw(sp, overlay, new Vector2(400, row - scrollOffset), _font);
+            new StatisticsComponent(statistic)
+                .Draw(sb, overlay, startPos + new Vector2(0, row), _font);
             row += 110;
         }
     }
@@ -84,47 +104,20 @@ public class StatisticsScreen : MenuScreenBase, IScreen
         spriteBatch.Begin();
         Rectangle destinationRect = new Rectangle(0, 0, game.GraphicsDevice.Viewport.Width, game.GraphicsDevice.Viewport.Height);
         spriteBatch.Draw(_backgroundTexture, destinationRect, Color.White);
-        
+
         foreach (var button in _buttons)
         {
             button.Draw(spriteBatch);
         }
 
         spriteBatch.End();
+        _statistics.Draw();
+    }
 
-        RasterizerState scissorRaster = new RasterizerState();
-        scissorRaster.MultiSampleAntiAlias = false;
-        scissorRaster.ScissorTestEnable = true;
-        
-        Rectangle scrollArea = new Rectangle(400, 100, 500, 300);
-        game.GraphicsDevice.ScissorRectangle = scrollArea;
-
-        spriteBatch.Begin(
-            SpriteSortMode.Deferred,
-            BlendState.AlphaBlend,
-            SamplerState.PointClamp,
-            DepthStencilState.None,
-            scissorRaster
-        );
-
-        if (InputHandler.IsHeld(GameAction.UI_DOWN))
-        {
-            scrollOffset += 5f;
-        }
-        if (InputHandler.IsHeld(GameAction.UI_UP))
-        {
-            scrollOffset -= 5f;
-        }
-        scrollOffset = MathHelper.Clamp(scrollOffset, 0, 1000f);
-        Texture2D overlay = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
-        overlay.SetData(new[] { Color.White });
-        MakeAchievementList(spriteBatch, overlay);
-        /*spriteBatch.Draw(
-            overlay, 
-            new Vector2(scrollArea.X, scrollArea.Y - scrollOffset), 
-            Color.White
-        );*/
-        spriteBatch.End();
+    public override void Update(GameTime gameTime)
+    {
+        base.Update(gameTime);
+        _statistics.Update();
     }
     public override bool DrawLower => false;
     public override bool UpdateLower => false;

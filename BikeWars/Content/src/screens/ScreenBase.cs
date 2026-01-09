@@ -18,19 +18,19 @@ namespace BikeWars.Content.screens
         protected MouseState _previousMouseState;
         protected GameTime _currentGameTime;
         public ScreenManager ScreenManager { get; set; }
-        
+
         protected double _clickCooldown = 300;
-        protected double _lastClickTime = -9999; 
+        protected double _lastClickTime = -9999;
         protected int _selectedIndex = 0;
         protected bool _usingMouse = true;
-        
+
         protected MenuScreenBase(Texture2D background, SpriteFont font)
         {
             _backgroundTexture = background;
             _font = font;
             _buttons = new List<MenuButton>();
         }
-        
+
         protected abstract void InitializeButtons();
 
         public virtual void Update(GameTime gameTime)
@@ -58,7 +58,7 @@ namespace BikeWars.Content.screens
 
             MouseState currentMouseState = Mouse.GetState();
             double now = gameTime.TotalGameTime.TotalMilliseconds;
-            
+
             foreach (var button in _buttons)
             {
                 button.Update(currentMouseState, gameTime);
@@ -78,42 +78,42 @@ namespace BikeWars.Content.screens
                     }
                 }
             }
-            
+
             _previousMouseState = currentMouseState;
         }
-        
+
         public virtual void Draw(GameTime gameTime)
         {
             Game1 game = Game1.Instance;
             SpriteBatch spriteBatch = game.SpriteBatch;
-            
+
             spriteBatch.Begin();
-            
+
             Rectangle destinationRect = new Rectangle(0, 0, game.GraphicsDevice.Viewport.Width, game.GraphicsDevice.Viewport.Height);
             spriteBatch.Draw(_backgroundTexture, destinationRect, Color.White);
-            
+
             foreach (var button in _buttons)
             {
                 button.Draw(spriteBatch);
             }
-            
+
             spriteBatch.End();
         }
-        
+
         // CreateSimpleTexture might be changed for a better graphic later
         protected Texture2D CreateSimpleTexture(GraphicsDevice graphicsDevice, int width, int height)
         {
             Texture2D texture = new Texture2D(graphicsDevice, width, height);
             Color[] data = new Color[width * height];
-            for (int i = 0; i < data.Length; i++) 
+            for (int i = 0; i < data.Length; i++)
                 data[i] = Color.White;
             texture.SetData(data);
             return texture;
         }
-        
+
         // Every screen has to handle their own button clicks
         protected abstract void HandleButtonClick(MenuButton button);
-        
+
         // helper-method for selecting a button
         protected void UpdateSelection(int newIndex)
         {

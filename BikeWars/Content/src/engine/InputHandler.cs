@@ -46,7 +46,7 @@ namespace BikeWars.Content.engine
         INVENTORY_4,
         INVENTORY_5,
         MODE_SWITCH,
-        
+
         // UI
         UI_UP,
         UI_DOWN,
@@ -208,7 +208,7 @@ namespace BikeWars.Content.engine
             { GameAction.UI_DOWN, new[] { Keys.S, Keys.Down } },
             { GameAction.UI_CONFIRM, new[] { Keys.Enter, Keys.Space } },
             { GameAction.MODE_SWITCH, new[] { Keys.J} },
-            
+
         };
         public static Dictionary<GameAction, MouseButton[]> MouseMapping { get; } = new()
         {
@@ -216,7 +216,7 @@ namespace BikeWars.Content.engine
         };
 
         public static Dictionary<GameAction, Buttons[]> GamepadMap { get; } = new()
-        {   
+        {
             // UI
             { GameAction.UI_UP,    new[] { Buttons.DPadUp } },
             { GameAction.UI_DOWN,  new[] { Buttons.DPadDown } },
@@ -228,7 +228,7 @@ namespace BikeWars.Content.engine
             { GameAction.INVENTORY_PREV, new[] { Buttons.LeftShoulder } },
             { GameAction.INVENTORY_NEXT, new[] { Buttons.RightShoulder } },
             { GameAction.INVENTORY_USE,  new[] { Buttons.A } },
-            
+
             // Gameplay
             { GameAction.SAVE, new[]  {Buttons.DPadUp} },
             { GameAction.LOAD, new[] {Buttons.DPadRight} },

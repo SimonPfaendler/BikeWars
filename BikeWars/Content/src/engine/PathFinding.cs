@@ -158,15 +158,15 @@ public class PathFinding
     {
         if (node.SearchId == _searchId)
             return;
-        
+
         node.SearchId = _searchId;
         node.G_cost = int.MaxValue;
         node.H_cost = 0;
         node.Parent_node = null;
-        
+
         node.ClosedId = -1;
     }
-    
+
 
     // Initializes the starting node with G = 0 and heuristic (H-cost)
     private static void InitializeStartNode(Node startNode, Node targetNode)
@@ -187,14 +187,14 @@ public class PathFinding
         // Validate that start and end positions are inside the map
         if (!IsInsideGrid(startX, startY) || !IsInsideGrid(endX, endY))
             return new List<Node>();
-        
+
         Node startNode = _grid[startX, startY];
         Node targetNode = _grid[endX, endY];
 
         // If either start or end is blocked, no path exists
         if (!startNode.Walkable || !targetNode.Walkable)
             return new List<Node>();
-        
+
         _searchId++;
         PrepareNodeForSearch(startNode);
         PrepareNodeForSearch(targetNode);
@@ -208,7 +208,7 @@ public class PathFinding
         while (openQueue.Count > 0)
         {
             Node currentNode = openQueue.Dequeue();
-            
+
             if (currentNode.ClosedId == _searchId)
                 continue;
 
