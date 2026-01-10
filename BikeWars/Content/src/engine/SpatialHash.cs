@@ -67,7 +67,7 @@ public class SpatialHash
                 }
 
                 cell.Count++;
-                cell.Layers.Add(c.Layer); // Layer speichern
+                cell.Layers.Add(c.Layer); // Save layer
                 cell.Colliders ??= new HashSet<ICollider>();
                 cell.Colliders.Add(c);
             }
