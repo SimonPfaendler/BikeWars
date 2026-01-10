@@ -431,6 +431,10 @@ public class CollisionManager
         foreach (CharacterBase c in characters)
         {
             AddDynamic(c.Collider);
+            if (c.IsDead)
+            {
+                _toRemoveColliders.Add(c.Collider);
+            }
         }
     }
 

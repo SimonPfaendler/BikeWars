@@ -94,14 +94,6 @@ public class CombatManager
         target.TakeDamage(aoe.Damage, shouldSquash: false);
         // _gameObjects.SpawnDamageNumber(target.Transform.Position, aoe.Damage); // HANDLED BY GameObjectManager AGGREGATION
 
-        /*
-        // Apply Knockback for AOE
-        // Direction is from AOE center to character
-        Vector2 knockbackDir = target.Transform.Position - aoe.Transform.Position;
-        if (knockbackDir != Vector2.Zero)
-            knockbackDir.Normalize();
-        target.ApplyKnockback(knockbackDir, 150f); // "Slightly" knockback
-        */
 
         if (aoe is IceTrail)
         {
