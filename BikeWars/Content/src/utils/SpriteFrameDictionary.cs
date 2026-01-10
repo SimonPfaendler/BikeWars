@@ -161,6 +161,16 @@ namespace BikeWars.Content.utils
 
              AnimationFrames["IceTrail_Attack"] = new List<Rectangle>();
              for (int i = 0; i < 5; i++) AnimationFrames["IceTrail_Attack"].Add(new Rectangle(i * 64, 0, 64, 60));
+
+             // e4 (KamikazeOpa):
+             // Movement (1 row, 6 columns)
+             AnimationFrames["KamikazeOpa_BikeDown"] = GetFramesFromAtlas("e4_kamikazeopa_bike_down.png", 6, 1);
+             AnimationFrames["KamikazeOpa_BikeLeft"] = GetFramesFromAtlas("e4_kamikazeopa_bike_left.png", 6, 1);
+             AnimationFrames["KamikazeOpa_BikeRight"] = GetFramesFromAtlas("e4_kamikazeopa_bike_right.png", 6, 1);
+             AnimationFrames["KamikazeOpa_BikeUp"] = GetFramesFromAtlas("e4_kamikazeopa_bike_up.png", 6, 1);
+
+             // Death (1 row, 9 columns, 9 frames total)
+             AnimationFrames["KamikazeOpa_Death"] = GetFramesFromAtlas("e4_kamikazeopa_death_animation.png", 9, 1);
         }
 
         public static List<Rectangle> GetFrames(string key)
