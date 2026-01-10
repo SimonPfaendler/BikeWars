@@ -147,10 +147,10 @@ namespace BikeWars.Content.utils
 
 
              // Walk Animations
-             AnimationFrames["Character2_WalkDown"] = GetFramesFromAtlas("c2_walk_down.png", 3, 4);
+             AnimationFrames["Character2_WalkDown"] = GetFramesFromAtlas("c2_walk_down.png", 4, 3);
              AnimationFrames["Character2_WalkLeft"] = GetFramesFromAtlas("c2_walk_left.png", 8, 1);
              AnimationFrames["Character2_WalkRight"] = GetFramesFromAtlas("c2_walk_right.png", 8, 1);
-             AnimationFrames["Character2_WalkUp"] = GetFramesFromAtlas("c2_walk_up.png", 3, 4);
+             AnimationFrames["Character2_WalkUp"] = GetFramesFromAtlas("c2_walk_up.png", 4, 3);
              AnimationFrames["Character2_Idle"] = GetFramesFromAtlas("c2_idle.png", 14, 11).Take(104).ToList();
              // Idle for Character 1 (uses first frame of WalkDown)
             AnimationFrames["Character1_Idle"] = new List<Rectangle> { AnimationFrames["Character1_WalkDown"][0] };
