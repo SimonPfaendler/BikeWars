@@ -49,7 +49,7 @@ namespace BikeWars.Entities.Characters
         public event Action Flamethrower;
         public event Action IceTrail;
         public event Action DamageCircle;
-        
+
 
         public event Action<Bike> Dismounted;
 
@@ -69,7 +69,7 @@ namespace BikeWars.Entities.Characters
         public event Action<int, int> OnLevelUp;
         public event Action<BikeShop> OnBikeShopOpen;
         public event Action<int> OnMoreXP;
-        
+
         public event Action<ItemBase> ChestItemSpawn;
 
         private bool _isUsingItem = false;
@@ -282,7 +282,7 @@ namespace BikeWars.Entities.Characters
         public override float GetPulseMultiplier()
         {
             // Reduce pulse significantly when on bike, as it looks weird if the bike breathes
-            return movement.OwnsBike ? 0.5f : 1.0f; 
+            return movement.OwnsBike ? 0.5f : 1.0f;
         }
 
         public override void TakeDamage(int amount, bool shouldSquash = true)
@@ -296,7 +296,7 @@ namespace BikeWars.Entities.Characters
             if (movement.OwnsBike && movement.CrtBike != null)
             {
                 var bike = movement.CrtBike;
-                bike.TakeDamage(amount);               
+                bike.TakeDamage(amount);
 
                 int reducedDamage = Math.Max(0, amount - bike.Attributes.Armor);
                 base.TakeDamage(reducedDamage, shouldSquash);
@@ -308,7 +308,7 @@ namespace BikeWars.Entities.Characters
             }
             else
             {
-                base.TakeDamage(amount, shouldSquash);             
+                base.TakeDamage(amount, shouldSquash);
             }
         }
 
@@ -788,7 +788,7 @@ namespace BikeWars.Entities.Characters
                 }
 
                 _currentAnimation?.Update(gameTime, movement.IsMoving());
-            } 
+            }
             else
             {
                  if (movement.CurrentMovement is WalkingMovement)

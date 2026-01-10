@@ -102,7 +102,7 @@ namespace BikeWars.Content.screens
 
             _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
             _gameMode = gameMode;
-            
+
             _playerManager = new PlayerManager();
 
             // Decide mode
@@ -114,7 +114,7 @@ namespace BikeWars.Content.screens
 
             _gameObjectManager = new GameObjectManager(_contentManager, player, player2);
             // Initial spawning is now handled by SpawnManager
-            
+
             _gameObjectManager.AddItem(new Frelo(new Vector2(5700, 5700), new Point(32, 32)));
             _gameObjectManager.AddItem(new RacingBike(new Vector2(5800, 5800), new Point(32, 32)));
             string energy = "Energygel";
@@ -139,7 +139,7 @@ namespace BikeWars.Content.screens
             _gameObjectManager.Player1.OnTookDamage += _statisticsManager.HandleTookDamage;
             _gameObjectManager.Player1.OnLevelUp += _statisticsManager.HandleLevel;
             _gameObjectManager.Player1.OnMoreXP += _statisticsManager.HandleExperience;
-            
+
             _collisionManager = new CollisionManager(CELL_SIZE, worldBounds.Height, _gameObjectManager);
             var players = new HashSet<Player>();
             if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);
@@ -174,6 +174,7 @@ namespace BikeWars.Content.screens
             _collisionManager.OnAOEHit += _combatManager.HandleAOEHit;
             _collisionManager.OnCharacterCollision += _combatManager.HandleCharacterCollision;
             _collisionManager.OnItemPickup += _gameObjectManager.Player1.OnPickUpItem;
+            _collisionManager.OnItemInteraction += _gameObjectManager.Player1.OnPickUpItem;
             _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
 
             _combatManager.OnHitStopRequested += TriggerHitStop;
@@ -181,7 +182,9 @@ namespace BikeWars.Content.screens
             _gameObjectManager.OnScreenShakeRequested += (intensity, duration) => camera.Shake(intensity, duration);
 
             if (_gameObjectManager.Player2 != null)
-            {   _collisionManager.OnItemPickup += _gameObjectManager.Player2.OnPickUpItem;
+            {
+                _collisionManager.OnItemPickup += _gameObjectManager.Player2.OnPickUpItem;
+                _collisionManager.OnItemInteraction += _gameObjectManager.Player2.OnPickUpItem;
                 _gameObjectManager.Player2.ItemPickedUp += _collisionManager.OnRemoveItem;
             }
 
@@ -228,7 +231,7 @@ namespace BikeWars.Content.screens
             {
                 _audioService.Sounds.ResumeAll();
             };
-            
+
 
             _gameObjectManager.Player1.OnBikeShopOpen += shop =>
             {
@@ -237,9 +240,8 @@ namespace BikeWars.Content.screens
             };
 
             _gameObjectManager.Player1.Dismounted += _gameObjectManager.AddItem;
-            
-            _gameObjectManager.Player1.ChestItemSpawn += _gameObjectManager.AddItem;
 
+            _gameObjectManager.Player1.ChestItemSpawn += _gameObjectManager.AddItem;
 
 
             // the Option selected gets upgraded
@@ -268,13 +270,13 @@ namespace BikeWars.Content.screens
             // Update HUD and Timer alignment for resolution changes
             int viewW = Game1.Instance.GraphicsDevice.Viewport.Width;
             int viewH = Game1.Instance.GraphicsDevice.Viewport.Height;
-            
+
             if (_hudP2 != null)
             {
                 _hudP2.Position = new Vector2(viewW - 350, viewH - 170);
             }
             _timerPosition = new Vector2(viewW / 2f, 40f);
-            
+
             if (InputHandler.IsPressed(GameAction.MODE_SWITCH))
             {
                 if (_inputMode == InputMode.Keyboard)
@@ -307,7 +309,7 @@ namespace BikeWars.Content.screens
             {
                 _worldAudioManager.UpdateListenerPosition(_gameObjectManager.Player1.Transform.Position);
             }
-            
+
             _overlay.SetPaused(false, gameTime);
             _overlay.SetPaused(false, gameTime);
 
@@ -321,7 +323,7 @@ namespace BikeWars.Content.screens
                      _tiledMapRenderer.Update(gameTime); // keep map rendering updating if needed or freeze it too
                     // We still might want to process input or camera?
                     // For "Juice", typically everything freezes.
-                    return; 
+                    return;
                 }
             }
 
@@ -589,7 +591,7 @@ namespace BikeWars.Content.screens
 
             _debugger.Draw(spriteBatch);
             DrawTimer(spriteBatch, gameTime);
-            
+
             var player = _gameObjectManager.Player1;
             bool showSelection = (_inputMode == InputMode.Controller);
             player.Inventory.Draw(spriteBatch, _pixel, player.SelectedInventoryIndex, showSelection);

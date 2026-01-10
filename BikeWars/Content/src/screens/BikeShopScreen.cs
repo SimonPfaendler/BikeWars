@@ -31,7 +31,7 @@ public class BikeShopScreen : IScreen
     private int _selectedOption = 0;
 
     private Player _player;
-    
+
     public event Action Closed;
 
     public BikeShopScreen()
@@ -65,7 +65,7 @@ public class BikeShopScreen : IScreen
             Close();
             return;
         }
-        
+
 
         if (ks.IsKeyDown(Keys.D1) || ks.IsKeyDown(Keys.NumPad1))
         {
@@ -87,7 +87,7 @@ public class BikeShopScreen : IScreen
             Close();
         }
     }
-    
+
 
     private void ApplyOption(ShopOption option)
     {
