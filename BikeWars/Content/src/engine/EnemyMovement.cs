@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.managers;
+using BikeWars.Content.entities.interfaces;
 using Microsoft.Xna.Framework;
 
 
@@ -24,8 +25,7 @@ public class EnemyMovement : MovementBase
    private int _pathIndex = 0;
    public IReadOnlyList<Node> CurrentPath => _currentPath;
    public int CurrentPathIndex => _pathIndex;
-   private const int QueryRadius = 3; // nearby collisions
-   private const int LocalGridSize = 40; // 7x7 nodes A*
+   private const int LocalGridSize = 21; // 7x7 nodes A*
    private Point _lastPlayerGrid = new Point(-1, -1);
     private float _repathTimer = 0f;
    private const float RepathInterval = 1f;
@@ -33,9 +33,14 @@ public class EnemyMovement : MovementBase
     private static readonly Random _rng = new();
 
 
-   private const float NodeReachDistance = 18f;
+   private const float NodeReachDistance = 10f;
    private const float StopRadius = 10f;
 
+   // enemies avoid each other
+   private const float AvoidRadius = 45f;
+   private const float AvoidStrength = 1.2f;
+   private const float AvoidMax = 1.0f;
+   private readonly float _slotAngle;
 
    public Vector2 PlayerPosition {get; set;}
    public Vector2 EnemyPosition {get; set;}
@@ -54,6 +59,8 @@ public class EnemyMovement : MovementBase
        _gridMapper = gridMapper;
         // Stagger initial repath timers to distribute load
         _repathTimer = (float)(_rng.NextDouble() * RepathInterval);
+        
+        _slotAngle = (float)(_rng.NextDouble() * MathF.Tau);
    }
 
     // Force a repath on the next update
@@ -79,11 +86,18 @@ public class EnemyMovement : MovementBase
 
        if (_repathTimer < 0f) _repathTimer = 0f;
 
-
-
-
+       
        var enemyGrid= _gridMapper.WorldToGrid(EnemyPosition);
-       var playerGrid= _gridMapper.WorldToGrid(PlayerPosition);
+       
+       var playerGridRaw = _gridMapper.WorldToGrid(PlayerPosition);
+       var playerGrid = OffsetTargetGrid(playerGridRaw);
+
+       // fallback if the offset goes outside the map or onto a blocked tile
+       if (!_pathFinding.IsInsideGrid(playerGrid.X, playerGrid.Y) ||
+           !_pathFinding.GetNode(playerGrid.X, playerGrid.Y).Walkable)
+       {
+           playerGrid = playerGridRaw;
+       }
 
 
        bool timeUp = _repathTimer <= 0f;
@@ -100,14 +114,38 @@ public class EnemyMovement : MovementBase
            RecalculatePath(enemyGrid, playerGrid);
            _repathTimer = RepathInterval;
        }
-       Direction = DirectionAlongPath();
-       if (Direction == Vector2.Zero)
+       
+       Vector2 pathDir = DirectionAlongPath();
+       if (pathDir == Vector2.Zero)
        {
            // optional: clear path when done, then just chase directly
            _currentPath.Clear();
            _pathIndex = 0;
-           Direction = DirectionToTarget();
+           pathDir = DirectionToTarget();
        }
+       
+       Vector2 avoidDir = ComputeAvoidance();
+       avoidDir *= 0.6f;
+       
+       // Stops the enemy from moving backwards when avoiding others,
+       // so it mainly moves forward and only steps to the side.
+       if (pathDir != Vector2.Zero && avoidDir != Vector2.Zero)
+       {
+           float dot = Vector2.Dot(avoidDir, pathDir);
+           if (dot < 0f)
+           {
+               // remove backward component
+               avoidDir -= pathDir * dot;
+           }
+       }
+       
+       Vector2 combinedPath = pathDir + avoidDir;
+       
+       if (combinedPath != Vector2.Zero)
+           combinedPath.Normalize();
+
+       Direction = combinedPath;
+       
        Update(gameTime);
    }
 
@@ -231,7 +269,8 @@ public class EnemyMovement : MovementBase
    // gives a direction pointing straight toward the player if not too close.
    private Vector2 DirectionToTarget()
    {
-       Vector2 toTarget = PlayerPosition - EnemyPosition;
+       Vector2 target = OffsetTarget(PlayerPosition);
+       Vector2 toTarget = target - EnemyPosition;
 
 
        if (toTarget.LengthSquared() < StopRadius * StopRadius)
@@ -240,6 +279,77 @@ public class EnemyMovement : MovementBase
 
        toTarget.Normalize();
        return toTarget;
+   }
+   
+   // the target will be a radius around the player not only the exact position of the player
+   // so that the enemies "avoid" each other
+   private Vector2 OffsetTarget(Vector2 playerPosition)
+   {
+       float angle = _slotAngle;
+       float radius = 35f;
+       
+       Vector2 offset = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * radius;
+       
+       return playerPosition + offset;
+   }
+
+   // makes the enemies aim for different tiles around the player
+   // to prevent them from stacking on one position
+   private Point OffsetTargetGrid(Point playerGrid)
+   {
+       int ox = (int)MathF.Round(MathF.Cos(_slotAngle) * 2f);
+       int oy = (int)MathF.Round(MathF.Sin(_slotAngle) * 2f);
+       return new Point(playerGrid.X + ox, playerGrid.Y + oy);
+   }
+   
+   
+   // helper function that computes avoidance direction
+   private Vector2 ComputeAvoidance()
+   {
+       if (_gridMapper.DynamicHash == null)
+           return Vector2.Zero;
+       
+       Vector2 avoid = Vector2.Zero;
+       var nearby = _gridMapper.DynamicHash.QueryNearby(EnemyPosition, 3);
+
+       foreach (var otherCollider in  nearby)
+       {
+           if (otherCollider.Layer != CollisionLayer.CHARACTER)
+               continue;
+
+           if (otherCollider.Owner is not CharacterBase otherChar)
+               continue;
+
+           if (otherChar.Movement is not EnemyMovement)
+               continue;
+           
+           Vector2 diff = EnemyPosition - otherChar.Transform.Position;
+           float distSquared = diff.LengthSquared();
+           
+           float avoidRadiusSq = AvoidRadius * AvoidRadius;
+
+           if (distSquared < 0.0001f || distSquared >= avoidRadiusSq)
+               continue;
+           
+           float dist = (float)Math.Sqrt(distSquared);
+           diff /= dist;
+           
+           float strength = (AvoidRadius - dist) / AvoidRadius;
+           avoid += diff * strength;
+       }
+       
+       if (avoid == Vector2.Zero)
+           return Vector2.Zero;
+       
+       avoid *= AvoidStrength;
+
+       if (avoid.LengthSquared() > AvoidMax * AvoidMax)
+       {
+           avoid.Normalize();
+           avoid *= AvoidMax;
+       }
+       
+       return avoid;
    }
 
 

@@ -209,7 +209,7 @@ namespace BikeWars.Content.screens
             Rectangle initialView = GetCameraWorldRect();
             _worldAudioManager = new WorldAudioManager(initialView);
             _gameObjectManager.SetWorldAudioManager(_worldAudioManager);
-
+            
             _levelUpScreen = new LevelUpScreen();
             _levelUpScreen.Closed += () =>
             {
@@ -254,7 +254,7 @@ namespace BikeWars.Content.screens
                 game.GraphicsDevice.Viewport.Width / 2f,
                 40f
             );
-            if (!_gameTimer.IsRunning)
+            if (!_gameTimer.IsRunning && !_isTechDemo)
             {
                 InitializeTimer();
             }
@@ -387,8 +387,9 @@ namespace BikeWars.Content.screens
                 PauseMenuScreen pauseMenu = new PauseMenuScreen(_font, _audioService);
                 ScreenManager.AddScreen(pauseMenu);
             }
-
-            _gameTimer.Update(gameTime);
+            
+            if (!_isTechDemo)
+                _gameTimer.Update(gameTime);
         }
 
         // Load here stuff like statistics or options that is not related to the
@@ -575,7 +576,7 @@ namespace BikeWars.Content.screens
             }
 
             // draws A* paths for enemies in tech demo
-            if (_isTechDemo)
+            if (_isTechDemo && _showStaticHitboxes)
             {
                 DrawEnemyPaths(spriteBatch);
             }
