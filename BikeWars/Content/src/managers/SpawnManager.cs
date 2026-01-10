@@ -129,18 +129,30 @@ namespace BikeWars.Content.managers
             }
             else
             {
-                bool spawnDog = _random.NextDouble() > (0.2 + 0.3 * progress); // Chance of BikeThief increases from 20% to 50%
-                if (spawnDog)
+                // Remaining probability split between Dog, Thief, and Kamikaze
+                double val = _random.NextDouble();
+                // Dog: 40% of remaining
+                // Thief: 40% of remaining
+                // Kamikaze: 20% of remaining
+                
+                if (val < 0.4)
                 {
                     var dog = new Dog(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager);
                     ApplyScaling(dog, difficultyMultiplier, speedMultiplier);
                     _gameObjectManager.AddCharacter(dog);
                 }
-                else
+                else if (val < 0.8)
                 {
                     var thief = new BikeThief(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager);
                     ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
-                    _gameObjectManager.AddCharacter(thief);}
+                    _gameObjectManager.AddCharacter(thief);
+                }
+                else
+                {
+                    var kamikaze = new KamikazeOpa(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager, _gameObjectManager);
+                    ApplyScaling(kamikaze, difficultyMultiplier, speedMultiplier);
+                    _gameObjectManager.AddCharacter(kamikaze);
+                }
             }
         }
 
