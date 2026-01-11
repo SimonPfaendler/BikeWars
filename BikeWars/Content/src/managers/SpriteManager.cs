@@ -28,7 +28,8 @@ namespace BikeWars.Content.managers
         private static readonly Dictionary<string, float> AnimationSpeeds = new Dictionary<string, float>
         {
             { "Hobo_Idle", 0.4f },
-            { "Dog_Idle", 0.5f }
+            { "Dog_Idle", 0.5f },
+            { "KamikazeOpa_Death", 0.1f }
         };
 
         private const float DefaultSpeed = 0.15f;
@@ -112,6 +113,13 @@ namespace BikeWars.Content.managers
             "Dog_WalkRight",
             "Dog_WalkDown",
             "Dog_WalkUp",
+
+            // KAMIKAZE OPA
+            "KamikazeOpa_BikeDown",
+            "KamikazeOpa_BikeLeft",
+            "KamikazeOpa_BikeRight",
+            "KamikazeOpa_BikeUp",
+            "KamikazeOpa_Death",
         };
 
         private static float GetAnimationSpeed(string key)

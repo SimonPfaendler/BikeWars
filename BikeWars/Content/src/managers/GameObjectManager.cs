@@ -39,9 +39,9 @@ public class GameObjectManager
 
     private HashSet<AreaOfEffectBase> _aoeAttacks = new();
 
-    
+
     public HashSet<AreaOfEffectBase> AOEAttacks => _aoeAttacks;
-    
+
     private HashSet<DamageNumber> _damageNumbers = new HashSet<DamageNumber>();
     private SpriteFont? _damageFont;
 
@@ -55,7 +55,7 @@ public class GameObjectManager
         Player1 = player1;
         Player2 = player2;
         _contentManager = content;
-        
+
         _characters = new HashSet<CharacterBase>();
         _items = new HashSet<ItemBase>();
         _statics = new HashSet<BoxCollider>();
@@ -80,7 +80,7 @@ public class GameObjectManager
         }
 
     }
-    
+
     public void AddCharacter(CharacterBase character)
     {
         if (_worldAudioManager != null && character is IWorldAudioAware wa)
@@ -111,7 +111,7 @@ public class GameObjectManager
         _pendingDamage[c] += amount;
 
         OnTookDamage?.Invoke(c, amount);
-        
+
         if (c is Player || c == Player1 || c == Player2)
         {
              OnScreenShakeRequested?.Invoke(5.5f, 0.2f);
@@ -167,7 +167,7 @@ public class GameObjectManager
         {
             aoe.Draw(spriteBatch);
         }
-        
+
         foreach (var dn in _damageNumbers)
         {
             if (_damageFont != null)
@@ -222,7 +222,7 @@ public class GameObjectManager
             {
                 var character = kvp.Key;
                 var totalDamage = kvp.Value;
-                
+
                 // Only spawn if damage > 0 and character is valid
                 if (totalDamage > 0)
                 {
@@ -271,7 +271,7 @@ public class GameObjectManager
         DamageCircle dc = new DamageCircle(player);
         dc.LoadContent(_contentManager);
         AddAOE(dc);
-        
+
         // Shake screen on cast
         //OnScreenShakeRequested?.Invoke(6f, 0.8f);
         OnScreenShakeRequested?.Invoke(7f, 2.0f);
@@ -361,7 +361,7 @@ public class GameObjectManager
         // Randomize slightly for "juice"
         Random rnd = new Random();
         float angle = (float)(rnd.NextDouble() * 0.5f - 0.25f); // +/- ~15 degrees variation
-        
+
         // Rotate direction slightly
         float cos = MathF.Cos(angle);
         float sin = MathF.Sin(angle);
@@ -369,8 +369,8 @@ public class GameObjectManager
 
         float speed = 200f;
         float upSpeed = 100f;
-        
-        Vector2 velocity = rotatedDir * speed + new Vector2(0, -upSpeed); 
+
+        Vector2 velocity = rotatedDir * speed + new Vector2(0, -upSpeed);
 
         if (isCrit) velocity *= 1.5f; // Bigger pop for crits
 
@@ -380,34 +380,36 @@ public class GameObjectManager
     {
         _items.Remove(item);
     }
-    
+
     public void SpawnFromTiledObjects(IEnumerable<TiledObjectInfo> spawns)
     {
         foreach (var spawn in spawns)
         {
             var created = CreateFromTiled(spawn);
-            if (created != null)
+            if (created == null)
             {
-                // Destructible objects should both be drawable (items) and registered as statics
-                if (created is BikeWars.Entities.Characters.MapObjects.DestructibleObject)
-                {
+                continue;
+            }
+            AddItem(created);
+            switch (created) {
+                case BikeShop bs: // It works but Bikeshop shouldn't be a item.
+                    AddStatic(bs.CollisionCollider);
+                    break;
+                case DestructibleObject:
+                    AddStatic(created.Collider);
+                    break;
+                case Chest:
                     AddItem(created);
-                    if (created.Collider is BoxCollider box)
-                        AddStatic(box);
-                }
-                else
-                {
-                    AddItem(created);
-                }
+                    break;
             }
         }
     }
-    
+
     private ItemBase? CreateFromTiled(TiledObjectInfo spawn)
     {
         var start = new Vector2(spawn.Rect.X, spawn.Rect.Y);
         var size  = new Point(spawn.Rect.Width, spawn.Rect.Height);
-        
+
         string type = spawn.Properties["type"];
 
         switch (type)
@@ -415,11 +417,10 @@ public class GameObjectManager
             case "Bike_Shop":
                 return new BikeShop(start, size, spawn);
             case "Destructible":
-                return new BikeWars.Entities.Characters.MapObjects.DestructibleObject(start, size, spawn);
+                return new DestructibleObject(start, size, spawn);
             case "chest":
                 string item = spawn.Properties["item"];
                 return new Chest(start, size, item);
-
             default:
                 return null;
         }

@@ -19,6 +19,7 @@ public class CollisionManager
 {
     // Events that can be followed by other classes
     public event Action<Player, ItemBase> OnItemPickup;
+    public event Action<Player, ItemBase> OnItemInteraction; // Will be used for the bikeshop too
     public event Action<CharacterBase, ProjectileBase> OnProjectileHit;
     public event Action<CharacterBase, CharacterBase> OnCharacterCollision;
     public event Action<CharacterBase, AreaOfEffectBase> OnAOEHit;
@@ -126,10 +127,10 @@ public class CollisionManager
         LoadObjectLayer("Destructibles");
         // spawn shops/objects
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
-        
+
         LoadObjectLayer("Chests");
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
-        
+
 
         // Insert any statics registered by the GameObjectManager (e.g. destructibles)
         foreach (var s in _gameObjectManager.Statics)
@@ -431,6 +432,10 @@ public class CollisionManager
         foreach (CharacterBase c in characters)
         {
             AddDynamic(c.Collider);
+            if (c.IsDead)
+            {
+                _toRemoveColliders.Add(c.Collider);
+            }
         }
     }
 
@@ -542,6 +547,7 @@ public class CollisionManager
         foreach (var d in dynamics)
         {
             PickingUpItem(c, d);
+            HandleInteractions(c, d);
             HandleCharacters(c, d);
         }
     }
@@ -681,6 +687,18 @@ public class CollisionManager
             {
                 player.CurrentTerrain = (TerrainCollider)s;
                 return;
+            }
+        }
+    }
+
+    // This one will be used for checking with INTERACT CollisionLayers and with dynamic ones
+    private void HandleInteractions(ICollider c, ICollider d)
+    {
+        if (c.Layer == CollisionLayer.PLAYER && d.Layer == CollisionLayer.INTERACT && c.Intersects(d))
+        {
+            if (c.Owner is Player p && d.Owner is ItemBase i)
+            {
+                OnItemInteraction?.Invoke(p, i);
             }
         }
     }
@@ -935,7 +953,7 @@ public class CollisionManager
         ObjectSpawns.Clear();
 
         var objLayer = TiledMap.GetLayer<TiledMapObjectLayer>(layerName);
-        
+
         foreach (var obj in objLayer.Objects)
         {
             var rect = new Rectangle(
