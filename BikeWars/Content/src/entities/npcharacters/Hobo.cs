@@ -19,6 +19,7 @@ namespace BikeWars.Entities.Characters
 
         private readonly PathFinding _pathFinding;
         private readonly CollisionManager _collisionManager;
+        private readonly RepathScheduler _repathScheduler;
 
         protected override string WalkingSound => AudioAssets.Walking;
 
@@ -27,18 +28,19 @@ namespace BikeWars.Entities.Characters
 
 
         public Hobo(Vector2 start, Point size, AudioService audio, PathFinding pathFinding,
-            CollisionManager collisionManager)
+            CollisionManager collisionManager, RepathScheduler repathScheduler)
         {
             _audio = audio;
             _pathFinding = pathFinding;
             _collisionManager = collisionManager;
+            _repathScheduler = repathScheduler;
 
             Attributes = new CharacterAttributes(this, 40, 0, 5, 2f, false);
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             Speed = 130f;
             Movement = new EnemyMovement(canMove: true, isMoving: false, pathFinding: _pathFinding,
-                gridMapper: _collisionManager);
+                gridMapper: _collisionManager, repathScheduler: _repathScheduler);
             _idleAnimation = SpriteManager.GetAnimation("Hobo_Idle");
             _walkLeftAnimation = SpriteManager.GetAnimation("Hobo_WalkLeft");
             _walkRightAnimation = SpriteManager.GetAnimation("Hobo_WalkRight");
@@ -54,16 +56,26 @@ namespace BikeWars.Entities.Characters
             UpdateKnockback(gameTime);
             UpdateHitFlash(gameTime);
             // Sound- and Movement-Control
+            if (Movement is EnemyMovement em)
+            {
+                em.EnemyPosition = Transform.Position;
+                em.PlayerPosition = _collisionManager.GameObjectManager.Player1.Transform.Position;
+            }
             Movement.HandleMovement(gameTime);
             HandleSound(Movement.IsMoving);
 
             Vector2 direction = Movement.Direction;
-            LastTransform = new Transform(new Vector2(Transform.Position.X - direction.X, Transform.Position.Y - direction.Y), Transform.Size);
+            LastTransform = new Transform(Transform.Position, Transform.Size);
             if (Movement.IsMoving)
             {
                 float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
-                direction.Normalize();
-                Transform.Position += direction * Speed * delta;
+                
+                if (direction.LengthSquared() > 0.0001f)
+                {
+                    direction.Normalize();
+                    Transform.Position += direction * Speed * delta;
+                }
+                
                 if (System.Math.Abs(direction.X) > System.Math.Abs(direction.Y))
                 {
 

@@ -28,8 +28,9 @@ namespace BikeWars.Content.managers
         private const float MAX_SPAWN_RADIUS = 700f;
 
         private readonly Random _random;
+        private readonly RepathScheduler _repathScheduler;
 
-        public SpawnManager(GameObjectManager gameObjectManager, CollisionManager collisionManager, AudioService audioService, PathFinding pathFinding)
+        public SpawnManager(GameObjectManager gameObjectManager, CollisionManager collisionManager, AudioService audioService, PathFinding pathFinding, RepathScheduler repathScheduler)
         {
             _gameObjectManager = gameObjectManager;
             _collisionManager = collisionManager;
@@ -37,6 +38,7 @@ namespace BikeWars.Content.managers
             _random = new Random();
             _spawnInterval = START_SPAWN_INTERVAL;
             _pathFinding = pathFinding;
+            _repathScheduler = repathScheduler;
         }
 
         public void Update(GameTime gameTime)
@@ -98,7 +100,7 @@ namespace BikeWars.Content.managers
                  }
 
                  var hobo = new Hobo(spawnPos, new Point(32, 32), _audioService, _pathFinding,
-                     _collisionManager);
+                     _collisionManager, _repathScheduler);
                  ApplyScaling(hobo, difficultyMultiplier, speedMultiplier); // Apply extra speed
                  _gameObjectManager.AddCharacter(hobo);
              }
@@ -123,24 +125,36 @@ namespace BikeWars.Content.managers
 
             if (spawnHobo)
             {
-                var hobo = new Hobo(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager);
+                var hobo = new Hobo(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager,  _repathScheduler);
                 ApplyScaling(hobo, difficultyMultiplier, speedMultiplier);
                 _gameObjectManager.AddCharacter(hobo);
             }
             else
             {
-                bool spawnDog = _random.NextDouble() > (0.2 + 0.3 * progress); // Chance of BikeThief increases from 20% to 50%
-                if (spawnDog)
+                // Remaining probability split between Dog, Thief, and Kamikaze
+                double val = _random.NextDouble();
+                // Dog: 40% of remaining
+                // Thief: 40% of remaining
+                // Kamikaze: 20% of remaining
+                
+                if (val < 0.4)
                 {
-                    var dog = new Dog(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager);
+                    var dog = new Dog(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager, _repathScheduler);
                     ApplyScaling(dog, difficultyMultiplier, speedMultiplier);
                     _gameObjectManager.AddCharacter(dog);
                 }
+                else if (val < 0.8)
+                {
+                    var thief = new BikeThief(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager, _repathScheduler);
+                    ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
+                    _gameObjectManager.AddCharacter(thief);
+                }
                 else
                 {
-                    var thief = new BikeThief(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager);
-                    ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
-                    _gameObjectManager.AddCharacter(thief);}
+                    var kamikaze = new KamikazeOpa(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager, _gameObjectManager, _repathScheduler);
+                    ApplyScaling(kamikaze, difficultyMultiplier, speedMultiplier);
+                    _gameObjectManager.AddCharacter(kamikaze);
+                }
             }
         }
 
@@ -188,7 +202,7 @@ namespace BikeWars.Content.managers
                 if (!IsValidSpawnPosition(pos)) continue;
 
                 // Alternate between Hobo and BikeThief
-                CharacterBase enemy = new Hobo(pos, new Point(32, 32), _audioService, _pathFinding, _collisionManager);
+                CharacterBase enemy = new Hobo(pos, new Point(32, 32), _audioService, _pathFinding, _collisionManager, _repathScheduler);
 
                 ApplyScaling(enemy, difficultyMultiplier, speedMultiplier);
                 _gameObjectManager.AddCharacter(enemy);

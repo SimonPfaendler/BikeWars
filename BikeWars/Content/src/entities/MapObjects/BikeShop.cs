@@ -9,10 +9,15 @@ namespace BikeWars.Entities.Characters.MapObjects;
 
 public class BikeShop: ItemBase
 {
+    private BoxCollider _collisionCollider {get;set;}
+    public BoxCollider CollisionCollider {get => _collisionCollider; set => _collisionCollider = value; } // Now this collider is for collision
+
+    private int PADDING_INTERACTION_AREA = 40;
     public BikeShop(Vector2 start, Point size, TiledObjectInfo attributes)
     {
         Transform = new Transform(start, size);
-        Collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.ITEM, this);
+        Collider = new BoxCollider(new Vector2(Transform.Position.X - PADDING_INTERACTION_AREA / 2, Transform.Position.Y - PADDING_INTERACTION_AREA / 2), Transform.Size.X + PADDING_INTERACTION_AREA, Transform.Size.Y + PADDING_INTERACTION_AREA, CollisionLayer.INTERACT, this);
+        CollisionCollider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.WALL, this);
         TexRight = SpriteManager.GetTexture("Fahrradwerkstatt");
         CurrentTex = TexRight;
     }
@@ -26,7 +31,7 @@ public class BikeShop: ItemBase
     {
         // nichts
     }
-    
+
     public override bool Intersects(ICollider other)
     {
         return Collider.Intersects(other);

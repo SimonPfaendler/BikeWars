@@ -19,7 +19,8 @@ namespace BikeWars.Content.screens
     {
         Hobo,
         BikeThief,
-        Dog
+        Dog,
+        Kamikaze
     }
 
     public class TechDemoScreen : GameScreen
@@ -28,6 +29,7 @@ namespace BikeWars.Content.screens
         private MenuButton _spawnHoboBtn;
         private MenuButton _spawnBikeBtn;
         private MenuButton _spawnDogBtn;
+        private MenuButton _spawnKamikazeBtn;
 
         private Texture2D _buttonTex;
         private SpriteFont _font;
@@ -78,6 +80,15 @@ namespace BikeWars.Content.screens
                 font: _font,
                 audioService: AudioService
             );
+
+            _spawnKamikazeBtn = new MenuButton(
+                id: 1,
+                texture: _buttonTex,
+                bounds: new Rectangle(30, 360, 200, 60),
+                text: "Spawn 1 Opa",
+                font: _font,
+                audioService: AudioService
+            );
         }
 
         public override void Update(GameTime gameTime)
@@ -89,6 +100,7 @@ namespace BikeWars.Content.screens
             _spawnHoboBtn.Update(mouse, gameTime);
             _spawnBikeBtn.Update(mouse, gameTime);
             _spawnDogBtn.Update(mouse, gameTime);
+            _spawnKamikazeBtn.Update(mouse, gameTime);
 
             if(_spawnHoboBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Hobo, 100);
@@ -98,6 +110,9 @@ namespace BikeWars.Content.screens
 
             if(_spawnDogBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Dog, 50);
+
+            if (_spawnKamikazeBtn.IsClicked(mouse, _prevMouse))
+                SpawnEnemies(EnemyType.Kamikaze, 1);
 
             _prevMouse = mouse;
         }
@@ -140,16 +155,20 @@ namespace BikeWars.Content.screens
                 {
                     case EnemyType.Hobo:
                         enemy = new Hobo(spawnPos, new Point(32, 32), AudioService, PathFinding,
-                            CollisionManager);
+                            CollisionManager, RepathScheduler);
                         break;
 
                     case EnemyType.BikeThief:
                         enemy = new BikeThief(spawnPos, new Point(32, 32), AudioService, PathFinding,
-                            CollisionManager);
+                            CollisionManager, RepathScheduler);
                         break;
                     case EnemyType.Dog:
                         enemy = new Dog(spawnPos, new Point(32, 32), AudioService, PathFinding,
-                            CollisionManager);
+                            CollisionManager, RepathScheduler);
+                        break;
+                    case EnemyType.Kamikaze:
+                        enemy = new KamikazeOpa(spawnPos, new Point(32, 32), AudioService, PathFinding,
+                            CollisionManager, GameObjectManager, RepathScheduler);
                         break;
 
                     default:
@@ -170,6 +189,7 @@ namespace BikeWars.Content.screens
             _spawnHoboBtn.Draw(spriteBatch);
             _spawnBikeBtn.Draw(spriteBatch);
             _spawnDogBtn.Draw(spriteBatch);
+            _spawnKamikazeBtn.Draw(spriteBatch);
             spriteBatch.End();
         }
     }
