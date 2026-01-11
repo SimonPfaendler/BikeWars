@@ -25,6 +25,7 @@ public class CollisionManager
 
     public List<TiledObjectInfo> ObjectSpawns { get; } = new();
     private readonly GameObjectManager _gameObjectManager;
+    public GameObjectManager GameObjectManager => _gameObjectManager;
 
     private const string MAP = "assets/Map/Bike_Wars_Map";
     private const string TILED_MAP_LAYER = "Collision";

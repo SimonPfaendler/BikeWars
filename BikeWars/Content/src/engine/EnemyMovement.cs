@@ -28,7 +28,7 @@ public class EnemyMovement : MovementBase
    private const int LocalGridSize = 21; // 7x7 nodes A*
    private Point _lastPlayerGrid = new Point(-1, -1);
     private float _repathTimer = 0f;
-   private const float RepathInterval = 1f;
+   private const float RepathInterval = 0.25f;
 
     private static readonly Random _rng = new();
 
@@ -44,11 +44,20 @@ public class EnemyMovement : MovementBase
 
    public Vector2 PlayerPosition {get; set;}
    public Vector2 EnemyPosition {get; set;}
+   
+   // repath scheduler
+   private readonly RepathScheduler _repathScheduler;
+
+   public bool IsRepathQueued { get; set; }  // scheduler needs this
+
+   private Point _pendingStartGrid;
+   private Point _pendingTargetGrid;
+   private bool _hasPendingRepath;
 
 
    // sets up the enemy movement system and stores pathfinding + grid helpers.
    public EnemyMovement(bool canMove, bool isMoving, PathFinding pathFinding,
-       CollisionManager gridMapper)
+       CollisionManager gridMapper, RepathScheduler repathScheduler)
    {
        Direction = Vector2.Zero;
        CanMove = canMove;
@@ -61,6 +70,7 @@ public class EnemyMovement : MovementBase
         _repathTimer = (float)(_rng.NextDouble() * RepathInterval);
         
         _slotAngle = (float)(_rng.NextDouble() * MathF.Tau);
+        _repathScheduler = repathScheduler;
    }
 
     // Force a repath on the next update
@@ -69,6 +79,9 @@ public class EnemyMovement : MovementBase
         _repathTimer = 0f;
         _currentPath.Clear();
         _pathIndex = 0;
+        
+        _hasPendingRepath = false;
+        IsRepathQueued = false;
     }
 
 
@@ -104,24 +117,46 @@ public class EnemyMovement : MovementBase
 
 
        bool needNewPath =
-           _currentPath == null ||
-           _currentPath.Count == 0 ||
-           timeUp;
+           !_hasPendingRepath && (
+               _currentPath == null ||
+               _currentPath.Count == 0 ||
+               timeUp
+           );
 
 
        if (needNewPath)
        {
-           RecalculatePath(enemyGrid, playerGrid);
-           _repathTimer = RepathInterval;
+           _pendingStartGrid = enemyGrid;
+           _pendingTargetGrid = playerGrid;
+
+           if (_repathScheduler != null && _repathScheduler.Request(this))
+           {
+               _hasPendingRepath = true;
+               _repathTimer = RepathInterval;
+           }
+           else
+           {
+               // scheduler full or already queued
+               // try again soon (small delay so you don't spam)
+               _repathTimer = 0.1f;
+           }
        }
        
        Vector2 pathDir = DirectionAlongPath();
        if (pathDir == Vector2.Zero)
        {
-           // optional: clear path when done, then just chase directly
-           _currentPath.Clear();
-           _pathIndex = 0;
-           pathDir = DirectionToTarget();
+           if (_hasPendingRepath)
+           {
+               // waiting for scheduler -> take a small obstacle-safe grid step
+               pathDir = FallbackStepOnGrid(enemyGrid, playerGrid);
+           }
+           else
+           {
+               // not waiting -> ok to chase directly
+               _currentPath.Clear();
+               _pathIndex = 0;
+               pathDir = DirectionToTarget();
+           }
        }
        
        Vector2 avoidDir = ComputeAvoidance();
@@ -139,7 +174,12 @@ public class EnemyMovement : MovementBase
            }
        }
        
+       // commented for debug, bypasses all the avoidance algo
        Vector2 combinedPath = pathDir + avoidDir;
+       // Vector2 combinedPath = pathDir;
+       
+       if (combinedPath.LengthSquared() < 0.0001f)
+           combinedPath = pathDir;
        
        if (combinedPath != Vector2.Zero)
            combinedPath.Normalize();
@@ -310,9 +350,9 @@ public class EnemyMovement : MovementBase
            return Vector2.Zero;
        
        Vector2 avoid = Vector2.Zero;
-       var nearby = _gridMapper.DynamicHash.QueryNearby(EnemyPosition, 3);
+       var nearbyEnemies = _gridMapper.DynamicHash.QueryNearby(EnemyPosition, 3);
 
-       foreach (var otherCollider in  nearby)
+       foreach (var otherCollider in  nearbyEnemies)
        {
            if (otherCollider.Layer != CollisionLayer.CHARACTER)
                continue;
@@ -351,6 +391,68 @@ public class EnemyMovement : MovementBase
        
        return avoid;
    }
+   
+   public void DoRepathNow()
+   {
+       if (!_hasPendingRepath)
+           return;
+
+       RecalculatePath(_pendingStartGrid, _pendingTargetGrid);
+       _hasPendingRepath = false;
+   }
+   
+   
+   private Vector2 FallbackStepOnGrid(Point enemyGrid, Point targetGrid)
+   {
+       // If already at target, stop
+       if (enemyGrid == targetGrid)
+           return Vector2.Zero;
+
+       // 8 directions (including diagonals)
+       int[] dxs = { -1, 0, 1, -1, 1, -1, 0, 1 };
+       int[] dys = { -1, -1, -1, 0, 0, 1, 1, 1 };
+
+       Point best = enemyGrid;
+       float bestScore = float.PositiveInfinity;
+
+       for (int i = 0; i < 8; i++)
+       {
+           int nx = enemyGrid.X + dxs[i];
+           int ny = enemyGrid.Y + dys[i];
+
+           if (!_pathFinding.IsInsideGrid(nx, ny))
+               continue;
+
+           // don't step into walls
+           if (!_pathFinding.GetNode(nx, ny).Walkable)
+               continue;
+
+           // score = distance to target (smaller is better)
+           float ddx = targetGrid.X - nx;
+           float ddy = targetGrid.Y - ny;
+           float score = ddx * ddx + ddy * ddy;
+
+           if (score < bestScore)
+           {
+               bestScore = score;
+               best = new Point(nx, ny);
+           }
+       }
+
+       if (best == enemyGrid)
+           return Vector2.Zero;
+
+       // move toward center of the chosen neighbor tile
+       Vector2 bestPos = _gridMapper.GridToWorldCenter(_pathFinding.GetNode(best.X, best.Y));
+       Vector2 dir = bestPos - EnemyPosition;
+
+       if (dir.LengthSquared() < 0.0001f)
+           return Vector2.Zero;
+
+       dir.Normalize();
+       return dir;
+   }
+
 
 
    private bool UpdateMoving() => Direction != Vector2.Zero;

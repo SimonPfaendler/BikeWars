@@ -140,16 +140,16 @@ namespace BikeWars.Content.screens
                 {
                     case EnemyType.Hobo:
                         enemy = new Hobo(spawnPos, new Point(32, 32), AudioService, PathFinding,
-                            CollisionManager);
+                            CollisionManager, RepathScheduler);
                         break;
 
                     case EnemyType.BikeThief:
                         enemy = new BikeThief(spawnPos, new Point(32, 32), AudioService, PathFinding,
-                            CollisionManager);
+                            CollisionManager, RepathScheduler);
                         break;
                     case EnemyType.Dog:
                         enemy = new Dog(spawnPos, new Point(32, 32), AudioService, PathFinding,
-                            CollisionManager);
+                            CollisionManager, RepathScheduler);
                         break;
 
                     default:

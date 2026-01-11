@@ -88,6 +88,10 @@ namespace BikeWars.Content.screens
         private InputMode _inputMode = InputMode.Keyboard;
 
         private float _hitStopTimer = 0f;
+        
+        private RepathScheduler _repathScheduler;
+        protected RepathScheduler RepathScheduler => _repathScheduler;
+
 
         public void TriggerHitStop(float duration)
         {
@@ -164,6 +168,13 @@ namespace BikeWars.Content.screens
 
             // pathfinding object
             _pathFinding = new PathFinding(_collisionManager.PathGrid);
+            
+            // Pathfinding scheduler (limits how many enemies may repath per frame)
+            _repathScheduler = new RepathScheduler(capacity: 2000)
+            {
+                UpdateMaxEnemies = 120
+            };
+            
             _tiledMapRenderer = new TiledMapRenderer(Game1.Instance.GraphicsDevice, _collisionManager.TiledMap);
 
             // Create Combat Manager
@@ -249,7 +260,7 @@ namespace BikeWars.Content.screens
             };
 
             // Spawn Manager
-            _spawnManager = new SpawnManager(_gameObjectManager, _collisionManager, _audioService, _pathFinding);
+            _spawnManager = new SpawnManager(_gameObjectManager, _collisionManager, _audioService, _pathFinding, _repathScheduler);
 
             // timer
             _timerFont = content.Load<SpriteFont>("assets/fonts/Arial");
@@ -334,7 +345,10 @@ namespace BikeWars.Content.screens
             {
                 _spawnManager.Update(gameTime);
             }
-
+            
+            // Let up to 50 enemies recalc their paths this frame
+            _repathScheduler?.Update();
+            
             _gameObjectManager.Update(gameTime, InputHandler.MakeMouseWorldPosByCamera(camera));
             _collisionManager.Update(players, _gameObjectManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters);
 
@@ -435,19 +449,19 @@ namespace BikeWars.Content.screens
                 if (p.Type == SaveLoad.TYPES.HOBO)
                 {
                     Hobo b = new Hobo(p.Position.ToVector2(), p.Size.ToPoint(), _audioService, _pathFinding,
-                        _collisionManager);
+                        _collisionManager, _repathScheduler);
                     _gameObjectManager.AddCharacter(b);
                 }
                 if (p.Type == SaveLoad.TYPES.BIKETHIEF)
                 {
                     BikeThief b = new BikeThief(p.Position.ToVector2(), p.Size.ToPoint(), _audioService, _pathFinding,
-                        _collisionManager);
+                        _collisionManager, _repathScheduler);
                     _gameObjectManager.AddCharacter(b);
                 }
                 if (p.Type == SaveLoad.TYPES.DOG)
                 {
                     Dog b = new Dog(p.Position.ToVector2(), p.Size.ToPoint(), _audioService, _pathFinding,
-                        _collisionManager);
+                        _collisionManager, _repathScheduler);
                     _gameObjectManager.AddCharacter(b);
                 }
             }
