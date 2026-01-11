@@ -168,7 +168,7 @@ namespace BikeWars.Content.screens
                         break;
                     case EnemyType.Kamikaze:
                         enemy = new KamikazeOpa(spawnPos, new Point(32, 32), AudioService, PathFinding,
-                            CollisionManager, GameObjectManager);
+                            CollisionManager, GameObjectManager, RepathScheduler);
                         break;
 
                     default:

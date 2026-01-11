@@ -26,14 +26,16 @@ namespace BikeWars.Entities.Characters
         private const float ExplosionCenteringOffset = 96f; // 192 / 2
 
         private readonly GameObjectManager _gameObjectManager;
+        private readonly RepathScheduler _repathScheduler;
 
         protected override string WalkingSound => AudioAssets.Walking; 
 
         public KamikazeOpa(Vector2 start, Point size, AudioService audio, PathFinding pathFinding,
-            CollisionManager collisionManager, GameObjectManager gameObjectManager)
+            CollisionManager collisionManager, GameObjectManager gameObjectManager, RepathScheduler repathScheduler)
         {
             _audio = audio;
             _gameObjectManager = gameObjectManager;
+            _repathScheduler = repathScheduler;
 
             // High speed, low health
             Attributes = new CharacterAttributes(this, 10, 0, 0, 0f, false);
@@ -42,7 +44,7 @@ namespace BikeWars.Entities.Characters
             Speed = 200f; // Very fast
             
             Movement = new EnemyMovement(canMove: true, isMoving: false, pathFinding: pathFinding,
-                gridMapper: collisionManager);
+                gridMapper: collisionManager, repathScheduler: _repathScheduler);
 
             _walkDownAnimation = SpriteManager.GetAnimation("KamikazeOpa_BikeDown");
             _walkLeftAnimation = SpriteManager.GetAnimation("KamikazeOpa_BikeLeft");

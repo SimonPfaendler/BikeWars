@@ -151,7 +151,7 @@ namespace BikeWars.Content.managers
                 }
                 else
                 {
-                    var kamikaze = new KamikazeOpa(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager, _gameObjectManager);
+                    var kamikaze = new KamikazeOpa(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager, _gameObjectManager, _repathScheduler);
                     ApplyScaling(kamikaze, difficultyMultiplier, speedMultiplier);
                     _gameObjectManager.AddCharacter(kamikaze);
                 }
