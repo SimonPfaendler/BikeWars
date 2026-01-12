@@ -83,53 +83,38 @@ namespace BikeWars.Content.screens
             {
                 case ButtonAction.Resolution1920x1080:
                     game.SetResolution(1920, 1080, false);
-                    RefreshScreen(); 
                     break;
                 case ButtonAction.Resolution1536x864:
                     game.SetResolution(1536, 864, false);
-                    RefreshScreen();
                     break;
                 case ButtonAction.Resolution1280x720:
                     game.SetResolution(1280, 720, false);
-                    RefreshScreen();
                     break;
                 case ButtonAction.Resolution800x600:
                     game.SetResolution(800, 600, false);
-                    RefreshScreen();
                     break;
 
                 case ButtonAction.ResolutionPortrait1080x1920:
                     game.SetResolution(1080, 1920, false);
-                    RefreshScreen();
                     break;
                 case ButtonAction.ResolutionPortrait864x1536:
                     game.SetResolution(864, 1536, false);
-                    RefreshScreen();
                     break;
                 case ButtonAction.ResolutionPortrait720x1280:
                     game.SetResolution(720, 1280, false);
-                    RefreshScreen();
                     break;
                 case ButtonAction.ResolutionPortrait600x800:
                     game.SetResolution(600, 800, false);
-                    RefreshScreen();
                     break;
 
                 case ButtonAction.ToggleFullscreen:
                     bool currentFs = game.GraphicsDevice.PresentationParameters.IsFullScreen;
                     game.SetResolution(game.GraphicsDevice.Viewport.Width, game.GraphicsDevice.Viewport.Height, !currentFs);
-                    RefreshScreen();
                     break;
                 case ButtonAction.Back:
                     ScreenManager.RemoveScreen(this);
                     break;
             }
-        }
-
-        private void RefreshScreen()
-        {
-            ScreenManager.RemoveScreen(this);
-            ScreenManager.AddScreen(new GraphicsConfigScreen(_backgroundTexture, _font, _audioService));
         }
     }
 }
