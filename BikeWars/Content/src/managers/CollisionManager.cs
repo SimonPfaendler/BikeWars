@@ -130,6 +130,8 @@ public class CollisionManager
 
         LoadObjectLayer("Chests");
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
+        LoadObjectLayer("Dog-Bowl");
+        _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
 
 
         // Insert any statics registered by the GameObjectManager (e.g. destructibles)
