@@ -65,7 +65,7 @@ namespace BikeWars.Content.managers
             { "EnergyGel", "assets/images/EnergyGel" },
             { "DogFood", "assets/images/DogFood" },
             //MAP OBJECTS
-            { "Fahrradwerkstatt", "assets/Map/Fahrradwerkstatt_Tile"},
+            { "Fahrradwerkstatt", "assets/MapObjects/Fahrradwerkstatt_Tile"},
             { "Dog_Bowl", "assets/MapObjects/Dog_Bowl"},
             { "Dog_Bowl_full", "assets/MapObjects/Dog_Bowl_full"}
         };
