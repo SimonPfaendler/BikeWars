@@ -9,6 +9,7 @@ using BikeWars.Content.engine.Audio;
 using BikeWars.Content.entities.Inventory;
 using BikeWars.Content.entities.items;
 using BikeWars.Content.entities.levelup;
+using BikeWars.Content.entities.MapObjects;
 using BikeWars.Content.managers;
 using BikeWars.Entities.Characters.MapObjects;
 using BikeWars.Utilities;
@@ -206,6 +207,20 @@ namespace BikeWars.Entities.Characters
                     }
                 }
 
+                return;
+            }
+
+            if (item is DogBowl dogBowl)
+            {
+                if (_input.IsPressed(GameAction.INTERACT))
+                {
+                    var selected = Inventory.GetItemAt(_selectedInventoryIndex);
+                    if (selected is DogFood)
+                    {
+                        dogBowl.FillUpDogBowl();
+                        Inventory.RemoveAt(_selectedInventoryIndex);
+                    }
+                }
                 return;
             }
             item.IsPickedUp = true;
