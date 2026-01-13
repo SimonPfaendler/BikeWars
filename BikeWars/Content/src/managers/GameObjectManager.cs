@@ -402,6 +402,9 @@ public class GameObjectManager
                 case Chest:
                     AddItem(created);
                     break;
+                case Musicians m:
+                    AddStatic(m.CollisionCollider);
+                    break;
             }
         }
     }
@@ -425,6 +428,8 @@ public class GameObjectManager
                 return new Chest(start, size, item);
             case "dog-bowl":
                 return new DogBowl(start, size);
+            case "musicians":
+                return new Musicians(start, size);
             default:
                 return null;
         }

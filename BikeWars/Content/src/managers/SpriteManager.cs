@@ -67,7 +67,8 @@ namespace BikeWars.Content.managers
             //MAP OBJECTS
             { "Fahrradwerkstatt", "assets/MapObjects/Fahrradwerkstatt_Tile"},
             { "Dog_Bowl", "assets/MapObjects/Dog_Bowl"},
-            { "Dog_Bowl_full", "assets/MapObjects/Dog_Bowl_full"}
+            { "Dog_Bowl_full", "assets/MapObjects/Dog_Bowl_full"},
+            { "Straßenmusikanten", "assets/MapObjects/Straßenmusikanten" }
         };
 
         // No single-image map sprites here; map sprites are loaded from atlas JSON.
