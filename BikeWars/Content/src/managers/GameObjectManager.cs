@@ -279,6 +279,11 @@ public class GameObjectManager
 
     }
 
+    public void RequestScreenShake(float intensity, float duration)
+    {
+        OnScreenShakeRequested?.Invoke(intensity, duration);
+    }
+
     public void SetWorldAudioManager(WorldAudioManager worldAudioManager)
     {
         _worldAudioManager = worldAudioManager;
