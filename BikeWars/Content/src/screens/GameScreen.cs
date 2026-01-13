@@ -581,6 +581,10 @@ namespace BikeWars.Content.screens
 
             spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.GetTransform());
             _gameObjectManager.Draw(spriteBatch);
+            if (!_isTechDemo)
+            {
+               _spawnManager.Draw();
+            }
 
             if (_isTechDemo && _showStaticHitboxes)
             {

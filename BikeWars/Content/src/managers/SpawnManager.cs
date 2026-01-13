@@ -6,6 +6,8 @@ using BikeWars.Content.entities.interfaces;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using BikeWars.Content.engine.interfaces;
+using BikeWars.Content.components;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace BikeWars.Content.managers
 {
@@ -31,8 +33,14 @@ namespace BikeWars.Content.managers
         private const float MIN_SPAWN_RADIUS = 300f;
         private const float MAX_SPAWN_RADIUS = 700f;
 
+        // Tram Logic
+        private List<Tram> _activeTrams = new List<Tram>();
+        private double _timeSinceLastTram;
+        private const double TRAM_SPAWN_INTERVAL = 5.0; // Every 5 seconds
+
         private readonly Random _random;
         private readonly RepathScheduler _repathScheduler;
+        private readonly SpriteBatch _spriteBatch;
 
         public SpawnManager(GameObjectManager gameObjectManager, CollisionManager collisionManager, AudioService audioService, PathFinding pathFinding, RepathScheduler repathScheduler)
         {
@@ -43,6 +51,7 @@ namespace BikeWars.Content.managers
             _spawnInterval = START_SPAWN_INTERVAL;
             _pathFinding = pathFinding;
             _repathScheduler = repathScheduler;
+            _spriteBatch = Game1.Instance.SpriteBatch;
         }
 
         public void Update(GameTime gameTime)
@@ -52,6 +61,7 @@ namespace BikeWars.Content.managers
             _timeSinceLastSpawn += elapsed;
             _timeSinceLastSwarm += elapsed;
             _timeSinceLastCircle += elapsed;
+            _timeSinceLastTram += elapsed;
 
             // Update spawn interval based on progression
             // Lerp from start interval to end interval based on time fraction
@@ -75,6 +85,110 @@ namespace BikeWars.Content.managers
             {
                 SpawnCircle(progress);
                 _timeSinceLastCircle = 0;
+            }
+
+            if (_timeSinceLastTram >= TRAM_SPAWN_INTERVAL)
+            {
+                SpawnTram();
+                _timeSinceLastTram = 0;
+            }
+
+            UpdateTrams(gameTime);
+        }
+
+        private void SpawnTram()
+        {
+            if (_gameObjectManager.Player1 == null) return;
+
+            // Spawn far outside the screen
+            Vector2 playerPos = _gameObjectManager.Player1.Transform.Position;
+            float spawnRadius = 3000f;
+            float angle = (float)(_random.NextDouble() * Math.PI * 2);
+
+            Vector2 startPos = playerPos + new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * spawnRadius;
+
+            // Target a position near the player with some randomness
+            Vector2 targetOffset = new Vector2((float)(_random.NextDouble() - 0.5) * 10, (float)(_random.NextDouble() - 0.5) * 10);
+            Vector2 targetPos = playerPos + targetOffset;
+
+            var tram = new Tram(startPos, targetPos, Game1.Instance.GraphicsDevice);
+            _activeTrams.Add(tram);
+        }
+
+        private void UpdateTrams(GameTime gameTime)
+        {
+            // Update Trams
+            for (int i = _activeTrams.Count - 1; i >= 0; i--)
+            {
+                var tram = _activeTrams[i];
+                tram.Update(gameTime);
+
+                // Despawn if too far away
+                if (_gameObjectManager.Player1 != null)
+                {
+                     if (Vector2.Distance(tram.Position, _gameObjectManager.Player1.Transform.Position) > 3000)
+                     {
+                         _activeTrams.RemoveAt(i);
+                         continue;
+                     }
+                }
+                CheckTramCollision(tram);
+            }
+        }
+
+        private void CheckTramCollision(Tram tram)
+        {
+            // Tram vs Player 1
+            if (_gameObjectManager.Player1 != null)
+            {
+                CheckTramHit(tram, _gameObjectManager.Player1);
+            }
+             // Tram vs Player 2
+            if (_gameObjectManager.Player2 != null)
+            {
+                CheckTramHit(tram, _gameObjectManager.Player2);
+            }
+
+            // Tram vs Enemies
+            foreach (var character in _gameObjectManager.Characters)
+            {
+                CheckTramHit(tram, character);
+            }
+        }
+
+        private void CheckTramHit(Tram tram, CharacterBase character)
+        {
+             // Optimization: Simple distance check first before checking sub-colliders
+             float combinedRadius = Math.Max(tram.Size.X, tram.Size.Y) / 2f + 50f; // Rough bounding circle
+             if (Vector2.DistanceSquared(tram.Position, character.Transform.Position) > combinedRadius * combinedRadius)
+             {
+                 return;
+             }
+
+             // Detailed check against all tram colliders
+             foreach (var tramCollider in tram.Colliders)
+             {
+                 if (tramCollider.Intersects(character.Collider))
+                 {
+
+
+                     // Only hit if not already dead to avoid spamming
+                     if (!character.IsDead)
+                     {
+                         character.TakeDamage(10);
+
+                         // TODO: Sound
+                     }
+                     return;
+                 }
+             }
+        }
+
+        public void Draw()
+        {
+            foreach (var tram in _activeTrams)
+            {
+                tram.Draw(_spriteBatch);
             }
         }
 

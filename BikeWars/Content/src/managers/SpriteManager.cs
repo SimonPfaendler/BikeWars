@@ -63,8 +63,11 @@ namespace BikeWars.Content.managers
             { "XP_Beer", "assets/sprites/XP/xp_beer_texture" },
             { "XP_Money", "assets/sprites/XP/xp_money_texture" },
             { "EnergyGel", "assets/images/EnergyGel" },
+            { "DogFood", "assets/images/DogFood" },
             //MAP OBJECTS
-            { "Fahrradwerkstatt", "assets/Map/Fahrradwerkstatt_Tile"}
+            { "Fahrradwerkstatt", "assets/MapObjects/Fahrradwerkstatt_Tile"},
+            { "Dog_Bowl", "assets/MapObjects/Dog_Bowl"},
+            { "Dog_Bowl_full", "assets/MapObjects/Dog_Bowl_full"}
         };
 
         // No single-image map sprites here; map sprites are loaded from atlas JSON.

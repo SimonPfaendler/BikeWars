@@ -13,6 +13,7 @@ using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Entities.Characters.MapObjects;
 using BikeWars.Content.engine.ui;
+using BikeWars.Content.entities.MapObjects;
 
 
 namespace BikeWars.Content.managers;
@@ -411,6 +412,7 @@ public class GameObjectManager
     }
 
     private ItemBase? CreateFromTiled(TiledObjectInfo spawn)
+    // spawn = properties 
     {
         var start = new Vector2(spawn.Rect.X, spawn.Rect.Y);
         var size  = new Point(spawn.Rect.Width, spawn.Rect.Height);
@@ -426,6 +428,8 @@ public class GameObjectManager
             case "chest":
                 string item = spawn.Properties["item"];
                 return new Chest(start, size, item);
+            case "dog-bowl":
+                return new DogBowl(start, size);
             default:
                 return null;
         }
