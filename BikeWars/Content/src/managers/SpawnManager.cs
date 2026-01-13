@@ -124,15 +124,26 @@ namespace BikeWars.Content.managers
                 // Despawn if too far away
                 if (_gameObjectManager.Player1 != null)
                 {
-                     if (Vector2.Distance(tram.Position, _gameObjectManager.Player1.Transform.Position) > 3000)
+                     float distToPlayer = Vector2.Distance(tram.Position, _gameObjectManager.Player1.Transform.Position);
+
+                     if (distToPlayer > 3000)
                      {
                          _activeTrams.RemoveAt(i);
                          continue;
+                     }
+                     
+                     // Screen Shake if near
+                     if (distToPlayer < 1400)
+                     {
+                         float intensity = 6f * (1f - (distToPlayer / 1400f)); // Stronger when closer
+                         OnScreenShakeRequested?.Invoke(intensity, 0.2f);
                      }
                 }
                 CheckTramCollision(tram);
             }
         }
+
+        public event Action<float, float>? OnScreenShakeRequested;
 
         private void CheckTramCollision(Tram tram)
         {

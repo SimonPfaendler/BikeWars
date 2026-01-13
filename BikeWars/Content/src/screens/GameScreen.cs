@@ -263,6 +263,7 @@ namespace BikeWars.Content.screens
 
             // Spawn Manager
             _spawnManager = new SpawnManager(_gameObjectManager, _collisionManager, _audioService, _pathFinding, _repathScheduler);
+            _spawnManager.OnScreenShakeRequested += (intensity, duration) => camera.Shake(intensity, duration);
 
             // timer
             _timerFont = content.Load<SpriteFont>("assets/fonts/Arial");
