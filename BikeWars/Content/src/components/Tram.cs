@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
+using BikeWars.Content.managers;
 
 namespace BikeWars.Content.components
 {
@@ -16,15 +17,13 @@ namespace BikeWars.Content.components
         public List<BoxCollider> Colliders { get; private set; }
 
         private Texture2D _texture;
-
-        // Configuration
         private const int COLLIDER_SEGMENT_SIZE = 40;
         private const float SPEED = 700f;
 
         public Tram(Vector2 startPosition, Vector2 targetPosition, GraphicsDevice graphicsDevice)
         {
             Position = startPosition;
-            Size = new Point(400, 50);
+            Size = new Point(515, 50);
 
             // Calculate Direction and Rotation
             Vector2 direction = targetPosition - startPosition;
@@ -37,10 +36,7 @@ namespace BikeWars.Content.components
 
             Colliders = new List<BoxCollider>();
             InitializeColliders();
-
-            // Simple first texture
-            _texture = new Texture2D(graphicsDevice, 1, 1);
-            _texture.SetData(new[] { Color.Red });
+            _texture = SpriteManager.GetTexture("Tram");
         }
 
         private void InitializeColliders()
@@ -88,8 +84,9 @@ namespace BikeWars.Content.components
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            Vector2 origin = new Vector2(0.5f, 0.5f);
-            Vector2 scale = new Vector2(Size.X, Size.Y);
+            if (_texture == null) return;
+            Vector2 origin = new Vector2(_texture.Width / 2f, _texture.Height / 2f);
+            Vector2 scale = Vector2.One;
 
             spriteBatch.Draw(
                 _texture,

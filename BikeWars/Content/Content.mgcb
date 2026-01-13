@@ -22,6 +22,18 @@
 /processorParam:TextureFormat=Compressed
 /build:assets/fonts/Arial.spritefont;assets/fonts/Arial
 
+#begin assets/images/DogFood.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/DogFood.png
+
 #begin assets/images/EnergyGel.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -112,19 +124,7 @@
 /processor:TiledMapTilesetProcessor
 /build:assets/Map/Bike_Wars_Tileset.tsx
 
-#begin assets/MapObjects/Fahrradwerkstatt_Tile.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:assets/MapObjects/Fahrradwerkstatt_Tile.png
-
-#begin assets/MapObjects/tilemap_1.png
+#begin assets/Map/tilemap_1.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -147,6 +147,42 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:assets/Map/tilemap_2.png
+
+#begin assets/MapObjects/Dog_Bowl_full.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/MapObjects/Dog_Bowl_full.png
+
+#begin assets/MapObjects/Dog_Bowl.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/MapObjects/Dog_Bowl.png
+
+#begin assets/MapObjects/Fahrradwerkstatt_Tile.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/MapObjects/Fahrradwerkstatt_Tile.png
 
 #begin assets/sounds/Bike_Driving.mp3
 /importer:Mp3Importer
@@ -262,18 +298,6 @@
 /processorParam:TextureFormat=Color
 /build:assets/sprites/characters/character_atlas.png;assets/sprites/characters/character_atlas
 
-#begin assets/sprites/chest_texture.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:assets/sprites/chest_texture.png
-
 #begin assets/sprites/chest_open_texture.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -285,6 +309,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:assets/sprites/chest_open_texture.png
+
+#begin assets/sprites/chest_texture.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/sprites/chest_texture.png
 
 #begin assets/sprites/HUD/HUD_sheet.png
 /importer:TextureImporter
@@ -358,6 +394,18 @@
 /processorParam:TextureFormat=Color
 /build:assets/sprites/projectiles/ice_trail.png
 
+#begin assets/sprites/Tram/Tram_final.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/sprites/Tram/Tram_final.png;assets/sprites/Tram_final
+
 #begin assets/sprites/videos/BikeCrash.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -418,38 +466,3 @@
 /processorParam:TextureFormat=Color
 /build:assets/sprites/XP/xp_money_texture.png
 
-#begin assets/MapObjects/Dog_Bowl_full.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:assets/MapObjects/Dog_Bowl_full.png
-
-#begin assets/MapObjects/Dog_Bowl.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:assets/MapObjects/Dog_Bowl.png
-
-#begin assets/images/DogFood.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:assets/images/DogFood.png
