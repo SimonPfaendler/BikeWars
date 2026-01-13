@@ -45,6 +45,15 @@ public class CollisionManager
     public HashSet<ICollider> activeDynamics = new();
     private SpatialHash _staticHash { get; set; }
 
+    // Reusable query buffers
+    private readonly List<ICollider> _nearbyDynamics = new(64);
+    private readonly List<ICollider> _nearbyStatics  = new(64);
+
+    // Reusable removal buffers
+    private readonly List<ProjectileBase> _removeProjectiles = new(16);
+    private readonly List<ItemBase> _removeItems = new(16);
+    private readonly List<CharacterBase> _removeCharacters = new(16);
+
     public SpatialHash StaticHash
     {
         get => _staticHash;
@@ -400,8 +409,8 @@ public class CollisionManager
         allDynamics.Add(c);
     }
 
-    public void Insertions(HashSet<ItemBase> items, HashSet<Player> players, HashSet<ProjectileBase> projectiles,
-        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters)
+    public void Insertions(List<ItemBase> items, HashSet<Player> players, List<ProjectileBase> projectiles,
+        List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters)
     {
         foreach (ItemBase c in items)
         {
@@ -533,7 +542,7 @@ public class CollisionManager
         }
     }
 
-    private void HandleStatics(ICollider c, HashSet<ICollider> statics)
+    private void HandleStatics(ICollider c, List<ICollider> statics)
     {
         foreach (var b in statics)
         {
@@ -542,7 +551,7 @@ public class CollisionManager
         }
     }
 
-    private void HandleDynamics(ICollider c, HashSet<ICollider> dynamics)
+    private void HandleDynamics(ICollider c, List<ICollider> dynamics)
     {
         foreach (var d in dynamics)
         {
@@ -674,7 +683,7 @@ public class CollisionManager
         return; // don't run projectile logic
     }
 
-    private void HandleTerrain(ICollider c, HashSet<ICollider> statics)
+    private void HandleTerrain(ICollider c, List<ICollider> statics)
     {
         if (c.Owner is not Player player)
             return;
@@ -703,8 +712,8 @@ public class CollisionManager
         }
     }
 
-    public void Update(HashSet<Player> players, HashSet<ItemBase> items, HashSet<ProjectileBase> projectiles,
-        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters)
+    public void Update(HashSet<Player> players, List<ItemBase> items, List<ProjectileBase> projectiles,
+        List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters)
     {
         allDynamics.Clear();
         DynamicHash.Clear();
@@ -718,29 +727,28 @@ public class CollisionManager
                 continue;
             }
 
-            var dynamics = DynamicHash.QueryNearby(c.Position, 1);
-            var statics = StaticHash.QueryNearby(c.Position, 2);
+            DynamicHash.QueryNearby(c.Position, 1, _nearbyDynamics);
+            StaticHash.QueryNearby(c.Position, 2, _nearbyStatics);
 
-            HandleDynamics(c, dynamics);
-            HandleStatics(c, statics);
-            HandleTerrain(c, statics);
+            HandleDynamics(c, _nearbyDynamics);
+            HandleStatics(c, _nearbyStatics);
+            HandleTerrain(c, _nearbyStatics);
         }
 
-        HashSet<ProjectileBase> removeProjectiles = new();
-        HashSet<ItemBase> removeItems = new();
-        HashSet<CharacterBase> removeCharacters = new();
-
+        _removeProjectiles.Clear();
+        _removeItems.Clear();
+        _removeCharacters.Clear();
         foreach (var c in _toRemoveColliders)
         {
             switch (c.Owner)
             {
-                case ProjectileBase p: removeProjectiles.Add(p); break;
-                case ItemBase i: removeItems.Add(i); break;
-                case CharacterBase ch: removeCharacters.Add(ch); break;
+                case ProjectileBase p: _removeProjectiles.Add(p); break;
+                case ItemBase i: _removeItems.Add(i); break;
+                case CharacterBase ch: _removeCharacters.Add(ch); break;
             }
         }
 
-        foreach (ProjectileBase p in removeProjectiles)
+        foreach (ProjectileBase p in _removeProjectiles)
         {
             if (_toRemoveColliders.Contains(p.Collider))
             {
@@ -748,7 +756,7 @@ public class CollisionManager
             }
         }
 
-        foreach (ItemBase i in removeItems)
+        foreach (ItemBase i in _removeItems)
         {
             if (_toRemoveColliders.Contains(i.Collider))
             {
@@ -756,7 +764,7 @@ public class CollisionManager
             }
         }
 
-        foreach (CharacterBase ch in removeCharacters)
+        foreach (CharacterBase ch in _removeCharacters)
         {
             if (_toRemoveColliders.Contains(ch.Collider))
             {
@@ -789,8 +797,8 @@ public class CollisionManager
 
     // makes the hitboxes visible for when in the tech demo
     public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
-        Player player, HashSet<CharacterBase> characters,
-        HashSet<ItemBase> items, HashSet<ProjectileBase> projectiles, HashSet<AreaOfEffectBase> aoeAttacks)
+        Player player, List<CharacterBase> characters,
+        List<ItemBase> items, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks)
     {
         foreach (var cell in StaticHash._cells)
         {

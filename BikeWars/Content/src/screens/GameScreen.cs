@@ -88,7 +88,7 @@ namespace BikeWars.Content.screens
         private InputMode _inputMode = InputMode.Keyboard;
 
         private float _hitStopTimer = 0f;
-        
+
         private RepathScheduler _repathScheduler;
         protected RepathScheduler RepathScheduler => _repathScheduler;
 
@@ -168,13 +168,13 @@ namespace BikeWars.Content.screens
 
             // pathfinding object
             _pathFinding = new PathFinding(_collisionManager.PathGrid);
-            
+
             // Pathfinding scheduler (limits how many enemies may repath per frame)
             _repathScheduler = new RepathScheduler(capacity: 2000)
             {
                 UpdateMaxEnemies = 120
             };
-            
+
             _tiledMapRenderer = new TiledMapRenderer(Game1.Instance.GraphicsDevice, _collisionManager.TiledMap);
 
             // Create Combat Manager
@@ -224,7 +224,7 @@ namespace BikeWars.Content.screens
             Rectangle initialView = GetCameraWorldRect();
             _worldAudioManager = new WorldAudioManager(initialView);
             _gameObjectManager.SetWorldAudioManager(_worldAudioManager);
-            
+
             _levelUpScreen = new LevelUpScreen();
             _levelUpScreen.Closed += () =>
             {
@@ -347,10 +347,10 @@ namespace BikeWars.Content.screens
             {
                 _spawnManager.Update(gameTime);
             }
-            
+
             // Let up to 50 enemies recalc their paths this frame
             _repathScheduler?.Update();
-            
+
             _gameObjectManager.Update(gameTime, InputHandler.MakeMouseWorldPosByCamera(camera));
             _collisionManager.Update(players, _gameObjectManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters);
 
@@ -407,7 +407,7 @@ namespace BikeWars.Content.screens
                 PauseMenuScreen pauseMenu = new PauseMenuScreen(_font, _audioService);
                 ScreenManager.AddScreen(pauseMenu);
             }
-            
+
             if (!_isTechDemo)
                 _gameTimer.Update(gameTime);
         }

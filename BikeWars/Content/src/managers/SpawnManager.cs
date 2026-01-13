@@ -4,6 +4,8 @@ using BikeWars.Content.engine.Audio;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.entities.interfaces;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
+using BikeWars.Content.engine.interfaces;
 
 namespace BikeWars.Content.managers
 {
@@ -19,6 +21,8 @@ namespace BikeWars.Content.managers
         private double _timeSinceLastCircle;
         private const double SWARM_INTERVAL = 65.0;
         private const double CIRCLE_SPAWN_INTERVAL = 100.0;
+
+        private readonly List<ICollider> _spawnQueryBuffer = new(32);
 
         private const double GAME_DURATION = 15 * 60; // 15 minutes in seconds
         private const double START_SPAWN_INTERVAL = 4; // Start with 4 seconds
@@ -136,7 +140,7 @@ namespace BikeWars.Content.managers
                 // Dog: 40% of remaining
                 // Thief: 40% of remaining
                 // Kamikaze: 20% of remaining
-                
+
                 if (val < 0.4)
                 {
                     var dog = new Dog(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager, _repathScheduler);
@@ -172,8 +176,9 @@ namespace BikeWars.Content.managers
             // Use 32x32 size (enemy size)
             BoxCollider checkCollider = new BoxCollider(pos, 32, 32, CollisionLayer.CHARACTER, null);
 
-            var nearby = _collisionManager.StaticHash.QueryNearby(pos, 3);
-            foreach (var col in nearby)
+            _spawnQueryBuffer.Clear();
+            _collisionManager.StaticHash.QueryNearby(pos, 3, _spawnQueryBuffer);
+            foreach (var col in _spawnQueryBuffer)
             {
                 if (col.Layer == CollisionLayer.SPAWNENEMIES && col.Intersects(checkCollider))
                 {

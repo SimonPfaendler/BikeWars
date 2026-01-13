@@ -25,22 +25,22 @@ public class GameObjectManager
     private Player? _player2 {get; set;}
     public Player? Player2{get => _player2; set => _player2 = value;}
 
-    private HashSet<CharacterBase> _characters {get; set;}
-    public HashSet<CharacterBase> Characters {get => _characters;}
+    private List<CharacterBase> _characters {get; set;}
+    public List<CharacterBase> Characters {get => _characters;}
 
-    private readonly HashSet<ItemBase> _items = new();
-    public HashSet<ItemBase> Items => _items;
+    private readonly List<ItemBase> _items = new();
+    public List<ItemBase> Items => _items;
 
-    private HashSet<BoxCollider> _statics {get; set;}
-    public HashSet<BoxCollider> Statics {get => _statics;}
+    private List<BoxCollider> _statics {get; set;}
+    public List<BoxCollider> Statics {get => _statics;}
 
-    private HashSet<ProjectileBase> _projectiles {get; set;}
-    public HashSet<ProjectileBase> Projectiles {get => _projectiles;}
+    private List<ProjectileBase> _projectiles {get; set;}
+    public List<ProjectileBase> Projectiles {get => _projectiles;}
 
-    private HashSet<AreaOfEffectBase> _aoeAttacks = new();
+    private List<AreaOfEffectBase> _aoeAttacks = new();
 
 
-    public HashSet<AreaOfEffectBase> AOEAttacks => _aoeAttacks;
+    public List<AreaOfEffectBase> AOEAttacks => _aoeAttacks;
 
     private HashSet<DamageNumber> _damageNumbers = new HashSet<DamageNumber>();
     private SpriteFont? _damageFont;
@@ -56,10 +56,10 @@ public class GameObjectManager
         Player2 = player2;
         _contentManager = content;
 
-        _characters = new HashSet<CharacterBase>();
-        _items = new HashSet<ItemBase>();
-        _statics = new HashSet<BoxCollider>();
-        _projectiles = new HashSet<ProjectileBase>();
+        _characters = new List<CharacterBase>();
+        _items = new List<ItemBase>();
+        _statics = new List<BoxCollider>();
+        _projectiles = new List<ProjectileBase>();
 
         if (Player1 != null)
         {
@@ -202,11 +202,16 @@ public class GameObjectManager
         {
             p.Update(gameTime);
         }
-        _aoeAttacks.RemoveWhere(aoe =>
+        for (int i = _aoeAttacks.Count - 1; i >= 0; i--)
         {
+            var aoe = _aoeAttacks[i];
             aoe.Update(gameTime);
-            return aoe.IsExpired;
-        });
+
+            if (aoe.IsExpired)
+            {
+                _aoeAttacks.RemoveAt(i);
+            }
+        }
 
         _damageNumbers.RemoveWhere(dn =>
         {
