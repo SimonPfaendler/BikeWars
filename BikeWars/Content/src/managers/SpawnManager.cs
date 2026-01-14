@@ -94,13 +94,12 @@ namespace BikeWars.Content.managers
             UpdateTrams(gameTime);
         }
 
-        private void SpawnTram()
+        public void SpawnTram(float spawnRadius = 5000f)
         {
             if (_gameObjectManager.Player1 == null) return;
 
             // Spawn far outside the screen
             Vector2 playerPos = _gameObjectManager.Player1.Transform.Position;
-            float spawnRadius = 5000f;
             float angle = (float)(_random.NextDouble() * Math.PI * 2);
             
             Vector2 startPos = playerPos + new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * spawnRadius;
@@ -113,7 +112,7 @@ namespace BikeWars.Content.managers
             _activeTrams.Add(tram);
         }
 
-        private void UpdateTrams(GameTime gameTime)
+        public void UpdateTrams(GameTime gameTime)
         {
             // Update Trams
             for (int i = _activeTrams.Count - 1; i >= 0; i--)
