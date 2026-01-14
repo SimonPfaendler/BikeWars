@@ -92,6 +92,13 @@ namespace BikeWars.Content.screens
         
         private RepathScheduler _repathScheduler;
         protected RepathScheduler RepathScheduler => _repathScheduler;
+        
+        private bool _musicOverrideActive = false;
+        private Musicians _activeMusicianOverride = null;
+        private float _musicOverrideDelayTimer = 0f;
+        private bool _waitingForMetal = false;
+
+        private const float METAL_DELAY_SECONDS = 2f;
 
 
         public void TriggerHitStop(float duration)
@@ -420,7 +427,6 @@ namespace BikeWars.Content.screens
             {
                 if (item is Musicians musicians)
                 {
-                    // Check für Player 1 und (falls vorhanden) Player 2
                     if (musicians.IsPlayerNearby(_gameObjectManager.Player1.Transform.Position) || 
                         (_gameObjectManager.Player2 != null && musicians.IsPlayerNearby(_gameObjectManager.Player2.Transform.Position)))
                     {
@@ -429,6 +435,68 @@ namespace BikeWars.Content.screens
                     }
                 }
             }
+            
+            // logic for interaction with musicians (music change and attack)
+            if (!_musicOverrideActive)
+            {
+                foreach (var item in _gameObjectManager.Items)
+                {
+                    if (item is not Musicians musicians)
+                        continue;
+
+                    bool p1Interact =
+                        musicians.Intersects(_gameObjectManager.Player1.Collider) &&
+                        _gameObjectManager.Player1.IsInteractPressed();
+
+                    bool p2Interact = false;
+
+                    if (_gameObjectManager.Player2 != null)
+                    {
+                        p2Interact =
+                            musicians.Intersects(_gameObjectManager.Player2.Collider) &&
+                            _gameObjectManager.Player2.IsInteractPressed();
+                    }
+
+                    if ((p1Interact || p2Interact) && musicians.TryTriggerOverride())
+                    {
+                        StartMusicOverride(musicians);
+                        break;
+                    }
+                }
+            }
+            
+            if (_musicOverrideActive)
+            {
+                float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+                
+                if (_waitingForMetal)
+                {
+                    _musicOverrideDelayTimer -= dt;
+
+                    if (_musicOverrideDelayTimer <= 0f)
+                    {
+                        _waitingForMetal = false;
+                        
+                        _audioService.Music.Play(AudioAssets.Metal, isRepeating: false);
+                    }
+                    
+                    return;
+                }
+                
+                if (!_audioService.Music.IsPlaying)
+                {
+                    _musicOverrideActive = false;
+
+                    if (_activeMusicianOverride != null)
+                    {
+                        _activeMusicianOverride.ResetOverride();
+                        _activeMusicianOverride = null;
+                    }
+                }
+
+                return;
+            }
+
             
             if (playerNearMusicians)
             {
@@ -762,6 +830,20 @@ namespace BikeWars.Content.screens
             Keyboard,
             Controller
         }
+        
+        private void StartMusicOverride(Musicians musicians)
+        {
+            _musicOverrideActive = true;
+            _activeMusicianOverride = musicians;
+            
+            _audioService.Music.Stop();
+            
+            _audioService.Sounds.Play(AudioAssets.VinylStop);
+            
+            _musicOverrideDelayTimer = METAL_DELAY_SECONDS;
+            _waitingForMetal = true;
+        }
+
 
 
     }

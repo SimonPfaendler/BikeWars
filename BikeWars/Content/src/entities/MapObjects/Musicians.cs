@@ -42,4 +42,24 @@ public class Musicians : ItemBase
         const float MUSIC_RADIUS = 500f; 
         return Vector2.Distance(Transform.Position, playerPosition) < MUSIC_RADIUS;
     }
+    
+    // following code needed for interaction logic (music change and attack, see GameScreen.cs)
+    private bool _overrideActive = false;
+
+    public bool IsOverrideActive => _overrideActive;
+
+    public bool TryTriggerOverride()
+    {
+        if (_overrideActive)
+            return false;
+
+        _overrideActive = true;
+        return true;
+    }
+
+    public void ResetOverride()
+    {
+        _overrideActive = false;
+    }
+
 }
