@@ -269,7 +269,11 @@ public class GameObjectManager
     private void OnPlayerDamageCircle(Player player)
     {
         Vector2 direction = player.GazeDirection;
-        DamageCircle dc = new DamageCircle(player);
+        DamageCircle dc = new DamageCircle(
+            player.Transform,
+            owner: player,
+            damagePlayers: false
+        );
         dc.LoadContent(_contentManager);
         AddAOE(dc);
 
@@ -430,6 +434,8 @@ public class GameObjectManager
                 return new Chest(start, size, item);
             case "dog-bowl":
                 return new DogBowl(start, size);
+            case "musicians":
+                return new Musicians(start, size);
             default:
                 return null;
         }

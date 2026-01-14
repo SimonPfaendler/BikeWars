@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
+using BikeWars.Content.entities.MapObjects;
 using BikeWars.Entities.Characters;
 using BikeWars.Entities.Characters.MapObjects;
 using BikeWars.Content.components;
@@ -133,6 +134,8 @@ public class CollisionManager
         LoadObjectLayer("Chests");
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
         LoadObjectLayer("Dog-Bowl");
+        _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
+        LoadObjectLayer("Musicians");
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
 
 
@@ -409,6 +412,9 @@ public class CollisionManager
     {
         foreach (ItemBase c in items)
         {
+            if (c is Musicians)
+                continue;
+            
             AddDynamic(c.Collider);
         }
 
