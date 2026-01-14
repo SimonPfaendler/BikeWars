@@ -99,6 +99,13 @@ namespace BikeWars.Content.screens
         private bool _waitingForMetal = false;
 
         private const float METAL_DELAY_SECONDS = 2f;
+        
+        private int _musicianDamageCircleCount = 0;
+        private float _musicianDamageCircleTimer = 0f;
+        private const int MUSICIAN_DAMAGE_CIRCLE_TOTAL = 3;
+        private const float MUSICIAN_DAMAGE_CIRCLE_INTERVAL = 3f;
+        private Musicians? _activeMusiciansForAOE = null;
+
 
 
         public void TriggerHitStop(float duration)
@@ -460,10 +467,42 @@ namespace BikeWars.Content.screens
                     if ((p1Interact || p2Interact) && musicians.TryTriggerOverride())
                     {
                         StartMusicOverride(musicians);
+                        _activeMusiciansForAOE = musicians;
+                        _musicianDamageCircleCount = 0;
+                        _musicianDamageCircleTimer = MUSICIAN_DAMAGE_CIRCLE_INTERVAL;
+
                         break;
                     }
                 }
             }
+            
+            if (_activeMusiciansForAOE != null && _musicianDamageCircleCount < MUSICIAN_DAMAGE_CIRCLE_TOTAL)
+            {
+                _musicianDamageCircleTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                if (_musicianDamageCircleTimer <= 0f)
+                {
+                    // spawn DamageCircle
+                    Vector2 offset = new Vector2(_activeMusiciansForAOE.Transform.Size.X / 2f,
+                        _activeMusiciansForAOE.Transform.Size.Y / 2f);
+                    
+                    Transform dcTransform = new Transform(_activeMusiciansForAOE.Transform.Position + offset,
+                        _activeMusiciansForAOE.Transform.Size);
+
+                    DamageCircle dc = new DamageCircle(
+                        dcTransform,
+                        owner: null,
+                        damagePlayers: false
+                    );
+
+                    dc.LoadContent(_gameObjectManager._contentManager);
+                    _gameObjectManager.AddAOE(dc);
+
+                    _musicianDamageCircleCount++;
+                    _musicianDamageCircleTimer = MUSICIAN_DAMAGE_CIRCLE_INTERVAL;
+                }
+            }
+
             
             if (_musicOverrideActive)
             {

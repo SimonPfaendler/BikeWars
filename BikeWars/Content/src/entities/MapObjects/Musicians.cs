@@ -3,6 +3,8 @@ using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.engine.interfaces;
+using BikeWars.Content.entities.items;
+using BikeWars.Content.managers;
 
 namespace BikeWars.Content.entities.MapObjects;
 
@@ -61,5 +63,6 @@ public class Musicians : ItemBase
     {
         _overrideActive = false;
     }
+
 
 }
