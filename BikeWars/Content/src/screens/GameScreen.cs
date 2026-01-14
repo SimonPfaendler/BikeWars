@@ -16,6 +16,7 @@ using MonoGame.Extended.Tiled.Renderers;
 using BikeWars.Content.managers;
 using BikeWars.Content.events;
 using BikeWars.Content.entities.interfaces;
+using BikeWars.Content.entities.MapObjects;
 using BikeWars.Entities.Characters.MapObjects;
 
 namespace BikeWars.Content.screens
@@ -410,6 +411,39 @@ namespace BikeWars.Content.screens
             
             if (!_isTechDemo)
                 _gameTimer.Update(gameTime);
+            
+            // check if Musicians are nearby and change Music if it's the case
+            
+            bool playerNearMusicians = false;
+            
+            foreach (var item in _gameObjectManager.Items)
+            {
+                if (item is Musicians musicians)
+                {
+                    // Check für Player 1 und (falls vorhanden) Player 2
+                    if (musicians.IsPlayerNearby(_gameObjectManager.Player1.Transform.Position) || 
+                        (_gameObjectManager.Player2 != null && musicians.IsPlayerNearby(_gameObjectManager.Player2.Transform.Position)))
+                    {
+                        playerNearMusicians = true;
+                        break; 
+                    }
+                }
+            }
+            
+            if (playerNearMusicians)
+            {
+                if (_audioService.Music.CurrentSong != AudioAssets.LatinMusic)
+                {
+                    _audioService.Music.PlayWithFade(AudioAssets.LatinMusic, true);
+                }
+            }
+            else
+            {
+                if (_audioService.Music.CurrentSong == AudioAssets.LatinMusic)
+                {
+                    _audioService.Music.PlayWithFade(AudioAssets.GameMusic, true);
+                }
+            }
         }
 
         // Load here stuff like statistics or options that is not related to the

@@ -8,7 +8,7 @@ namespace BikeWars.Content.entities.MapObjects;
 
 public class Musicians : ItemBase
 {
-    private const int PADDING_INTERACTION_AREA = 50;
+    private const int PADDING_INTERACTION_AREA = 100;
     private BoxCollider _collisionCollider { get; set; }
     public BoxCollider CollisionCollider { get => _collisionCollider; set => _collisionCollider = value; }
 
@@ -35,5 +35,11 @@ public class Musicians : ItemBase
     public override bool Intersects(ICollider collider)
     {
         return Collider.Intersects(collider);
+    }
+    
+    public bool IsPlayerNearby(Vector2 playerPosition)
+    {
+        const float MUSIC_RADIUS = 500f; 
+        return Vector2.Distance(Transform.Position, playerPosition) < MUSIC_RADIUS;
     }
 }
