@@ -140,6 +140,9 @@ namespace BikeWars.Entities.Characters
             
             var explosion = new KamikazeExplosion(this, explosionPos);
             _gameObjectManager.AddAOE(explosion);
+            
+            // Screen Shake
+            _gameObjectManager.RequestScreenShake(5.5f, 1f);
         }
 
         public override void Draw(SpriteBatch spriteBatch)

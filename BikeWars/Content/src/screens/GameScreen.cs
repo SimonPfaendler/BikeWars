@@ -63,7 +63,7 @@ namespace BikeWars.Content.screens
 
         private CombatManager _combatManager;
 
-        private SpawnManager _spawnManager;
+        protected SpawnManager _spawnManager;
 
         private PathFinding _pathFinding;
 
@@ -278,6 +278,7 @@ namespace BikeWars.Content.screens
 
             // Spawn Manager
             _spawnManager = new SpawnManager(_gameObjectManager, _collisionManager, _audioService, _pathFinding, _repathScheduler);
+            _spawnManager.OnScreenShakeRequested += (intensity, duration) => camera.Shake(intensity, duration);
 
             // timer
             _timerFont = content.Load<SpriteFont>("assets/fonts/Arial");
@@ -722,6 +723,7 @@ namespace BikeWars.Content.screens
 
             spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.GetTransform());
             _gameObjectManager.Draw(spriteBatch);
+            _spawnManager.Draw();
 
             if (_isTechDemo && _showStaticHitboxes)
             {
