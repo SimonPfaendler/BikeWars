@@ -15,6 +15,7 @@ namespace BikeWars.Content.components
         public float Rotation { get; private set; }
         public Point Size { get; private set; }
         public List<BoxCollider> Colliders { get; private set; }
+        public bool HasHonked { get; set; } = false;
 
         private Texture2D _texture;
         private const int COLLIDER_SEGMENT_SIZE = 40;

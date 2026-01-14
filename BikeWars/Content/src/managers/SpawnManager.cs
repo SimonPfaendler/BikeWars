@@ -34,7 +34,7 @@ namespace BikeWars.Content.managers
         // Tram Logic
         private List<Tram> _activeTrams = new List<Tram>();
         private double _timeSinceLastTram;
-        private const double TRAM_SPAWN_INTERVAL = 5.0; // Every 5 seconds
+        private const double TRAM_SPAWN_INTERVAL = 15.0; // Every 15 seconds
 
         private readonly Random _random;
         private readonly RepathScheduler _repathScheduler;
@@ -100,7 +100,7 @@ namespace BikeWars.Content.managers
 
             // Spawn far outside the screen
             Vector2 playerPos = _gameObjectManager.Player1.Transform.Position;
-            float spawnRadius = 3000f;
+            float spawnRadius = 5000f;
             float angle = (float)(_random.NextDouble() * Math.PI * 2);
             
             Vector2 startPos = playerPos + new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * spawnRadius;
@@ -125,8 +125,7 @@ namespace BikeWars.Content.managers
                 if (_gameObjectManager.Player1 != null)
                 {
                      float distToPlayer = Vector2.Distance(tram.Position, _gameObjectManager.Player1.Transform.Position);
-
-                     if (distToPlayer > 3000)
+                     if (distToPlayer > 5500)
                      {
                          _activeTrams.RemoveAt(i);
                          continue;
@@ -137,6 +136,13 @@ namespace BikeWars.Content.managers
                      {
                          float intensity = 6f * (1f - (distToPlayer / 1400f)); // Stronger when closer
                          OnScreenShakeRequested?.Invoke(intensity, 0.2f);
+                     }
+
+                     // Honk if near
+                     if (!tram.HasHonked && distToPlayer < 3000)
+                     {
+                         _audioService.Sounds.Play(AudioAssets.TrainHorn);
+                         tram.HasHonked = true;
                      }
                 }
                 CheckTramCollision(tram);
