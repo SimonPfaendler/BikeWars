@@ -21,6 +21,7 @@ namespace BikeWars.Content.engine.Audio
         public const string Slurp = "slurp";
         public const string Relief = "relief";
         public const string DamageCircle = "damage_circle";
+        public const string VinylStop = "vinyl_stop";
 
         // Mapping ID -> Content-Path
         public static readonly IReadOnlyDictionary<string, string> SoundEffectPaths = new Dictionary<string, string>
@@ -41,15 +42,20 @@ namespace BikeWars.Content.engine.Audio
             { Slurp, "assets/sounds/Slurp"},
             { Relief, "assets/sounds/Relief"},
             { DamageCircle, "assets/sounds/damage_circle"},
+            { VinylStop, "assets/sounds/VinylStop"},
         };
 
         // Song IDs to be used in the code
         public const string MenuMusic = "Menu_music";
         public const string GameMusic = "Game_music";
+        public const string LatinMusic = "Latin_music";
+        public const string Metal = "Metal";
         public static readonly IReadOnlyDictionary<string, string> SongPaths = new Dictionary<string, string>
         {
             { MenuMusic, "assets/sounds/Menu_music" },
             { GameMusic, "assets/sounds/Game_music" },
+            { LatinMusic, "assets/sounds/LatinMusic"},
+            { Metal, "assets/sounds/Metal" },
 
         };
     }
