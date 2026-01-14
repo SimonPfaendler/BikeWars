@@ -5,6 +5,7 @@ using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Entities.Characters;
 using BikeWars.Entities.Characters.MapObjects;
+using BikeWars.Content.components;
 using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
 using Microsoft.Xna.Framework;
@@ -23,6 +24,7 @@ public class CollisionManager
     public event Action<CharacterBase, ProjectileBase> OnProjectileHit;
     public event Action<CharacterBase, CharacterBase> OnCharacterCollision;
     public event Action<CharacterBase, AreaOfEffectBase> OnAOEHit;
+    public event Action<CharacterBase> OnTramHit;
 
     public List<TiledObjectInfo> ObjectSpawns { get; } = new();
     private readonly GameObjectManager _gameObjectManager;
@@ -403,7 +405,7 @@ public class CollisionManager
     }
 
     public void Insertions(HashSet<ItemBase> items, HashSet<Player> players, HashSet<ProjectileBase> projectiles,
-        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters)
+        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters, List<Tram> trams)
     {
         foreach (ItemBase c in items)
         {
@@ -437,6 +439,14 @@ public class CollisionManager
             if (c.IsDead)
             {
                 _toRemoveColliders.Add(c.Collider);
+            }
+        }
+
+        foreach (var t in trams)
+        {
+            foreach (var col in t.Colliders)
+            {
+                AddDynamic(col);
             }
         }
     }
@@ -551,6 +561,18 @@ public class CollisionManager
             PickingUpItem(c, d);
             HandleInteractions(c, d);
             HandleCharacters(c, d);
+            HandleTramCollision(c, d);
+        }
+    }
+
+    private void HandleTramCollision(ICollider c, ICollider d)
+    {
+        if (c.Layer == CollisionLayer.TRAM && (d.Layer == CollisionLayer.CHARACTER || d.Layer == CollisionLayer.PLAYER))
+        {
+             if (c.Intersects(d))
+             {
+                 OnTramHit?.Invoke((CharacterBase)d.Owner);
+             }
         }
     }
 
@@ -706,16 +728,16 @@ public class CollisionManager
     }
 
     public void Update(HashSet<Player> players, HashSet<ItemBase> items, HashSet<ProjectileBase> projectiles,
-        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters)
+        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters, List<Tram> trams)
     {
         allDynamics.Clear();
         DynamicHash.Clear();
-        Insertions(items, players, projectiles, aoeAttacks, characters);
+        Insertions(items, players, projectiles, aoeAttacks, characters, trams);
 
         foreach (var c in allDynamics)
         {
             if (c.Layer != CollisionLayer.CHARACTER && c.Layer != CollisionLayer.PLAYER &&
-                c.Layer != CollisionLayer.PROJECTILE)
+                c.Layer != CollisionLayer.PROJECTILE && c.Layer != CollisionLayer.TRAM)
             {
                 continue;
             }
@@ -792,7 +814,7 @@ public class CollisionManager
     // makes the hitboxes visible for when in the tech demo
     public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
         Player player, HashSet<CharacterBase> characters,
-        HashSet<ItemBase> items, HashSet<ProjectileBase> projectiles, HashSet<AreaOfEffectBase> aoeAttacks)
+        HashSet<ItemBase> items, HashSet<ProjectileBase> projectiles, HashSet<AreaOfEffectBase> aoeAttacks, List<Tram> trams)
     {
         foreach (var cell in StaticHash._cells)
         {
@@ -865,6 +887,16 @@ public class CollisionManager
             {
                 var projRect = GetColliderRectangle(projectile.Collider);
                 DrawRectOutline(spriteBatch, pixel, projRect, Color.Red * 0.7f);
+            }
+        }
+
+        // Tram hitboxes
+        foreach (var tram in trams)
+        {
+            foreach (var collider in tram.Colliders)
+            {
+                var tramRect = GetColliderRectangle(collider);
+                DrawRectOutline(spriteBatch, pixel, tramRect, Color.Red * 0.7f);
             }
         }
     }

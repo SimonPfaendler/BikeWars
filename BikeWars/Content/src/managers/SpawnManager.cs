@@ -33,6 +33,7 @@ namespace BikeWars.Content.managers
 
         // Tram Logic
         private List<Tram> _activeTrams = new List<Tram>();
+        public List<Tram> ActiveTrams => _activeTrams;
         private double _timeSinceLastTram;
         private const double TRAM_SPAWN_INTERVAL = 15.0; // Every 15 seconds
 
@@ -144,59 +145,10 @@ namespace BikeWars.Content.managers
                          tram.HasHonked = true;
                      }
                 }
-                CheckTramCollision(tram);
             }
         }
 
         public event Action<float, float>? OnScreenShakeRequested;
-
-        private void CheckTramCollision(Tram tram)
-        {
-            // Tram vs Player 1
-            if (_gameObjectManager.Player1 != null)
-            {
-                CheckTramHit(tram, _gameObjectManager.Player1);
-            }
-             // Tram vs Player 2
-            if (_gameObjectManager.Player2 != null)
-            {
-                CheckTramHit(tram, _gameObjectManager.Player2);
-            }
-
-            // Tram vs Enemies
-            foreach (var character in _gameObjectManager.Characters)
-            {
-                CheckTramHit(tram, character);
-            }
-        }
-
-        private void CheckTramHit(Tram tram, CharacterBase character)
-        {
-             // Optimization: Simple distance check first before checking sub-colliders
-             float combinedRadius = Math.Max(tram.Size.X, tram.Size.Y) / 2f + 50f; // Rough bounding circle
-             if (Vector2.DistanceSquared(tram.Position, character.Transform.Position) > combinedRadius * combinedRadius)
-             {
-                 return;
-             }
-
-             // Detailed check against all tram colliders
-             foreach (var tramCollider in tram.Colliders)
-             {
-                 if (tramCollider.Intersects(character.Collider))
-                 {
-
-                     
-                     // Only hit if not already dead to avoid spamming
-                     if (!character.IsDead)
-                     {
-                         character.TakeDamage(10);
-                         
-                         // TODO: Sound
-                     }
-                     return;
-                 }
-             }
-        }
 
         public void Draw()
         {

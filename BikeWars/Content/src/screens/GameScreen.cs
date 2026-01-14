@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using BikeWars.Content.components;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -149,7 +150,7 @@ namespace BikeWars.Content.screens
             if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);
             if (_gameObjectManager.Player2 != null) players.Add(_gameObjectManager.Player2);
 
-            _collisionManager.Insertions(_gameObjectManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters);
+            _collisionManager.Insertions(_gameObjectManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>());
 
             GameEvents.OnResumeTimer += ResumeTimer;
             HandleLoadNonInGameData();
@@ -187,6 +188,10 @@ namespace BikeWars.Content.screens
             _collisionManager.OnItemPickup += _gameObjectManager.Player1.OnPickUpItem;
             _collisionManager.OnItemInteraction += _gameObjectManager.Player1.OnPickUpItem;
             _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
+            _collisionManager.OnTramHit += (character) =>
+            {
+               character.TakeDamage(10);
+            };
 
             _combatManager.OnHitStopRequested += TriggerHitStop;
             _combatManager.OnScreenShakeRequested += (intensity, duration) => camera.Shake(intensity, duration);
@@ -353,7 +358,7 @@ namespace BikeWars.Content.screens
             _repathScheduler?.Update();
             
             _gameObjectManager.Update(gameTime, InputHandler.MakeMouseWorldPosByCamera(camera));
-            _collisionManager.Update(players, _gameObjectManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters);
+            _collisionManager.Update(players, _gameObjectManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, _spawnManager.ActiveTrams);
 
 
             if (InputHandler.IsPressed(GameAction.DEBUG_HEAL))
@@ -593,7 +598,8 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.Characters,
                     _gameObjectManager.Items,
                     _gameObjectManager.Projectiles,
-                    _gameObjectManager.AOEAttacks
+                    _gameObjectManager.AOEAttacks,
+                    _spawnManager.ActiveTrams
                 );
             }
 
