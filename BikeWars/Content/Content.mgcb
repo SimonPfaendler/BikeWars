@@ -358,6 +358,12 @@
 /processorParam:Quality=Best
 /build:assets/sounds/train-horn.wav;assets/sounds/train-horn
 
+#begin assets/sounds/TrainHitSlime.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/TrainHitSlime.mp3;assets/sounds/TrainHitSlime
+
 #begin assets/sounds/VinylStop.mp3
 /importer:Mp3Importer
 /processor:SoundEffectProcessor

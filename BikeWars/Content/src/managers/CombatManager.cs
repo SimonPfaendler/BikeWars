@@ -125,9 +125,7 @@ public class CombatManager
         if (target.IsGodMode) return;
 
         target.TakeDamage(10);
-        
-        
-         _audio.Sounds.Play(AudioAssets.BulletHit); // Maybe change this sound
+        _audio.Sounds.Play(AudioAssets.TrainHit);
 
         if (target.Attributes.Health <= 0)
         {

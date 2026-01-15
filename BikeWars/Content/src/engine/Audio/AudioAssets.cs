@@ -17,6 +17,7 @@ namespace BikeWars.Content.engine.Audio
         public const string IceTrail = "ice_trail";
         public const string CarHorn = "car_horn";
         public const string TrainHorn = "train_horn";
+        public const string TrainHit = "TrainHitSlime";
         public const string ShortPain = "short_pain";
         public const string Slurp = "slurp";
         public const string Relief = "relief";
@@ -47,6 +48,7 @@ namespace BikeWars.Content.engine.Audio
             { IceTrail, "assets/sounds/ice_trail"},
             { CarHorn, "assets/sounds/CarHorn"},
             { TrainHorn, "assets/sounds/train-horn"},
+            { TrainHit, "assets/sounds/TrainHitSlime" },
             { ShortPain, "assets/sounds/short_pain"},
             { Slurp, "assets/sounds/Slurp"},
             { Relief, "assets/sounds/Relief"},
