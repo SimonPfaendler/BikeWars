@@ -30,6 +30,7 @@ namespace BikeWars.Content.managers
         private double _spawnInterval;
         private const float MIN_SPAWN_RADIUS = 300f;
         private const float MAX_SPAWN_RADIUS = 700f;
+        private readonly WorldAudioManager _worldAudioManager;
 
         // Tram Logic
         private List<Tram> _activeTrams = new List<Tram>();
@@ -41,7 +42,7 @@ namespace BikeWars.Content.managers
         private readonly RepathScheduler _repathScheduler;
         private readonly SpriteBatch _spriteBatch;
 
-        public SpawnManager(GameObjectManager gameObjectManager, CollisionManager collisionManager, AudioService audioService, PathFinding pathFinding, RepathScheduler repathScheduler)
+        public SpawnManager(GameObjectManager gameObjectManager, CollisionManager collisionManager, AudioService audioService, PathFinding pathFinding, RepathScheduler repathScheduler, WorldAudioManager worldAudioManager)
         {
             _gameObjectManager = gameObjectManager;
             _collisionManager = collisionManager;
@@ -50,6 +51,7 @@ namespace BikeWars.Content.managers
             _spawnInterval = START_SPAWN_INTERVAL;
             _pathFinding = pathFinding;
             _repathScheduler = repathScheduler;
+            _worldAudioManager = worldAudioManager;
             _spriteBatch = Game1.Instance.SpriteBatch;
         }
 
@@ -225,6 +227,7 @@ namespace BikeWars.Content.managers
                 {
                     var dog = new Dog(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager, _repathScheduler);
                     ApplyScaling(dog, difficultyMultiplier, speedMultiplier);
+                    dog.SetWorldAudioManager(_worldAudioManager);
                     _gameObjectManager.AddCharacter(dog);
                 }
                 else if (val < 0.8)
