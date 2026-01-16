@@ -371,7 +371,7 @@ public class CollisionManager
 
     public Vector2 GetPenetrationVector(ICollider a, ICollider b)
     {
-        const float SEPARATION = 1.25f; // fixed Push
+        // const float SEPARATION = 1.25f; // fixed Push
         if (a is BoxCollider A && b is BoxCollider B)
         {
             Vector2 aCenter = A.Position + new Vector2(A.Width / 2f, A.Height / 2f);
@@ -385,16 +385,19 @@ public class CollisionManager
 
             if (px <= 0 || py <= 0)
                 return Vector2.Zero;
+            
+            // Extra buffer to ensure characters are definitely separated
+            float buffer = 1.0f;
 
             if (px < py)
             {
                 // horizontal push
-                return new Vector2(Math.Sign(dx) * SEPARATION, 0);
+                return new Vector2(Math.Sign(dx) * (px + buffer), 0);
             }
             else
             {
                 // vertical push
-                return new Vector2(0, Math.Sign(dy) * SEPARATION);
+                return new Vector2(0, Math.Sign(dy) * (py + buffer));
             }
         }
 
@@ -614,19 +617,117 @@ public class CollisionManager
         }
 
         OnCharacterCollision?.Invoke((CharacterBase)c.Owner, (CharacterBase)d.Owner);
+        
+        // calculate vector that separates 2 characters
         Vector2 t = GetPenetrationVector(c, d);
+        if (t.LengthSquared() < 0.0001f)
+            return;
+        
         CharacterBase chd = (CharacterBase)d.Owner;
 
 
-        if (t.LengthSquared() < 0.01f)
+        if (t.LengthSquared() < 0.0001f)
             return;
-        ch.SetLastTransform();
-        ch.Transform.Position -= t;
-        ch.UpdateCollider();
-
-        chd.SetLastTransform();
-        chd.UpdateCollider();
+        
+        // split 2 characters apart by 50%
+        Vector2 separation = t * 0.5f;
+        
+        // Push character A (Backwards)
+        ApplySafePush(ch, c, -separation);
+        
+        // Push character B (Forwards)
+        ApplySafePush(chd, d, separation);
+        
+        
     }
+    
+    // slide the enemies along walls instead of them being pushed into the hitboxes
+    private void ApplySafePush(CharacterBase ch, ICollider collider, Vector2 push)
+    {
+        // try full push
+        Vector2 fullPos = ch.Transform.Position + push;
+        if (!IsInsideWall(collider, fullPos))
+        {
+            ch.SetLastTransform();
+            ch.Transform.Position = fullPos;
+            ch.UpdateCollider();
+            return;
+        }
+        
+        // try sliding X (horizontal only)
+        // We only try this if the push actually has an X component
+        if (Math.Abs(push.X) > 0.01f)
+        {
+            Vector2 slideXPos = ch.Transform.Position + new Vector2(push.X, 0);
+            if (!IsInsideWall(collider, slideXPos))
+            {
+                ch.SetLastTransform();
+                ch.Transform.Position = slideXPos;
+                ch.UpdateCollider();
+                return;
+            }
+        }
+        
+        // try sliding Y (horizontal only)
+        // We only try this if the push actually has an Y component
+        if (Math.Abs(push.Y) > 0.01f)
+        {
+            Vector2 slideYPos = ch.Transform.Position + new Vector2(0, push.Y);
+            if (!IsInsideWall(collider, slideYPos))
+            {
+                ch.SetLastTransform();
+                ch.Transform.Position = slideYPos;
+                ch.UpdateCollider();
+                return;
+            }
+        }
+        
+        // 4) last resort: try smaller (scaled) pushes
+        // This helps a lot with corners: full push collides, but a partial push might be valid.
+        for (float t = 0.75f; t >= 0.1f; t -= 0.15f)
+        {
+            Vector2 scaledPos = ch.Transform.Position + push * t;
+            if (!IsInsideWall(collider, scaledPos))
+            {
+                ch.SetLastTransform();
+                ch.Transform.Position = scaledPos;
+                ch.UpdateCollider();
+                return;
+            }
+        }
+        
+    }
+
+    // helper function for HandleCharacterCollision
+    // makes sure characters don't push each other in static objects
+    private bool IsInsideWall(ICollider collider, Vector2 newPos)
+    {
+        // create a temporary hitbox at the new position
+        // to see if the enemy will hit a wall or not
+        BoxCollider testBox = new BoxCollider(newPos, collider.Width, collider.Height, collider.Layer, collider.Owner);
+        
+        // check nearby statics
+        var statics = StaticHash.QueryNearby(newPos + new Vector2(collider.Width/2f, collider.Height/2f), 5);
+
+
+        foreach (var s in statics)
+        {
+            // IGNORE things that don't block movement
+            if (s.Layer == CollisionLayer.SPAWNENEMIES || 
+                s.Layer == CollisionLayer.TERRAIN || 
+                s.Layer == CollisionLayer.AOE ||
+                (s.Layer == CollisionLayer.INTERACT && s.Owner is not ItemBase))
+            {
+                continue;
+            }
+            // If it hits ANYTHING else (Wall, Water, Destructible, etc.), it's a block.
+            if (s.Intersects(testBox))
+                return true; 
+        }
+        return false;
+
+    }
+
 
     private void HandleCharacterProjectiles(ICollider c, ICollider d)
     {
