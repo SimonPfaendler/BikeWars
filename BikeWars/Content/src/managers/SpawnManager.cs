@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using BikeWars.Content.components;
 
-using Microsoft.Xna.Framework.Graphics;
+
 
 namespace BikeWars.Content.managers
 {
@@ -33,14 +33,12 @@ namespace BikeWars.Content.managers
         private readonly WorldAudioManager _worldAudioManager;
 
         // Tram Logic
-        private List<Tram> _activeTrams = new List<Tram>();
-        public List<Tram> ActiveTrams => _activeTrams;
         private double _timeSinceLastTram;
         private const double TRAM_SPAWN_INTERVAL = 15.0; // Every 15 seconds
 
         private readonly Random _random;
         private readonly RepathScheduler _repathScheduler;
-        private readonly SpriteBatch _spriteBatch;
+
 
         public SpawnManager(GameObjectManager gameObjectManager, CollisionManager collisionManager, AudioService audioService, PathFinding pathFinding, RepathScheduler repathScheduler, WorldAudioManager worldAudioManager)
         {
@@ -52,7 +50,7 @@ namespace BikeWars.Content.managers
             _pathFinding = pathFinding;
             _repathScheduler = repathScheduler;
             _worldAudioManager = worldAudioManager;
-            _spriteBatch = Game1.Instance.SpriteBatch;
+
         }
 
         public void Update(GameTime gameTime)
@@ -94,8 +92,7 @@ namespace BikeWars.Content.managers
                 _timeSinceLastTram = 0;
             }
 
-            UpdateTrams(gameTime);
-        }
+            }
 
         public void SpawnTram(float spawnRadius = 5000f)
         {
@@ -111,54 +108,11 @@ namespace BikeWars.Content.managers
             Vector2 targetOffset = new Vector2((float)(_random.NextDouble() - 0.5) * 10, (float)(_random.NextDouble() - 0.5) * 10);
             Vector2 targetPos = playerPos + targetOffset;
 
-            var tram = new Tram(startPos, targetPos, Game1.Instance.GraphicsDevice);
-            _activeTrams.Add(tram);
+            var tram = new Tram(startPos, targetPos,  _audioService, _gameObjectManager.Player1);
+            _gameObjectManager.AddTram(tram);
         }
 
-        public void UpdateTrams(GameTime gameTime)
-        {
-            // Update Trams
-            for (int i = _activeTrams.Count - 1; i >= 0; i--)
-            {
-                var tram = _activeTrams[i];
-                tram.Update(gameTime);
 
-                // Despawn if too far away
-                if (_gameObjectManager.Player1 != null)
-                {
-                     float distToPlayer = Vector2.Distance(tram.Position, _gameObjectManager.Player1.Transform.Position);
-                     if (distToPlayer > 5500)
-                     {
-                         _activeTrams.RemoveAt(i);
-                         continue;
-                     }
-                     
-                     // Screen Shake if near
-                     if (distToPlayer < 1400)
-                     {
-                         float intensity = 6f * (1f - (distToPlayer / 1400f)); // Stronger when closer
-                         OnScreenShakeRequested?.Invoke(intensity, 0.2f);
-                     }
-
-                     // Honk if near
-                     if (!tram.HasHonked && distToPlayer < 3000)
-                     {
-                         _audioService.Sounds.Play(AudioAssets.TrainHorn);
-                         tram.HasHonked = true;
-                     }
-                }
-            }
-        }
-
-        public event Action<float, float>? OnScreenShakeRequested;
-
-        public void Draw()
-        {
-            foreach (var tram in _activeTrams)
-            {
-                tram.Draw(_spriteBatch);
-            }
-        }
 
         private void SpawnSwarm(double progress)
         {

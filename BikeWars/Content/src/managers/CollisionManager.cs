@@ -138,6 +138,8 @@ public class CollisionManager
         LoadObjectLayer("Musicians");
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
 
+        // Load world border collision (non-destructible static colliders)
+        LoadWorldBorderCollision();
 
         // Insert any statics registered by the GameObjectManager (e.g. destructibles)
         foreach (var s in _gameObjectManager.Statics)
@@ -1105,6 +1107,43 @@ public class CollisionManager
             );
 
             ObjectSpawns.Add(new TiledObjectInfo(rect, obj.Properties));
+        }
+    }
+
+    private void LoadWorldBorderCollision()
+    {
+        try
+        {
+            var objLayer = TiledMap.GetLayer<TiledMapObjectLayer>("worldborder_collision");
+            if (objLayer == null) return;
+
+            foreach (var obj in objLayer.Objects)
+            {
+                var rect = new Rectangle(
+                    (int)obj.Position.X,
+                    (int)obj.Position.Y,
+                    (int)obj.Size.Width,
+                    (int)obj.Size.Height
+                );
+
+                // Create a static collider for this world border area
+                BoxCollider borderCollider = new BoxCollider(
+                    new Vector2(rect.X, rect.Y),
+                    rect.Width,
+                    rect.Height,
+                    CollisionLayer.WALL,
+                    this
+                );
+
+                StaticHash.Insert(borderCollider);
+
+                // Mark as non-walkable in the pathfinding grid
+                SetBaseWalkableForRect(rect, false);
+            }
+        }
+        catch
+        {
+            // Layer might not exist; continue without it
         }
     }
 }

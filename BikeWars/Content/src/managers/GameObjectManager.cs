@@ -12,6 +12,7 @@ using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Entities.Characters.MapObjects;
+using BikeWars.Content.components;
 using BikeWars.Content.engine.ui;
 using BikeWars.Content.entities.MapObjects;
 
@@ -46,11 +47,12 @@ public class GameObjectManager
     private HashSet<DamageNumber> _damageNumbers = new HashSet<DamageNumber>();
     private SpriteFont? _damageFont;
 
+    private HashSet<Tram> _trams = new HashSet<Tram>();
+    public HashSet<Tram> Trams => _trams;
 
     public ContentManager _contentManager {get; set;} // TODO do we need this one?
 
     private WorldAudioManager? _worldAudioManager;
-
     public GameObjectManager(ContentManager content, Player? player1, Player? player2)
     {
         Player1 = player1;
@@ -139,6 +141,12 @@ public class GameObjectManager
         _aoeAttacks.Add(aoe);
     }
 
+    public void AddTram(Tram tram)
+    {
+        _trams.Add(tram);
+        tram.RequestScreenShake += RequestScreenShake;
+    }
+
     public void LoadContent(ContentManager content)
     {
         foreach (AreaOfEffectBase a in _aoeAttacks)
@@ -150,6 +158,7 @@ public class GameObjectManager
 
     public void Draw(SpriteBatch spriteBatch)
     {
+
         if (Player1 != null) Player1.Draw(spriteBatch);
         if (Player2 != null) Player2.Draw(spriteBatch);
         foreach (CharacterBase c in Characters)
@@ -173,6 +182,10 @@ public class GameObjectManager
         {
             if (_damageFont != null)
                 dn.Draw(spriteBatch, _damageFont);
+        }
+        foreach (var tram in _trams)
+        {
+            tram.Draw(spriteBatch);
         }
 
         foreach (BoxCollider s in Statics)
@@ -208,6 +221,11 @@ public class GameObjectManager
             aoe.Update(gameTime);
             return aoe.IsExpired;
         });
+        foreach (var tram in _trams)
+        {
+            tram.Update(gameTime);
+        }
+        _trams.RemoveWhere(t => t.IsExpired);
 
         _damageNumbers.RemoveWhere(dn =>
         {
@@ -234,6 +252,8 @@ public class GameObjectManager
             _pendingDamage.Clear();
             _damageAggregationTimer = AggregationInterval;
         }
+
+        DogBowl.UpdateBowl(gameTime);
     }
 
     private void OnPlayerShotBullet(Player player)
