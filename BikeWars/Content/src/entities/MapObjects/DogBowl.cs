@@ -9,7 +9,7 @@ namespace BikeWars.Content.entities.MapObjects;
 public class DogBowl: ItemBase
 {
     private bool _full;
-    public bool Full => _full;
+
     private BoxCollider _collisionCollider {get;set;}
     public BoxCollider CollisionCollider {get => _collisionCollider; set => _collisionCollider = value; }
     private int PADDING_INTERACTION_AREA = 40;
@@ -40,6 +40,11 @@ public class DogBowl: ItemBase
 
     public override void Update(GameTime gameTime)
     {
+        if (_full && !_bowlCooldown.IsActive)
+        {
+            _full = false;
+            CurrentTex = TexRight;
+        }
     }
     public override bool Intersects(ICollider collider)
     {
