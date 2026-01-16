@@ -129,7 +129,7 @@ namespace BikeWars.Content.screens
             if (_spawnTramBtn.IsClicked(mouse, _prevMouse))
                  _spawnManager.SpawnTram(1500f);
 
-            _spawnManager.UpdateTrams(gameTime);
+
 
             _prevMouse = mouse;
         }

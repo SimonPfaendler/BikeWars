@@ -280,7 +280,7 @@ namespace BikeWars.Content.screens
 
             // Spawn Manager
             _spawnManager = new SpawnManager(_gameObjectManager, _collisionManager, _audioService, _pathFinding, _repathScheduler, _worldAudioManager);
-            _spawnManager.OnScreenShakeRequested += (intensity, duration) => camera.Shake(intensity, duration);
+
 
             // timer
             _timerFont = content.Load<SpriteFont>("assets/fonts/Arial");
@@ -349,9 +349,7 @@ namespace BikeWars.Content.screens
                 if (_hitStopTimer > 0f)
                 {
                     // Skip updates for game objects and collision to simulate pause
-                     _tiledMapRenderer.Update(gameTime); // keep map rendering updating if needed or freeze it too
-                    // We still might want to process input or camera?
-                    // For "Juice", typically everything freezes.
+                     _tiledMapRenderer.Update(gameTime); // keep map rendering updating
                     return;
                 }
             }
@@ -370,7 +368,7 @@ namespace BikeWars.Content.screens
             _repathScheduler?.Update();
             
             _gameObjectManager.Update(gameTime, InputHandler.MakeMouseWorldPosByCamera(camera));
-            _collisionManager.Update(players, _gameObjectManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, _spawnManager.ActiveTrams);
+            _collisionManager.Update(players, _gameObjectManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(_gameObjectManager.Trams));
 
 
             if (InputHandler.IsPressed(GameAction.DEBUG_HEAL))
@@ -725,7 +723,7 @@ namespace BikeWars.Content.screens
 
             spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.GetTransform());
             _gameObjectManager.Draw(spriteBatch);
-            _spawnManager.Draw();
+            // _spawnManager.Draw(); // Trams are drawn via GameObjectManager
 
             if (_isTechDemo && _showStaticHitboxes)
             {
@@ -737,7 +735,7 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.Items,
                     _gameObjectManager.Projectiles,
                     _gameObjectManager.AOEAttacks,
-                    _spawnManager.ActiveTrams
+                    new List<Tram>(_gameObjectManager.Trams)
                 );
             }
 
