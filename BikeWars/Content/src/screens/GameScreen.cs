@@ -81,7 +81,7 @@ namespace BikeWars.Content.screens
         private bool _showStaticHitboxes = true;
 
         private GameTimer _gameTimer;
-        private const float GAME_TIME_LIMIT = 120f;
+        private const float GAME_TIME_LIMIT = 300f;
         private SpriteFont _timerFont;
         private Vector2 _timerPosition;
         private readonly GameMode _gameMode;
@@ -139,7 +139,8 @@ namespace BikeWars.Content.screens
             _gameObjectManager.AddItem(new RacingBike(new Vector2(5800, 5800), new Point(32, 32)));
             string energy = "Energygel";
             _gameObjectManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32), energy));
-            _gameObjectManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 90), new Point(32, 32), energy));
+            string doping = "DopingSpritze";
+            _gameObjectManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 90), new Point(32, 32), doping));
 
             _freelook = false;
             // camera.Position is set by Update usually, but let's init it

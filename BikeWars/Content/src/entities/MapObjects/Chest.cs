@@ -52,6 +52,7 @@ public class Chest: ItemBase
             "Frelo"      => new Frelo(dropPos, new Point(32, 32)),
             "Racingbike" => new RacingBike(dropPos, new Point(32, 32)),
             "DogFood" => new DogFood(dropPos, new Point(32, 32)),
+            "DopingSpritze" => new DopingSpritze(dropPos, new Point(32, 32)),
         };
     }
 }
