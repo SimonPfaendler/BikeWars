@@ -5,6 +5,7 @@ using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
+using BikeWars.Content.entities.MapObjects;
 using BikeWars.Content.managers;
 
 
@@ -86,7 +87,12 @@ namespace BikeWars.Entities.Characters
             if (Movement is EnemyMovement em)
             {
                 em.EnemyPosition = Transform.Position;
-                em.PlayerPosition = _collisionManager.GameObjectManager.Player1.Transform.Position;
+                if (!DogBowl.BowlIsActive)
+                {em.PlayerPosition = _collisionManager.GameObjectManager.Player1.Transform.Position;}
+                else
+                {
+                    em.PlayerPosition = DogBowl.BowlPosition;
+                }
             }
             Movement.HandleMovement(gameTime);
             HandleSound(Movement.IsMoving);

@@ -38,7 +38,6 @@ namespace BikeWars.Entities.Characters
         private Vector2 _facingDirection = Vector2.UnitX; // Default to right
         private Vector2 _lastGazeDirection = Vector2.UnitX;
         private const float AimLength = 100f;
-
         public TerrainCollider CurrentTerrain { get; set; }
         public float TerrainSpeedMultiplier = 1.0f;
         private const float IncreaseSpeed = 1.1f;
@@ -217,6 +216,12 @@ namespace BikeWars.Entities.Characters
                     var selected = Inventory.GetItemAt(_selectedInventoryIndex);
                     if (selected is DogFood)
                     {
+                        if (!dogBowl.TryActivateDogBowl())
+                        {
+                            return;
+                        }
+
+                        dogBowl.ActivateDogBowl(dogBowl.Transform.Position);
                         dogBowl.FillUpDogBowl();
                         Inventory.RemoveAt(_selectedInventoryIndex);
                     }
