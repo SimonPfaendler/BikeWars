@@ -1,0 +1,17 @@
+{
+  "frames": [
+    {
+      "filename": "tree_1.png",
+      "frame": { "x": 864, "y": 928, "w": 64, "h": 96 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 96 },
+      "sourceSize": { "w": 64, "h": 96 },
+      "pivot": { "x": 0.5, "y": 0.5 }
+    }
+  ],
+  "meta": {
+    "image": "tilemap_2.png",
+    "size": { "w": 1024, "h": 1024 }
+  }
+}
