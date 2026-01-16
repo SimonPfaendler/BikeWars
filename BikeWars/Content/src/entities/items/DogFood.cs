@@ -38,7 +38,6 @@ public class DogFood: ItemBase, IPickable
 
     public override void Update(GameTime gameTime)
     {
-        // EnergyGel hat keine Animation
     }
 
     public override bool Intersects(ICollider collider)

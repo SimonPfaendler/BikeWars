@@ -13,6 +13,12 @@ public class DogBowl: ItemBase
     private BoxCollider _collisionCollider {get;set;}
     public BoxCollider CollisionCollider {get => _collisionCollider; set => _collisionCollider = value; }
     private int PADDING_INTERACTION_AREA = 40;
+    
+    private static readonly CooldownWithDuration _bowlCooldown =
+        new CooldownWithDuration(durationSeconds: 20f, cooldownSeconds: 5f);
+
+    public static bool BowlIsActive => _bowlCooldown.IsActive;
+    public static Vector2 BowlPosition { get; private set; }
 
     public DogBowl(Vector2 start, Point size, bool full = false)
     {
@@ -40,10 +46,32 @@ public class DogBowl: ItemBase
         return Collider.Intersects(collider);
     }
 
+    public bool TryActivateDogBowl()
+    {
+        if (_bowlCooldown.Ready)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public void ActivateDogBowl(Vector2 bowlposition)
+    {
+        BowlPosition = bowlposition;
+        _bowlCooldown.Activate();
+    }
+    
     public void FillUpDogBowl()
     {
         if (_full) return;
         _full = true;
         CurrentTex = managers.SpriteManager.GetTexture("Dog_Bowl_full");
     }
+
+    public static void UpdateBowl(GameTime gameTime)
+    {
+        _bowlCooldown.Update(gameTime);
+    }
+    
+
 }
