@@ -29,7 +29,9 @@ namespace BikeWars.Content.screens
         private MenuButton _spawnHoboBtn;
         private MenuButton _spawnBikeBtn;
         private MenuButton _spawnDogBtn;
+
         private MenuButton _spawnKamikazeBtn;
+        private MenuButton _spawnTramBtn;
 
         private SpriteFont _font;
         private MouseState _prevMouse;
@@ -86,6 +88,15 @@ namespace BikeWars.Content.screens
                 font: _font,
                 audioService: AudioService
             );
+
+            _spawnTramBtn = new MenuButton(
+                id: 1,
+                texture: RenderPrimitives.Pixel,
+                bounds: new Rectangle(30, 430, 200, 60),
+                text: "Spawn 1 Tram",
+                font: _font,
+                audioService: AudioService
+            );
         }
 
         public override void Update(GameTime gameTime)
@@ -98,6 +109,7 @@ namespace BikeWars.Content.screens
             _spawnBikeBtn.Update(mouse, gameTime);
             _spawnDogBtn.Update(mouse, gameTime);
             _spawnKamikazeBtn.Update(mouse, gameTime);
+            _spawnTramBtn.Update(mouse, gameTime);
 
             if(_spawnHoboBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Hobo, 100);
@@ -110,6 +122,11 @@ namespace BikeWars.Content.screens
 
             if (_spawnKamikazeBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Kamikaze, 1);
+
+            if (_spawnTramBtn.IsClicked(mouse, _prevMouse))
+                 _spawnManager.SpawnTram(1500f);
+
+
 
             _prevMouse = mouse;
         }
@@ -179,12 +196,12 @@ namespace BikeWars.Content.screens
         public override void Draw(GameTime gameTime, SpriteBatch sb)
         {
             base.Draw(gameTime, sb);
-
             sb.Begin();
             _spawnHoboBtn.Draw(sb);
             _spawnBikeBtn.Draw(sb);
             _spawnDogBtn.Draw(sb);
             _spawnKamikazeBtn.Draw(sb);
+            _spawnTramBtn.Draw(sb);
             sb.End();
         }
     }

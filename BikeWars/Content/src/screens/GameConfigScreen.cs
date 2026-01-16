@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.managers;
 using MonoGame.Extended.Content;
+using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.screens;
 
@@ -24,131 +25,133 @@ public class GameConfigScreen : MenuScreenBase, IScreen
         :base(background, font)
     {
         _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
+    }
+
+    public override void LoadContent(ContentManager contentManager)
+    {
+        base.LoadContent(contentManager);
         InitializeButtons();
     }
 
     protected sealed override void InitializeButtons()
+    {
+        int screenWidth = Content.GetGraphicsDevice().Viewport.Width;
+        int screenHeight = Content.GetGraphicsDevice().Viewport.Height;
+
+        int buttonWidth = 250;
+        int buttonHeight = 60;
+        int verticalSpacing = 20;
+        int horizontalSpacing = screenWidth / 15;
+
+        int leftStartY = screenHeight / 4;
+        int rightStartY = screenHeight / 4;
+
+        _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
+
+        // Buttons on the left side
+        _buttons.Add(new MenuButton(
+            id: (int)ButtonAction.NewProfile,
+            texture: _buttonTexture,
+            bounds: new Rectangle(horizontalSpacing, leftStartY, buttonWidth, buttonHeight),
+            text: "Neues Profil",
+            font: _font,
+            audioService: _audioService
+        ));
+
+        _buttons.Add(new MenuButton(
+            id: (int)ButtonAction.Back,
+            texture: _buttonTexture,
+            bounds: new Rectangle(horizontalSpacing, leftStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
+            text: "Back",
+            font: _font,
+            audioService: _audioService
+        ));
+
+        // Buttons on the right side
+        _singleplayerButton = new MenuButton(
+            id: (int)ButtonAction.Singleplayer,
+            texture: _buttonTexture,
+            bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY, buttonWidth, buttonHeight),
+            text: "Singleplayer",
+            font: _font,
+            audioService: _audioService
+        );
+
+        _multiplayerButton = new MenuButton(
+            id: (int)ButtonAction.Multiplayer,
+            texture: _buttonTexture,
+            bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
+            text: "Multiplayer",
+            font: _font,
+            audioService: _audioService
+        );
+
+        _buttons.Add(_singleplayerButton);
+        _buttons.Add(_multiplayerButton);
+
+
+        // centre start Button
+        _buttons.Add(new MenuButton(
+            id: (int)ButtonAction.StartGame,
+            texture: _buttonTexture,
+            bounds: new Rectangle(
+                (screenWidth - buttonWidth) / 2,
+                screenHeight / 3 - buttonHeight / 2,
+                buttonWidth,
+                buttonHeight
+            ),
+            text: "Spiel starten",
+            font: _font,
+            audioService: _audioService
+        ));
+
+        UpdateSelection(3);
+        UpdateModeButtonColors();
+    }
+
+    protected override void HandleButtonClick(MenuButton button)
+    {
+        switch ((ButtonAction)button.Id)
         {
-            int screenWidth = Content.GetGraphicsDevice().Viewport.Width;
-            int screenHeight = Content.GetGraphicsDevice().Viewport.Height;
+            case ButtonAction.StartGame:
+                GameScreen gameScreen = new GameScreen(_audioService, _selectedGameMode);
+                gameScreen.LoadContent(Content);
+                ScreenManager.RemoveScreen(this);
+                ScreenManager.AddScreen(gameScreen);
+                break;
 
-            int buttonWidth = 250;
-            int buttonHeight = 60;
-            int verticalSpacing = 20;
-            int horizontalSpacing = screenWidth / 15;
+            case ButtonAction.Back:
+                ScreenManager.RemoveScreen(this);
+                break;
 
-            int leftStartY = screenHeight / 4;
-            int rightStartY = screenHeight / 4;
+            case ButtonAction.NewProfile:
+                // TODO: Profile Creation Logic
+                break;
 
-            _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
+            case ButtonAction.Singleplayer:
+                _selectedGameMode = GameMode.SinglePlayer;
+                UpdateModeButtonColors();
+                break;
 
-            // Buttons on the left side
-            _buttons.Add(new MenuButton(
-                id: (int)ButtonAction.NewProfile,
-                texture: _buttonTexture,
-                bounds: new Rectangle(horizontalSpacing, leftStartY, buttonWidth, buttonHeight),
-                text: "Neues Profil",
-                font: _font,
-                audioService: _audioService
-            ));
-
-            _buttons.Add(new MenuButton(
-                id: (int)ButtonAction.Back,
-                texture: _buttonTexture,
-                bounds: new Rectangle(horizontalSpacing, leftStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
-                text: "Back",
-                font: _font,
-                audioService: _audioService
-            ));
-
-            // Buttons on the right side
-            _singleplayerButton = new MenuButton(
-                id: (int)ButtonAction.Singleplayer,
-                texture: _buttonTexture,
-                bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY, buttonWidth, buttonHeight),
-                text: "Singleplayer",
-                font: _font,
-                audioService: _audioService
-            );
-
-            _multiplayerButton = new MenuButton(
-                id: (int)ButtonAction.Multiplayer,
-                texture: _buttonTexture,
-                bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
-                text: "Multiplayer",
-                font: _font,
-                audioService: _audioService
-            );
-
-            _buttons.Add(_singleplayerButton);
-            _buttons.Add(_multiplayerButton);
-
-
-            // centre start Button
-            _buttons.Add(new MenuButton(
-                id: (int)ButtonAction.StartGame,
-                texture: _buttonTexture,
-                bounds: new Rectangle(
-                    (screenWidth - buttonWidth) / 2,
-                    screenHeight / 3 - buttonHeight / 2,
-                    buttonWidth,
-                    buttonHeight
-                ),
-                text: "Spiel starten",
-                font: _font,
-                audioService: _audioService
-            ));
-
-            UpdateSelection(3);
-            UpdateModeButtonColors();
+            case ButtonAction.Multiplayer:
+                _selectedGameMode = GameMode.MultiPlayer;
+                UpdateModeButtonColors();
+                break;
         }
+    }
+    private void UpdateModeButtonColors()
+    {
+        bool isMultiplayer = _selectedGameMode == GameMode.MultiPlayer;
 
-        protected override void HandleButtonClick(MenuButton button)
-        {
-            switch ((ButtonAction)button.Id)
-            {
-                case ButtonAction.StartGame:
-                    GameScreen gameScreen = new GameScreen(_audioService, _selectedGameMode);
-                    gameScreen.LoadContent(Content);
-                    ScreenManager.RemoveScreen(this);
-                    ScreenManager.AddScreen(gameScreen);
-                    break;
+        // Multiplayer Button
+        _multiplayerButton.BackgroundColor = isMultiplayer ? _selectedColor : _defaultColor;
+        _multiplayerButton.IsSelected = isMultiplayer;
 
-                case ButtonAction.Back:
-                    ScreenManager.RemoveScreen(this);
-                    break;
+        // Singleplayer Button
+        _singleplayerButton.BackgroundColor = !isMultiplayer ? _selectedColor : _defaultColor;
+        _singleplayerButton.IsSelected = !isMultiplayer;
+    }
 
-                case ButtonAction.NewProfile:
-                    // TODO: Profile Creation Logic
-                    break;
-
-                case ButtonAction.Singleplayer:
-                    _selectedGameMode = GameMode.SinglePlayer;
-                    UpdateModeButtonColors();
-                    break;
-
-                case ButtonAction.Multiplayer:
-                    _selectedGameMode = GameMode.MultiPlayer;
-                    UpdateModeButtonColors();
-                    break;
-            }
-        }
-        private void UpdateModeButtonColors()
-        {
-            bool isMultiplayer = _selectedGameMode == GameMode.MultiPlayer;
-
-            // Multiplayer Button
-            _multiplayerButton.BackgroundColor = isMultiplayer ? _selectedColor : _defaultColor;
-            _multiplayerButton.IsSelected = isMultiplayer;
-
-            // Singleplayer Button
-            _singleplayerButton.BackgroundColor = !isMultiplayer ? _selectedColor : _defaultColor;
-            _singleplayerButton.IsSelected = !isMultiplayer;
-        }
-
-
-
-
-        public override bool DrawLower => false;
-        public override bool UpdateLower => false;
+    public override bool DrawLower => false;
+    public override bool UpdateLower => false;
 }

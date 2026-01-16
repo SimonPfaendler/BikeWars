@@ -64,10 +64,13 @@ namespace BikeWars.Content.managers
             { "XP_Money", "assets/sprites/XP/xp_money_texture" },
             { "EnergyGel", "assets/images/EnergyGel" },
             { "DogFood", "assets/images/DogFood" },
+            // TRAM
+            { "Tram", "assets/sprites/Tram_final" },
             //MAP OBJECTS
             { "Fahrradwerkstatt", "assets/MapObjects/Fahrradwerkstatt_Tile"},
             { "Dog_Bowl", "assets/MapObjects/Dog_Bowl"},
-            { "Dog_Bowl_full", "assets/MapObjects/Dog_Bowl_full"}
+            { "Dog_Bowl_full", "assets/MapObjects/Dog_Bowl_full"},
+            { "Straßenmusikanten", "assets/MapObjects/Straßenmusikanten" }
         };
 
         // No single-image map sprites here; map sprites are loaded from atlas JSON.

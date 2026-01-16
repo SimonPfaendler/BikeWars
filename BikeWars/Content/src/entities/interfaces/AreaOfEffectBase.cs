@@ -45,9 +45,12 @@ namespace BikeWars.Content.entities.interfaces
         }
 
         /// Checks if enough time has passed since last damage to this target
-        public bool CanDamage(CharacterBase target)
+        public virtual bool CanDamage(CharacterBase target)
         {
             if (target == null)
+                return false;
+            
+            if (target == Owner)
                 return false;
 
             if (!_lastDamageTime.ContainsKey(target))

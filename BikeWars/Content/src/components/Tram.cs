@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
+using BikeWars.Content.engine.interfaces;
+using BikeWars.Content.managers;
+using BikeWars.Content.engine.Audio;
+using BikeWars.Entities.Characters;
 
 namespace BikeWars.Content.components
 {
@@ -13,15 +17,24 @@ namespace BikeWars.Content.components
         public float Rotation { get; private set; }
         public Point Size { get; private set; }
         public List<BoxCollider> Colliders { get; private set; }
+        public bool HasHonked { get; set; } = false;
+        public bool IsExpired { get; set; } = false;
 
-        // Configuration
+        private Texture2D _texture;
         private const int COLLIDER_SEGMENT_SIZE = 40;
         private const float SPEED = 700f;
 
-        public Tram(Vector2 startPosition, Vector2 targetPosition)
+        private AudioService _audio;
+        private Player _player; // Reference to player for distance
+        public event Action<float, float> RequestScreenShake;
+
+        public Tram(Vector2 startPosition, Vector2 targetPosition, AudioService audio, Player player)
         {
             Position = startPosition;
-            Size = new Point(400, 50);
+            Size = new Point(515, 50);
+
+            _audio = audio;
+            _player = player;
 
             // Calculate Direction and Rotation
             Vector2 direction = targetPosition - startPosition;
@@ -34,6 +47,7 @@ namespace BikeWars.Content.components
 
             Colliders = new List<BoxCollider>();
             InitializeColliders();
+            _texture = SpriteManager.GetTexture("Tram");
         }
 
         private void InitializeColliders()
@@ -53,6 +67,29 @@ namespace BikeWars.Content.components
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
             Position += Velocity * dt;
             UpdateColliders();
+
+            if (_player != null)
+            {
+                float distToPlayer = Vector2.Distance(Position, _player.Transform.Position);
+                if (distToPlayer > 5500)
+                {
+                    IsExpired = true;
+                }
+
+                // Screen Shake if near
+                if (distToPlayer < 1400)
+                {
+                    float intensity = 6f * (1f - (distToPlayer / 1400f));
+                    RequestScreenShake?.Invoke(intensity, 0.2f);
+                }
+
+                // Honk if near
+                if (!HasHonked && distToPlayer < 3000)
+                {
+                    _audio.Sounds.Play(AudioAssets.TrainHorn);
+                    HasHonked = true;
+                }
+            }
         }
 
         private void UpdateColliders()
@@ -81,8 +118,9 @@ namespace BikeWars.Content.components
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            Vector2 origin = new Vector2(0.5f, 0.5f);
-            Vector2 scale = new Vector2(Size.X, Size.Y);
+            if (_texture == null) return;
+            Vector2 origin = new Vector2(_texture.Width / 2f, _texture.Height / 2f);
+            Vector2 scale = Vector2.One;
 
             spriteBatch.Draw(
                 RenderPrimitives.Pixel,

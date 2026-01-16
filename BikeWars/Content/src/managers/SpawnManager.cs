@@ -7,7 +7,6 @@ using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.components;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace BikeWars.Content.managers
 {
@@ -32,15 +31,15 @@ namespace BikeWars.Content.managers
         private double _spawnInterval;
         private const float MIN_SPAWN_RADIUS = 300f;
         private const float MAX_SPAWN_RADIUS = 700f;
+        private readonly WorldAudioManager _worldAudioManager;
 
         // Tram Logic
-        private List<Tram> _activeTrams = new List<Tram>();
         private double _timeSinceLastTram;
-        private const double TRAM_SPAWN_INTERVAL = 5.0; // Every 5 seconds
+        private const double TRAM_SPAWN_INTERVAL = 15.0; // Every 15 seconds
 
         private readonly Random _random;
         private readonly RepathScheduler _repathScheduler;
-        public SpawnManager(GameObjectManager gameObjectManager, CollisionManager collisionManager, AudioService audioService, PathFinding pathFinding, RepathScheduler repathScheduler)
+        public SpawnManager(GameObjectManager gameObjectManager, CollisionManager collisionManager, AudioService audioService, PathFinding pathFinding, RepathScheduler repathScheduler, WorldAudioManager worldAudioManager)
         {
             _gameObjectManager = gameObjectManager;
             _collisionManager = collisionManager;
@@ -49,6 +48,7 @@ namespace BikeWars.Content.managers
             _spawnInterval = START_SPAWN_INTERVAL;
             _pathFinding = pathFinding;
             _repathScheduler = repathScheduler;
+            _worldAudioManager = worldAudioManager;
         }
 
         public void Update(GameTime gameTime)
@@ -89,17 +89,14 @@ namespace BikeWars.Content.managers
                 SpawnTram();
                 _timeSinceLastTram = 0;
             }
-
-            UpdateTrams(gameTime);
         }
 
-        private void SpawnTram()
+        public void SpawnTram(float spawnRadius = 5000f)
         {
             if (_gameObjectManager.Player1 == null) return;
 
             // Spawn far outside the screen
             Vector2 playerPos = _gameObjectManager.Player1.Transform.Position;
-            float spawnRadius = 3000f;
             float angle = (float)(_random.NextDouble() * Math.PI * 2);
 
             Vector2 startPos = playerPos + new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * spawnRadius;
@@ -108,86 +105,9 @@ namespace BikeWars.Content.managers
             Vector2 targetOffset = new Vector2((float)(_random.NextDouble() - 0.5) * 10, (float)(_random.NextDouble() - 0.5) * 10);
             Vector2 targetPos = playerPos + targetOffset;
 
-            var tram = new Tram(startPos, targetPos);
-            _activeTrams.Add(tram);
+            Tram tram = new Tram(startPos, targetPos,  _audioService, _gameObjectManager.Player1);
+            _gameObjectManager.AddTram(tram);
         }
-
-        private void UpdateTrams(GameTime gameTime)
-        {
-            // Update Trams
-            for (int i = _activeTrams.Count - 1; i >= 0; i--)
-            {
-                var tram = _activeTrams[i];
-                tram.Update(gameTime);
-
-                // Despawn if too far away
-                if (_gameObjectManager.Player1 != null)
-                {
-                     if (Vector2.Distance(tram.Position, _gameObjectManager.Player1.Transform.Position) > 3000)
-                     {
-                         _activeTrams.RemoveAt(i);
-                         continue;
-                     }
-                }
-                CheckTramCollision(tram);
-            }
-        }
-
-        private void CheckTramCollision(Tram tram)
-        {
-            // Tram vs Player 1
-            if (_gameObjectManager.Player1 != null)
-            {
-                CheckTramHit(tram, _gameObjectManager.Player1);
-            }
-             // Tram vs Player 2
-            if (_gameObjectManager.Player2 != null)
-            {
-                CheckTramHit(tram, _gameObjectManager.Player2);
-            }
-
-            // Tram vs Enemies
-            foreach (var character in _gameObjectManager.Characters)
-            {
-                CheckTramHit(tram, character);
-            }
-        }
-
-        private void CheckTramHit(Tram tram, CharacterBase character)
-        {
-             // Optimization: Simple distance check first before checking sub-colliders
-             float combinedRadius = Math.Max(tram.Size.X, tram.Size.Y) / 2f + 50f; // Rough bounding circle
-             if (Vector2.DistanceSquared(tram.Position, character.Transform.Position) > combinedRadius * combinedRadius)
-             {
-                 return;
-             }
-
-             // Detailed check against all tram colliders
-             foreach (var tramCollider in tram.Colliders)
-             {
-                 if (tramCollider.Intersects(character.Collider))
-                 {
-
-
-                     // Only hit if not already dead to avoid spamming
-                     if (!character.IsDead)
-                     {
-                         character.TakeDamage(10);
-                         // TODO: Sound
-                     }
-                     return;
-                 }
-             }
-        }
-
-        // public void Draw()
-        // {
-        //     foreach (var tram in _activeTrams)
-        //     {
-        //         tram.Draw(_spriteBatch);
-        //     }
-        // }
-
         private void SpawnSwarm(double progress)
         {
 
@@ -254,6 +174,7 @@ namespace BikeWars.Content.managers
                 {
                     var dog = new Dog(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager, _repathScheduler);
                     ApplyScaling(dog, difficultyMultiplier, speedMultiplier);
+                    dog.SetWorldAudioManager(_worldAudioManager);
                     _gameObjectManager.AddCharacter(dog);
                 }
                 else if (val < 0.8)

@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
+using BikeWars.Content.entities.MapObjects;
 using BikeWars.Entities.Characters;
 using BikeWars.Entities.Characters.MapObjects;
+using BikeWars.Content.components;
 using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
 using Microsoft.Xna.Framework;
@@ -23,6 +25,7 @@ public class CollisionManager
     public event Action<CharacterBase, ProjectileBase> OnProjectileHit;
     public event Action<CharacterBase, CharacterBase> OnCharacterCollision;
     public event Action<CharacterBase, AreaOfEffectBase> OnAOEHit;
+    public event Action<CharacterBase> OnTramHit;
 
     public List<TiledObjectInfo> ObjectSpawns { get; } = new();
     private readonly GameObjectManager _gameObjectManager;
@@ -140,6 +143,8 @@ public class CollisionManager
         LoadObjectLayer("Chests");
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
         LoadObjectLayer("Dog-Bowl");
+        _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
+        LoadObjectLayer("Musicians");
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
 
 
@@ -412,10 +417,13 @@ public class CollisionManager
     }
 
     public void Insertions(List<ItemBase> items, HashSet<Player> players, List<ProjectileBase> projectiles,
-        List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters)
+        List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters, List<Tram> trams)
     {
         foreach (ItemBase c in items)
         {
+            if (c is Musicians)
+                continue;
+
             AddDynamic(c.Collider);
         }
 
@@ -446,6 +454,14 @@ public class CollisionManager
             if (c.IsDead)
             {
                 _toRemoveColliders.Add(c.Collider);
+            }
+        }
+
+        foreach (var t in trams)
+        {
+            foreach (var col in t.Colliders)
+            {
+                AddDynamic(col);
             }
         }
     }
@@ -560,6 +576,18 @@ public class CollisionManager
             PickingUpItem(c, d);
             HandleInteractions(c, d);
             HandleCharacters(c, d);
+            HandleTramCollision(c, d);
+        }
+    }
+
+    private void HandleTramCollision(ICollider c, ICollider d)
+    {
+        if (c.Layer == CollisionLayer.TRAM && (d.Layer == CollisionLayer.CHARACTER || d.Layer == CollisionLayer.PLAYER))
+        {
+             if (c.Intersects(d))
+             {
+                 OnTramHit?.Invoke((CharacterBase)d.Owner);
+             }
         }
     }
 
@@ -715,16 +743,16 @@ public class CollisionManager
     }
 
     public void Update(HashSet<Player> players, List<ItemBase> items, List<ProjectileBase> projectiles,
-        List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters)
+        List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters, List<Tram> trams)
     {
         allDynamics.Clear();
         DynamicHash.Clear();
-        Insertions(items, players, projectiles, aoeAttacks, characters);
+        Insertions(items, players, projectiles, aoeAttacks, characters, trams);
 
         foreach (var c in allDynamics)
         {
             if (c.Layer != CollisionLayer.CHARACTER && c.Layer != CollisionLayer.PLAYER &&
-                c.Layer != CollisionLayer.PROJECTILE)
+                c.Layer != CollisionLayer.PROJECTILE && c.Layer != CollisionLayer.TRAM)
             {
                 continue;
             }
@@ -800,7 +828,7 @@ public class CollisionManager
     // makes the hitboxes visible for when in the tech demo
     public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
         Player player, List<CharacterBase> characters,
-        List<ItemBase> items, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks)
+        List<ItemBase> items, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks, List<Tram> trams)
     {
         foreach (var cell in StaticHash._cells)
         {
@@ -873,6 +901,16 @@ public class CollisionManager
             {
                 var projRect = GetColliderRectangle(projectile.Collider);
                 DrawRectOutline(spriteBatch, pixel, projRect, Color.Red * 0.7f);
+            }
+        }
+
+        // Tram hitboxes
+        foreach (var tram in trams)
+        {
+            foreach (var collider in tram.Colliders)
+            {
+                var tramRect = GetColliderRectangle(collider);
+                DrawRectOutline(spriteBatch, pixel, tramRect, Color.Red * 0.7f);
             }
         }
     }

@@ -42,17 +42,14 @@ public class CombatManager
         }
         if (target == projectile.Owner) return;
 
-        // Initialize random manually or use a shared instance if available. Good practice to have a shared Random.
-        // Assuming a shared Random or just creating one for now. Performance impact is negligible here.
+        // Crit Logic
         Random rnd = new Random();
-        //bool isCrit = false; // isn't used, maybe unnecessary
         int damage = projectile.Damage;
 
         if (projectile.Owner is CharacterBase owner)
         {
             if (rnd.NextDouble() < owner.Attributes.CritChance)
             {
-                // isCrit = true;
                 damage = (int)(damage * owner.Attributes.CritMultiplier);
             }
         }
@@ -121,5 +118,18 @@ public class CombatManager
             enemy2.Attack(b);
         }
 
+    }
+    public void HandleTramHit(CharacterBase target)
+    {
+        if (target.IsDead) return;
+        if (target.IsGodMode) return;
+
+        target.TakeDamage(10);
+        _audio.Sounds.Play(AudioAssets.TrainHit);
+
+        if (target.Attributes.Health <= 0)
+        {
+            HandleDeath(target);
+        }
     }
 }
