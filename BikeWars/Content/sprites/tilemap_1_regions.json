@@ -18,6 +18,24 @@
       "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 192 },
       "sourceSize": { "w": 144, "h": 192 },
       "pivot": { "x": 0.5, "y": 0.5 }
+    },
+    {
+      "filename": "yellow_house.png",
+      "frame": { "x": 240, "y": 80, "w": 80, "h": 112 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 80, "h": 112 },
+      "sourceSize": { "w": 80, "h": 112 },
+      "pivot": { "x": 0.5, "y": 0.5 }
+    },
+    {
+      "filename": "shop_house.png",
+      "frame": { "x": 320, "y": 0, "w": 144, "h": 160 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 160 },
+      "sourceSize": { "w": 144, "h": 160 },
+      "pivot": { "x": 0.5, "y": 0.5 }
     }
   ],
   "meta": {
