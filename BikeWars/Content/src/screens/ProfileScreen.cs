@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.managers;
+using MonoGame.Extended.Content;
 
 namespace BikeWars.Content.screens;
 
@@ -21,22 +22,21 @@ public class ProfileScreen: MenuScreenBase, IScreen
         _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
         InitializeButtons();
     }
-    
+
     protected sealed override void InitializeButtons()
         {
-            Game1 game = Game1.Instance;
-            int screenWidth = game.GraphicsDevice.Viewport.Width;
-            int screenHeight = game.GraphicsDevice.Viewport.Height;
-    
+            int screenWidth = Content.GetGraphicsDevice().Viewport.Width;
+            int screenHeight = Content.GetGraphicsDevice().Viewport.Height;
+
             int buttonWidth = 250;
             int buttonHeight = 60;
             int verticalSpacing = 20;
             int horizontalSpacing = screenWidth / 15;
-            
+
             int leftStartY = screenHeight / 4;
             int rightStartY = screenHeight / 4;
 
-            _buttonTexture = CreateSimpleTexture(game.GraphicsDevice, buttonWidth, buttonHeight);
+            _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
 
             // Buttons on the left side
             _buttons.Add(new MenuButton(
@@ -52,7 +52,7 @@ public class ProfileScreen: MenuScreenBase, IScreen
                 id: (int)ButtonAction.Back,
                 texture: _buttonTexture,
                 bounds: new Rectangle(horizontalSpacing, leftStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
-                text: "Back", 
+                text: "Back",
                 font: _font,
                 audioService: _audioService
             ));
@@ -75,11 +75,11 @@ public class ProfileScreen: MenuScreenBase, IScreen
                 font: _font,
                 audioService: _audioService
             ));
-            
+
             UpdateSelection(0);
         }
-    
-        
+
+
         protected override void HandleButtonClick(MenuButton button)
         {
             switch ((ButtonAction)button.Id)
@@ -87,7 +87,7 @@ public class ProfileScreen: MenuScreenBase, IScreen
                 case ButtonAction.Back:
                     ScreenManager.RemoveScreen(this);
                     break;
-            
+
                 case ButtonAction.NewProfile:
                     // TODO: Profile Creation Logic
                     break;
@@ -101,7 +101,7 @@ public class ProfileScreen: MenuScreenBase, IScreen
                     break;
             }
         }
-        
+
         public override bool DrawLower => false;
         public override bool UpdateLower => false;
 }

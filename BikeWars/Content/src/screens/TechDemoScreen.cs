@@ -31,7 +31,6 @@ namespace BikeWars.Content.screens
         private MenuButton _spawnDogBtn;
         private MenuButton _spawnKamikazeBtn;
 
-        private Texture2D _buttonTex;
         private SpriteFont _font;
         private MouseState _prevMouse;
 
@@ -40,7 +39,7 @@ namespace BikeWars.Content.screens
         public TechDemoScreen(AudioService audioService)
             : base(audioService, GameMode.SinglePlayer, true)
         {
-            LoadContent(Game1.Instance.Content);
+            LoadContent(Content);
         }
 
         public override void LoadContent(ContentManager content)
@@ -50,13 +49,11 @@ namespace BikeWars.Content.screens
             _font = content.Load<SpriteFont>("assets/fonts/Arial");
 
             // creates simple button texture
-            _buttonTex = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
-            _buttonTex.SetData(new[] { Color.White });
 
             // makes the 3 tech-demo buttons
             _spawnHoboBtn = new MenuButton(
                 id: 1,
-                texture: _buttonTex,
+                texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(30, 150, 200, 60),
                 text: "Spawn 100 Hobos",
                 font: _font,
@@ -65,7 +62,7 @@ namespace BikeWars.Content.screens
 
             _spawnBikeBtn = new MenuButton(
                 id: 2,
-                texture: _buttonTex,
+                texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(30, 220, 200, 60),
                 text: "Spawn 15 Thieves",
                 font: _font,
@@ -74,7 +71,7 @@ namespace BikeWars.Content.screens
 
             _spawnDogBtn = new MenuButton(
                 id: 1,
-                texture: _buttonTex,
+                texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(30, 290, 200, 60),
                 text: "Spawn 50 Dogs",
                 font: _font,
@@ -83,7 +80,7 @@ namespace BikeWars.Content.screens
 
             _spawnKamikazeBtn = new MenuButton(
                 id: 1,
-                texture: _buttonTex,
+                texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(30, 360, 200, 60),
                 text: "Spawn 1 Opa",
                 font: _font,
@@ -179,18 +176,16 @@ namespace BikeWars.Content.screens
         }
 
         // draws the buttons
-        public override void Draw(GameTime gameTime)
+        public override void Draw(GameTime gameTime, SpriteBatch sb)
         {
-            base.Draw(gameTime);
+            base.Draw(gameTime, sb);
 
-            var spriteBatch = Game1.Instance.SpriteBatch;
-
-            spriteBatch.Begin();
-            _spawnHoboBtn.Draw(spriteBatch);
-            _spawnBikeBtn.Draw(spriteBatch);
-            _spawnDogBtn.Draw(spriteBatch);
-            _spawnKamikazeBtn.Draw(spriteBatch);
-            spriteBatch.End();
+            sb.Begin();
+            _spawnHoboBtn.Draw(sb);
+            _spawnBikeBtn.Draw(sb);
+            _spawnDogBtn.Draw(sb);
+            _spawnKamikazeBtn.Draw(sb);
+            sb.End();
         }
     }
 }

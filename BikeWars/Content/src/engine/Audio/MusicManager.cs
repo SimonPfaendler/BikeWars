@@ -16,16 +16,22 @@ public class MusicManager
 
     public string CurrentSong => _currentSongId;
 
+    private ContentManager _content;
+
+    public MusicManager(ContentManager c)
+    {
+        _content = c;
+    }
 
     // Load: used only once when starting the game: paths = ID -> content path
-    public void Load(ContentManager content, IReadOnlyDictionary<string, string> paths)
+    public void Load(IReadOnlyDictionary<string, string> paths)
     {
         _songs.Clear();
         foreach (var kv in paths)
         {
             try
             {
-                var song = content.Load<Song>(kv.Value);
+                var song = _content.Load<Song>(kv.Value);
                 _songs[kv.Key] = song;
             }
             catch (Exception ex)
@@ -46,7 +52,7 @@ public class MusicManager
 
             try
             {
-                song = Game1.Instance.Content.Load<Song>(path);
+                song = _content.Load<Song>(path);
                 _songs[id] = song;
             }
             catch (Exception ex)

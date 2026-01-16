@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
-using BikeWars.Content.engine.interfaces;
 
 namespace BikeWars.Content.components
 {
@@ -15,13 +14,11 @@ namespace BikeWars.Content.components
         public Point Size { get; private set; }
         public List<BoxCollider> Colliders { get; private set; }
 
-        private Texture2D _texture;
-
         // Configuration
         private const int COLLIDER_SEGMENT_SIZE = 40;
         private const float SPEED = 700f;
 
-        public Tram(Vector2 startPosition, Vector2 targetPosition, GraphicsDevice graphicsDevice)
+        public Tram(Vector2 startPosition, Vector2 targetPosition)
         {
             Position = startPosition;
             Size = new Point(400, 50);
@@ -37,10 +34,6 @@ namespace BikeWars.Content.components
 
             Colliders = new List<BoxCollider>();
             InitializeColliders();
-
-            // Simple first texture
-            _texture = new Texture2D(graphicsDevice, 1, 1);
-            _texture.SetData(new[] { Color.Red });
         }
 
         private void InitializeColliders()
@@ -65,14 +58,14 @@ namespace BikeWars.Content.components
         private void UpdateColliders()
         {
             // Update the position of each collider segment based on the Tram's current position and rotation
-            
+
             // Direction vector for the length of the tram
             Vector2 forward = new Vector2((float)Math.Cos(Rotation), (float)Math.Sin(Rotation));
-            
+
             // Calculate the starting offset
             float halfLength = Size.X / 2f;
             Vector2 startOffset = -forward * halfLength;
-            
+
             // Distance between segment centers
             float segmentSpacing = (float)Size.X / Colliders.Count;
 
@@ -80,8 +73,8 @@ namespace BikeWars.Content.components
             {
                 // Calculate center position of this segment along the tram line
                 float distanceAlongTram = (i * segmentSpacing) + (segmentSpacing / 2f);
-                Vector2 segmentCenterPos = Position + startOffset + (forward * distanceAlongTram);              
-                Vector2 colliderPos = segmentCenterPos - new Vector2(Colliders[i].Width / 2f, Colliders[i].Height / 2f);  
+                Vector2 segmentCenterPos = Position + startOffset + (forward * distanceAlongTram);
+                Vector2 colliderPos = segmentCenterPos - new Vector2(Colliders[i].Width / 2f, Colliders[i].Height / 2f);
                 Colliders[i].Position = colliderPos;
             }
         }
@@ -92,7 +85,7 @@ namespace BikeWars.Content.components
             Vector2 scale = new Vector2(Size.X, Size.Y);
 
             spriteBatch.Draw(
-                _texture,
+                RenderPrimitives.Pixel,
                 Position,
                 null,
                 Color.White,
@@ -102,7 +95,7 @@ namespace BikeWars.Content.components
                 SpriteEffects.None,
                 0f
             );
-            
+
         }
     }
 }

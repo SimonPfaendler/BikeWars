@@ -16,12 +16,13 @@ using MonoGame.Extended.Tiled.Renderers;
 using BikeWars.Content.managers;
 using BikeWars.Content.events;
 using BikeWars.Content.entities.interfaces;
-using BikeWars.Entities.Characters.MapObjects;
+using MonoGame.Extended.Content;
 
 namespace BikeWars.Content.screens
 {
     public class GameScreen : IScreen
     {
+        protected ContentManager Content { get; private set; }
         private LevelUpScreen _levelUpScreen;
         private BikeShopScreen _bikeShopScreen;
         private readonly Camera2D camera;
@@ -92,6 +93,8 @@ namespace BikeWars.Content.screens
         private RepathScheduler _repathScheduler;
         protected RepathScheduler RepathScheduler => _repathScheduler;
 
+        private GameOverScreen _gameOverScreen;
+        public event Action Exit;
 
         public void TriggerHitStop(float duration)
         {
@@ -107,10 +110,7 @@ namespace BikeWars.Content.screens
             _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
             _gameMode = gameMode;
 
-            _playerManager = new PlayerManager();
-
-            // Decide mode
-            _playerManager.Initialize(_gameMode, worldBounds, _audioService, _isTechDemo);
+            _playerManager = new PlayerManager(Content.GetGraphicsDevice(), _gameMode, worldBounds, _audioService, _isTechDemo);
 
             camera = _playerManager.Camera;
             Player player = _playerManager.Player1;
@@ -151,6 +151,9 @@ namespace BikeWars.Content.screens
 
             _collisionManager.Insertions(_gameObjectManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters);
 
+            _gameOverScreen = new GameOverScreen(_font, _audioService, _statisticsManager.Statistic);
+            _gameOverScreen.Exit += () => OnExit();
+
             GameEvents.OnResumeTimer += ResumeTimer;
             HandleLoadNonInGameData();
             _gameTimer.OnTimerFinished += OnGameTimerFinished;
@@ -175,7 +178,7 @@ namespace BikeWars.Content.screens
                 UpdateMaxEnemies = 120
             };
 
-            _tiledMapRenderer = new TiledMapRenderer(Game1.Instance.GraphicsDevice, _collisionManager.TiledMap);
+            _tiledMapRenderer = new TiledMapRenderer(Content.GetGraphicsDevice(), _collisionManager.TiledMap);
 
             // Create Combat Manager
             _combatManager = new CombatManager(_audioService, _gameObjectManager);
@@ -209,8 +212,8 @@ namespace BikeWars.Content.screens
 
             _hudP2 = new HUD(hudTexture);
             // Position P2 HUD at bottom right
-            int viewW = Game1.Instance.GraphicsDevice.Viewport.Width;
-            int viewH = Game1.Instance.GraphicsDevice.Viewport.Height;
+            int viewW = Content.GetGraphicsDevice().Viewport.Width;
+            int viewH = Content.GetGraphicsDevice().Viewport.Height;
             _hudP2.Position = new Vector2(viewW - 350, viewH - 170);
 
             _gameObjectManager.LoadContent(content);
@@ -218,7 +221,7 @@ namespace BikeWars.Content.screens
             _contentManager = content; // We need this to add it later to spawning entities. (Maybe there is another possible implementation)
             _gameObjectManager._contentManager = content;
 
-            _pixel = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
+            _pixel = new Texture2D(Content.GetGraphicsDevice(), 1, 1);
             _pixel.SetData(new[] { Color.White });
              // sound control
             Rectangle initialView = GetCameraWorldRect();
@@ -266,9 +269,8 @@ namespace BikeWars.Content.screens
 
             // timer
             _timerFont = content.Load<SpriteFont>("assets/fonts/Arial");
-            Game1 game = Game1.Instance;
             _timerPosition = new Vector2(
-                game.GraphicsDevice.Viewport.Width / 2f,
+                viewW / 2f,
                 40f
             );
             if (!_gameTimer.IsRunning && !_isTechDemo)
@@ -279,8 +281,8 @@ namespace BikeWars.Content.screens
         public virtual void Update(GameTime gameTime)
         {
             // Update HUD and Timer alignment for resolution changes
-            int viewW = Game1.Instance.GraphicsDevice.Viewport.Width;
-            int viewH = Game1.Instance.GraphicsDevice.Viewport.Height;
+            int viewW = Content.GetGraphicsDevice().Viewport.Width;
+            int viewH = Content.GetGraphicsDevice().Viewport.Height;
 
             if (_hudP2 != null)
             {
@@ -375,7 +377,7 @@ namespace BikeWars.Content.screens
                 _audioService.Music.Stop();
                 _overlay.SetPaused(true, gameTime);
                 _audioService.Sounds.Play(AudioAssets.CarCrash);
-                ScreenManager.AddScreen(new GameOverScreen(_font, _audioService, _statisticsManager.Statistic));
+                ScreenManager.AddScreen(_gameOverScreen);
                 _statisticsManager.SaveStatistic();
                 SaveLoad.SaveNonGame(_statisticsManager);
             }
@@ -572,24 +574,21 @@ namespace BikeWars.Content.screens
             }
         }
 
-        public virtual void Draw(GameTime gameTime)
+        public virtual void Draw(GameTime gameTime, SpriteBatch sb)
         {
-            Game1 game = Game1.Instance;
-            SpriteBatch spriteBatch = game.SpriteBatch;
-
             _tiledMapRenderer.Draw(camera.GetTransform());
 
-            spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.GetTransform());
-            _gameObjectManager.Draw(spriteBatch);
+            sb.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.GetTransform());
+            _gameObjectManager.Draw(sb);
             if (!_isTechDemo)
             {
-               _spawnManager.Draw();
+            //    _spawnManager.Draw();
             }
 
             if (_isTechDemo && _showStaticHitboxes)
             {
                 _collisionManager.DrawHitboxes(
-                    spriteBatch,
+                    sb,
                     _pixel,
                     _gameObjectManager.Player1,
                     _gameObjectManager.Characters,
@@ -602,42 +601,50 @@ namespace BikeWars.Content.screens
             // draws A* paths for enemies in tech demo
             if (_isTechDemo && _showStaticHitboxes)
             {
-                DrawEnemyPaths(spriteBatch);
+                DrawEnemyPaths(sb);
             }
 
-            spriteBatch.End();
-            spriteBatch.Begin();
+            sb.End();
+            sb.Begin();
 
-            _debugger.Draw(spriteBatch);
-            DrawTimer(spriteBatch, gameTime);
+            _debugger.Draw(sb);
+            DrawTimer(sb, gameTime);
 
             var player = _gameObjectManager.Player1;
             bool showSelection = (_inputMode == InputMode.Controller);
-            player.Inventory.Draw(spriteBatch, _pixel, player.SelectedInventoryIndex, showSelection);
-            hud.Draw(spriteBatch, _gameObjectManager.Player1);
+            player.Inventory.Draw(sb, _pixel, player.SelectedInventoryIndex, showSelection);
+            hud.Draw(sb, _gameObjectManager.Player1);
 
             if (_gameObjectManager.Player2 != null)
             {
-                _hudP2.Draw(spriteBatch, _gameObjectManager.Player2);
+                _hudP2.Draw(sb, _gameObjectManager.Player2);
             }
 
             if (_levelUpScreen.IsOpen)
             {
-                _levelUpScreen.Draw(spriteBatch);
+                _levelUpScreen.Draw(gameTime, sb);
             }
             if (_bikeShopScreen.IsOpen)
             {
-                _bikeShopScreen.Draw(spriteBatch);
+                _bikeShopScreen.Draw(gameTime, sb);
             }
 
-            spriteBatch.End();
+            sb.End();
+        }
+
+        public virtual void Dispose()
+        {
+            _pixel?.Dispose();
+            _pixel = null;
+
+            _tiledMapRenderer?.Dispose();
+            _tiledMapRenderer = null;
         }
 
         private Rectangle GetCameraWorldRect()
         {
-            var game = Game1.Instance;
-            int viewW = game.GraphicsDevice.Viewport.Width;
-            int viewH = game.GraphicsDevice.Viewport.Height;
+            int viewW = Content.GetGraphicsDevice().Viewport.Width;
+            int viewH = Content.GetGraphicsDevice().Viewport.Height;
 
             // world half extents depend on zoom (analog zur Camera2D.ClampToWorld)
             float halfW = (viewW / 2f) / camera.Zoom;
@@ -706,6 +713,12 @@ namespace BikeWars.Content.screens
             spriteBatch.Draw(_pixel, backgroundRect, Color.Black * 0.5f);
 
             spriteBatch.DrawString(_timerFont, timerText, centeredPosition, timerColor);
+        }
+
+        // Pass it to Game1 to Exit the Game
+        private void OnExit()
+        {
+            Exit?.Invoke();
         }
 
         public void ResetGameTimer()

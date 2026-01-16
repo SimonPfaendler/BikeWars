@@ -40,8 +40,6 @@ namespace BikeWars.Content.managers
 
         private readonly Random _random;
         private readonly RepathScheduler _repathScheduler;
-        private readonly SpriteBatch _spriteBatch;
-
         public SpawnManager(GameObjectManager gameObjectManager, CollisionManager collisionManager, AudioService audioService, PathFinding pathFinding, RepathScheduler repathScheduler)
         {
             _gameObjectManager = gameObjectManager;
@@ -51,7 +49,6 @@ namespace BikeWars.Content.managers
             _spawnInterval = START_SPAWN_INTERVAL;
             _pathFinding = pathFinding;
             _repathScheduler = repathScheduler;
-            _spriteBatch = Game1.Instance.SpriteBatch;
         }
 
         public void Update(GameTime gameTime)
@@ -111,7 +108,7 @@ namespace BikeWars.Content.managers
             Vector2 targetOffset = new Vector2((float)(_random.NextDouble() - 0.5) * 10, (float)(_random.NextDouble() - 0.5) * 10);
             Vector2 targetPos = playerPos + targetOffset;
 
-            var tram = new Tram(startPos, targetPos, Game1.Instance.GraphicsDevice);
+            var tram = new Tram(startPos, targetPos);
             _activeTrams.Add(tram);
         }
 
@@ -176,7 +173,6 @@ namespace BikeWars.Content.managers
                      if (!character.IsDead)
                      {
                          character.TakeDamage(10);
-
                          // TODO: Sound
                      }
                      return;
@@ -184,20 +180,19 @@ namespace BikeWars.Content.managers
              }
         }
 
-        public void Draw()
-        {
-            foreach (var tram in _activeTrams)
-            {
-                tram.Draw(_spriteBatch);
-            }
-        }
+        // public void Draw()
+        // {
+        //     foreach (var tram in _activeTrams)
+        //     {
+        //         tram.Draw(_spriteBatch);
+        //     }
+        // }
 
         private void SpawnSwarm(double progress)
         {
 
             // Spawn 10-15 Hobos
             int count = _random.Next(10, 16);
-
 
             float speedMultiplier = 1.5f + (0.5f * (float)progress); // Start fast, get faster
             float difficultyMultiplier = 1.0f + (2.0f * (float)progress);

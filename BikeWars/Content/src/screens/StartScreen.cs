@@ -4,9 +4,9 @@ using BikeWars.Content.managers;
 using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using System.Collections.Generic;
 using BikeWars.Content.engine.Audio;
+using MonoGame.Extended.Content;
+using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.screens;
 // the first screen that pops up when the Game is started
@@ -15,31 +15,36 @@ public class StartScreen : MenuScreenBase, IScreen
     private readonly AudioService _audioService;
     public string DesiredMusic => AudioAssets.MenuMusic;
     public float MusicVolume => 1f;
-    
+    public event Action<GraphicsCommand> GraphicsRequested;
+
+
     public StartScreen(Texture2D background, SpriteFont font, AudioService audioService)
         : base(background, font)
     {
         _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
+    }
+
+
+    public override void LoadContent(ContentManager contentManager)
+    {
+        base.LoadContent(contentManager);
         InitializeButtons();
     }
 
-    
+
     protected sealed override void InitializeButtons()
     {
-        Game1 game = Game1.Instance;
-
         int buttonWidth = 250;
         int buttonHeight = 80;
 
         Rectangle buttonBounds = new Rectangle(
-            (game.GraphicsDevice.Viewport.Width - buttonWidth) / 2,
-            (game.GraphicsDevice.Viewport.Height - buttonHeight) / 3,
+            (Content.GetGraphicsDevice().Viewport.Width - buttonWidth) / 2,
+            (Content.GetGraphicsDevice().Viewport.Height - buttonHeight) / 3,
             buttonWidth,
             buttonHeight
         );
 
         _buttonTexture = CreateSimpleTexture(
-            game.GraphicsDevice,
             buttonWidth,
             buttonHeight
         );
@@ -55,7 +60,7 @@ public class StartScreen : MenuScreenBase, IScreen
 
         UpdateSelection(0);
     }
-    
+
     protected override void HandleButtonClick(MenuButton button)
     {
         switch ((ButtonAction)button.Id)
@@ -66,13 +71,18 @@ public class StartScreen : MenuScreenBase, IScreen
                     _font,
                     _audioService
                 );
+                mainMenu.LoadContent(Content);
+                mainMenu.GraphicsRequested += Forward;
                 ScreenManager.RemoveScreen(this);
                 ScreenManager.AddScreen(mainMenu);
                 break;
         }
     }
 
-    
+    private void Forward(GraphicsCommand cmd)
+    {
+        GraphicsRequested?.Invoke(cmd);
+    }
     public override bool DrawLower => false;
     public override bool UpdateLower => false;
 }

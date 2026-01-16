@@ -4,6 +4,8 @@ using BikeWars.Content.managers;
 using BikeWars.Content.screens;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
+using System;
+using BikeWars.Content.components;
 
 namespace BikeWars;
 
@@ -13,8 +15,7 @@ public class Game1 : Game
     public SpriteBatch SpriteBatch { get; private set; }
     public ScreenManager ScreenManager;
     private AudioService _audioService;
-    public static AudioService Audio => Instance._audioService;
-    public static Game1 Instance { get; private set; }
+    // public static AudioService Audio => _audioService;
     public static Texture2D background;
     public static GameTime CurrentGameTime { get; private set; }
 
@@ -24,7 +25,6 @@ public class Game1 : Game
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
-        Instance = this;
 
         _graphics.PreferredBackBufferWidth = 1280;
         _graphics.PreferredBackBufferHeight = 720;
@@ -48,34 +48,32 @@ public class Game1 : Game
 
     private void CreateMainMenu()
     {
-        SpriteFont font = Content.Load<SpriteFont>("assets/fonts/Arial");
-        MainMenuScreen mainMenu = new MainMenuScreen(background, font, _audioService);
+        MainMenuScreen mainMenu = new MainMenuScreen(background, UIAssets.DefaultFont, _audioService);
+        mainMenu.LoadContent(Content);
+        mainMenu.GraphicsRequested += OnGraphicsRequested;
         ScreenManager.AddScreen(mainMenu);
     }
 
     protected override void LoadContent()
     {
         this.SpriteBatch = new SpriteBatch(GraphicsDevice);
+        RenderPrimitives.Init(GraphicsDevice);
+        UIAssets.Load(Content);
 
-        _audioService = new AudioService();
-        _audioService.LoadContent(Content);
+        _audioService = new AudioService(Content);
+        _audioService.LoadContent();
 
         background = Content.Load<Texture2D>("assets/images/Startbildschirm");
-
-        SpriteManager.LoadContent(Content);
-
-
-        SpriteFont font = Content.Load<SpriteFont>("assets/fonts/Arial");
-
-        StartScreen startScreen = new StartScreen(
-            background,
-            font,
-            _audioService
-        );
-
+        StartScreen startScreen = new StartScreen(background, UIAssets.DefaultFont, _audioService);
+        startScreen.LoadContent(Content);
+        startScreen.GraphicsRequested += OnGraphicsRequested;
         ScreenManager.AddScreen(startScreen);
-
         ScreenManager.SetAudio(_audioService);
+    }
+
+    private void OnGraphicsRequested(GraphicsCommand gc)
+    {
+        SetResolution(gc.Width, gc.Height, _graphics.IsFullScreen = !_graphics.IsFullScreen);
     }
 
     protected override void Update(GameTime gameTime)
@@ -93,7 +91,6 @@ public class Game1 : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
-        ScreenManager.Draw(gameTime);
-        base.Draw(gameTime);
+        ScreenManager.Draw(gameTime, SpriteBatch); // SpriteBatch wird durchgereicht
     }
 }

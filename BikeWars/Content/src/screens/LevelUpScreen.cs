@@ -14,13 +14,10 @@ public class LevelUpScreen : IScreen
 {
     public bool IsOpen { get; private set; }
 
-    private readonly SpriteFont _font;
-    private readonly Texture2D _pixel;
-
     private SkillTree.SkillId _option1;
     private SkillTree.SkillId _option2;
     private SkillTree.SkillId _option3;
-    
+
     private int _selectedOption = 0;
 
     public event Action<SkillTree.SkillId> OnOptionSelected;
@@ -28,9 +25,6 @@ public class LevelUpScreen : IScreen
 
     public LevelUpScreen()
     {
-        _pixel = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
-        _pixel.SetData(new[] { Color.White });
-        _font = Game1.Instance.Content.Load<SpriteFont>("assets/fonts/Arial");
     }
 
     public void Open(Player player)
@@ -60,7 +54,7 @@ public class LevelUpScreen : IScreen
         if (!IsOpen) return;
         // three different Options
         // can be selected by the numbers, so multiple options can be selected
-        
+
         if (InputHandler.IsPressed(GameAction.UI_UP))
             _selectedOption = (_selectedOption + 2) % 3; // wrap-around
         else if (InputHandler.IsPressed(GameAction.UI_DOWN))
@@ -81,16 +75,16 @@ public class LevelUpScreen : IScreen
         }
     }
 
-    public void Draw(SpriteBatch spriteBatch)
+    public void Draw(GameTime gameTime, SpriteBatch sb)
     {
         if (!IsOpen) return;
-        
-        var viewport = Game1.Instance.GraphicsDevice.Viewport;
+
+        var viewport = sb.GraphicsDevice.Viewport;
         int screenW = viewport.Width;
         int screenH = viewport.Height;
 
         // Fullscreen overlay
-        spriteBatch.Draw(_pixel, new Rectangle(0, 0, screenW, screenH), Color.Black * 0.4f);
+        sb.Draw(RenderPrimitives.Pixel, new Rectangle(0, 0, screenW, screenH), Color.Black * 0.4f);
 
         int boxW = 400;
         int boxH = 250;
@@ -98,33 +92,33 @@ public class LevelUpScreen : IScreen
         int boxY = (screenH - boxH) / 2;
 
         Rectangle box = new Rectangle(boxX, boxY, boxW, boxH);
-        spriteBatch.Draw(_pixel, box, Color.DarkGray);
+        sb.Draw(RenderPrimitives.Pixel, box, Color.DarkGray);
 
         // Header
         string title = "!!LEVEL UP!!";
-        Vector2 titleSize = _font.MeasureString(title);
+        Vector2 titleSize = UIAssets.DefaultFont.MeasureString(title);
         Vector2 titlePos = new Vector2(
             boxX + (boxW - titleSize.X) / 2,
             boxY + 30
         );
-        spriteBatch.DrawString(_font, title, titlePos, Color.DarkRed);
-        
+        sb.DrawString(UIAssets.DefaultFont, title, titlePos, Color.DarkRed);
+
         // Options
         int startOptionY = boxY + 70;
         int optionSpacing = 50;
         // Center text in box - approximate X offset or use generic padding
-        int textX = boxX + 40; 
+        int textX = boxX + 40;
 
-        DrawOption(spriteBatch, _option1, new Vector2(textX, startOptionY), _selectedOption == 0);
-        DrawOption(spriteBatch, _option2, new Vector2(textX, startOptionY + optionSpacing), _selectedOption == 1);
-        DrawOption(spriteBatch, _option3, new Vector2(textX, startOptionY + optionSpacing * 2), _selectedOption == 2);
+        DrawOption(sb, _option1, new Vector2(textX, startOptionY), _selectedOption == 0);
+        DrawOption(sb, _option2, new Vector2(textX, startOptionY + optionSpacing), _selectedOption == 1);
+        DrawOption(sb, _option3, new Vector2(textX, startOptionY + optionSpacing * 2), _selectedOption == 2);
     }
 
     private void DrawOption(SpriteBatch spriteBatch, SkillTree.SkillId option, Vector2 position, bool selected)
     {
         Color color = selected ? Color.Gold : Color.White;
         string message = SkillTree.All.ContainsKey(option) ? SkillTree.All[option] : option.ToString();
-        spriteBatch.DrawString(_font, message, position, color);
+        spriteBatch.DrawString(UIAssets.DefaultFont, message, position, color);
     }
 
     // the code below doesn't do anything its just for IScreen
@@ -139,5 +133,9 @@ public class LevelUpScreen : IScreen
     public void OnExit()  { }
     public void Draw(GameTime gameTime)
     {
+    }
+    public void Dispose()
+    {
+        throw new NotImplementedException();
     }
 }

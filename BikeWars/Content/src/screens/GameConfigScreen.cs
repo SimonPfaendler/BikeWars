@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.managers;
+using MonoGame.Extended.Content;
 
 namespace BikeWars.Content.screens;
 
@@ -28,9 +29,8 @@ public class GameConfigScreen : MenuScreenBase, IScreen
 
     protected sealed override void InitializeButtons()
         {
-            Game1 game = Game1.Instance;
-            int screenWidth = game.GraphicsDevice.Viewport.Width;
-            int screenHeight = game.GraphicsDevice.Viewport.Height;
+            int screenWidth = Content.GetGraphicsDevice().Viewport.Width;
+            int screenHeight = Content.GetGraphicsDevice().Viewport.Height;
 
             int buttonWidth = 250;
             int buttonHeight = 60;
@@ -40,7 +40,7 @@ public class GameConfigScreen : MenuScreenBase, IScreen
             int leftStartY = screenHeight / 4;
             int rightStartY = screenHeight / 4;
 
-            _buttonTexture = CreateSimpleTexture(game.GraphicsDevice, buttonWidth, buttonHeight);
+            _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
 
             // Buttons on the left side
             _buttons.Add(new MenuButton(
@@ -98,7 +98,7 @@ public class GameConfigScreen : MenuScreenBase, IScreen
                 font: _font,
                 audioService: _audioService
             ));
-            
+
             UpdateSelection(3);
             UpdateModeButtonColors();
         }
@@ -109,7 +109,7 @@ public class GameConfigScreen : MenuScreenBase, IScreen
             {
                 case ButtonAction.StartGame:
                     GameScreen gameScreen = new GameScreen(_audioService, _selectedGameMode);
-                    gameScreen.LoadContent(Game1.Instance.Content);
+                    gameScreen.LoadContent(Content);
                     ScreenManager.RemoveScreen(this);
                     ScreenManager.AddScreen(gameScreen);
                     break;

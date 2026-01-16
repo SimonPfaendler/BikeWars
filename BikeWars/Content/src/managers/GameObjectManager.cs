@@ -412,7 +412,7 @@ public class GameObjectManager
     }
 
     private ItemBase? CreateFromTiled(TiledObjectInfo spawn)
-    // spawn = properties 
+    // spawn = properties
     {
         var start = new Vector2(spawn.Rect.X, spawn.Rect.Y);
         var size  = new Point(spawn.Rect.Width, spawn.Rect.Height);

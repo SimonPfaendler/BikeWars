@@ -13,15 +13,15 @@ public class AudioService
     private HashSet<string> _loadedMusic = new HashSet<string>();
 
     private ContentManager _content;
-    public AudioService()
+    public AudioService(ContentManager c)
     {
-        Sounds = new SoundManager();
-        Music = new MusicManager();
+        Sounds = new SoundManager(c);
+        Music = new MusicManager(c);
+        _content = c;
     }
 
-    public void LoadContent(ContentManager content)
+    public void LoadContent()
     {
-        _content = content;
         // Sounds.Load(content, AudioAssets.SoundEffectPaths);
         // Music.Load(content, AudioAssets.SongPaths);
     }
@@ -32,7 +32,7 @@ public class AudioService
         {
             var soundDict = new Dictionary<string, string> { { soundName, AudioAssets.SoundEffectPaths[soundName] } };
 
-            Sounds.Load(_content, soundDict);
+            Sounds.Load(soundDict);
             _loadedSounds.Add(soundName);
         }
 
@@ -47,7 +47,7 @@ public class AudioService
             // Baue ein Dictionary mit nur diesem Song
             var songDict = new Dictionary<string, string> { { musicName, AudioAssets.SongPaths[musicName] } };
 
-            Music.Load(_content, songDict);
+            Music.Load(songDict);
             _loadedMusic.Add(musicName);
         }
 

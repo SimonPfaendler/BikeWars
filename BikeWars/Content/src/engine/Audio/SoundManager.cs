@@ -20,8 +20,15 @@ public class SoundManager
     private const int MaxTotalSounds = 15;
     private const int MaxPerType = 3;
 
+    private ContentManager _content;
+
     private int ActiveSoundCount =>
         _activeInstances.Count + _loopInstances.Count;
+
+    public SoundManager(ContentManager c)
+    {
+        _content = c;
+    }
 
     // internal wrapper to store id + instance
     private class ManagedInstance
@@ -37,14 +44,14 @@ public class SoundManager
     }
 
     // Load: used only once when starting the game: paths = ID -> content path
-    public void Load(ContentManager content, IReadOnlyDictionary<string, string> paths)
+    public void Load(IReadOnlyDictionary<string, string> paths)
     {
         _sfx.Clear();
         foreach (var kv in paths)
         {
             try
             {
-                var effect = content.Load<SoundEffect>(kv.Value);
+                var effect = _content.Load<SoundEffect>(kv.Value);
                 _sfx[kv.Key] = effect;
             }
             catch (Exception ex)
@@ -101,7 +108,7 @@ public class SoundManager
 
             try
             {
-                sfx = Game1.Instance.Content.Load<SoundEffect>(path);
+                sfx = _content.Load<SoundEffect>(path);
                 _sfx[id] = sfx;
             }
             catch (Exception ex)

@@ -23,10 +23,6 @@ namespace BikeWars.Entities.Characters
 
         protected override string WalkingSound => AudioAssets.Walking;
 
-        // 1x1 Texture to represent the enemy
-        public static Texture2D pixel;
-
-
         public Hobo(Vector2 start, Point size, AudioService audio, PathFinding pathFinding,
             CollisionManager collisionManager, RepathScheduler repathScheduler)
         {
@@ -69,13 +65,13 @@ namespace BikeWars.Entities.Characters
             if (Movement.IsMoving)
             {
                 float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
-                
+
                 if (direction.LengthSquared() > 0.0001f)
                 {
                     direction.Normalize();
                     Transform.Position += direction * Speed * delta;
                 }
-                
+
                 if (System.Math.Abs(direction.X) > System.Math.Abs(direction.Y))
                 {
 
@@ -106,7 +102,7 @@ namespace BikeWars.Entities.Characters
                 return;
             if (_currentAnimation == null)
                 return;
-            
+
             Color drawColor = (_hitFlashTimer > 0f) ? _hitColor : Color.White;
             _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, 0f, _renderScale, drawColor);
         }

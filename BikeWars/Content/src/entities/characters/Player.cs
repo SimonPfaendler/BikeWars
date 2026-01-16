@@ -109,9 +109,6 @@ namespace BikeWars.Entities.Characters
 
         public WeaponType CurrentWeapon { get; private set; } = WeaponType.Gun;
 
-        // 1x1 Texture to represent the player
-        public static Texture2D pixel;
-
         private void Shooting()
         {
             // Only shoot if we have a valid gaze direction
@@ -238,11 +235,6 @@ namespace BikeWars.Entities.Characters
             sprint = new CooldownWithDuration(1f, 5f);
             Inventory = new Inventory();
             _audio = audio;
-            if (pixel == null)
-            {
-                pixel = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
-                pixel.SetData(new[] { Color.White });
-            }
 
             // LOAD BOTH ANIMATION SETS
             _bikeUpAnimation = SpriteManager.GetAnimation($"{characterPrefix}_BikeUp");
@@ -351,14 +343,6 @@ namespace BikeWars.Entities.Characters
                 );
             }
 
-            // saubere Ganzzahl-Position, sonst „zittert“ Pixelart
-            var dest = new Rectangle(
-                (int)MathF.Round(Transform.Position.X),
-                (int)MathF.Round(Transform.Position.Y),
-                Transform.Size.X,
-                Transform.Size.Y
-            );
-
             // 2) Spieler zeichnen
             if (_currentAnimation == null)
                 return;
@@ -382,12 +366,12 @@ namespace BikeWars.Entities.Characters
 
                 // Draw static valid zone arc based on facing direction
                 float facingAngle = (float)Math.Atan2(_facingDirection.Y, _facingDirection.X);
-                DrawUtils.DrawArc(spriteBatch, pixel, center, 50f, facingAngle, MathHelper.ToRadians(240),
+                DrawUtils.DrawArc(spriteBatch, RenderPrimitives.Pixel, center, 50f, facingAngle, MathHelper.ToRadians(240),
                     Color.Red * 0.5f);
 
                 // Draw aiming line
                 Vector2 aimEnd = center + GazeDirection * 50f;
-                DrawUtils.DrawLine(spriteBatch, pixel, center, aimEnd, Color.Red);
+                DrawUtils.DrawLine(spriteBatch, RenderPrimitives.Pixel, center, aimEnd, Color.Red);
             }
         }
 

@@ -5,8 +5,10 @@ using BikeWars.Content.managers;
 using BikeWars.Entities.Characters;
 using BikeWars.Entities.Characters.MapObjects;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using MonoGame.Extended.Content;
 
 namespace BikeWars.Content.screens;
 
@@ -15,8 +17,6 @@ public class BikeShopScreen : IScreen
     public bool IsOpen { get; private set; }
 
     private readonly SpriteFont _font;
-    private readonly Texture2D _pixel;
-
     public enum ShopOption
     {
         HealFull,
@@ -34,12 +34,11 @@ public class BikeShopScreen : IScreen
 
     public event Action Closed;
 
+    private readonly ContentManager Content;
+
     public BikeShopScreen()
     {
-        _pixel = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
-        _pixel.SetData(new[] { Color.White });
-
-        _font = Game1.Instance.Content.Load<SpriteFont>("assets/fonts/Arial");
+        _font = Content.Load<SpriteFont>("assets/fonts/Arial");
     }
 
     public void Open(Player player, BikeShop shop)
@@ -114,16 +113,16 @@ public class BikeShopScreen : IScreen
         }
     }
 
-    public void Draw(SpriteBatch spriteBatch)
+    public void Draw(GameTime gameTime, SpriteBatch sb)
     {
         if (!IsOpen) return;
 
-        var viewport = Game1.Instance.GraphicsDevice.Viewport;
+        var viewport = Content.GetGraphicsDevice().Viewport;
         int screenW = viewport.Width;
         int screenH = viewport.Height;
 
         // Fullscreen overlay
-        spriteBatch.Draw(_pixel, new Rectangle(0, 0, screenW, screenH), Color.Black * 0.4f);
+        sb.Draw(RenderPrimitives.Pixel, new Rectangle(0, 0, screenW, screenH), Color.Black * 0.4f);
 
         int boxW = 400;
         int boxH = 250;
@@ -131,7 +130,7 @@ public class BikeShopScreen : IScreen
         int boxY = (screenH - boxH) / 2;
 
         Rectangle box = new Rectangle(boxX, boxY, boxW, boxH);
-        spriteBatch.Draw(_pixel, box, Color.DarkGray);
+        sb.Draw(RenderPrimitives.Pixel, box, Color.DarkGray);
 
         string title = "BIKE SHOP";
         Vector2 titleSize = _font.MeasureString(title);
@@ -139,19 +138,19 @@ public class BikeShopScreen : IScreen
             boxX + (boxW - titleSize.X) / 2,
             boxY + 30
         );
-        spriteBatch.DrawString(_font, title, titlePos, Color.DarkRed);
+        sb.DrawString(_font, title, titlePos, Color.DarkRed);
 
         // Options
         int startOptionY = boxY + 70;
         int optionSpacing = 50;
         int textX = boxX + 40;
 
-        DrawOption(spriteBatch, _option1, new Vector2(textX, startOptionY), _selectedOption == 0);
-        DrawOption(spriteBatch, _option2, new Vector2(textX, startOptionY + optionSpacing), _selectedOption == 1);
-        DrawOption(spriteBatch, _option3, new Vector2(textX, startOptionY + optionSpacing * 2), _selectedOption == 2);
+        DrawOption(sb, _option1, new Vector2(textX, startOptionY), _selectedOption == 0);
+        DrawOption(sb, _option2, new Vector2(textX, startOptionY + optionSpacing), _selectedOption == 1);
+        DrawOption(sb, _option3, new Vector2(textX, startOptionY + optionSpacing * 2), _selectedOption == 2);
     }
 
-    private void DrawOption(SpriteBatch spriteBatch, ShopOption option, Vector2 position, bool selected)
+    private void DrawOption(SpriteBatch sb, ShopOption option, Vector2 position, bool selected)
     {
         Color color = selected ? Color.Gold : Color.White;
 
@@ -163,7 +162,7 @@ public class BikeShopScreen : IScreen
             _ => option.ToString()
         };
 
-        spriteBatch.DrawString(_font, message, position, color);
+        sb.DrawString(_font, message, position, color);
     }
 
     // Just for IScreen
@@ -183,7 +182,9 @@ public class BikeShopScreen : IScreen
     {
     }
 
-    public void Draw(GameTime gameTime)
+    public virtual void Dispose()
     {
+
     }
+
 }

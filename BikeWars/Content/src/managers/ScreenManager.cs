@@ -4,6 +4,7 @@ using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.screens;
 using Microsoft.Xna.Framework;
 using BikeWars.Content.engine.Audio;
+using Microsoft.Xna.Framework.Graphics;
 // The screen manager handles all existing screens:
 // -> decides which screen are drawn
 // -> decide which screens are getting updated
@@ -33,11 +34,22 @@ namespace BikeWars.Content.managers
         public void RemoveScreen(IScreen screen)
         {
             _mScreenStack.Remove(screen);
+            if (screen is IDisposable d)
+            {
+                d.Dispose();
+            }
             OnScreenRemoved?.Invoke(screen);
         }
 
         public void ReturnToMainMenu()
         {
+            foreach (var screen in _mScreenStack)
+            {
+                if (screen is IDisposable d)
+                {
+                    d.Dispose();
+                }
+            }
             _mScreenStack.Clear();
             OnReturnToMainMenu?.Invoke();
         }
@@ -75,7 +87,7 @@ namespace BikeWars.Content.managers
         }
 
 
-        public void Draw(GameTime gameTime)
+        public void Draw(GameTime gameTime, SpriteBatch sb)
         {
             int lowestScreenToBeDrawn = _mScreenStack.Count - 1;
             for (int i = _mScreenStack.Count - 1; i >= 0; i--)
@@ -94,7 +106,7 @@ namespace BikeWars.Content.managers
             for (int i = lowestScreenToBeDrawn; i < _mScreenStack.Count; i++)
             {
                 IScreen screen = _mScreenStack[i];
-                screen.Draw(gameTime);
+                screen.Draw(gameTime, sb);
             }
         }
 

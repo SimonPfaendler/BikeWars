@@ -45,7 +45,7 @@ public class CombatManager
         // Initialize random manually or use a shared instance if available. Good practice to have a shared Random.
         // Assuming a shared Random or just creating one for now. Performance impact is negligible here.
         Random rnd = new Random();
-        //bool isCrit = false; // isn't used, maybe unnecessary 
+        //bool isCrit = false; // isn't used, maybe unnecessary
         int damage = projectile.Damage;
 
         if (projectile.Owner is CharacterBase owner)
@@ -60,7 +60,7 @@ public class CombatManager
         // Apply Damage
         target.TakeDamage(damage);
         projectile.HasHit = true;
-        
+
 
         // Notify GameScreen to Shake
         OnScreenShakeRequested?.Invoke(2.75f, 0.10f);
