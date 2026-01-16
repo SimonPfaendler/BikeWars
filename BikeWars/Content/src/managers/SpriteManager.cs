@@ -63,6 +63,7 @@ namespace BikeWars.Content.managers
             { "XP_Beer", "assets/sprites/XP/xp_beer_texture" },
             { "XP_Money", "assets/sprites/XP/xp_money_texture" },
             { "EnergyGel", "assets/images/EnergyGel" },
+            { "DopingSpritze", "assets/images/DopingSpritze" },
             { "DogFood", "assets/images/DogFood" },
             // TRAM
             { "Tram", "assets/sprites/Tram_final" },
