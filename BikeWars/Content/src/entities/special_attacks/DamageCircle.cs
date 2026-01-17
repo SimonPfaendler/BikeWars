@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 using System.Collections.Generic;
+using System;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
@@ -28,6 +29,7 @@ namespace BikeWars.Content.entities.items
         private Vector2 _spritePos;
         
         private readonly Transform _sourceTransform;
+        private readonly Func<Vector2> _positionProvider;
         private readonly bool _damagePlayers;
 
 
@@ -57,6 +59,11 @@ namespace BikeWars.Content.entities.items
             _sourceTransform = sourceTransform;
             _damagePlayers = damagePlayers;
 
+            // Always query the live position so the circle follows even if the owner's transform instance gets replaced
+            _positionProvider = owner != null
+                ? () => owner.Transform.Position
+                : () => _sourceTransform.Position;
+
             foreach (Vector2 boxPosition in _boxPositions)
             {
                 _hitboxes.Add(new BoxCollider(
@@ -85,6 +92,7 @@ namespace BikeWars.Content.entities.items
             base.Update(gameTime);
 
             _spritePos = _sourceTransform.Position;
+            _spritePos = _positionProvider.Invoke();
 
             for (int i = 0; i < _hitboxes.Count; i++)
             {
