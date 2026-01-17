@@ -516,6 +516,16 @@ public class CollisionManager
 
             ch.UpdateCollider();
         }
+
+        // If already overlapping a static (e.g., pushed in by another entity), push the character out
+        if (c.Intersects(b))
+        {
+            var penetration = GetPenetrationVector(c, b);
+            if (penetration.LengthSquared() > 0.0001f && c.Owner is CharacterBase stuck)
+            {
+                ApplySafePush(stuck, c, -penetration);
+            }
+        }
     }
 
     private void HandleProjectileWithStatic(ICollider b, ICollider c)
