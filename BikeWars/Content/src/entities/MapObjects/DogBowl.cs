@@ -5,7 +5,7 @@ using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.engine.interfaces;
 
 namespace BikeWars.Content.entities.MapObjects;
-
+// if DogBowl is active, Dogs targrt the Dog Bowl (which is handeld in Dog.cs) only one DogBowl can be active at once
 public class DogBowl: ItemBase
 {
     private bool _full;
