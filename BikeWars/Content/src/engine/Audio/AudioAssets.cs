@@ -31,6 +31,8 @@ namespace BikeWars.Content.engine.Audio
         public const string BarkSimon2 = "bark_simon_2";
         public const string BarkFritz = "bark_fritz";
         public const string Miau = "miau";
+        public const string WoodCrack = "wood_crack";
+        public const string WoodDestroy = "wood_destroy";
         
 
         // Mapping ID -> Content-Path
@@ -61,7 +63,9 @@ namespace BikeWars.Content.engine.Audio
             { BarkSimon, "assets/sounds/vBark_Simon"},
             { BarkSimon2, "assets/sounds/Dogs/Bark_Simon_2"},
             { BarkFritz, "assets/sounds/Dogs/Bark_Fritz"},
-            { Miau, "assets/sounds/Dogs/Miau"},
+            { WoodCrack, "assets/sounds/wood_crack"},
+            { WoodDestroy, "assets/sounds/wood_destroy"},
+            { Miau, "assets/sounds/miau"},
             
         };
 

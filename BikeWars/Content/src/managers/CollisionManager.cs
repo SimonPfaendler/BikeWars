@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BikeWars.Content.engine;
+using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.entities.MapObjects;
@@ -11,6 +12,7 @@ using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using BikeWars;
 
 namespace BikeWars.Content.managers;
 
@@ -540,6 +542,7 @@ public class CollisionManager
             if (b.Owner is DestructibleObject destructible)
             {
                 destructible.TakeDamage(p.Damage);
+                Game1.Audio.Sounds.Play(destructible.Health > 0 ? AudioAssets.WoodCrack : AudioAssets.WoodDestroy);
                 _gameObjectManager.SpawnDamageNumber(GetObjectCenter(destructible), p.Damage);
                 _toRemoveColliders.Add(p.Collider);
 
@@ -595,6 +598,7 @@ public class CollisionManager
         }
 
         destructible.TakeDamage(aoe.Damage);
+        Game1.Audio.Sounds.Play(destructible.Health > 0 ? AudioAssets.WoodCrack : AudioAssets.WoodDestroy);
         _gameObjectManager.SpawnDamageNumber(GetObjectCenter(destructible), aoe.Damage);
 
         if (destructible.Health <= 0)
