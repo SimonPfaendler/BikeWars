@@ -425,11 +425,14 @@ public class GameObjectManager
                 case BikeShop bs: // It works but Bikeshop shouldn't be a item.
                     AddStatic(bs.CollisionCollider);
                     break;
+                case DogBowl db:
+                    AddStatic(db.CollisionCollider);
+                    break;
                 case DestructibleObject:
                     AddStatic(created.Collider);
                     break;
-                case Chest:
-                    AddItem(created);
+                case Chest chest:
+                    AddStatic(chest.CollisionCollider);
                     break;
             }
         }
@@ -460,5 +463,4 @@ public class GameObjectManager
                 return null;
         }
     }
-
 }
