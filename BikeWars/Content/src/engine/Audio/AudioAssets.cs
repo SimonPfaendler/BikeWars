@@ -65,7 +65,7 @@ namespace BikeWars.Content.engine.Audio
             { BarkFritz, "assets/sounds/Dogs/Bark_Fritz"},
             { WoodCrack, "assets/sounds/wood_crack"},
             { WoodDestroy, "assets/sounds/wood_destroy"},
-            { Miau, "assets/sounds/miau"},
+            { Miau, "assets/sounds/Dogs/Miau"}
             
         };
 
