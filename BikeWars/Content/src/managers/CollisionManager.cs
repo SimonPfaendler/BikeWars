@@ -540,6 +540,7 @@ public class CollisionManager
             if (b.Owner is DestructibleObject destructible)
             {
                 destructible.TakeDamage(p.Damage);
+                _gameObjectManager.SpawnDamageNumber(GetObjectCenter(destructible), p.Damage);
                 _toRemoveColliders.Add(p.Collider);
 
                 // if destroyed: defer static collider removal and defer path grid update
@@ -594,6 +595,7 @@ public class CollisionManager
         }
 
         destructible.TakeDamage(aoe.Damage);
+        _gameObjectManager.SpawnDamageNumber(GetObjectCenter(destructible), aoe.Damage);
 
         if (destructible.Health <= 0)
         {
@@ -623,6 +625,12 @@ public class CollisionManager
             HandleCharacters(c, d);
             HandleTramCollision(c, d);
         }
+    }
+
+    private static Vector2 GetObjectCenter(DestructibleObject destructible)
+    {
+        var bounds = destructible.Transform.Bounds;
+        return new Vector2(bounds.Center.X, bounds.Center.Y);
     }
 
     private void HandleTramCollision(ICollider c, ICollider d)
