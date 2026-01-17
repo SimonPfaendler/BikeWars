@@ -16,7 +16,6 @@ public class SoundConfigScreen : MenuScreenBase, IScreen
 
     private Rectangle _musicTrackRect;
     private Rectangle _sfxTrackRect;
-    private Texture2D _sliderTexture;
 
     private bool _isDraggingMusic;
     private bool _isDraggingSfx;
@@ -33,54 +32,51 @@ public class SoundConfigScreen : MenuScreenBase, IScreen
     public override bool DrawLower => false;
     public override bool UpdateLower => false;
 
-    public SoundConfigScreen(Texture2D background, SpriteFont font, AudioService audioService)
-        : base(background, font)
+    public SoundConfigScreen(Texture2D background, SpriteFont font, AudioService audioService, Viewport vp)
+        : base(background, font, vp)
     {
         _audioService = audioService;
     }
 
-    public override void LoadContent(ContentManager contentManager)
+    public override void LoadContent(ContentManager content, GraphicsDevice gd)
     {
-        base.LoadContent(contentManager);
-        _buttonTexture = CreateSimpleTexture(1, 1);
-        _sliderTexture = CreateSimpleTexture(1, 1);
+        base.LoadContent(content, gd);
         InitializeButtons();
     }
 
     protected sealed override void InitializeButtons()
     {
         _buttons.Clear();
-        var viewport = Content.GetGraphicsDevice().Viewport;
-
-        _uiScale = viewport.Height / 1080f;
+        _uiScale = ViewPort.Height / 1080f;
 
         // scale button
         int btnWidth = (int)(250 * _uiScale);
         int btnHeight = (int)(60 * _uiScale);
         int margin = (int)(50 * _uiScale);
 
-        _buttons.Add(new MenuButton(
+
+        AddButton(new MenuButton(
             id: (int)ButtonAction.Back,
-            texture: _buttonTexture,
-            bounds: new Rectangle(margin, viewport.Height - btnHeight - margin, btnWidth, btnHeight),
+            texture: RenderPrimitives.Pixel,
+            bounds: new Rectangle(margin, ViewPort.Height - btnHeight - margin, btnWidth, btnHeight),
             text: "Back",
             font: _font,
             audioService: _audioService
         ));
 
         // scale slider
-        int trackWidth = (int)(viewport.Width * 0.45f);
+        int trackWidth = (int)(ViewPort.Width * 0.45f);
         int trackHeight = (int)(20 * _uiScale);
 
         _knobWidth = (int)(30 * _uiScale);
         _knobHeight = (int)(50 * _uiScale);
 
-        int centerX = viewport.Width / 2 - trackWidth / 2;
+        int centerX = ViewPort.Width / 2 - trackWidth / 2;
 
-        int musicY = (int)(viewport.Height * 0.35f);
+        int musicY = (int)(ViewPort.Height * 0.35f);
         _musicTrackRect = new Rectangle(centerX, musicY, trackWidth, trackHeight);
 
-        int sfxY = (int)(viewport.Height * 0.55f);
+        int sfxY = (int)(ViewPort.Height * 0.55f);
         _sfxTrackRect = new Rectangle(centerX, sfxY, trackWidth, trackHeight);
     }
 
@@ -180,13 +176,13 @@ public class SoundConfigScreen : MenuScreenBase, IScreen
     {
         // track
         Color trackColor = isSelected ? Color.White * 0.8f : Color.Gray * 0.5f;
-        sb.Draw(_sliderTexture, track, trackColor);
+        sb.Draw(RenderPrimitives.Pixel, track, trackColor);
 
         int knobX = track.X + (int)(track.Width * volume) - (_knobWidth / 2);
         Rectangle knobRect = new Rectangle(knobX, track.Y + (track.Height / 2) - (_knobHeight / 2), _knobWidth, _knobHeight);
 
         // knob
-        sb.Draw(_sliderTexture, knobRect, isSelected ? Color.Gold : Color.DarkGoldenrod);
+        sb.Draw(RenderPrimitives.Pixel, knobRect, isSelected ? Color.Gold : Color.DarkGoldenrod);
 
         string text = $"{label}: {(int)(volume * 100)}%";
         float fontScale = 1.4f * _uiScale;
@@ -197,13 +193,5 @@ public class SoundConfigScreen : MenuScreenBase, IScreen
 
         sb.DrawString(_font, text, new Vector2(track.Center.X - textSize.X / 2, track.Y - (70 * _uiScale)),
             textColor, 0f, Vector2.Zero, fontScale, SpriteEffects.None, 0f);
-    }
-
-    protected override void HandleButtonClick(MenuButton button)
-    {
-        if (button.Id == (int)ButtonAction.Back)
-        {
-            ScreenManager.RemoveScreen(this);
-        }
     }
 }

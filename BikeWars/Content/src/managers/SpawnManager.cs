@@ -269,5 +269,10 @@ namespace BikeWars.Content.managers
             // Fallback
             return playerPos + new Vector2(MIN_SPAWN_RADIUS, 0);
         }
+
+        public void Dispose()
+        {
+
+        }
     }
 }

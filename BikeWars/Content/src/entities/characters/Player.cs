@@ -220,7 +220,7 @@ namespace BikeWars.Entities.Characters
                 }
                 return;
             }
-            
+
             item.IsPickedUp = true;
             ItemPickedUp?.Invoke(item);
         }
@@ -818,7 +818,7 @@ namespace BikeWars.Entities.Characters
                 _selectedInventoryIndex = (_selectedInventoryIndex + 4) % 5;
             }
         }
-        
+
         public bool IsInteractPressed()
         {
             return _input.IsPressed(GameAction.INTERACT);

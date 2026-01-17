@@ -23,6 +23,10 @@ public class LevelUpScreen : IScreen
     public event Action<SkillTree.SkillId> OnOptionSelected;
     public event Action Closed;
 
+    public Viewport ViewPort {get; set;}
+
+    public event Action<int, IScreen> BtnClicked;
+
     public LevelUpScreen()
     {
     }
@@ -79,9 +83,8 @@ public class LevelUpScreen : IScreen
     {
         if (!IsOpen) return;
 
-        var viewport = sb.GraphicsDevice.Viewport;
-        int screenW = viewport.Width;
-        int screenH = viewport.Height;
+        int screenW = ViewPort.Width;
+        int screenH = ViewPort.Height;
 
         // Fullscreen overlay
         sb.Draw(RenderPrimitives.Pixel, new Rectangle(0, 0, screenW, screenH), Color.Black * 0.4f);
@@ -129,12 +132,23 @@ public class LevelUpScreen : IScreen
     }
     public bool DrawLower  => false;
     public bool UpdateLower => false;
+
     public void OnEnter() { }
     public void OnExit()  { }
     public void Draw(GameTime gameTime)
     {
     }
     public void Dispose()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Unload()
+    {
+
+    }
+
+    public void OnActivated()
     {
         throw new NotImplementedException();
     }

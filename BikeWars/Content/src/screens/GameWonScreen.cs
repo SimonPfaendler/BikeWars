@@ -9,8 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
-using BikeWars.Content.managers;
-using MonoGame.Extended.Content;
+using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.screens
 {
@@ -46,22 +45,27 @@ namespace BikeWars.Content.screens
 
         public Statistic Statistic {get; set;}
 
-        public GameWonScreen(SpriteFont font, AudioService audioService, Statistic statistic)
-            :base(null, font)
+        public GameWonScreen(SpriteFont font, AudioService audioService, Statistic statistic, Viewport vp)
+            :base(null, font, vp)
         {
             _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
             Statistic = statistic;
-            InitializeButtons();
-            LoadAnimationAssets();
         }
 
-        private void LoadAnimationAssets()
+        public override void LoadContent(ContentManager content, GraphicsDevice gd)
+        {
+            base.LoadContent(content, gd);
+            InitializeButtons();
+            LoadAnimationAssets(content);
+        }
+
+        private void LoadAnimationAssets(ContentManager content)
         {
             try
             {
                 // load textures
-                _winSheet = Content.Load<Texture2D>("assets/sprites/videos/PogacarWinSpriteSheet");
-                _beerSheet = Content.Load<Texture2D>("assets/sprites/videos/PogacarBeerSpriteSheet");
+                _winSheet = content.Load<Texture2D>("assets/sprites/videos/PogacarWinSpriteSheet");
+                _beerSheet = content.Load<Texture2D>("assets/sprites/videos/PogacarBeerSpriteSheet");
 
                 // define paths
                 string jsonPathWin = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content", "sprites", "PogacarWinSpriteSheet.json");
@@ -127,8 +131,8 @@ namespace BikeWars.Content.screens
 
         protected sealed override void InitializeButtons()
         {
-            int screenWidth = Content.GetGraphicsDevice().Viewport.Width;
-            int screenHeight = Content.GetGraphicsDevice().Viewport.Height;
+            int screenWidth = ViewPort.Width;
+            int screenHeight = ViewPort.Height;
 
             int buttonWidth = 380;
             int buttonHeight = 80;
@@ -137,7 +141,7 @@ namespace BikeWars.Content.screens
 
             int startY = screenHeight / 2 + 50;
 
-            _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
+            // _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
 
             var buttonDefinitions = new[]
             {
@@ -160,7 +164,8 @@ namespace BikeWars.Content.screens
 
                 _buttons.Add(new MenuButton(
                     id: (int)definition.id,
-                    texture: _buttonTexture,
+                    // texture: _buttonTexture,
+                    texture: RenderPrimitives.Pixel,
                     bounds: new Rectangle(buttonX, startY, buttonWidth, buttonHeight),
                     text: definition.text,
                     font: _font,
@@ -170,27 +175,28 @@ namespace BikeWars.Content.screens
             UpdateSelection(0);
         }
 
-        protected override void HandleButtonClick(MenuButton button)
-        {
-            switch ((ButtonAction)button.Id)
-            {
-                case ButtonAction.MainMenu:
-                    _audioService.Sounds.StopAll();
-                    _audioService.Sounds.Play(AudioAssets.SoftClick);
-                    ScreenManager.ReturnToMainMenu();
-                    break;
+        // protected override void HandleButtonClick(MenuButton button, ContentManager content, GraphicsDevice gd)
+        // {
+        //     switch ((ButtonAction)button.Id)
+        //     {
+        //         case ButtonAction.MainMenu:
+        //             _audioService.Sounds.StopAll();
+        //             _audioService.Sounds.Play(AudioAssets.SoftClick);
+        //             // ScreenManager.ReturnToMainMenu();
+        //             break;
 
-                case ButtonAction.Exit:
-                    ConfirmationDialogScreen confirmDialog = new ConfirmationDialogScreen(
-                        _font,
-                        "Bist Du Dir sicher?",
-                        this,
-                        _audioService
-                    );
-                    ScreenManager.AddScreen(confirmDialog);
-                    break;
-            }
-        }
+        //         case ButtonAction.Exit:
+        //             ConfirmationDialogScreen confirmDialog = new ConfirmationDialogScreen(
+        //                 _font,
+        //                 "Bist Du Dir sicher?",
+        //                 this,
+        //                 _audioService,
+        //                 ViewPort
+        //             );
+        //             // ScreenManager.AddScreen(confirmDialog);
+        //             break;
+        //     }
+        // }
 
         public override void Draw(GameTime gameTime, SpriteBatch sb)
         {

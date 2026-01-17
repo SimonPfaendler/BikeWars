@@ -4,6 +4,7 @@ using BikeWars.Content.engine.input;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.engine.Audio;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace BikeWars.Content.managers
 {
@@ -19,11 +20,11 @@ namespace BikeWars.Content.managers
         public Player Player2 { get; private set; }
         public Camera2D Camera { get; private set; }
 
-        public PlayerManager(GraphicsDevice gd, GameMode mode, Rectangle worldBounds, AudioService audioService, bool isTechDemo)
+        public PlayerManager(Viewport viewport, GameMode mode, Rectangle worldBounds, AudioService audioService, bool isTechDemo)
         {
             Camera = new Camera2D(
-                gd.Viewport.Width,
-                gd.Viewport.Height,
+                viewport.Width,
+                viewport.Height,
                 worldBounds
             );
 

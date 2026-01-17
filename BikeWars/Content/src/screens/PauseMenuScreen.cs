@@ -5,8 +5,8 @@ using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.events;
 using BikeWars.Content.managers;
-using MonoGame.Extended.Content;
 using System;
+using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.screens
 {
@@ -18,26 +18,28 @@ namespace BikeWars.Content.screens
         public event Action<GraphicsCommand> GraphicsRequested;
 
 
-        public PauseMenuScreen(SpriteFont font, AudioService audioService)
-            :base(null, font)
+        public PauseMenuScreen(SpriteFont font, AudioService audioService, Viewport vp)
+            :base(null, font, vp)
         {
             _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
+        }
+
+        public override void LoadContent(ContentManager content, GraphicsDevice gd)
+        {
+            base.LoadContent(content, gd);
             InitializeButtons();
         }
 
         protected sealed override void InitializeButtons()
         {
-            int screenWidth = Content.GetGraphicsDevice().Viewport.Width;
-            int screenHeight = Content.GetGraphicsDevice().Viewport.Height;
+            int screenWidth = ViewPort.Width;
+            int screenHeight = ViewPort.Height;
 
             int buttonWidth = 300;
             int buttonHeight = 60;
 
             int startY = screenHeight / 4;
             int verticalSpacing = 20;
-
-
-            _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
 
             _buttons.Clear();
 
@@ -53,9 +55,9 @@ namespace BikeWars.Content.screens
 
             for (int i = 0; i < buttonDefinitions.Length; i++)
             {
-                _buttons.Add(new MenuButton(
+                AddButton(new MenuButton(
                     id: (int)buttonDefinitions[i].id,
-                    texture: _buttonTexture,
+                    texture: RenderPrimitives.Pixel,
                     bounds: new Rectangle((screenWidth - buttonWidth) / 2, startY + i * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
                     text: buttonDefinitions[i].text,
                     font: _font,
@@ -66,49 +68,50 @@ namespace BikeWars.Content.screens
             UpdateSelection(0);
         }
 
-        protected override void HandleButtonClick(MenuButton button)
-        {
-            // Use _currentGameTime from ScreenBase class if GameTime is needed
-            switch ((ButtonAction)button.Id)
-            {
-                case ButtonAction.Resume:
-                    _audioService.Sounds.ResumeAll();
-                    GameEvents.RaiseResumeTimer();
-                    ScreenManager.RemoveScreen(this);
-                    break;
+        // protected void HandleButtonClick(MenuButton button, ContentManager content, GraphicsDevice gd)
+        // {
+        //     // Use _currentGameTime from ScreenBase class if GameTime is needed
+        //     switch ((ButtonAction)button.Id)
+        //     {
+        //         case ButtonAction.Resume:
+        //             _audioService.Sounds.ResumeAll();
+        //             GameEvents.RaiseResumeTimer();
+        //             // ScreenManager.RemoveScreen(this);
+        //             break;
 
-                case ButtonAction.SaveGame:
-                    // TODO: Save game logic
-                    break;
+        //         case ButtonAction.SaveGame:
+        //             // TODO: Save game logic
+        //             break;
 
-                case ButtonAction.LoadGame:
-                    // TODO: Load game logic
-                    break;
+        //         case ButtonAction.LoadGame:
+        //             // TODO: Load game logic
+        //             break;
 
-                case ButtonAction.MainMenu:
-                    _audioService.Sounds.StopAll();
-                    _audioService.Sounds.Play(AudioAssets.SoftClick);
-                    ScreenManager.ReturnToMainMenu();
-                    break;
+        //         case ButtonAction.MainMenu:
+        //             _audioService.Sounds.StopAll();
+        //             _audioService.Sounds.Play(AudioAssets.SoftClick);
+        //             // ScreenManager.ReturnToMainMenu();
+        //             break;
 
-                case ButtonAction.Options:
-                    OptionScreen optionScreen = new OptionScreen(_backgroundTexture, _font, _audioService);
-                    optionScreen.LoadContent(Content);
-                    optionScreen.GraphicsRequested += Forward;
-                    ScreenManager.AddScreen(optionScreen);
-                    break;
+        //         case ButtonAction.Options:
+        //             OptionScreen optionScreen = new OptionScreen(_backgroundTexture, _font, _audioService, ViewPort);
+        //             optionScreen.LoadContent(content, gd);
+        //             optionScreen.GraphicsRequested += Forward;
+        //             // ScreenManager.AddScreen(optionScreen);
+        //             break;
 
-                case ButtonAction.Exit:
-                    ConfirmationDialogScreen confirmDialog = new ConfirmationDialogScreen(
-                        _font,
-                        "Bist Du Dir sicher?",
-                        this,
-                        _audioService
-                    );
-                    ScreenManager.AddScreen(confirmDialog);
-                    break;
-            }
-        }
+        //         case ButtonAction.Exit:
+        //             ConfirmationDialogScreen confirmDialog = new ConfirmationDialogScreen(
+        //                 _font,
+        //                 "Bist Du Dir sicher?",
+        //                 this,
+        //                 _audioService,
+        //                 ViewPort
+        //             );
+        //             // ScreenManager.AddScreen(confirmDialog);
+        //             break;
+        //     }
+        // }
         private void Forward(GraphicsCommand cmd)
         {
             GraphicsRequested?.Invoke(cmd);
@@ -116,9 +119,9 @@ namespace BikeWars.Content.screens
 
         public override void Draw(GameTime gameTime, SpriteBatch sb)
         {
-            var viewport = Content.GetGraphicsDevice().Viewport;
+
             sb.Begin();
-            sb.Draw(RenderPrimitives.Pixel, new Rectangle(0, 0, viewport.Width, viewport.Height), Color.Black * 0.7f);
+            sb.Draw(RenderPrimitives.Pixel, new Rectangle(0, 0, ViewPort.Width, ViewPort.Height), Color.Black * 0.7f);
             foreach (var button in _buttons)
             {
                 button.Draw(sb);

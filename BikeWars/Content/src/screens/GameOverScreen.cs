@@ -10,7 +10,7 @@ using System.Linq;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.managers;
-using MonoGame.Extended.Content;
+using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.screens
 {
@@ -36,8 +36,8 @@ namespace BikeWars.Content.screens
 
         private ConfirmationDialogScreen _confirmDialog {get;set;}
 
-        public GameOverScreen(SpriteFont font, AudioService audioService, Statistic statistic)
-            :base(null, font)
+        public GameOverScreen(SpriteFont font, AudioService audioService, Statistic statistic, Viewport vp)
+            :base(null, font, vp)
         {
             _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
             Statistic = statistic;
@@ -45,18 +45,24 @@ namespace BikeWars.Content.screens
                 _font,
                 "Bist Du Dir sicher?",
                 this,
-                _audioService
+                _audioService,
+                vp
             );
             _confirmDialog.Exit += () => Exit();
-            InitializeButtons();
-            LoadAnimationAssets();
         }
 
-        private void LoadAnimationAssets()
+        public override void LoadContent(ContentManager content, GraphicsDevice gd)
+        {
+            base.LoadContent(content, gd);
+            InitializeButtons();
+            LoadAnimationAssets(content);
+        }
+
+        private void LoadAnimationAssets(ContentManager content)
         {
             try
             {
-                _crashSheet = Content.Load<Texture2D>("assets/sprites/videos/BikeCrash");
+                _crashSheet = content.Load<Texture2D>("assets/sprites/videos/BikeCrash");
                 string jsonPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content", "sprites", "BikeCrash.json");
 
                 if (File.Exists(jsonPath))
@@ -99,8 +105,8 @@ namespace BikeWars.Content.screens
 
         protected sealed override void InitializeButtons()
         {
-            int screenWidth = Content.GetGraphicsDevice().Viewport.Width;
-            int screenHeight = Content.GetGraphicsDevice().Viewport.Height;
+            int screenWidth = ViewPort.Width;
+            int screenHeight = ViewPort.Height;
 
             int buttonWidth = 380;
             int buttonHeight = 80;
@@ -109,7 +115,8 @@ namespace BikeWars.Content.screens
 
             int startY = screenHeight / 2 + 50;
 
-            _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
+            // _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
+            // _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
 
             var buttonDefinitions = new[]
             {
@@ -132,7 +139,8 @@ namespace BikeWars.Content.screens
 
                 _buttons.Add(new MenuButton(
                     id: (int)definition.id,
-                    texture: _buttonTexture,
+                    // texture: _buttonTexture,
+                    texture: RenderPrimitives.Pixel,
                     bounds: new Rectangle(buttonX, startY, buttonWidth, buttonHeight),
                     text: definition.text,
                     font: _font,
@@ -142,32 +150,31 @@ namespace BikeWars.Content.screens
             UpdateSelection(0);
         }
 
-        protected override void HandleButtonClick(MenuButton button)
-        {
-            // Use _currentGameTime from ScreenBase class if GameTime is needed
-            switch ((ButtonAction)button.Id)
-            {
-                case ButtonAction.MainMenu:
-                    _audioService.Sounds.StopAll();
-                    _audioService.Sounds.Play(AudioAssets.SoftClick);
-                    ScreenManager.ReturnToMainMenu();
-                    break;
+        // protected override void HandleButtonClick(MenuButton button, ContentManager content, GraphicsDevice gd)
+        // {
+        //     // Use _currentGameTime from ScreenBase class if GameTime is needed
+        //     switch ((ButtonAction)button.Id)
+        //     {
+        //         case ButtonAction.MainMenu:
+        //             _audioService.Sounds.StopAll();
+        //             _audioService.Sounds.Play(AudioAssets.SoftClick);
+        //             // ScreenManager.ReturnToMainMenu();
+        //             break;
 
-                case ButtonAction.Exit:
-                    ScreenManager.AddScreen(_confirmDialog);
-                    break;
-            }
-        }
+        //         case ButtonAction.Exit:
+        //             // ScreenManager.AddScreen(_confirmDialog);
+        //             break;
+        //     }
+        // }
 
         public override void Draw(GameTime gameTime, SpriteBatch sb)
         {
-            int screenWidth = Content.GetGraphicsDevice().Viewport.Width;
-            int screenHeight = Content.GetGraphicsDevice().Viewport.Height;
+            int screenWidth = ViewPort.Width;
+            int screenHeight = ViewPort.Height;
 
             sb.Begin();
-
-            Texture2D overlay = CreateOverlayTexture(screenWidth, screenHeight);
-            sb.Draw(overlay, Vector2.Zero, Color.White * 0.7f);
+            // Texture2D overlay = CreateOverlayTexture(screenWidth, screenHeight);
+            // sb.Draw(overlay, Vector2.Zero, Color.White * 0.7f);
 
             if (_isAnimationLoaded)
             {
@@ -244,15 +251,15 @@ namespace BikeWars.Content.screens
             sb.End();
         }
 
-        private Texture2D CreateOverlayTexture(int width, int height)
-        {
-            Texture2D texture = new Texture2D(Content.GetGraphicsDevice(), width, height);
-            Color[] data = new Color[width * height];
-            for (int i = 0; i < data.Length; i++)
-                data[i] = Color.Black;
-            texture.SetData(data);
-            return texture;
-        }
+        // private Texture2D CreateOverlayTexture(int width, int height)
+        // {
+        //     Texture2D texture = new Texture2D(ScreenManager.GraphicsDevice, width, height);
+        //     Color[] data = new Color[width * height];
+        //     for (int i = 0; i < data.Length; i++)
+        //         data[i] = Color.Black;
+        //     texture.SetData(data);
+        //     return texture;
+        // }
 
         // Pass it through until we get to Game1
         private void OnExit()

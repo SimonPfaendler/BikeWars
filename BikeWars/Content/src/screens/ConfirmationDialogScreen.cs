@@ -4,8 +4,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.managers;
-using MonoGame.Extended.Content;
 using System;
+using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.screens
 {
@@ -15,67 +15,51 @@ namespace BikeWars.Content.screens
         private readonly IScreen _previousScreen;
         private readonly AudioService _audioService;
         public float MusicVolume => 0.5f;
-        private Texture2D _overlayTexture;
 
         public event Action Exit;
 
-        public ConfirmationDialogScreen(SpriteFont font, string message, IScreen previousScreen, AudioService audioService)
-            : base(null, font)
+        public ConfirmationDialogScreen(SpriteFont font, string message, IScreen previousScreen, AudioService audioService, Viewport vp)
+            : base(null, font, vp)
         {
             _message = message;
             _previousScreen = previousScreen;
             _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
-            InitializeButtons();
         }
 
+        public override void LoadContent(ContentManager content, GraphicsDevice gd)
+        {
+            base.LoadContent(content, gd);
+            InitializeButtons();
+        }
         protected sealed override void InitializeButtons()
         {
             int buttonWidth = 150;
             int buttonHeight = 60;
             int buttonSpacing = 30;
 
-            _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
-
-            int screenWidth = Content.GetGraphicsDevice().Viewport.Width;
-            int screenHeight = Content.GetGraphicsDevice().Viewport.Height;
+            int screenWidth = ViewPort.Width;
+            int screenHeight = ViewPort.Height;
 
             int totalWidth = buttonWidth * 2 + buttonSpacing;
             int startX = (screenWidth - totalWidth) / 2;
 
-            _buttons.Add(new MenuButton(
+            AddButton(new MenuButton(
                 id: (int)ButtonAction.ConfirmYes,
-                texture: _buttonTexture,
+                texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(startX, screenHeight / 2 + 80, buttonWidth, buttonHeight),
                 text: "Ja",
                 font: _font,
                 audioService: _audioService
             ));
-
-            _buttons.Add(new MenuButton(
+            AddButton(new MenuButton(
                 id: (int)ButtonAction.ConfirmNo,
-                texture: _buttonTexture,
+                texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(startX + buttonWidth + buttonSpacing, screenHeight / 2 + 80, buttonWidth, buttonHeight),
                 text: "Nein",
                 font: _font,
                 audioService: _audioService
             ));
-
-            // _overlayTexture = CreateOverlayTexture(screenWidth, screenHeight);
             UpdateSelection(0);
-        }
-
-        protected override void HandleButtonClick(MenuButton button)
-        {
-            switch ((ButtonAction)button.Id)
-            {
-                case ButtonAction.ConfirmYes:
-                    Exit?.Invoke();
-                    break;
-
-                case ButtonAction.ConfirmNo:
-                    ScreenManager.RemoveScreen(this);
-                    break;
-            }
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch sb)
@@ -99,17 +83,6 @@ namespace BikeWars.Content.screens
                 button.Draw(sb);
             }
             sb.End();
-        }
-
-        // TODOJL
-        private Texture2D CreateOverlayTexture(GraphicsDevice graphicsDevice, int width, int height)
-        {
-            Texture2D texture = new Texture2D(graphicsDevice, width, height);
-            Color[] data = new Color[width * height];
-            for (int i = 0; i < data.Length; i++)
-                data[i] = Color.Black;
-            texture.SetData(data);
-            return texture;
         }
 
         public override bool DrawLower => true;

@@ -33,7 +33,6 @@ namespace BikeWars.Content.screens
         private MenuButton _spawnKamikazeBtn;
         private MenuButton _spawnTramBtn;
 
-        private SpriteFont _font;
         private MouseState _prevMouse;
 
         private readonly System.Random _random = new System.Random();
@@ -41,14 +40,11 @@ namespace BikeWars.Content.screens
         public TechDemoScreen(AudioService audioService)
             : base(audioService, GameMode.SinglePlayer, true)
         {
-            LoadContent(Content);
         }
 
-        public override void LoadContent(ContentManager content)
+        public override void LoadContent(ContentManager content, GraphicsDevice gd)
         {
-            base.LoadContent(content);
-
-            _font = content.Load<SpriteFont>("assets/fonts/Arial");
+            base.LoadContent(content, gd);
 
             // creates simple button texture
 
@@ -58,7 +54,7 @@ namespace BikeWars.Content.screens
                 texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(30, 150, 200, 60),
                 text: "Spawn 100 Hobos",
-                font: _font,
+                font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
 
@@ -67,7 +63,7 @@ namespace BikeWars.Content.screens
                 texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(30, 220, 200, 60),
                 text: "Spawn 15 Thieves",
-                font: _font,
+                font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
 
@@ -76,7 +72,7 @@ namespace BikeWars.Content.screens
                 texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(30, 290, 200, 60),
                 text: "Spawn 50 Dogs",
-                font: _font,
+                font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
 
@@ -85,7 +81,7 @@ namespace BikeWars.Content.screens
                 texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(30, 360, 200, 60),
                 text: "Spawn 1 Opa",
-                font: _font,
+                font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
 
@@ -94,7 +90,7 @@ namespace BikeWars.Content.screens
                 texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(30, 430, 200, 60),
                 text: "Spawn 1 Tram",
-                font: _font,
+                font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
         }

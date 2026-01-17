@@ -1014,4 +1014,13 @@ public class CollisionManager
             ObjectSpawns.Add(new TiledObjectInfo(rect, obj.Properties));
         }
     }
+    public void Unload()
+    {
+        OnItemPickup = null;
+        OnItemInteraction = null;
+        OnProjectileHit = null;
+        OnCharacterCollision = null;
+        OnAOEHit = null;
+        OnTramHit = null;
+    }
 }

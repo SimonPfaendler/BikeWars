@@ -1,11 +1,9 @@
 using System;
 using BikeWars.Content.engine.interfaces;
-using BikeWars.Content.managers;
 using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
-using MonoGame.Extended.Content;
 using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.screens;
@@ -16,18 +14,16 @@ public class StartScreen : MenuScreenBase, IScreen
     public string DesiredMusic => AudioAssets.MenuMusic;
     public float MusicVolume => 1f;
     public event Action<GraphicsCommand> GraphicsRequested;
-
-
-    public StartScreen(Texture2D background, SpriteFont font, AudioService audioService)
-        : base(background, font)
+    public StartScreen(Texture2D background, SpriteFont font, AudioService audioService, Viewport vp)
+        : base(background, font, vp)
     {
         _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
     }
 
 
-    public override void LoadContent(ContentManager contentManager)
+    public override void LoadContent(ContentManager content, GraphicsDevice gd)
     {
-        base.LoadContent(contentManager);
+        base.LoadContent(content, gd);
         InitializeButtons();
     }
 
@@ -38,45 +34,21 @@ public class StartScreen : MenuScreenBase, IScreen
         int buttonHeight = 80;
 
         Rectangle buttonBounds = new Rectangle(
-            (Content.GetGraphicsDevice().Viewport.Width - buttonWidth) / 2,
-            (Content.GetGraphicsDevice().Viewport.Height - buttonHeight) / 3,
+            (ViewPort.Width - buttonWidth) / 2,
+            (ViewPort.Height - buttonHeight) / 3,
             buttonWidth,
             buttonHeight
         );
 
-        _buttonTexture = CreateSimpleTexture(
-            buttonWidth,
-            buttonHeight
-        );
-
-        _buttons.Add(new MenuButton(
+        AddButton(new MenuButton(
             id: (int)ButtonAction.NewGame,
-            texture: _buttonTexture,
+            texture: RenderPrimitives.Pixel,
             bounds: buttonBounds,
             text: "Start",
             font: _font,
             audioService: _audioService
         ));
-
         UpdateSelection(0);
-    }
-
-    protected override void HandleButtonClick(MenuButton button)
-    {
-        switch ((ButtonAction)button.Id)
-        {
-            case ButtonAction.NewGame:
-                MainMenuScreen mainMenu = new MainMenuScreen(
-                    _backgroundTexture,
-                    _font,
-                    _audioService
-                );
-                mainMenu.LoadContent(Content);
-                mainMenu.GraphicsRequested += Forward;
-                ScreenManager.RemoveScreen(this);
-                ScreenManager.AddScreen(mainMenu);
-                break;
-        }
     }
 
     private void Forward(GraphicsCommand cmd)

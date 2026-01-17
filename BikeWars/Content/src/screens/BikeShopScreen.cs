@@ -5,10 +5,8 @@ using BikeWars.Content.managers;
 using BikeWars.Entities.Characters;
 using BikeWars.Entities.Characters.MapObjects;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using MonoGame.Extended.Content;
 
 namespace BikeWars.Content.screens;
 
@@ -16,7 +14,6 @@ public class BikeShopScreen : IScreen
 {
     public bool IsOpen { get; private set; }
 
-    private readonly SpriteFont _font;
     public enum ShopOption
     {
         HealFull,
@@ -28,17 +25,18 @@ public class BikeShopScreen : IScreen
     private readonly ShopOption _option2 = ShopOption.RepairBike;
     private readonly ShopOption _option3 = ShopOption.Close;
 
+    public Viewport ViewPort {get;set;}
+    public event Action<int, IScreen> BtnClicked;
+
     private int _selectedOption = 0;
 
     private Player _player;
 
     public event Action Closed;
 
-    private readonly ContentManager Content;
-
-    public BikeShopScreen()
+    public BikeShopScreen(Viewport vp)
     {
-        _font = Content.Load<SpriteFont>("assets/fonts/Arial");
+        ViewPort = vp;
     }
 
     public void Open(Player player, BikeShop shop)
@@ -117,9 +115,8 @@ public class BikeShopScreen : IScreen
     {
         if (!IsOpen) return;
 
-        var viewport = Content.GetGraphicsDevice().Viewport;
-        int screenW = viewport.Width;
-        int screenH = viewport.Height;
+        int screenW = ViewPort.Width;
+        int screenH = ViewPort.Height;
 
         // Fullscreen overlay
         sb.Draw(RenderPrimitives.Pixel, new Rectangle(0, 0, screenW, screenH), Color.Black * 0.4f);
@@ -133,12 +130,12 @@ public class BikeShopScreen : IScreen
         sb.Draw(RenderPrimitives.Pixel, box, Color.DarkGray);
 
         string title = "BIKE SHOP";
-        Vector2 titleSize = _font.MeasureString(title);
+        Vector2 titleSize = UIAssets.DefaultFont.MeasureString(title);
         Vector2 titlePos = new Vector2(
             boxX + (boxW - titleSize.X) / 2,
             boxY + 30
         );
-        sb.DrawString(_font, title, titlePos, Color.DarkRed);
+        sb.DrawString(UIAssets.DefaultFont, title, titlePos, Color.DarkRed);
 
         // Options
         int startOptionY = boxY + 70;
@@ -162,7 +159,7 @@ public class BikeShopScreen : IScreen
             _ => option.ToString()
         };
 
-        sb.DrawString(_font, message, position, color);
+        sb.DrawString(UIAssets.DefaultFont, message, position, color);
     }
 
     // Just for IScreen
@@ -187,4 +184,12 @@ public class BikeShopScreen : IScreen
 
     }
 
+    public void OnActivated()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Unload()
+    {
+    }
 }

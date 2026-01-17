@@ -11,7 +11,7 @@ namespace BikeWars.Content.engine.Audio
         {
             _audibleAreaSize = new Point(initialViewRect.Width, initialViewRect.Height);
         }
-        
+
         public void UpdateListenerPosition(Vector2 position)
         {
             _listenerPosition = position;
@@ -26,11 +26,15 @@ namespace BikeWars.Content.engine.Audio
 
             return currentAudibleRect.Contains(soundSourcePosition);
         }
-        
+
         public float GetVolumeFor(Vector2 worldPosition)
         {
             // Optional: Hier könnte man später Distanz-basiertes Fading einbauen
             return IsAudible(worldPosition) ? 1f : 0f;
+        }
+        public void Dispose()
+        {
+
         }
     }
 }

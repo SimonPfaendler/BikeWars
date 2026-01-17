@@ -18,22 +18,34 @@ namespace BikeWars.Content.screens
 
         public event Action<GraphicsCommand> GraphicsRequested;
 
-        public GraphicsConfigScreen(Texture2D background, SpriteFont font, AudioService audioService)
-            : base(background, font)
+        public GraphicsConfigScreen(Texture2D background, SpriteFont font, AudioService audioService, Viewport vp)
+            : base(background, font, vp)
         {
             _audioService = audioService;
         }
 
-        public override void LoadContent(ContentManager contentManager)
+        public override void LoadContent(ContentManager content, GraphicsDevice gd)
         {
-            base.LoadContent(contentManager);
+            base.LoadContent(content, gd);
+            string fullscreenText = gd.PresentationParameters.IsFullScreen ? "Fullscreen: ON" : "Fullscreen: OFF";
+            int screenWidth = ViewPort.Width;
+            int screenHeight = ViewPort.Height;
+
+            int buttonWidth = 240;
+            int buttonHeight = 50;
+            int spacing = 15;
+            int startY = screenHeight / 4;
+            int footerY = startY + 4 * (buttonHeight + spacing) + 20;
+            int centerX = (screenWidth - buttonWidth) / 2;
+
+            AddButton(ButtonAction.ToggleFullscreen, fullscreenText, centerX, footerY, buttonWidth, buttonHeight);
             InitializeButtons();
         }
 
         protected sealed override void InitializeButtons()
         {
-            int screenWidth = Content.GetGraphicsDevice().Viewport.Width;
-            int screenHeight = Content.GetGraphicsDevice().Viewport.Height;
+            int screenWidth = ViewPort.Width;
+            int screenHeight = ViewPort.Height;
 
             int buttonWidth = 240;
             int buttonHeight = 50;
@@ -44,7 +56,7 @@ namespace BikeWars.Content.screens
             int leftColumnX = (screenWidth / 3) - (buttonWidth / 2);
             int rightColumnX = (2 * screenWidth / 3) - (buttonWidth / 2);
 
-            _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
+            // _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
 
 
             AddButton(ButtonAction.Resolution1920x1080, "1920 x 1080", leftColumnX, startY, buttonWidth, buttonHeight);
@@ -61,9 +73,6 @@ namespace BikeWars.Content.screens
             int footerY = startY + 4 * (buttonHeight + spacing) + 20;
             int centerX = (screenWidth - buttonWidth) / 2;
 
-            string fullscreenText = Content.GetGraphicsDevice().PresentationParameters.IsFullScreen ? "Fullscreen: ON" : "Fullscreen: OFF";
-            AddButton(ButtonAction.ToggleFullscreen, fullscreenText, centerX, footerY, buttonWidth, buttonHeight);
-
             AddButton(ButtonAction.Back, "Back", centerX, footerY + (buttonHeight + spacing), buttonWidth, buttonHeight);
 
             UpdateSelection(0);
@@ -71,53 +80,56 @@ namespace BikeWars.Content.screens
 
         private void AddButton(ButtonAction action, string text, int x, int y, int w, int h)
         {
-            _buttons.Add(new MenuButton(
+            MenuButton mb = new MenuButton(
                 id: (int)action,
-                texture: _buttonTexture,
+                // texture: _buttonTexture,
+                texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(x, y, w, h),
                 text: text,
                 font: _font,
                 audioService: _audioService
-            ));
+            );
+            mb.Clicked += RaiseBtnClicked;
+            _buttons.Add(mb);
         }
 
-        protected override void HandleButtonClick(MenuButton button)
-        {
-            switch ((ButtonAction)button.Id)
-            {
-                case ButtonAction.Resolution1920x1080:
-                    GraphicsRequested?.Invoke(new GraphicsCommand(1920, 1080, false));
-                    break;
-                case ButtonAction.Resolution1536x864:
-                    GraphicsRequested?.Invoke(new GraphicsCommand(1536, 864, false));
-                    break;
-                case ButtonAction.Resolution1280x720:
-                    GraphicsRequested?.Invoke(new GraphicsCommand(1280, 720, false));
-                    break;
-                case ButtonAction.Resolution800x600:
-                    GraphicsRequested?.Invoke(new GraphicsCommand(800, 600, false));
-                    break;
+        // protected override void HandleButtonClick(MenuButton button, ContentManager content, GraphicsDevice gd)
+        // {
+        //     switch ((ButtonAction)button.Id)
+        //     {
+        //         case ButtonAction.Resolution1920x1080:
+        //             GraphicsRequested?.Invoke(new GraphicsCommand(1920, 1080, false));
+        //             break;
+        //         case ButtonAction.Resolution1536x864:
+        //             GraphicsRequested?.Invoke(new GraphicsCommand(1536, 864, false));
+        //             break;
+        //         case ButtonAction.Resolution1280x720:
+        //             GraphicsRequested?.Invoke(new GraphicsCommand(1280, 720, false));
+        //             break;
+        //         case ButtonAction.Resolution800x600:
+        //             GraphicsRequested?.Invoke(new GraphicsCommand(800, 600, false));
+        //             break;
 
-                case ButtonAction.ResolutionPortrait1080x1920:
-                    GraphicsRequested?.Invoke(new GraphicsCommand(1080, 1920, false));
-                    break;
-                case ButtonAction.ResolutionPortrait864x1536:
-                    GraphicsRequested?.Invoke(new GraphicsCommand(864, 1536, false));
-                    break;
-                case ButtonAction.ResolutionPortrait720x1280:
-                    GraphicsRequested?.Invoke(new GraphicsCommand(720, 1280, false));
-                    break;
-                case ButtonAction.ResolutionPortrait600x800:
-                    GraphicsRequested?.Invoke(new GraphicsCommand(600, 800, false));
-                    break;
-                case ButtonAction.ToggleFullscreen:
-                    GraphicsRequested?.Invoke(new GraphicsCommand(0, 0, true));
-                    break;
-                case ButtonAction.Back:
-                    ScreenManager.RemoveScreen(this);
-                    break;
-            }
-        }
+        //         case ButtonAction.ResolutionPortrait1080x1920:
+        //             GraphicsRequested?.Invoke(new GraphicsCommand(1080, 1920, false));
+        //             break;
+        //         case ButtonAction.ResolutionPortrait864x1536:
+        //             GraphicsRequested?.Invoke(new GraphicsCommand(864, 1536, false));
+        //             break;
+        //         case ButtonAction.ResolutionPortrait720x1280:
+        //             GraphicsRequested?.Invoke(new GraphicsCommand(720, 1280, false));
+        //             break;
+        //         case ButtonAction.ResolutionPortrait600x800:
+        //             GraphicsRequested?.Invoke(new GraphicsCommand(600, 800, false));
+        //             break;
+        //         case ButtonAction.ToggleFullscreen:
+        //             GraphicsRequested?.Invoke(new GraphicsCommand(0, 0, true));
+        //             break;
+        //         case ButtonAction.Back:
+        //             // ScreenManager.RemoveScreen(this);
+        //             break;
+        //     }
+        // }
         public override void Dispose()
         {
             GraphicsRequested = null;

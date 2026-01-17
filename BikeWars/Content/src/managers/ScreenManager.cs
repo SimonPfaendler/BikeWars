@@ -5,6 +5,7 @@ using BikeWars.Content.screens;
 using Microsoft.Xna.Framework;
 using BikeWars.Content.engine.Audio;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Content;
 // The screen manager handles all existing screens:
 // -> decides which screen are drawn
 // -> decide which screens are getting updated
@@ -20,25 +21,42 @@ namespace BikeWars.Content.managers
         public event Action<IScreen> OnScreenRemoved;
         public event Action OnReturnToMainMenu;
 
+        public ContentManager Content { get; set; }
+        public GraphicsDevice GraphicsDevice { get; set; }
+
         private AudioService _audio;
         private string _currentMusic;
         private float _currentVolume = -1f;
 
+        public IReadOnlyList<IScreen> Screens => _mScreenStack.AsReadOnly();
+
         public void AddScreen(IScreen screen)
         {
-            screen.ScreenManager = this;
             _mScreenStack.Add(screen);
+            if (screen is MenuScreenBase menu)
+            {
+                menu.OnActivated();
+            }
             OnScreenAdded?.Invoke(screen);
         }
 
         public void RemoveScreen(IScreen screen)
         {
-            _mScreenStack.Remove(screen);
+            if (screen is IScreen s)
+            {
+                s.Unload();
+            }
             if (screen is IDisposable d)
             {
                 d.Dispose();
             }
+            _mScreenStack.Remove(screen);
             OnScreenRemoved?.Invoke(screen);
+            if (_mScreenStack.Count > 0)
+            {
+                IScreen newTop = _mScreenStack[_mScreenStack.Count - 1];
+                newTop.OnActivated();
+            }
         }
 
         public void ReturnToMainMenu()

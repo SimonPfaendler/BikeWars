@@ -463,4 +463,9 @@ public class GameObjectManager
         }
     }
 
+    public void Unload()
+    {
+        OnTookDamage = null;
+        OnCharacterDied = null;
+    }
 }

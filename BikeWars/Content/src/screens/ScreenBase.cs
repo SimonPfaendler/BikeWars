@@ -5,60 +5,72 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 using BikeWars.Content.engine;
-using BikeWars.Content.managers;
 using System;
 using Microsoft.Xna.Framework.Content;
-using MonoGame.Extended.Content;
 
 namespace BikeWars.Content.screens;
 public abstract class MenuScreenBase : IScreen, IDisposable
 {
-    protected ContentManager Content { get; private set; }
     protected Texture2D _backgroundTexture;
     protected Texture2D _buttonTexture;
     protected SpriteFont _font;
     protected List<MenuButton> _buttons;
     protected MouseState _previousMouseState;
     protected GameTime _currentGameTime;
-    public ScreenManager ScreenManager { get; set; }
 
     protected double _clickCooldown = 300;
     protected double _lastClickTime = -9999;
     protected int _selectedIndex = 0;
     protected bool _usingMouse = true;
 
+    public Viewport ViewPort {get;set;}
+
+    public event Action<int, IScreen> BtnClicked;
+
     // Resolution tracking
     protected int _lastScreenWidth;
     protected int _lastScreenHeight;
 
-    protected MenuScreenBase(Texture2D background, SpriteFont font)
+    protected MenuScreenBase(Texture2D background, SpriteFont font, Viewport viewport)
     {
         _backgroundTexture = background;
         _font = font;
         _buttons = new List<MenuButton>();
         _previousMouseState = Mouse.GetState();
+        ViewPort = viewport;
     }
 
     protected abstract void InitializeButtons();
 
-    public virtual void LoadContent(ContentManager contentManager)
+    public virtual void LoadContent(ContentManager content, GraphicsDevice gd)
     {
-        Content = new ContentManager(contentManager.ServiceProvider, contentManager.RootDirectory);
         // Track initial resolution
-        Viewport vp = Content.GetGraphicsDevice().Viewport;
-        _lastScreenWidth = vp.Width;
-        _lastScreenHeight = vp.Height;
+        _lastScreenWidth = ViewPort.Width;
+        _lastScreenHeight = ViewPort.Height;
         InitializeButtons();
+    }
+
+    protected void AddButton(MenuButton button)
+    {
+        button.Clicked += id => RaiseBtnClicked(id);
+        _buttons.Add(button);
+    }
+
+    public virtual void OnActivated()
+    {
+        _previousMouseState = Mouse.GetState();
+        _usingMouse = true;
+        _lastClickTime = -9999;
+        UpdateSelection(0);
     }
 
     public virtual void Update(GameTime gameTime)
     {
         // Check for Resolution Change
-        var vp = Content.GetGraphicsDevice().Viewport;
-        if (vp.Width != _lastScreenWidth || vp.Height != _lastScreenHeight)
+        if (ViewPort.Width != _lastScreenWidth || ViewPort.Height != _lastScreenHeight)
         {
-            _lastScreenWidth = vp.Width;
-            _lastScreenHeight = vp.Height;
+            _lastScreenWidth = ViewPort.Width;
+            _lastScreenHeight = ViewPort.Height;
             _buttons.Clear();
             InitializeButtons();
         }
@@ -78,8 +90,8 @@ public abstract class MenuScreenBase : IScreen, IDisposable
         if (InputHandler.IsPressed(GameAction.UI_CONFIRM))
         {
             _usingMouse = false;
-            HandleButtonClick(_buttons[_selectedIndex]);
-            return;
+            _buttons[_selectedIndex].TriggerClick();
+            // HandleButtonClick(_buttons[_selectedIndex], content, gd);
         }
 
         _currentGameTime = gameTime;
@@ -107,7 +119,8 @@ public abstract class MenuScreenBase : IScreen, IDisposable
                 if (now - _lastClickTime >= _clickCooldown)
                 {
                     _lastClickTime = now;
-                    HandleButtonClick(button);
+                    button.TriggerClick();
+                    // HandleButtonClick(button, content, gd);
                 }
             }
         }
@@ -115,10 +128,15 @@ public abstract class MenuScreenBase : IScreen, IDisposable
         _previousMouseState = currentMouseState;
     }
 
+    protected void RaiseBtnClicked(int id)
+    {
+        BtnClicked?.Invoke(id, this);
+    }
+
     public virtual void Draw(GameTime gameTime, SpriteBatch sb)
     {
         sb.Begin();
-        Rectangle destinationRect = new Rectangle(0, 0, Content.GetGraphicsDevice().Viewport.Width, Content.GetGraphicsDevice().Viewport.Height);
+        Rectangle destinationRect = new Rectangle(0, 0, ViewPort.Width, ViewPort.Height);
         sb.Draw(_backgroundTexture, destinationRect, Color.White);
 
         foreach (var button in _buttons)
@@ -129,18 +147,18 @@ public abstract class MenuScreenBase : IScreen, IDisposable
     }
 
     // CreateSimpleTexture might be changed for a better graphic later
-    protected Texture2D CreateSimpleTexture(int width, int height)
-    {
-        Texture2D texture = new Texture2D(Content.GetGraphicsDevice(), width, height);
-        Color[] data = new Color[width * height];
-        for (int i = 0; i < data.Length; i++)
-            data[i] = Color.White;
-        texture.SetData(data);
-        return texture;
-    }
+    // protected Texture2D CreateSimpleTexture(int width, int height)
+    // {
+    //     Texture2D texture = new Texture2D(ScreenManager.GraphicsDevice, width, height);
+    //     Color[] data = new Color[width * height];
+    //     for (int i = 0; i < data.Length; i++)
+    //         data[i] = Color.White;
+    //     texture.SetData(data);
+    //     return texture;
+    // }
 
     // Every screen has to handle their own button clicks
-    protected abstract void HandleButtonClick(MenuButton button);
+    // protected abstract void HandleButtonClick(MenuButton button, ContentManager content, GraphicsDevice gd);
 
     // helper-method for selecting a button
     protected void UpdateSelection(int newIndex)
@@ -158,9 +176,11 @@ public abstract class MenuScreenBase : IScreen, IDisposable
     {
         _buttonTexture?.Dispose();
         _buttonTexture = null;
+    }
 
-        Content?.Unload();
-        Content = null;
+    public void Unload()
+    {
+
     }
 
     public virtual bool DrawLower => false;

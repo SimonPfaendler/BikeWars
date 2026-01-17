@@ -3,11 +3,8 @@ using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using System.Collections.Generic;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.managers;
-using MonoGame.Extended.Content;
 using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.screens;
@@ -19,22 +16,22 @@ public class OptionScreen : MenuScreenBase, IScreen
     public float MusicVolume => 1f;
 
     public event Action<GraphicsCommand> GraphicsRequested;
-    public OptionScreen(Texture2D background, SpriteFont font, AudioService audioService)
-        : base(background, font)
+    public OptionScreen(Texture2D background, SpriteFont font, AudioService audioService, Viewport vp)
+        : base(background, font, vp)
     {
         _audioService = audioService;
 
     }
-    public override void LoadContent(ContentManager contentManager)
+    public override void LoadContent(ContentManager content, GraphicsDevice gd)
     {
-        base.LoadContent(contentManager);
+        base.LoadContent(content, gd);
         InitializeButtons();
     }
 
     protected sealed override void InitializeButtons()
     {
-        int screenWidth = Content.GetGraphicsDevice().Viewport.Width;
-        int screenHeight = Content.GetGraphicsDevice().Viewport.Height;
+        int screenWidth = ViewPort.Width;
+        int screenHeight = ViewPort.Height;
 
         int buttonWidth = 250;
         int buttonHeight = 60;
@@ -44,90 +41,66 @@ public class OptionScreen : MenuScreenBase, IScreen
         int leftStartY = screenHeight / 7;
         int rightStartY = screenHeight / 7;
 
-        _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
-
         // Buttons on the left side
-        _buttons.Add(new MenuButton(
+
+        MenuButton mb = new MenuButton(
             id: (int)ButtonAction.KeyBindingsPlayer1,
-            texture: _buttonTexture,
+            texture: RenderPrimitives.Pixel,
             bounds: new Rectangle(horizontalSpacing, leftStartY, buttonWidth, buttonHeight),
             text: "Key-Bindings Spieler 1",
             font: _font,
             audioService: _audioService
-        ));
-
-        _buttons.Add(new MenuButton(
+        );
+        mb.Clicked += RaiseBtnClicked;
+        _buttons.Add(mb);
+        mb = new MenuButton(
             id: (int)ButtonAction.KeyBindingsPlayer2,
-            texture: _buttonTexture,
+            // texture: _buttonTexture,
+            texture: RenderPrimitives.Pixel,
             bounds: new Rectangle(horizontalSpacing, leftStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
             text: "Key-Bindings Spieler 1",
             font: _font,
             audioService: _audioService
-        ));
+        );
+        mb.Clicked += RaiseBtnClicked;
+        _buttons.Add(mb);
 
-        _buttons.Add(new MenuButton(
+        mb = new MenuButton(
             id: (int)ButtonAction.Back,
-            texture: _buttonTexture,
+            texture: RenderPrimitives.Pixel,
             bounds: new Rectangle(horizontalSpacing, leftStartY + 3 * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
             text: "Back",
             font: _font,
             audioService: _audioService
-        ));
+        );
+        mb.Clicked += RaiseBtnClicked;
+        _buttons.Add(mb);
 
-        // Buttons on the right side
-        _buttons.Add(new MenuButton(
+        mb = new MenuButton(
             id: (int)ButtonAction.GraphicOptions,
-            texture: _buttonTexture,
+            texture: RenderPrimitives.Pixel,
             bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY, buttonWidth, buttonHeight),
             text: "Grafikeinstellungen",
             font: _font,
             audioService: _audioService
-        ));
+        );
+        mb.Clicked += RaiseBtnClicked;
 
-        _buttons.Add(new MenuButton(
+        // Buttons on the right side
+        _buttons.Add(mb);
+
+        mb = new MenuButton(
             id: (int)ButtonAction.SoundOptions,
-            texture: _buttonTexture,
+            texture: RenderPrimitives.Pixel,
             bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
             text: "Soundeinstellungen",
             font: _font,
             audioService: _audioService
-        ));
+        );
+        mb.Clicked += RaiseBtnClicked;
+        _buttons.Add(mb);
 
         UpdateSelection(0);
-    }
-
-
-    protected override void HandleButtonClick(MenuButton button)
-    {
-        switch ((ButtonAction)button.Id)
-        {
-            case ButtonAction.KeyBindingsPlayer1:
-                // TODO: Make KeyBindings customizable
-                break;
-
-            case ButtonAction.KeyBindingsPlayer2:
-                // TODO: Make KeyBindings customizable
-                break;
-
-            case ButtonAction.Back:
-                ScreenManager.RemoveScreen(this);
-                break;
-
-            case ButtonAction.GraphicOptions:
-            {
-                GraphicsConfigScreen gcs = new GraphicsConfigScreen(_backgroundTexture, _font, _audioService);
-                gcs.LoadContent(Content);
-                gcs.GraphicsRequested += Forward;
-                ScreenManager.AddScreen(gcs);
-                break;
-            }
-
-            case ButtonAction.SoundOptions:
-                SoundConfigScreen scs = new SoundConfigScreen(_backgroundTexture, _font, _audioService);
-                scs.LoadContent(Content);
-                ScreenManager.AddScreen(scs);
-                break;
-        }
     }
 
     private void Forward(GraphicsCommand cmd)

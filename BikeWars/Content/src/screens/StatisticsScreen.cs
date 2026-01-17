@@ -2,19 +2,15 @@ using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
-using BikeWars.Content.managers;
 using System.Collections.Generic;
 using BikeWars.Content.engine;
 using BikeWars.Content.src.utils.SaveLoadExample;
-using MonoGame.Extended.Content;
 using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.screens;
 public class StatisticsScreen : MenuScreenBase
 {
     private ScrollBox _statistics;
-
-    private readonly Texture2D bg_scroll;
     private readonly AudioService _audioService;
     public string DesiredMusic => AudioAssets.MenuMusic;
     public float MusicVolume => 1f;
@@ -23,8 +19,8 @@ public class StatisticsScreen : MenuScreenBase
 
     private List<StatisticsComponent> _components;
 
-    public StatisticsScreen(Texture2D background, SpriteFont font, AudioService audioService)
-    : base(background, font)
+    public StatisticsScreen(Texture2D background, SpriteFont font, AudioService audioService, Viewport vp)
+    : base(background, font, vp)
     {
         _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
 
@@ -46,9 +42,9 @@ public class StatisticsScreen : MenuScreenBase
         }
     }
 
-    public override void LoadContent(ContentManager contentManager)
+    public override void LoadContent(ContentManager content, GraphicsDevice gd)
     {
-        base.LoadContent(contentManager);
+        base.LoadContent(content, gd);
         InitializeButtons();
     }
 
@@ -59,8 +55,8 @@ public class StatisticsScreen : MenuScreenBase
 
     protected sealed override void InitializeButtons()
     {
-        int screenWidth = Content.GetGraphicsDevice().Viewport.Width;
-        int screenHeight = Content.GetGraphicsDevice().Viewport.Height;
+        int screenWidth = ViewPort.Width;
+        int screenHeight = ViewPort.Height;
 
         int buttonWidth = 250;
         int buttonHeight = 60;
@@ -68,11 +64,9 @@ public class StatisticsScreen : MenuScreenBase
         int horizontalSpacing = screenWidth / 15;
 
         int leftStartY = screenHeight / 2;
-
-        _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
-        _buttons.Add(new MenuButton(
+        AddButton(new MenuButton(
             id: (int)ButtonAction.Back,
-            texture: _buttonTexture,
+            texture: RenderPrimitives.Pixel,
             bounds: new Rectangle(horizontalSpacing, leftStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
             text: "Back",
             font: _font,
@@ -80,16 +74,6 @@ public class StatisticsScreen : MenuScreenBase
         ));
 
         UpdateSelection(0);
-    }
-
-    protected override void HandleButtonClick(MenuButton button)
-    {
-        switch ((ButtonAction)button.Id)
-        {
-            case ButtonAction.Back:
-                ScreenManager.RemoveScreen(this);
-                break;
-        }
     }
 
     private void MakeAchievementList(SpriteBatch sb, Vector2 startPos)
@@ -104,7 +88,7 @@ public class StatisticsScreen : MenuScreenBase
     public override void Draw(GameTime gameTime, SpriteBatch sb)
     {
         sb.Begin();
-        Rectangle destinationRect = new Rectangle(0, 0, Content.GetGraphicsDevice().Viewport.Width, Content.GetGraphicsDevice().Viewport.Height);
+        Rectangle destinationRect = new Rectangle(0, 0, ViewPort.Width, ViewPort.Height);
         sb.Draw(_backgroundTexture, destinationRect, Color.White);
 
         foreach (var button in _buttons)
