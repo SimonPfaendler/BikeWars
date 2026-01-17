@@ -556,12 +556,51 @@ public class CollisionManager
         }
     }
 
+    private void HandleAOEWithStatic(ICollider b, ICollider c)
+    {
+        if (b.Layer != CollisionLayer.WALL || c.Layer != CollisionLayer.AOE)
+        {
+            return;
+        }
+
+        if (!c.Intersects(b))
+        {
+            return;
+        }
+
+        if (b.Owner is not DestructibleObject destructible)
+        {
+            return;
+        }
+
+        if (c.Owner is not AreaOfEffectBase aoe)
+        {
+            return;
+        }
+
+        if (!aoe.CanDamageObject(destructible))
+        {
+            return;
+        }
+
+        destructible.TakeDamage(aoe.Damage);
+
+        if (destructible.Health <= 0)
+        {
+            _toUpdateWalkableRects.Add(destructible.Transform.Bounds);
+            _toRemoveStaticColliders.Add(b);
+            _gameObjectManager.Remove(destructible);
+            _gameObjectManager.NotifyPathGridChanged();
+        }
+    }
+
     private void HandleStatics(ICollider c, HashSet<ICollider> statics)
     {
         foreach (var b in statics)
         {
             HandleCharacterWithStatic(b, c);
             HandleProjectileWithStatic(b, c);
+            HandleAOEWithStatic(b, c);
         }
     }
 
@@ -846,7 +885,8 @@ public class CollisionManager
         foreach (var c in allDynamics)
         {
             if (c.Layer != CollisionLayer.CHARACTER && c.Layer != CollisionLayer.PLAYER &&
-                c.Layer != CollisionLayer.PROJECTILE && c.Layer != CollisionLayer.TRAM)
+                c.Layer != CollisionLayer.PROJECTILE && c.Layer != CollisionLayer.TRAM &&
+                c.Layer != CollisionLayer.AOE)
             {
                 continue;
             }
