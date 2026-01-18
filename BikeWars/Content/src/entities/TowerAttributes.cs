@@ -9,8 +9,9 @@ using BikeWars.Content.entities.interfaces;
 namespace BikeWars.Entities;
 public class TowerAttributes
 {
-    
-    public event Action<TowerAttributes> OnDied;
+    public float AttackRange = 200f;
+
+    public event Action<Tower> OnDied;
     private int _health { get; set; }
     public int Health {
         get => _health;
@@ -18,7 +19,7 @@ public class TowerAttributes
         {
             if (value <= 0) {
                 _health = 0;
-                OnDied?.Invoke((TowerAttributes)owner);
+                OnDied?.Invoke((Tower)owner);
                 return;
             }
             if (value > MaxHealth)

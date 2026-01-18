@@ -71,7 +71,9 @@ namespace BikeWars.Content.managers
             { "Fahrradwerkstatt", "assets/MapObjects/Fahrradwerkstatt_Tile"},
             { "Dog_Bowl", "assets/MapObjects/Dog_Bowl"},
             { "Dog_Bowl_full", "assets/MapObjects/Dog_Bowl_full"},
-            { "Straßenmusikanten", "assets/MapObjects/Straßenmusikanten" }
+            { "Straßenmusikanten", "assets/MapObjects/Straßenmusikanten" },
+            // Tower
+            { "TowerAlly", "assets/images/tower_ally"}
         };
 
         // No single-image map sprites here; map sprites are loaded from atlas JSON.
@@ -115,7 +117,7 @@ namespace BikeWars.Content.managers
             "BikeThief_Idle",
             "BikeThief_WalkLeft",
             "BikeThief_WalkRight",
-            
+
             // DOG
             "Dog_Idle",
             "Dog_WalkLeft",

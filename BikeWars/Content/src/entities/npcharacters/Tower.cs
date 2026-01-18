@@ -4,9 +4,12 @@ using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.managers;
+using System;
+using System.Collections.Generic;
+using BikeWars.Content.entities.interfaces;
 
 namespace BikeWars.Entities;
-public class Tower: IWorldAudioAware
+public abstract class Tower: IWorldAudioAware
 {
     //private readonly SpriteAnimation _idleAnimation;
     //private readonly SpriteAnimation _walkLeftAnimation;
@@ -18,11 +21,17 @@ public class Tower: IWorldAudioAware
     public float Speed;
     private BoxCollider _collider { get; set; }
     public BoxCollider Collider {get => _collider; set => _collider = value;}
-    private float _attackCooldownTimer = 0f;
+    protected float _attackCooldownTimer = 0f;
     private TowerAttributes _attributes {get;set;}
     public TowerAttributes Attributes {get => _attributes; set => _attributes = value;}
+    public bool IsDead => Attributes.Health <= 0;
+    public event Action<Tower, int> OnTookDamage;
 
-    private SpriteAnimation _currentAnimation;
+    public float Rotation {get; set;}
+
+    public Vector2 GazeDirection { get; set; }
+
+    protected Texture2D _texture;
     protected AudioService _audio;
 
 
@@ -35,10 +44,11 @@ public class Tower: IWorldAudioAware
         _audio = audio;
         // _pathFinding = pathFinding;
         // _collisionManager = collisionManager;
-
-        Attributes = new TowerAttributes(this, 40, 0, 5, 2f, false);
+        GazeDirection = new Vector2(0, -1);
+        Rotation = 0f;
         Transform = new Transform(start, size);
-        Speed = 130f;
+
+
         // Movement = new EnemyMovement(canMove: true, isMoving: false, pathFinding: _pathFinding,
         //     gridMapper: _collisionManager, repathScheduler: _repathScheduler);
         // _idleAnimation = SpriteManager.GetAnimation("Hobo_Idle");
@@ -46,84 +56,103 @@ public class Tower: IWorldAudioAware
         // _walkRightAnimation = SpriteManager.GetAnimation("Hobo_WalkRight");
         // _walkDownAnimation = SpriteManager.GetAnimation("Hobo_WalkDown");
         // _walkUpAnimation = SpriteManager.GetAnimation("Hobo_WalkUp");
-        _currentAnimation = _idleAnimation;
-        UpdateCollider();
+        // _currentAnimation = SpriteManager.GetTexture("TowerAlly");
+        // UpdateCollider();
     }
 
-public override void Update(GameTime gameTime)
+    public void Update(GameTime gameTime, List<CharacterBase> enemies)
     {
-        UpdateAttackCooldown(gameTime);
-        UpdateKnockback(gameTime);
-        UpdateHitFlash(gameTime);
+        UpdateAttack(gameTime, enemies);
+        // UpdateAttackCooldown(gameTime);
+        // UpdateKnockback(gameTime);
+        // UpdateHitFlash(gameTime);
         // Sound- and Movement-Control
-        if (Movement is EnemyMovement em)
-        {
-            em.EnemyPosition = Transform.Position;
-            em.PlayerPosition = _collisionManager.GameObjectManager.Player1.Transform.Position;
-        }
-        Movement.HandleMovement(gameTime);
-        HandleSound(Movement.IsMoving);
+        // if (Movement is EnemyMovement em)
+        // {
+        //     em.EnemyPosition = Transform.Position;
+        //     em.PlayerPosition = _collisionManager.GameObjectManager.Player1.Transform.Position;
+        // }
+        // Movement.HandleMovement(gameTime);
+        // HandleSound(Movement.IsMoving);
 
-    Vector2 direction = Movement.Direction;
-        LastTransform = new Transform(Transform.Position, Transform.Size);
-        if (Movement.IsMoving)
-        {
-            float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
+    // Vector2 direction = Movement.Direction;
+    //     LastTransform = new Transform(Transform.Position, Transform.Size);
+    //     if (Movement.IsMoving)
+    //     {
+    //         float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            if (direction.LengthSquared() > 0.0001f)
-            {
-                direction.Normalize();
-                Transform.Position += direction * Speed * delta;
-            }
+    //         if (direction.LengthSquared() > 0.0001f)
+    //         {
+    //             direction.Normalize();
+    //             Transform.Position += direction * Speed * delta;
+    //         }
 
-            if (System.Math.Abs(direction.X) > System.Math.Abs(direction.Y))
-            {
+    //         if (System.Math.Abs(direction.X) > System.Math.Abs(direction.Y))
+    //         {
 
-            _currentAnimation = (direction.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
-            }
-            else
-            {
+    //         _currentAnimation = (direction.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
+    //         }
+    //         else
+    //         {
 
-            _currentAnimation = (direction.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
-            }
-        }
-        else
-        {
-            _currentAnimation = _idleAnimation;
-        }
+    //         _currentAnimation = (direction.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
+    //         }
+    //     }
+    //     else
+    //     {
+    //         _currentAnimation = _idleAnimation;
+    //     }
 
-    if (_currentAnimation != null)
-        {
-            _currentAnimation.Update(gameTime, Movement.IsMoving);
-        }
+    // if (_currentAnimation != null)
+    //     {
+    //         _currentAnimation.Update(gameTime, Movement.IsMoving);
+    //     }
 
-    UpdateCollider();
+    // UpdateCollider();
     }
 
-public override void Draw(SpriteBatch spriteBatch)
-    {
-        if(IsDead)
-            return;
-        if (_currentAnimation == null)
-            return;
+    protected abstract void UpdateAttack(GameTime gameTime, List<CharacterBase> enemies);
 
-        Color drawColor = (_hitFlashTimer > 0f) ? _hitColor : Color.White;
-        _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, 0f, _renderScale, drawColor);
+    public void Draw(SpriteBatch spriteBatch)
+    {
+        float spriteOrientationOffset = -MathF.PI / 2f;
+        spriteBatch.Draw(
+            _texture,
+            Transform.Bounds.Center.ToVector2(),
+            null,
+            Color.White,
+            Rotation + spriteOrientationOffset,
+            new Vector2(_texture.Width / 2f, _texture.Height / 2f),
+            2.5f,
+            SpriteEffects.None,
+            0f
+        );
     }
 
-public void SetWorldAudioManager(WorldAudioManager manager)
+    public void SetWorldAudioManager(WorldAudioManager manager)
     {
-        _worldAudioManager = manager;
     }
 
-public void Immobalize(bool value)
+    public void Immobalize(bool value)
     {
-        Movement.CanMove = !value;
     }
-    public override void Attack(ICombat target)
+
+     public virtual void TakeDamage(int amount)
     {
-        if (!CanAttack()) return;
-        base.Attack(target);
-        _audio.Sounds.Play(AudioAssets.Punch);
+    }
+
+    protected virtual void OnDestroyed()
+    {
+    }
+
+    public void Dispose()
+    {
+        _texture.Dispose();
+        _texture = null;
+    }
+
+    public bool CanAttack()
+    {
+        return _attackCooldownTimer <= 0f;
     }
 }
