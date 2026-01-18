@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace BikeWars.Entities.Characters.MapObjects;
 
-public class DestructibleObject : ItemBase
+public class DestructibleObject : ObjectBase
 {
     public int Health { get; private set; }
     private bool _usesAtlas = false;
