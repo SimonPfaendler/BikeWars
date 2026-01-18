@@ -32,6 +32,8 @@ public class GameObjectManager
 
     private readonly HashSet<ItemBase> _items = new();
     public HashSet<ItemBase> Items => _items;
+    private readonly HashSet<ObjectBase> _objects = new();
+    public HashSet<ObjectBase> Objects => _objects;
 
     private HashSet<BoxCollider> _statics {get; set;}
     public HashSet<BoxCollider> Statics {get => _statics;}
@@ -126,6 +128,16 @@ public class GameObjectManager
         Items.Add(item);
     }
 
+    public void AddObject(ObjectBase obj)
+    {
+        _objects.Add(obj);
+
+        if (obj.CollisionCollider != null)
+            Statics.Add(obj.CollisionCollider);
+    }
+
+    public void RemoveObject(ObjectBase obj) => _objects.Remove(obj);
+
     public void AddStatic(BoxCollider stat)
     {
         Statics.Add(stat);
@@ -169,6 +181,10 @@ public class GameObjectManager
         {
             i.Draw(spriteBatch);
         }
+        foreach (var o in Objects)
+        {
+            o.Draw(spriteBatch);
+        }
         foreach (ProjectileBase p in Projectiles)
         {
             p.Draw(spriteBatch);
@@ -211,6 +227,10 @@ public class GameObjectManager
         foreach (ItemBase i in Items)
         {
             i.Update(gameTime);
+        }
+        foreach (ObjectBase o in Objects)
+        {
+            o.Update(gameTime);
         }
         foreach (ProjectileBase p in Projectiles)
         {
@@ -420,7 +440,7 @@ public class GameObjectManager
             {
                 continue;
             }
-            AddItem(created);
+            AddObject(created);
             switch (created) {
                 case BikeShop bs: // It works but Bikeshop shouldn't be a item.
                     AddStatic(bs.CollisionCollider);
@@ -438,7 +458,7 @@ public class GameObjectManager
         }
     }
 
-    private ItemBase? CreateFromTiled(TiledObjectInfo spawn)
+    private ObjectBase? CreateFromTiled(TiledObjectInfo spawn)
     // spawn = properties 
     {
         var start = new Vector2(spawn.Rect.X, spawn.Rect.Y);

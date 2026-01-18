@@ -23,7 +23,7 @@ public class CollisionManager
 {
     // Events that can be followed by other classes
     public event Action<Player, ItemBase> OnItemPickup;
-    public event Action<Player, ItemBase> OnItemInteraction; // Will be used for the bikeshop too
+    public event Action<Player, ObjectBase> OnObjectInteraction; // Will be used for the bikeshop too
     public event Action<CharacterBase, ProjectileBase> OnProjectileHit;
     public event Action<CharacterBase, CharacterBase> OnCharacterCollision;
     public event Action<CharacterBase, AreaOfEffectBase> OnAOEHit;
@@ -152,9 +152,9 @@ public class CollisionManager
         // Mark destructible items as non-walkable in the base grid, then pad once
         if (PathGrid != null && _baseWalkableGrid != null)
         {
-            foreach (var item in _gameObjectManager.Items)
+            foreach (var obj in _gameObjectManager.Objects)
             {
-                if (item is DestructibleObject d)
+                if (obj is DestructibleObject d)
                 {
                     SetBaseWalkableForRect(d.Transform.Bounds, false);
                 }
@@ -415,14 +415,16 @@ public class CollisionManager
     }
 
     public void Insertions(HashSet<ItemBase> items, HashSet<Player> players, HashSet<ProjectileBase> projectiles,
-        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters, List<Tram> trams)
+        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters, List<Tram> trams, HashSet<ObjectBase> objects)
     {
         foreach (ItemBase c in items)
         {
-            if (c is Musicians)
-                continue;
-            
             AddDynamic(c.Collider);
+        }
+
+        foreach (ObjectBase o in objects)
+        {
+            AddDynamic(o.Collider);
         }
 
         foreach (var p in players)
@@ -556,7 +558,7 @@ public class CollisionManager
                     _toRemoveStaticColliders.Add(b);
 
                     // remove drawable/game object now
-                    _gameObjectManager.Remove(destructible);
+                    _gameObjectManager.RemoveObject(destructible);
 
                     // Notify enemies to recalculate paths (they will see grid changes after deferred apply)
                     _gameObjectManager.NotifyPathGridChanged();
@@ -605,7 +607,7 @@ public class CollisionManager
         {
             _toUpdateWalkableRects.Add(destructible.Transform.Bounds);
             _toRemoveStaticColliders.Add(b);
-            _gameObjectManager.Remove(destructible);
+            _gameObjectManager.RemoveObject(destructible);
             _gameObjectManager.NotifyPathGridChanged();
         }
     }
@@ -779,7 +781,7 @@ public class CollisionManager
             if (s.Layer == CollisionLayer.SPAWNENEMIES || 
                 s.Layer == CollisionLayer.TERRAIN || 
                 s.Layer == CollisionLayer.AOE ||
-                (s.Layer == CollisionLayer.INTERACT && s.Owner is not ItemBase))
+                s.Layer == CollisionLayer.INTERACT)
             {
                 continue;
             }
@@ -890,19 +892,19 @@ public class CollisionManager
     {
         if (c.Layer == CollisionLayer.PLAYER && d.Layer == CollisionLayer.INTERACT && c.Intersects(d))
         {
-            if (c.Owner is Player p && d.Owner is ItemBase i)
+            if (c.Owner is Player p && d.Owner is ObjectBase i)
             {
-                OnItemInteraction?.Invoke(p, i);
+                OnObjectInteraction?.Invoke(p, i);
             }
         }
     }
 
     public void Update(HashSet<Player> players, HashSet<ItemBase> items, HashSet<ProjectileBase> projectiles,
-        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters, List<Tram> trams)
+        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters, List<Tram> trams, HashSet<ObjectBase> objects)
     {
         allDynamics.Clear();
         DynamicHash.Clear();
-        Insertions(items, players, projectiles, aoeAttacks, characters, trams);
+        Insertions(items, players, projectiles, aoeAttacks, characters, trams, objects);
 
         foreach (var c in allDynamics)
         {
