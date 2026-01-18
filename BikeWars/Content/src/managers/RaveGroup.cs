@@ -25,9 +25,6 @@ namespace BikeWars.Content.managers
         private readonly float _minRadius;
         private readonly float _shrinkSpeed;
         
-        // Optional music
-        // private readonly string? _musicTrackName;
-        // private bool _musicStarted;
 
         public bool IsActive => !_isDispersed && _ravers.Any(r => !r.IsDead);
 
@@ -38,8 +35,8 @@ namespace BikeWars.Content.managers
             float startRadius,
             Vector2 circleCenter,
             float shrinkSpeed,
-            float minRadius,
-            string? musicTrackName)
+            float minRadius
+            )
         {
             _ravers = ravers;
             _audioService = audioService;
@@ -51,10 +48,7 @@ namespace BikeWars.Content.managers
             _shrinkSpeed = shrinkSpeed;
             _minRadius = minRadius;
             
-            // TODO: Play Rave Music
-            // _audioService.Music.Play("RaveTrack");
-            // _musicTrackName = musicTrackName;
-            // StartMusicIfNeeded();
+            
         }
         
         // Spawns a rave circle around Player1
@@ -65,16 +59,21 @@ namespace BikeWars.Content.managers
             AudioService audioService,
             GameObjectManager gameObjectManager,
             CollisionManager collisionManager,
-            float shrinkSpeed = 20f,
-            float minRadius = 60f,
-            string? musicTrackName = null
+            float shrinkSpeed = 10f,
+            float minRadius = 60f
         )
         {
             if (gameObjectManager.Player1 == null)
                 return null;
             
+            audioService.Music.Pause();
+            audioService.Sounds.PlayLoop(AudioAssets.RaverSound);
+            
+            
             if (count < 1)
                 count = 1;
+            
+
             
             Vector2 circleCenter = gameObjectManager.Player1.Transform.Position;
             
@@ -104,10 +103,10 @@ namespace BikeWars.Content.managers
                 startRadius,
                 circleCenter,
                 shrinkSpeed,
-                minRadius,
-                musicTrackName
+                minRadius
             );
         }
+        
 
         public void Update(GameTime gameTime)
         {
@@ -133,8 +132,6 @@ namespace BikeWars.Content.managers
 
         private void UpdateRaverPositions()
         {
-            // compute circle center from the player position
-            // Vector2 center = _gameObjectManager.Player1!.Transform.Position;
             
             // IMPORTANT: Use the fixed list count for angles so adjacency is stable.
             int n = _ravers.Count;
@@ -198,8 +195,8 @@ namespace BikeWars.Content.managers
             else
                 dir.Normalize();
 
-            const float step = 16f;        // one tile step (matches your CELL_SIZE)
-            const int maxSteps = 10;       // search up to 10 tiles outward
+            const float step = 16f;        
+            const int maxSteps = 10;      
 
             for (int i = 1; i <= maxSteps; i++)
             {
@@ -248,6 +245,7 @@ namespace BikeWars.Content.managers
         {
             _isDispersed = true;
             
+            
             // kill/despawn all remaining ravers
             foreach (var r in _ravers)
             {
@@ -258,37 +256,12 @@ namespace BikeWars.Content.managers
                 // Remove from the world collection (GameObjectManager exposes Characters)
                 _gameObjectManager.Characters.Remove(r);
             }
+            _audioService.Sounds.StopLoop(AudioAssets.RaverSound);
+            _audioService.Music.Resume();
 
             _ravers.Clear();
-            // Stop music if needed
-            // _audioService.Music.Stop();
         }
         
-        // private void StartMusicIfNeeded()
-        // {
-        //     if (_musicStarted) return;
-        //     if (string.IsNullOrWhiteSpace(_musicTfrackName)) return;
-        //     if (_audioService == null) return;
-        //
-        //     // TODO: adapt to your AudioService API
-        //     // Example:
-        //     // _audioService.Music.Play(_musicTrackName);
-        //
-        //     _musicStarted = true;
-        // }
-        //
-        // private void StopMusicIfNeeded()
-        // {
-        //     if (!_musicStarted) return;
-        //     if (string.IsNullOrWhiteSpace(_musicTrackName)) return;
-        //     if (_audioService == null) return;
-        //
-        //     // TODO: adapt to your AudioService API
-        //     // Example:
-        //     // _audioService.Music.Stop();
-        //
-        //     _musicStarted = false;
-        // }
     }
 }
 

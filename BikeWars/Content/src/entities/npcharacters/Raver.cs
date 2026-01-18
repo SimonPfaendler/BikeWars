@@ -17,7 +17,7 @@ namespace BikeWars.Entities.Characters
         public Raver(Vector2 start, Point size, AudioService audio) 
         {
             _audio = audio;
-            Attributes = new CharacterAttributes(this, maxHealth: 5, health: 5, attackDamage: 2, attackCoolDown: 0f, canAutoAttack: false);
+            Attributes = new CharacterAttributes(this, maxHealth: 35, health: 35, attackDamage: 2, attackCoolDown: 0f, canAutoAttack: false);
             
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);

@@ -33,6 +33,7 @@ namespace BikeWars.Content.engine.Audio
         public const string Miau = "miau";
         public const string WoodCrack = "wood_crack";
         public const string WoodDestroy = "wood_destroy";
+        public const string RaverSound = "raver_audio";
         
 
         // Mapping ID -> Content-Path
@@ -65,7 +66,8 @@ namespace BikeWars.Content.engine.Audio
             { BarkFritz, "assets/sounds/Dogs/Bark_Fritz"},
             { WoodCrack, "assets/sounds/wood_crack"},
             { WoodDestroy, "assets/sounds/wood_destroy"},
-            { Miau, "assets/sounds/Dogs/Miau"}
+            { Miau, "assets/sounds/Dogs/Miau"},
+            { RaverSound, "assets/sounds/raver_audio" }
             
         };
 
@@ -74,13 +76,13 @@ namespace BikeWars.Content.engine.Audio
         public const string GameMusic = "Game_music";
         public const string LatinMusic = "Latin_music";
         public const string Metal = "Metal";
+        
         public static readonly IReadOnlyDictionary<string, string> SongPaths = new Dictionary<string, string>
         {
             { MenuMusic, "assets/sounds/Menu_music" },
             { GameMusic, "assets/sounds/Game_music" },
             { LatinMusic, "assets/sounds/LatinMusic"},
             { Metal, "assets/sounds/Metal" },
-
         };
     }
 }

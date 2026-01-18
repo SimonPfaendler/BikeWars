@@ -24,7 +24,7 @@ namespace BikeWars.Content.managers
         private double _timeSinceLastSwarm;
         private double _timeSinceLastCircle;
         private const double SWARM_INTERVAL = 65.0;
-        private const double CIRCLE_SPAWN_INTERVAL = 100.0;
+        private const double CIRCLE_SPAWN_INTERVAL = 40.0;
 
         private const double GAME_DURATION = 15 * 60; // 15 minutes in seconds
         private const double START_SPAWN_INTERVAL = 4; // Start with 4 seconds
@@ -261,9 +261,8 @@ namespace BikeWars.Content.managers
                 audioService: _audioService,
                 gameObjectManager: _gameObjectManager,
                 collisionManager: _collisionManager,
-                shrinkSpeed: 25f,
-                minRadius: 70f,
-                musicTrackName: null // or your track id later
+                shrinkSpeed: 15f,
+                minRadius: 70f
             );
 
             if (group != null)

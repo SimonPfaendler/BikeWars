@@ -240,8 +240,7 @@ namespace BikeWars.Content.screens
                 gameObjectManager: GameObjectManager,
                 collisionManager: CollisionManager,   
                 shrinkSpeed: 25f,
-                minRadius: 70f,
-                musicTrackName: null
+                minRadius: 70f
             );
 
             if (group != null)
