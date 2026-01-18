@@ -37,9 +37,9 @@ public class EnemyMovement : MovementBase
    private const float StopRadius = 10f;
 
    // enemies avoid each other
-   private const float AvoidRadius = 45f;
-   private const float AvoidStrength = 1.2f;
-   private const float AvoidMax = 1.0f;
+   private const float AvoidRadius = 60f;
+   private const float AvoidStrength = 5.0f;
+   private const float AvoidMax = 6f;
    private readonly float _slotAngle;
 
    public Vector2 PlayerPosition {get; set;}
@@ -155,24 +155,24 @@ public class EnemyMovement : MovementBase
                // not waiting -> ok to chase directly
                _currentPath.Clear();
                _pathIndex = 0;
-               pathDir = DirectionToTarget();
+               pathDir = FallbackStepOnGrid(enemyGrid, playerGrid);
            }
        }
        
        Vector2 avoidDir = ComputeAvoidance();
-       avoidDir *= 0.6f;
+       // avoidDir *= 0.6f;
        
        // Stops the enemy from moving backwards when avoiding others,
        // so it mainly moves forward and only steps to the side.
-       if (pathDir != Vector2.Zero && avoidDir != Vector2.Zero)
-       {
-           float dot = Vector2.Dot(avoidDir, pathDir);
-           if (dot < 0f)
-           {
-               // remove backward component
-               avoidDir -= pathDir * dot;
-           }
-       }
+       // if (pathDir != Vector2.Zero && avoidDir != Vector2.Zero)
+       // {
+       //     float dot = Vector2.Dot(avoidDir, pathDir);
+       //     if (dot < 0f)
+       //     {
+       //         // remove backward component
+       //         avoidDir -= pathDir * dot;
+       //     }
+       // }
        
        // commented for debug, bypasses all the avoidance algo
        Vector2 combinedPath = pathDir + avoidDir;
@@ -414,6 +414,9 @@ public class EnemyMovement : MovementBase
 
        Point best = enemyGrid;
        float bestScore = float.PositiveInfinity;
+        
+       // unique offset to stop enemies from walking in a single line
+       float noise = (this.GetHashCode() % 100) / 1000.0f;
 
        for (int i = 0; i < 8; i++)
        {
@@ -426,11 +429,26 @@ public class EnemyMovement : MovementBase
            // don't step into walls
            if (!_pathFinding.GetNode(nx, ny).Walkable)
                continue;
+           
+           // check if diagonal nodes are blocked 
+           if (dxs[i] != 0 && dys[i] != 0)
+           {
+               // manually check the 2 neighbours 
+               bool s1 = _pathFinding.GetNode(enemyGrid.X + dxs[i], enemyGrid.Y).Walkable;
+               bool s2 = _pathFinding.GetNode(enemyGrid.X, enemyGrid.Y + dys[i]).Walkable;
+               
+               // either one of them is blocked we stop
+               if (!s1 || !s2)
+                   continue;
+           }
 
            // score = distance to target (smaller is better)
            float ddx = targetGrid.X - nx;
            float ddy = targetGrid.Y - ny;
            float score = ddx * ddx + ddy * ddy;
+           
+           // add the noise to score to stop 2 enemies from choosing the same path
+           score += noise;
 
            if (score < bestScore)
            {

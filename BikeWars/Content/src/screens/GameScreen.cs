@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using BikeWars.Content.components;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -16,6 +17,7 @@ using MonoGame.Extended.Tiled.Renderers;
 using BikeWars.Content.managers;
 using BikeWars.Content.events;
 using BikeWars.Content.entities.interfaces;
+using BikeWars.Content.entities.MapObjects;
 using BikeWars.Entities.Characters.MapObjects;
 
 namespace BikeWars.Content.screens
@@ -62,7 +64,7 @@ namespace BikeWars.Content.screens
 
         private CombatManager _combatManager;
 
-        private SpawnManager _spawnManager;
+        protected SpawnManager _spawnManager;
 
         private PathFinding _pathFinding;
 
@@ -79,7 +81,7 @@ namespace BikeWars.Content.screens
         private bool _showStaticHitboxes = true;
 
         private GameTimer _gameTimer;
-        private const float GAME_TIME_LIMIT = 120f;
+        private const float GAME_TIME_LIMIT = 300f;
         private SpriteFont _timerFont;
         private Vector2 _timerPosition;
         private readonly GameMode _gameMode;
@@ -91,6 +93,20 @@ namespace BikeWars.Content.screens
         
         private RepathScheduler _repathScheduler;
         protected RepathScheduler RepathScheduler => _repathScheduler;
+        
+        private bool _musicOverrideActive = false;
+        private Musicians _activeMusicianOverride = null;
+        private float _musicOverrideDelayTimer = 0f;
+        private bool _waitingForMetal = false;
+
+        private const float METAL_DELAY_SECONDS = 2f;
+        
+        private int _musicianDamageCircleCount = 0;
+        private float _musicianDamageCircleTimer = 0f;
+        private const int MUSICIAN_DAMAGE_CIRCLE_TOTAL = 3;
+        private const float MUSICIAN_DAMAGE_CIRCLE_INTERVAL = 3f;
+        private Musicians? _activeMusiciansForAOE = null;
+
 
 
         public void TriggerHitStop(float duration)
@@ -123,7 +139,8 @@ namespace BikeWars.Content.screens
             _gameObjectManager.AddItem(new RacingBike(new Vector2(5800, 5800), new Point(32, 32)));
             string energy = "Energygel";
             _gameObjectManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32), energy));
-            _gameObjectManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 90), new Point(32, 32), energy));
+            string doping = "DopingSpritze";
+            _gameObjectManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 90), new Point(32, 32), doping));
 
             _freelook = false;
             // camera.Position is set by Update usually, but let's init it
@@ -149,7 +166,7 @@ namespace BikeWars.Content.screens
             if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);
             if (_gameObjectManager.Player2 != null) players.Add(_gameObjectManager.Player2);
 
-            _collisionManager.Insertions(_gameObjectManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters);
+            _collisionManager.Insertions(_gameObjectManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>());
 
             GameEvents.OnResumeTimer += ResumeTimer;
             HandleLoadNonInGameData();
@@ -187,6 +204,7 @@ namespace BikeWars.Content.screens
             _collisionManager.OnItemPickup += _gameObjectManager.Player1.OnPickUpItem;
             _collisionManager.OnItemInteraction += _gameObjectManager.Player1.OnPickUpItem;
             _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
+            _collisionManager.OnTramHit += _combatManager.HandleTramHit;
 
             _combatManager.OnHitStopRequested += TriggerHitStop;
             _combatManager.OnScreenShakeRequested += (intensity, duration) => camera.Shake(intensity, duration);
@@ -262,7 +280,8 @@ namespace BikeWars.Content.screens
             };
 
             // Spawn Manager
-            _spawnManager = new SpawnManager(_gameObjectManager, _collisionManager, _audioService, _pathFinding, _repathScheduler);
+            _spawnManager = new SpawnManager(_gameObjectManager, _collisionManager, _audioService, _pathFinding, _repathScheduler, _worldAudioManager);
+
 
             // timer
             _timerFont = content.Load<SpriteFont>("assets/fonts/Arial");
@@ -331,9 +350,7 @@ namespace BikeWars.Content.screens
                 if (_hitStopTimer > 0f)
                 {
                     // Skip updates for game objects and collision to simulate pause
-                     _tiledMapRenderer.Update(gameTime); // keep map rendering updating if needed or freeze it too
-                    // We still might want to process input or camera?
-                    // For "Juice", typically everything freezes.
+                     _tiledMapRenderer.Update(gameTime); // keep map rendering updating
                     return;
                 }
             }
@@ -352,7 +369,7 @@ namespace BikeWars.Content.screens
             _repathScheduler?.Update();
             
             _gameObjectManager.Update(gameTime, InputHandler.MakeMouseWorldPosByCamera(camera));
-            _collisionManager.Update(players, _gameObjectManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters);
+            _collisionManager.Update(players, _gameObjectManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(_gameObjectManager.Trams));
 
 
             if (InputHandler.IsPressed(GameAction.DEBUG_HEAL))
@@ -410,6 +427,132 @@ namespace BikeWars.Content.screens
             
             if (!_isTechDemo)
                 _gameTimer.Update(gameTime);
+            
+            // check if Musicians are nearby and change Music if it's the case
+            
+            bool playerNearMusicians = false;
+            
+            foreach (var item in _gameObjectManager.Items)
+            {
+                if (item is Musicians musicians)
+                {
+                    if (musicians.IsPlayerNearby(_gameObjectManager.Player1.Transform.Position) || 
+                        (_gameObjectManager.Player2 != null && musicians.IsPlayerNearby(_gameObjectManager.Player2.Transform.Position)))
+                    {
+                        playerNearMusicians = true;
+                        break; 
+                    }
+                }
+            }
+            
+            // logic for interaction with musicians (music change and attack)
+            if (!_musicOverrideActive)
+            {
+                foreach (var item in _gameObjectManager.Items)
+                {
+                    if (item is not Musicians musicians)
+                        continue;
+
+                    bool p1Interact =
+                        musicians.Intersects(_gameObjectManager.Player1.Collider) &&
+                        _gameObjectManager.Player1.IsInteractPressed();
+
+                    bool p2Interact = false;
+
+                    if (_gameObjectManager.Player2 != null)
+                    {
+                        p2Interact =
+                            musicians.Intersects(_gameObjectManager.Player2.Collider) &&
+                            _gameObjectManager.Player2.IsInteractPressed();
+                    }
+
+                    if ((p1Interact || p2Interact) && musicians.TryTriggerOverride())
+                    {
+                        StartMusicOverride(musicians);
+                        _activeMusiciansForAOE = musicians;
+                        _musicianDamageCircleCount = 0;
+                        _musicianDamageCircleTimer = MUSICIAN_DAMAGE_CIRCLE_INTERVAL;
+
+                        break;
+                    }
+                }
+            }
+            
+            if (_activeMusiciansForAOE != null && _musicianDamageCircleCount < MUSICIAN_DAMAGE_CIRCLE_TOTAL)
+            {
+                _musicianDamageCircleTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                if (_musicianDamageCircleTimer <= 0f)
+                {
+                    // spawn DamageCircle
+                    Vector2 offset = new Vector2(_activeMusiciansForAOE.Transform.Size.X / 2f,
+                        _activeMusiciansForAOE.Transform.Size.Y / 2f);
+                    
+                    Transform dcTransform = new Transform(_activeMusiciansForAOE.Transform.Position + offset,
+                        _activeMusiciansForAOE.Transform.Size);
+
+                    DamageCircle dc = new DamageCircle(
+                        dcTransform,
+                        owner: null,
+                        damagePlayers: false
+                    );
+
+                    dc.LoadContent(_gameObjectManager._contentManager);
+                    _gameObjectManager.AddAOE(dc);
+
+                    _musicianDamageCircleCount++;
+                    _musicianDamageCircleTimer = MUSICIAN_DAMAGE_CIRCLE_INTERVAL;
+                }
+            }
+
+            
+            if (_musicOverrideActive)
+            {
+                float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+                
+                if (_waitingForMetal)
+                {
+                    _musicOverrideDelayTimer -= dt;
+
+                    if (_musicOverrideDelayTimer <= 0f)
+                    {
+                        _waitingForMetal = false;
+                        
+                        _audioService.Music.Play(AudioAssets.Metal, isRepeating: false);
+                    }
+                    
+                    return;
+                }
+                
+                if (!_audioService.Music.IsPlaying)
+                {
+                    _musicOverrideActive = false;
+
+                    if (_activeMusicianOverride != null)
+                    {
+                        _activeMusicianOverride.ResetOverride();
+                        _activeMusicianOverride = null;
+                    }
+                }
+
+                return;
+            }
+
+            
+            if (playerNearMusicians)
+            {
+                if (_audioService.Music.CurrentSong != AudioAssets.LatinMusic)
+                {
+                    _audioService.Music.PlayWithFade(AudioAssets.LatinMusic, true);
+                }
+            }
+            else
+            {
+                if (_audioService.Music.CurrentSong == AudioAssets.LatinMusic)
+                {
+                    _audioService.Music.PlayWithFade(AudioAssets.GameMusic, true);
+                }
+            }
         }
 
         // Load here stuff like statistics or options that is not related to the
@@ -581,6 +724,7 @@ namespace BikeWars.Content.screens
 
             spriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.GetTransform());
             _gameObjectManager.Draw(spriteBatch);
+            // _spawnManager.Draw(); // Trams are drawn via GameObjectManager
 
             if (_isTechDemo && _showStaticHitboxes)
             {
@@ -591,7 +735,8 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.Characters,
                     _gameObjectManager.Items,
                     _gameObjectManager.Projectiles,
-                    _gameObjectManager.AOEAttacks
+                    _gameObjectManager.AOEAttacks,
+                    new List<Tram>(_gameObjectManager.Trams)
                 );
             }
 
@@ -728,6 +873,20 @@ namespace BikeWars.Content.screens
             Keyboard,
             Controller
         }
+        
+        private void StartMusicOverride(Musicians musicians)
+        {
+            _musicOverrideActive = true;
+            _activeMusicianOverride = musicians;
+            
+            _audioService.Music.Stop();
+            
+            _audioService.Sounds.Play(AudioAssets.VinylStop);
+            
+            _musicOverrideDelayTimer = METAL_DELAY_SECONDS;
+            _waitingForMetal = true;
+        }
+
 
 
     }
