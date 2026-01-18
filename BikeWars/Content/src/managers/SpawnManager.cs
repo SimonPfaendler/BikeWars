@@ -1,7 +1,9 @@
 using System;
+using System.Linq;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Entities.Characters;
+using BikeWars.Content.managers;
 using BikeWars.Content.entities.interfaces;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
@@ -35,6 +37,9 @@ namespace BikeWars.Content.managers
         // Tram Logic
         private double _timeSinceLastTram;
         private const double TRAM_SPAWN_INTERVAL = 15.0; // Every 15 seconds
+        
+        // raver logic
+        private List<RaveGroup> _raveGroups = new List<RaveGroup>();
 
         private readonly Random _random;
         private readonly RepathScheduler _repathScheduler;
@@ -91,8 +96,17 @@ namespace BikeWars.Content.managers
                 SpawnTram();
                 _timeSinceLastTram = 0;
             }
+            
+            for (int i = _raveGroups.Count - 1; i >= 0; i--)
+            {
+                _raveGroups[i].Update(gameTime);
 
+                // remove finished/dispersed groups
+                if (!_raveGroups[i].IsActive)
+                    _raveGroups.RemoveAt(i);
             }
+
+        }
 
         public void SpawnTram(float spawnRadius = 5000f)
         {
@@ -223,8 +237,40 @@ namespace BikeWars.Content.managers
             }
             return false;
         }
-
+        
+        // spawn the rave group
         private void SpawnCircle(double progress)
+        {
+            if (_gameObjectManager.Player1 == null) return;
+
+            int count = 12 + (int)(progress * 10); // 12..22
+            float startRadius = 300f;
+
+            // pick a size you want for ravers
+            Point raverSize = new Point(32, 32);
+
+            // optional: prevent multiple rave groups at once
+            if (_raveGroups.Any(g => g.IsActive))
+                return;
+
+            // Spawn the rave group (this already calls GameObjectManager.AddCharacter internally)
+            var group = RaveGroup.SpawnAroundPlayer(
+                count: count,
+                startRadius: startRadius,
+                raverSize: raverSize,
+                audioService: _audioService,
+                gameObjectManager: _gameObjectManager,
+                collisionManager: _collisionManager,
+                shrinkSpeed: 25f,
+                minRadius: 70f,
+                musicTrackName: null // or your track id later
+            );
+
+            if (group != null)
+                _raveGroups.Add(group);
+        }
+
+        private void SpawnRCircle(double progress)
         {
             int count = 12 + (int)(progress * 10); // 12 to 22 enemies
             float radius = 300f;

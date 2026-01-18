@@ -392,13 +392,13 @@
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:assets/sounds/wood-crack.wav
+/build:assets/sounds/wood-crack.wav;assets/sounds/wood_crack
 
 #begin assets/sounds/wood-destory.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:assets/sounds/wood-destory.wav
+/build:assets/sounds/wood-destory.wav;assets/sounds/wood_destroy
 
 #begin assets/sprites/characters/character_atlas.png
 /importer:TextureImporter
@@ -579,16 +579,4 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:assets/sprites/XP/xp_money_texture.png
-
-#begin assets/sounds/wood-crack.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:assets/sounds/wood-crack.wav;assets/sounds/wood_crack
-
-#begin assets/sounds/wood-destory.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:assets/sounds/wood-destory.wav;assets/sounds/wood_destroy
 

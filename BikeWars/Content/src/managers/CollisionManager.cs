@@ -672,6 +672,8 @@ public class CollisionManager
         }
 
         CharacterBase ch = (CharacterBase)c.Owner;
+        CharacterBase chd = (CharacterBase)d.Owner;
+        
         Vector2 delta = ch.Transform.Position - ch.LastTransform.Position;
 
         if (!WillCollide((BoxCollider)c, delta, d))
@@ -686,11 +688,20 @@ public class CollisionManager
         if (t.LengthSquared() < 0.0001f)
             return;
         
-        CharacterBase chd = (CharacterBase)d.Owner;
-
-
-        if (t.LengthSquared() < 0.0001f)
+        if (ch is Player)
+        {
+            ApplySafePush(ch, c, -t);
             return;
+        }
+        if (chd is Player)
+        {
+            // t is for (c,d). If we want to move d out of c, compute it the other way.
+            Vector2 td = GetPenetrationVector(d, c);
+            if (td.LengthSquared() < 0.0001f) return;
+
+            ApplySafePush(chd, d, -td);
+            return;
+        }
         
         // split 2 characters apart by 50%
         Vector2 separation = t * 0.5f;
@@ -700,8 +711,6 @@ public class CollisionManager
         
         // Push character B (Forwards)
         ApplySafePush(chd, d, separation);
-        
-        
     }
     
     // slide the enemies along walls instead of them being pushed into the hitboxes

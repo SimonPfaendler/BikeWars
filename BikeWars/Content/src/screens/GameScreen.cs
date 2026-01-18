@@ -660,15 +660,14 @@ namespace BikeWars.Content.screens
                 // if R is pressed while in tech demo remove all characters exept the player
                 if (_isTechDemo)
                 {
-                    foreach (CharacterBase ch in _gameObjectManager.Characters)
-                    {
-                        if (ch == _gameObjectManager.Player1)
-                        {
-                            continue;
-                        }
-                        _gameObjectManager.Characters.Remove(ch);
-                    }
+                    // remove everything except player(s)
+                    _gameObjectManager.Characters.RemoveWhere(ch =>
+                        ch != _gameObjectManager.Player1 &&
+                        ch != _gameObjectManager.Player2
+                    );
                     _gameObjectManager.Projectiles.Clear();
+                    
+                    OnTechDemoReset();
 
                     Console.WriteLine("Tech demo reset: removed all enemies and projectiles.");
                 }
@@ -681,6 +680,10 @@ namespace BikeWars.Content.screens
                     Console.WriteLine("Reset counter and player position.");
                 }
             }
+        }
+        
+        protected virtual void OnTechDemoReset()
+        {
         }
 
         // draws the enemy path in the tech demo
