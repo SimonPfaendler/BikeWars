@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BikeWars.Content.engine;
+using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.entities.MapObjects;
@@ -11,6 +12,7 @@ using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using BikeWars;
 
 namespace BikeWars.Content.managers;
 
@@ -516,6 +518,16 @@ public class CollisionManager
 
             ch.UpdateCollider();
         }
+
+        // If already overlapping a static (e.g., pushed in by another entity), push the character out
+        if (c.Intersects(b))
+        {
+            var penetration = GetPenetrationVector(c, b);
+            if (penetration.LengthSquared() > 0.0001f && c.Owner is CharacterBase stuck)
+            {
+                ApplySafePush(stuck, c, -penetration);
+            }
+        }
     }
 
     private void HandleProjectileWithStatic(ICollider b, ICollider c)
@@ -530,6 +542,8 @@ public class CollisionManager
             if (b.Owner is DestructibleObject destructible)
             {
                 destructible.TakeDamage(p.Damage);
+                Game1.Audio.Sounds.Play(destructible.Health > 0 ? AudioAssets.WoodCrack : AudioAssets.WoodDestroy);
+                _gameObjectManager.SpawnDamageNumber(GetObjectCenter(destructible), p.Damage);
                 _toRemoveColliders.Add(p.Collider);
 
                 // if destroyed: defer static collider removal and defer path grid update
@@ -584,6 +598,8 @@ public class CollisionManager
         }
 
         destructible.TakeDamage(aoe.Damage);
+        Game1.Audio.Sounds.Play(destructible.Health > 0 ? AudioAssets.WoodCrack : AudioAssets.WoodDestroy);
+        _gameObjectManager.SpawnDamageNumber(GetObjectCenter(destructible), aoe.Damage);
 
         if (destructible.Health <= 0)
         {
@@ -613,6 +629,12 @@ public class CollisionManager
             HandleCharacters(c, d);
             HandleTramCollision(c, d);
         }
+    }
+
+    private static Vector2 GetObjectCenter(DestructibleObject destructible)
+    {
+        var bounds = destructible.Transform.Bounds;
+        return new Vector2(bounds.Center.X, bounds.Center.Y);
     }
 
     private void HandleTramCollision(ICollider c, ICollider d)
