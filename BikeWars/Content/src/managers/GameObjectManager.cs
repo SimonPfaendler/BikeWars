@@ -12,7 +12,9 @@ using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Entities.Characters.MapObjects;
+using BikeWars.Content.components;
 using BikeWars.Content.engine.ui;
+using BikeWars.Content.entities.MapObjects;
 
 
 namespace BikeWars.Content.managers;
@@ -30,6 +32,8 @@ public class GameObjectManager
 
     private readonly HashSet<ItemBase> _items = new();
     public HashSet<ItemBase> Items => _items;
+    private readonly HashSet<ObjectBase> _objects = new();
+    public HashSet<ObjectBase> Objects => _objects;
 
     private HashSet<BoxCollider> _statics {get; set;}
     public HashSet<BoxCollider> Statics {get => _statics;}
@@ -45,11 +49,12 @@ public class GameObjectManager
     private HashSet<DamageNumber> _damageNumbers = new HashSet<DamageNumber>();
     private SpriteFont? _damageFont;
 
+    private HashSet<Tram> _trams = new HashSet<Tram>();
+    public HashSet<Tram> Trams => _trams;
 
     public ContentManager _contentManager {get; set;} // TODO do we need this one?
 
     private WorldAudioManager? _worldAudioManager;
-
     public GameObjectManager(ContentManager content, Player? player1, Player? player2)
     {
         Player1 = player1;
@@ -123,6 +128,16 @@ public class GameObjectManager
         Items.Add(item);
     }
 
+    public void AddObject(ObjectBase obj)
+    {
+        _objects.Add(obj);
+
+        if (obj.CollisionCollider != null)
+            Statics.Add(obj.CollisionCollider);
+    }
+
+    public void RemoveObject(ObjectBase obj) => _objects.Remove(obj);
+
     public void AddStatic(BoxCollider stat)
     {
         Statics.Add(stat);
@@ -138,6 +153,12 @@ public class GameObjectManager
         _aoeAttacks.Add(aoe);
     }
 
+    public void AddTram(Tram tram)
+    {
+        _trams.Add(tram);
+        tram.RequestScreenShake += RequestScreenShake;
+    }
+
     public void LoadContent(ContentManager content)
     {
         foreach (AreaOfEffectBase a in _aoeAttacks)
@@ -149,6 +170,7 @@ public class GameObjectManager
 
     public void Draw(SpriteBatch spriteBatch)
     {
+
         if (Player1 != null) Player1.Draw(spriteBatch);
         if (Player2 != null) Player2.Draw(spriteBatch);
         foreach (CharacterBase c in Characters)
@@ -158,6 +180,10 @@ public class GameObjectManager
         foreach (ItemBase i in Items)
         {
             i.Draw(spriteBatch);
+        }
+        foreach (var o in Objects)
+        {
+            o.Draw(spriteBatch);
         }
         foreach (ProjectileBase p in Projectiles)
         {
@@ -172,6 +198,10 @@ public class GameObjectManager
         {
             if (_damageFont != null)
                 dn.Draw(spriteBatch, _damageFont);
+        }
+        foreach (var tram in _trams)
+        {
+            tram.Draw(spriteBatch);
         }
 
         foreach (BoxCollider s in Statics)
@@ -198,6 +228,10 @@ public class GameObjectManager
         {
             i.Update(gameTime);
         }
+        foreach (ObjectBase o in Objects)
+        {
+            o.Update(gameTime);
+        }
         foreach (ProjectileBase p in Projectiles)
         {
             p.Update(gameTime);
@@ -207,6 +241,11 @@ public class GameObjectManager
             aoe.Update(gameTime);
             return aoe.IsExpired;
         });
+        foreach (var tram in _trams)
+        {
+            tram.Update(gameTime);
+        }
+        _trams.RemoveWhere(t => t.IsExpired);
 
         _damageNumbers.RemoveWhere(dn =>
         {
@@ -233,6 +272,8 @@ public class GameObjectManager
             _pendingDamage.Clear();
             _damageAggregationTimer = AggregationInterval;
         }
+
+        DogBowl.UpdateBowl(gameTime);
     }
 
     private void OnPlayerShotBullet(Player player)
@@ -268,7 +309,11 @@ public class GameObjectManager
     private void OnPlayerDamageCircle(Player player)
     {
         Vector2 direction = player.GazeDirection;
-        DamageCircle dc = new DamageCircle(player);
+        DamageCircle dc = new DamageCircle(
+            player.Transform,
+            owner: player,
+            damagePlayers: false
+        );
         dc.LoadContent(_contentManager);
         AddAOE(dc);
 
@@ -276,6 +321,11 @@ public class GameObjectManager
         //OnScreenShakeRequested?.Invoke(6f, 0.8f);
         OnScreenShakeRequested?.Invoke(7f, 2.0f);
 
+    }
+
+    public void RequestScreenShake(float intensity, float duration)
+    {
+        OnScreenShakeRequested?.Invoke(intensity, duration);
     }
 
     public void SetWorldAudioManager(WorldAudioManager worldAudioManager)
@@ -390,22 +440,26 @@ public class GameObjectManager
             {
                 continue;
             }
-            AddItem(created);
+            AddObject(created);
             switch (created) {
                 case BikeShop bs: // It works but Bikeshop shouldn't be a item.
                     AddStatic(bs.CollisionCollider);
                     break;
+                case DogBowl db:
+                    AddStatic(db.CollisionCollider);
+                    break;
                 case DestructibleObject:
                     AddStatic(created.Collider);
                     break;
-                case Chest:
-                    AddItem(created);
+                case Chest chest:
+                    AddStatic(chest.CollisionCollider);
                     break;
             }
         }
     }
 
-    private ItemBase? CreateFromTiled(TiledObjectInfo spawn)
+    private ObjectBase? CreateFromTiled(TiledObjectInfo spawn)
+    // spawn = properties 
     {
         var start = new Vector2(spawn.Rect.X, spawn.Rect.Y);
         var size  = new Point(spawn.Rect.Width, spawn.Rect.Height);
@@ -415,15 +469,18 @@ public class GameObjectManager
         switch (type)
         {
             case "Bike_Shop":
-                return new BikeShop(start, size, spawn);
+                return new BikeShop(start, size);
             case "Destructible":
                 return new DestructibleObject(start, size, spawn);
             case "chest":
                 string item = spawn.Properties["item"];
                 return new Chest(start, size, item);
+            case "dog-bowl":
+                return new DogBowl(start, size);
+            case "musicians":
+                return new Musicians(start, size);
             default:
                 return null;
         }
     }
-
 }

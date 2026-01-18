@@ -18,8 +18,6 @@ namespace BikeWars.Content.screens
         public float MusicVolume => 0.5f;
 
         private Texture2D _pixel;
-        private int _lastWidth;
-        private int _lastHeight;
 
         public PauseMenuScreen(SpriteFont font, AudioService audioService)
             :base(null, font)
@@ -39,9 +37,6 @@ namespace BikeWars.Content.screens
             int screenWidth = game.GraphicsDevice.Viewport.Width;
             int screenHeight = game.GraphicsDevice.Viewport.Height;
             
-            _lastWidth = screenWidth;
-            _lastHeight = screenHeight;
-    
             int buttonWidth = 300;
             int buttonHeight = 60;
     
@@ -76,18 +71,6 @@ namespace BikeWars.Content.screens
             }
             
             UpdateSelection(0);
-        }
-
-        public override void Update(GameTime gameTime)
-        {
-            base.Update(gameTime);
-
-            // Check for resolution change
-            var vp = Game1.Instance.GraphicsDevice.Viewport;
-            if (vp.Width != _lastWidth || vp.Height != _lastHeight)
-            {
-                 InitializeButtons();
-            }
         }
         
         protected override void HandleButtonClick(MenuButton button)

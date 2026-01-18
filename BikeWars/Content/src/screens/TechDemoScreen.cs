@@ -29,7 +29,9 @@ namespace BikeWars.Content.screens
         private MenuButton _spawnHoboBtn;
         private MenuButton _spawnBikeBtn;
         private MenuButton _spawnDogBtn;
+
         private MenuButton _spawnKamikazeBtn;
+        private MenuButton _spawnTramBtn;
 
         private Texture2D _buttonTex;
         private SpriteFont _font;
@@ -76,7 +78,7 @@ namespace BikeWars.Content.screens
                 id: 1,
                 texture: _buttonTex,
                 bounds: new Rectangle(30, 290, 200, 60),
-                text: "Spawn 50 Dogs",
+                text: "Spawn 10 Dogs",
                 font: _font,
                 audioService: AudioService
             );
@@ -86,6 +88,15 @@ namespace BikeWars.Content.screens
                 texture: _buttonTex,
                 bounds: new Rectangle(30, 360, 200, 60),
                 text: "Spawn 1 Opa",
+                font: _font,
+                audioService: AudioService
+            );
+            
+            _spawnTramBtn = new MenuButton(
+                id: 1,
+                texture: _buttonTex,
+                bounds: new Rectangle(30, 430, 200, 60),
+                text: "Spawn 1 Tram",
                 font: _font,
                 audioService: AudioService
             );
@@ -101,6 +112,7 @@ namespace BikeWars.Content.screens
             _spawnBikeBtn.Update(mouse, gameTime);
             _spawnDogBtn.Update(mouse, gameTime);
             _spawnKamikazeBtn.Update(mouse, gameTime);
+            _spawnTramBtn.Update(mouse, gameTime);
 
             if(_spawnHoboBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Hobo, 100);
@@ -109,10 +121,15 @@ namespace BikeWars.Content.screens
                 SpawnEnemies(EnemyType.BikeThief, 15);
 
             if(_spawnDogBtn.IsClicked(mouse, _prevMouse))
-                SpawnEnemies(EnemyType.Dog, 50);
+                SpawnEnemies(EnemyType.Dog, 10);
 
             if (_spawnKamikazeBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Kamikaze, 1);
+
+            if (_spawnTramBtn.IsClicked(mouse, _prevMouse))
+                 _spawnManager.SpawnTram(1500f);
+
+
 
             _prevMouse = mouse;
         }
@@ -190,6 +207,7 @@ namespace BikeWars.Content.screens
             _spawnBikeBtn.Draw(spriteBatch);
             _spawnDogBtn.Draw(spriteBatch);
             _spawnKamikazeBtn.Draw(spriteBatch);
+            _spawnTramBtn.Draw(spriteBatch);
             spriteBatch.End();
         }
     }

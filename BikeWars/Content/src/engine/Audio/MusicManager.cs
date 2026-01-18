@@ -16,6 +16,12 @@ namespace BikeWars.Content.engine.Audio
         public bool IsPlaying => MediaPlayer.State == MediaState.Playing;
 
         public string CurrentSong => _currentSongId;
+        
+        private float _fadeTargetVolume = 1f;
+        private float _fadeCurrentVolume = 1f;
+        private const float FADE_SPEED = 1.5f;
+        private string _pendingSongId = null;
+        private bool _isRepeatingPending = true;
 
         
         // Load: used only once when starting the game: paths = ID -> content path
@@ -75,8 +81,35 @@ namespace BikeWars.Content.engine.Audio
 
         public void Update(GameTime gameTime)
         {
-            // keep volume in sync
-            MediaPlayer.Volume = Math.Clamp(MasterVolume * MusicVolume, 0f, 1f);
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            // Fade if necessary
+            if (Math.Abs(_fadeCurrentVolume - _fadeTargetVolume) > 0.01f)
+            {
+                if (_fadeCurrentVolume > _fadeTargetVolume)
+                    _fadeCurrentVolume -= FADE_SPEED * dt;
+                else
+                    _fadeCurrentVolume += FADE_SPEED * dt;
+
+                _fadeCurrentVolume = Math.Clamp(_fadeCurrentVolume, 0f, 1f);
+            }
+            // if Fade-Out done, change song and start Fade-In
+            else if (_fadeTargetVolume == 0f && _pendingSongId != null)
+            {
+                Play(_pendingSongId, _isRepeatingPending);
+                _pendingSongId = null;
+                _fadeTargetVolume = 1f;
+            }
+            
+            MediaPlayer.Volume = Math.Clamp(MasterVolume * MusicVolume * _fadeCurrentVolume, 0f, 1f);
+        }
+        public void PlayWithFade(string id, bool isRepeating = true)
+        {
+            if (_currentSongId == id) return;
+            
+            _pendingSongId = id;
+            _isRepeatingPending = isRepeating;
+            _fadeTargetVolume = 0f; 
         }
     }
 }

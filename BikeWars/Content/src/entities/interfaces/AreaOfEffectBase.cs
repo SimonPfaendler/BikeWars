@@ -32,7 +32,7 @@ namespace BikeWars.Content.entities.interfaces
         protected readonly List<ICollider> _hitboxes = new();
 
         /// Tracks last damage time per target to enforce damage interval
-        private readonly Dictionary<CharacterBase, float> _lastDamageTime = new();
+        private readonly Dictionary<object, float> _lastDamageTime = new();
 
         /// Damage is applied once per this interval (in seconds)
         protected float DamageInterval { get; set; } = 1.0f;
@@ -45,7 +45,19 @@ namespace BikeWars.Content.entities.interfaces
         }
 
         /// Checks if enough time has passed since last damage to this target
-        public bool CanDamage(CharacterBase target)
+        public virtual bool CanDamage(CharacterBase target)
+        {
+            if (target == null)
+                return false;
+            
+            if (target == Owner)
+                return false;
+
+            return CanDamageObject(target);
+        }
+
+        /// Generic variant so AOEs can also hurt non-character targets (e.g., destructible walls)
+        public virtual bool CanDamageObject(object target)
         {
             if (target == null)
                 return false;

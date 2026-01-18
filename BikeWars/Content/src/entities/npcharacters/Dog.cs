@@ -1,9 +1,11 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
+using BikeWars.Content.entities.MapObjects;
 using BikeWars.Content.managers;
 
 
@@ -26,6 +28,22 @@ namespace BikeWars.Entities.Characters
 
         // 1x1 Texture to represent the enemy
         public static Texture2D pixel;
+        
+        private float _barkTimer = 0f;
+        private const float BARK_INTERVAL = 2.0f;
+        
+        private static readonly string[] BarkSounds = {
+            AudioAssets.BarkBora,
+            AudioAssets.BarkClemens,
+            AudioAssets.BarkCarlota,
+            AudioAssets.BarkGiulla,
+            AudioAssets.BarkSimon,
+            AudioAssets.BarkSimon2,
+            AudioAssets.BarkFritz,
+            AudioAssets.Miau,
+        };
+        
+        private static readonly System.Random _random = new System.Random();
 
 
         public Dog(Vector2 start, Point size, AudioService audio, PathFinding pathFinding,
@@ -53,6 +71,15 @@ namespace BikeWars.Entities.Characters
 
         public override void Update(GameTime gameTime)
         {
+            _barkTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            
+            if (_barkTimer >= BARK_INTERVAL)
+            {
+                _barkTimer = 0f;
+                
+                PlayBarkWithWorldAudio();
+            }
+            
             UpdateAttackCooldown(gameTime);
             UpdateKnockback(gameTime);
             UpdateHitFlash(gameTime);
@@ -60,7 +87,12 @@ namespace BikeWars.Entities.Characters
             if (Movement is EnemyMovement em)
             {
                 em.EnemyPosition = Transform.Position;
-                em.PlayerPosition = _collisionManager.GameObjectManager.Player1.Transform.Position;
+                if (!DogBowl.BowlIsActive)
+                {em.PlayerPosition = _collisionManager.GameObjectManager.Player1.Transform.Position;}
+                else
+                {
+                    em.PlayerPosition = DogBowl.BowlPosition;
+                }
             }
             Movement.HandleMovement(gameTime);
             HandleSound(Movement.IsMoving);
@@ -132,6 +164,23 @@ namespace BikeWars.Entities.Characters
             if (!CanAttack()) return;
             base.Attack(target);
             _audio.Sounds.Play(AudioAssets.Punch);
+        }
+        
+        private void PlayBarkWithWorldAudio()
+        {
+            if (_worldAudioManager == null) {
+                return;
+            }
+    
+            float volume = _worldAudioManager.GetVolumeFor(Transform.Position);
+
+            if (volume > 0)
+            {
+                int index = _random.Next(BarkSounds.Length);
+                string randomBark = BarkSounds[index];
+
+                _audio.Sounds.Play(randomBark);
+            }
         }
     }
 }

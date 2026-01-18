@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using BikeWars.Content.engine;
+using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
+using BikeWars.Content.entities.MapObjects;
 using BikeWars.Entities.Characters;
 using BikeWars.Entities.Characters.MapObjects;
+using BikeWars.Content.components;
 using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using BikeWars;
 
 namespace BikeWars.Content.managers;
 
@@ -19,10 +23,11 @@ public class CollisionManager
 {
     // Events that can be followed by other classes
     public event Action<Player, ItemBase> OnItemPickup;
-    public event Action<Player, ItemBase> OnItemInteraction; // Will be used for the bikeshop too
+    public event Action<Player, ObjectBase> OnObjectInteraction; // Will be used for the bikeshop too
     public event Action<CharacterBase, ProjectileBase> OnProjectileHit;
     public event Action<CharacterBase, CharacterBase> OnCharacterCollision;
     public event Action<CharacterBase, AreaOfEffectBase> OnAOEHit;
+    public event Action<CharacterBase> OnTramHit;
 
     public List<TiledObjectInfo> ObjectSpawns { get; } = new();
     private readonly GameObjectManager _gameObjectManager;
@@ -130,7 +135,13 @@ public class CollisionManager
 
         LoadObjectLayer("Chests");
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
+        LoadObjectLayer("Dog-Bowl");
+        _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
+        LoadObjectLayer("Musicians");
+        _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
 
+        // Load world border collision (non-destructible static colliders)
+        LoadWorldBorderCollision();
 
         // Insert any statics registered by the GameObjectManager (e.g. destructibles)
         foreach (var s in _gameObjectManager.Statics)
@@ -141,9 +152,9 @@ public class CollisionManager
         // Mark destructible items as non-walkable in the base grid, then pad once
         if (PathGrid != null && _baseWalkableGrid != null)
         {
-            foreach (var item in _gameObjectManager.Items)
+            foreach (var obj in _gameObjectManager.Objects)
             {
-                if (item is DestructibleObject d)
+                if (obj is DestructibleObject d)
                 {
                     SetBaseWalkableForRect(d.Transform.Bounds, false);
                 }
@@ -364,7 +375,7 @@ public class CollisionManager
 
     public Vector2 GetPenetrationVector(ICollider a, ICollider b)
     {
-        const float SEPARATION = 1.25f; // fixed Push
+        // const float SEPARATION = 1.25f; // fixed Push
         if (a is BoxCollider A && b is BoxCollider B)
         {
             Vector2 aCenter = A.Position + new Vector2(A.Width / 2f, A.Height / 2f);
@@ -378,16 +389,19 @@ public class CollisionManager
 
             if (px <= 0 || py <= 0)
                 return Vector2.Zero;
+            
+            // Extra buffer to ensure characters are definitely separated
+            float buffer = 1.0f;
 
             if (px < py)
             {
                 // horizontal push
-                return new Vector2(Math.Sign(dx) * SEPARATION, 0);
+                return new Vector2(Math.Sign(dx) * (px + buffer), 0);
             }
             else
             {
                 // vertical push
-                return new Vector2(0, Math.Sign(dy) * SEPARATION);
+                return new Vector2(0, Math.Sign(dy) * (py + buffer));
             }
         }
 
@@ -401,11 +415,16 @@ public class CollisionManager
     }
 
     public void Insertions(HashSet<ItemBase> items, HashSet<Player> players, HashSet<ProjectileBase> projectiles,
-        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters)
+        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters, List<Tram> trams, HashSet<ObjectBase> objects)
     {
         foreach (ItemBase c in items)
         {
             AddDynamic(c.Collider);
+        }
+
+        foreach (ObjectBase o in objects)
+        {
+            AddDynamic(o.Collider);
         }
 
         foreach (var p in players)
@@ -435,6 +454,14 @@ public class CollisionManager
             if (c.IsDead)
             {
                 _toRemoveColliders.Add(c.Collider);
+            }
+        }
+
+        foreach (var t in trams)
+        {
+            foreach (var col in t.Colliders)
+            {
+                AddDynamic(col);
             }
         }
     }
@@ -493,6 +520,16 @@ public class CollisionManager
 
             ch.UpdateCollider();
         }
+
+        // If already overlapping a static (e.g., pushed in by another entity), push the character out
+        if (c.Intersects(b))
+        {
+            var penetration = GetPenetrationVector(c, b);
+            if (penetration.LengthSquared() > 0.0001f && c.Owner is CharacterBase stuck)
+            {
+                ApplySafePush(stuck, c, -penetration);
+            }
+        }
     }
 
     private void HandleProjectileWithStatic(ICollider b, ICollider c)
@@ -507,6 +544,8 @@ public class CollisionManager
             if (b.Owner is DestructibleObject destructible)
             {
                 destructible.TakeDamage(p.Damage);
+                Game1.Audio.Sounds.Play(destructible.Health > 0 ? AudioAssets.WoodCrack : AudioAssets.WoodDestroy);
+                _gameObjectManager.SpawnDamageNumber(GetObjectCenter(destructible), p.Damage);
                 _toRemoveColliders.Add(p.Collider);
 
                 // if destroyed: defer static collider removal and defer path grid update
@@ -519,7 +558,7 @@ public class CollisionManager
                     _toRemoveStaticColliders.Add(b);
 
                     // remove drawable/game object now
-                    _gameObjectManager.Remove(destructible);
+                    _gameObjectManager.RemoveObject(destructible);
 
                     // Notify enemies to recalculate paths (they will see grid changes after deferred apply)
                     _gameObjectManager.NotifyPathGridChanged();
@@ -533,12 +572,53 @@ public class CollisionManager
         }
     }
 
+    private void HandleAOEWithStatic(ICollider b, ICollider c)
+    {
+        if (b.Layer != CollisionLayer.WALL || c.Layer != CollisionLayer.AOE)
+        {
+            return;
+        }
+
+        if (!c.Intersects(b))
+        {
+            return;
+        }
+
+        if (b.Owner is not DestructibleObject destructible)
+        {
+            return;
+        }
+
+        if (c.Owner is not AreaOfEffectBase aoe)
+        {
+            return;
+        }
+
+        if (!aoe.CanDamageObject(destructible))
+        {
+            return;
+        }
+
+        destructible.TakeDamage(aoe.Damage);
+        Game1.Audio.Sounds.Play(destructible.Health > 0 ? AudioAssets.WoodCrack : AudioAssets.WoodDestroy);
+        _gameObjectManager.SpawnDamageNumber(GetObjectCenter(destructible), aoe.Damage);
+
+        if (destructible.Health <= 0)
+        {
+            _toUpdateWalkableRects.Add(destructible.Transform.Bounds);
+            _toRemoveStaticColliders.Add(b);
+            _gameObjectManager.RemoveObject(destructible);
+            _gameObjectManager.NotifyPathGridChanged();
+        }
+    }
+
     private void HandleStatics(ICollider c, HashSet<ICollider> statics)
     {
         foreach (var b in statics)
         {
             HandleCharacterWithStatic(b, c);
             HandleProjectileWithStatic(b, c);
+            HandleAOEWithStatic(b, c);
         }
     }
 
@@ -549,6 +629,24 @@ public class CollisionManager
             PickingUpItem(c, d);
             HandleInteractions(c, d);
             HandleCharacters(c, d);
+            HandleTramCollision(c, d);
+        }
+    }
+
+    private static Vector2 GetObjectCenter(DestructibleObject destructible)
+    {
+        var bounds = destructible.Transform.Bounds;
+        return new Vector2(bounds.Center.X, bounds.Center.Y);
+    }
+
+    private void HandleTramCollision(ICollider c, ICollider d)
+    {
+        if (c.Layer == CollisionLayer.TRAM && (d.Layer == CollisionLayer.CHARACTER || d.Layer == CollisionLayer.PLAYER))
+        {
+             if (c.Intersects(d))
+             {
+                 OnTramHit?.Invoke((CharacterBase)d.Owner);
+             }
         }
     }
 
@@ -584,19 +682,117 @@ public class CollisionManager
         }
 
         OnCharacterCollision?.Invoke((CharacterBase)c.Owner, (CharacterBase)d.Owner);
+        
+        // calculate vector that separates 2 characters
         Vector2 t = GetPenetrationVector(c, d);
+        if (t.LengthSquared() < 0.0001f)
+            return;
+        
         CharacterBase chd = (CharacterBase)d.Owner;
 
 
-        if (t.LengthSquared() < 0.01f)
+        if (t.LengthSquared() < 0.0001f)
             return;
-        ch.SetLastTransform();
-        ch.Transform.Position -= t;
-        ch.UpdateCollider();
-
-        chd.SetLastTransform();
-        chd.UpdateCollider();
+        
+        // split 2 characters apart by 50%
+        Vector2 separation = t * 0.5f;
+        
+        // Push character A (Backwards)
+        ApplySafePush(ch, c, -separation);
+        
+        // Push character B (Forwards)
+        ApplySafePush(chd, d, separation);
+        
+        
     }
+    
+    // slide the enemies along walls instead of them being pushed into the hitboxes
+    private void ApplySafePush(CharacterBase ch, ICollider collider, Vector2 push)
+    {
+        // try full push
+        Vector2 fullPos = ch.Transform.Position + push;
+        if (!IsInsideWall(collider, fullPos))
+        {
+            ch.SetLastTransform();
+            ch.Transform.Position = fullPos;
+            ch.UpdateCollider();
+            return;
+        }
+        
+        // try sliding X (horizontal only)
+        // We only try this if the push actually has an X component
+        if (Math.Abs(push.X) > 0.01f)
+        {
+            Vector2 slideXPos = ch.Transform.Position + new Vector2(push.X, 0);
+            if (!IsInsideWall(collider, slideXPos))
+            {
+                ch.SetLastTransform();
+                ch.Transform.Position = slideXPos;
+                ch.UpdateCollider();
+                return;
+            }
+        }
+        
+        // try sliding Y (horizontal only)
+        // We only try this if the push actually has an Y component
+        if (Math.Abs(push.Y) > 0.01f)
+        {
+            Vector2 slideYPos = ch.Transform.Position + new Vector2(0, push.Y);
+            if (!IsInsideWall(collider, slideYPos))
+            {
+                ch.SetLastTransform();
+                ch.Transform.Position = slideYPos;
+                ch.UpdateCollider();
+                return;
+            }
+        }
+        
+        // 4) last resort: try smaller (scaled) pushes
+        // This helps a lot with corners: full push collides, but a partial push might be valid.
+        for (float t = 0.75f; t >= 0.1f; t -= 0.15f)
+        {
+            Vector2 scaledPos = ch.Transform.Position + push * t;
+            if (!IsInsideWall(collider, scaledPos))
+            {
+                ch.SetLastTransform();
+                ch.Transform.Position = scaledPos;
+                ch.UpdateCollider();
+                return;
+            }
+        }
+        
+    }
+
+    // helper function for HandleCharacterCollision
+    // makes sure characters don't push each other in static objects
+    private bool IsInsideWall(ICollider collider, Vector2 newPos)
+    {
+        // create a temporary hitbox at the new position
+        // to see if the enemy will hit a wall or not
+        BoxCollider testBox = new BoxCollider(newPos, collider.Width, collider.Height, collider.Layer, collider.Owner);
+        
+        // check nearby statics
+        var statics = StaticHash.QueryNearby(newPos + new Vector2(collider.Width/2f, collider.Height/2f), 5);
+
+
+        foreach (var s in statics)
+        {
+            // IGNORE things that don't block movement
+            if (s.Layer == CollisionLayer.SPAWNENEMIES || 
+                s.Layer == CollisionLayer.TERRAIN || 
+                s.Layer == CollisionLayer.AOE ||
+                s.Layer == CollisionLayer.INTERACT)
+            {
+                continue;
+            }
+            // If it hits ANYTHING else (Wall, Water, Destructible, etc.), it's a block.
+            if (s.Intersects(testBox))
+                return true; 
+        }
+        return false;
+
+    }
+
 
     private void HandleCharacterProjectiles(ICollider c, ICollider d)
     {
@@ -696,24 +892,25 @@ public class CollisionManager
     {
         if (c.Layer == CollisionLayer.PLAYER && d.Layer == CollisionLayer.INTERACT && c.Intersects(d))
         {
-            if (c.Owner is Player p && d.Owner is ItemBase i)
+            if (c.Owner is Player p && d.Owner is ObjectBase i)
             {
-                OnItemInteraction?.Invoke(p, i);
+                OnObjectInteraction?.Invoke(p, i);
             }
         }
     }
 
     public void Update(HashSet<Player> players, HashSet<ItemBase> items, HashSet<ProjectileBase> projectiles,
-        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters)
+        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters, List<Tram> trams, HashSet<ObjectBase> objects)
     {
         allDynamics.Clear();
         DynamicHash.Clear();
-        Insertions(items, players, projectiles, aoeAttacks, characters);
+        Insertions(items, players, projectiles, aoeAttacks, characters, trams, objects);
 
         foreach (var c in allDynamics)
         {
             if (c.Layer != CollisionLayer.CHARACTER && c.Layer != CollisionLayer.PLAYER &&
-                c.Layer != CollisionLayer.PROJECTILE)
+                c.Layer != CollisionLayer.PROJECTILE && c.Layer != CollisionLayer.TRAM &&
+                c.Layer != CollisionLayer.AOE)
             {
                 continue;
             }
@@ -790,7 +987,7 @@ public class CollisionManager
     // makes the hitboxes visible for when in the tech demo
     public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
         Player player, HashSet<CharacterBase> characters,
-        HashSet<ItemBase> items, HashSet<ProjectileBase> projectiles, HashSet<AreaOfEffectBase> aoeAttacks)
+        HashSet<ItemBase> items, HashSet<ProjectileBase> projectiles, HashSet<AreaOfEffectBase> aoeAttacks, List<Tram> trams, HashSet<ObjectBase> objects)
     {
         foreach (var cell in StaticHash._cells)
         {
@@ -855,6 +1052,16 @@ public class CollisionManager
                 DrawRectOutline(spriteBatch, pixel, itemRect, Color.Red * 0.7f);
             }
         }
+        
+        //Objects hitboxes
+        foreach (var obj in objects)
+        {
+            if (obj?.Collider != null)
+            {
+                var objRect = GetColliderRectangle(obj.Collider);
+                DrawRectOutline(spriteBatch, pixel, objRect, Color.Red * 0.7f);
+            }
+        }
 
         // Projectile hitboxes
         foreach (var projectile in projectiles)
@@ -863,6 +1070,16 @@ public class CollisionManager
             {
                 var projRect = GetColliderRectangle(projectile.Collider);
                 DrawRectOutline(spriteBatch, pixel, projRect, Color.Red * 0.7f);
+            }
+        }
+
+        // Tram hitboxes
+        foreach (var tram in trams)
+        {
+            foreach (var collider in tram.Colliders)
+            {
+                var tramRect = GetColliderRectangle(collider);
+                DrawRectOutline(spriteBatch, pixel, tramRect, Color.Red * 0.7f);
             }
         }
     }
@@ -964,6 +1181,43 @@ public class CollisionManager
             );
 
             ObjectSpawns.Add(new TiledObjectInfo(rect, obj.Properties));
+        }
+    }
+
+    private void LoadWorldBorderCollision()
+    {
+        try
+        {
+            var objLayer = TiledMap.GetLayer<TiledMapObjectLayer>("worldborder_collision");
+            if (objLayer == null) return;
+
+            foreach (var obj in objLayer.Objects)
+            {
+                var rect = new Rectangle(
+                    (int)obj.Position.X,
+                    (int)obj.Position.Y,
+                    (int)obj.Size.Width,
+                    (int)obj.Size.Height
+                );
+
+                // Create a static collider for this world border area
+                BoxCollider borderCollider = new BoxCollider(
+                    new Vector2(rect.X, rect.Y),
+                    rect.Width,
+                    rect.Height,
+                    CollisionLayer.WALL,
+                    this
+                );
+
+                StaticHash.Insert(borderCollider);
+
+                // Mark as non-walkable in the pathfinding grid
+                SetBaseWalkableForRect(rect, false);
+            }
+        }
+        catch
+        {
+            // Layer might not exist; continue without it
         }
     }
 }

@@ -12,6 +12,7 @@ public class Frelo: Bike
         TexRight = managers.SpriteManager.GetTexture("Frelo");
         CurrentTex = TexRight;
         Attributes = attributes;
+        InitpickupRange();
     }
 
     public Frelo(Vector2 start, Point size) : base(start, size)
@@ -22,18 +23,5 @@ public class Frelo: Bike
         Attributes = new BikeAttributes(
             this, 30, 30, 3, 0, 180, 1.2f, 3, 1.2f, 1.2f, 1.2f
         );
-    }
-
-    public override void Draw(SpriteBatch spriteBatch)
-    {
-        spriteBatch.Draw(CurrentTex, Transform.Bounds, Color.White);
-    }
-
-    public override void Update(GameTime gameTime)
-    {
-    }
-    public override bool Intersects(ICollider collider)
-    {
-        return Collider.Intersects(collider);
     }
 }

@@ -24,18 +24,37 @@ namespace BikeWars.Content.screens
         protected int _selectedIndex = 0;
         protected bool _usingMouse = true;
 
+        // Resolution tracking
+        protected int _lastScreenWidth;
+        protected int _lastScreenHeight;
+
         protected MenuScreenBase(Texture2D background, SpriteFont font)
         {
             _backgroundTexture = background;
             _font = font;
             _buttons = new List<MenuButton>();
             _previousMouseState = Mouse.GetState();
+
+            // Track initial resolution
+            var vp = Game1.Instance.GraphicsDevice.Viewport;
+            _lastScreenWidth = vp.Width;
+            _lastScreenHeight = vp.Height;
         }
 
         protected abstract void InitializeButtons();
 
         public virtual void Update(GameTime gameTime)
         {
+            // Check for Resolution Change
+            var vp = Game1.Instance.GraphicsDevice.Viewport;
+            if (vp.Width != _lastScreenWidth || vp.Height != _lastScreenHeight)
+            {
+                _lastScreenWidth = vp.Width;
+                _lastScreenHeight = vp.Height;
+                _buttons.Clear();
+                InitializeButtons();
+            }
+
             // Controller / Keyboard Navigation
             if (InputHandler.IsPressed(GameAction.UI_DOWN))
             {

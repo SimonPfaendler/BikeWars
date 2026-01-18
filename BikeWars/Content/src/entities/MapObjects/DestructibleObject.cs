@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace BikeWars.Entities.Characters.MapObjects;
 
-public class DestructibleObject : ItemBase
+public class DestructibleObject : ObjectBase
 {
     public int Health { get; private set; }
     private bool _usesAtlas = false;
@@ -80,7 +80,6 @@ public class DestructibleObject : ItemBase
         if (_usesAtlas && _atlas != null && _atlasRect != Rectangle.Empty)
         {
             spriteBatch.Draw(_atlas, Transform.Bounds, _atlasRect, Color.White);
-            return;
         }
         // No single-image fallback supported; nothing to draw if atlas not found
     }

@@ -4,6 +4,10 @@ using BikeWars.Content.engine.Audio;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.entities.interfaces;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
+using BikeWars.Content.components;
+
+
 
 namespace BikeWars.Content.managers
 {
@@ -26,11 +30,17 @@ namespace BikeWars.Content.managers
         private double _spawnInterval;
         private const float MIN_SPAWN_RADIUS = 300f;
         private const float MAX_SPAWN_RADIUS = 700f;
+        private readonly WorldAudioManager _worldAudioManager;
+
+        // Tram Logic
+        private double _timeSinceLastTram;
+        private const double TRAM_SPAWN_INTERVAL = 15.0; // Every 15 seconds
 
         private readonly Random _random;
         private readonly RepathScheduler _repathScheduler;
 
-        public SpawnManager(GameObjectManager gameObjectManager, CollisionManager collisionManager, AudioService audioService, PathFinding pathFinding, RepathScheduler repathScheduler)
+
+        public SpawnManager(GameObjectManager gameObjectManager, CollisionManager collisionManager, AudioService audioService, PathFinding pathFinding, RepathScheduler repathScheduler, WorldAudioManager worldAudioManager)
         {
             _gameObjectManager = gameObjectManager;
             _collisionManager = collisionManager;
@@ -39,6 +49,8 @@ namespace BikeWars.Content.managers
             _spawnInterval = START_SPAWN_INTERVAL;
             _pathFinding = pathFinding;
             _repathScheduler = repathScheduler;
+            _worldAudioManager = worldAudioManager;
+
         }
 
         public void Update(GameTime gameTime)
@@ -48,6 +60,7 @@ namespace BikeWars.Content.managers
             _timeSinceLastSpawn += elapsed;
             _timeSinceLastSwarm += elapsed;
             _timeSinceLastCircle += elapsed;
+            _timeSinceLastTram += elapsed;
 
             // Update spawn interval based on progression
             // Lerp from start interval to end interval based on time fraction
@@ -72,7 +85,34 @@ namespace BikeWars.Content.managers
                 SpawnCircle(progress);
                 _timeSinceLastCircle = 0;
             }
+
+            if (_timeSinceLastTram >= TRAM_SPAWN_INTERVAL)
+            {
+                SpawnTram();
+                _timeSinceLastTram = 0;
+            }
+
+            }
+
+        public void SpawnTram(float spawnRadius = 5000f)
+        {
+            if (_gameObjectManager.Player1 == null) return;
+
+            // Spawn far outside the screen
+            Vector2 playerPos = _gameObjectManager.Player1.Transform.Position;
+            float angle = (float)(_random.NextDouble() * Math.PI * 2);
+            
+            Vector2 startPos = playerPos + new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * spawnRadius;
+            
+            // Target a position near the player with some randomness
+            Vector2 targetOffset = new Vector2((float)(_random.NextDouble() - 0.5) * 10, (float)(_random.NextDouble() - 0.5) * 10);
+            Vector2 targetPos = playerPos + targetOffset;
+
+            var tram = new Tram(startPos, targetPos,  _audioService, _gameObjectManager.Player1);
+            _gameObjectManager.AddTram(tram);
         }
+
+
 
         private void SpawnSwarm(double progress)
         {
@@ -141,6 +181,7 @@ namespace BikeWars.Content.managers
                 {
                     var dog = new Dog(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager, _repathScheduler);
                     ApplyScaling(dog, difficultyMultiplier, speedMultiplier);
+                    dog.SetWorldAudioManager(_worldAudioManager);
                     _gameObjectManager.AddCharacter(dog);
                 }
                 else if (val < 0.8)
