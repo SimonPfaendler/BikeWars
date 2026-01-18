@@ -647,7 +647,11 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.AddObject(new Chest(pos, size, o.Item, o.IsOpen ?? false));
                 }
                 else if (o.Type == SaveLoad.TYPES.BIKESHOP)
-                    _gameObjectManager.AddObject(new BikeShop(pos, size));
+                { _gameObjectManager.AddObject(new BikeShop(pos, size));}
+                else if (o.Type == SaveLoad.TYPES.DOGBOWL)
+                {
+                    _gameObjectManager.AddObject(new DogBowl(pos, size, full: o.IsFull ?? false));
+                }
             }
             _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level);
             Console.WriteLine("Game loaded.");
