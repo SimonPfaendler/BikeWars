@@ -12,6 +12,7 @@ public class RacingBike: Bike
         TexRight = managers.SpriteManager.GetTexture("RacingBike");
         CurrentTex = TexRight;
         Attributes = attributes;
+        InitpickupRange();
     }
 
     public RacingBike(Vector2 start, Point size) : base(start, size)
@@ -24,16 +25,4 @@ public class RacingBike: Bike
         );
     }
 
-    public override void Draw(SpriteBatch spriteBatch)
-    {
-        spriteBatch.Draw(CurrentTex, Transform.Bounds, Color.White);
-    }
-
-    public override void Update(GameTime gameTime)
-    {
-    }
-    public override bool Intersects(ICollider collider)
-    {
-        return Collider.Intersects(collider);
-    }
 }
