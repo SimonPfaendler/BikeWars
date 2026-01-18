@@ -19,8 +19,10 @@ namespace BikeWars.Content.managers
     {
         // caching_construct, einmalig laden
         private static Texture2D _characterAtlas;
+
         // caching_construct, speichert fertig geladene animationen
         private static Dictionary<string, SpriteAnimation> _animationCache;
+
         // für nicht animierte Sprites: Kugel, Geld, etc.
         private static Dictionary<string, Texture2D> _textureCache;
 
@@ -42,6 +44,7 @@ namespace BikeWars.Content.managers
             {
                 throw new InvalidOperationException("character atlas is null");
             }
+
             return _characterAtlas;
         }
 
@@ -57,7 +60,7 @@ namespace BikeWars.Content.managers
 
             // ITEMS
             { "Chest", "assets/sprites/chest_texture" },
-            {"Chest_open", "assets/sprites/chest_open_texture"},
+            { "Chest_open", "assets/sprites/chest_open_texture" },
             { "Frelo", "assets/images/Frelo" },
             { "RacingBike", "assets/images/RacingBike" },
             { "XP_Beer", "assets/sprites/XP/xp_beer_texture" },
@@ -68,10 +71,11 @@ namespace BikeWars.Content.managers
             // TRAM
             { "Tram", "assets/sprites/Tram_final" },
             //MAP OBJECTS
-            { "Fahrradwerkstatt", "assets/MapObjects/Fahrradwerkstatt_Tile"},
-            { "Dog_Bowl", "assets/MapObjects/Dog_Bowl"},
-            { "Dog_Bowl_full", "assets/MapObjects/Dog_Bowl_full"},
+            { "Fahrradwerkstatt", "assets/MapObjects/Fahrradwerkstatt_Tile" },
+            { "Dog_Bowl", "assets/MapObjects/Dog_Bowl" },
+            { "Dog_Bowl_full", "assets/MapObjects/Dog_Bowl_full" },
             { "Straßenmusikanten", "assets/MapObjects/Straßenmusikanten" },
+
             // Tower
             { "TowerAlly", "assets/images/tower_ally"}
         };
@@ -80,7 +84,9 @@ namespace BikeWars.Content.managers
 
         // Atlas regions for large map atlases (tilemap_1, tilemap_2, etc.)
         // Structure: tilemap name -> (sprite filename -> rectangle)
-        private static Dictionary<string, Dictionary<string, Rectangle>> _mapAtlasEntries = new Dictionary<string, Dictionary<string, Rectangle>>();
+        private static Dictionary<string, Dictionary<string, Rectangle>> _mapAtlasEntries =
+            new Dictionary<string, Dictionary<string, Rectangle>>();
+
         // Structure: tilemap name -> texture
         private static Dictionary<string, Texture2D> _mapAtlasTextures = new Dictionary<string, Texture2D>();
 
@@ -139,10 +145,12 @@ namespace BikeWars.Content.managers
             {
                 return speed;
             }
+
             if (key.StartsWith("Character1"))
             {
                 return Character1Speed;
             }
+
             return DefaultSpeed;
         }
 
@@ -200,7 +208,9 @@ namespace BikeWars.Content.managers
 
                 if (System.IO.File.Exists(path))
                 {
-                    var root = System.Text.Json.JsonSerializer.Deserialize<MapAtlasRoot>(System.IO.File.ReadAllText(path), new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var root = System.Text.Json.JsonSerializer.Deserialize<MapAtlasRoot>(
+                        System.IO.File.ReadAllText(path),
+                        new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     if (root?.frames != null && root.meta?.image != null)
                     {
                         // load atlas texture by name (strip extension)
@@ -210,7 +220,9 @@ namespace BikeWars.Content.managers
                             Texture2D atlasTexture = content.Load<Texture2D>("assets/Map/" + imageName);
                             _mapAtlasTextures[atlasName] = atlasTexture;
                         }
-                        catch { }
+                        catch
+                        {
+                        }
 
                         // Store sprite entries for this atlas
                         var entries = new Dictionary<string, Rectangle>();
@@ -221,6 +233,7 @@ namespace BikeWars.Content.managers
                                 entries[f.filename] = new Rectangle(f.frame.x, f.frame.y, f.frame.w, f.frame.h);
                             }
                         }
+
                         if (entries.Count > 0)
                         {
                             _mapAtlasEntries[atlasName] = entries;
@@ -228,7 +241,9 @@ namespace BikeWars.Content.managers
                     }
                 }
             }
-            catch { }
+            catch
+            {
+            }
         }
 
         /// <summary>
@@ -292,10 +307,31 @@ namespace BikeWars.Content.managers
             throw new KeyNotFoundException("texture '" + name + "' not found");
         }
     }
-}
+
 
     // Structures for map atlas JSON deserialization
-    internal class MapAtlasRoot { public List<MapAtlasFrame> frames { get; set; } public MapAtlasMeta meta { get; set; } }
-    internal class MapAtlasFrame { public string filename { get; set; } public MapAtlasRect frame { get; set; } }
-    internal class MapAtlasMeta { public string image { get; set; } }
-    internal class MapAtlasRect { public int x { get; set; } public int y { get; set; } public int w { get; set; } public int h { get; set; } }
+    internal class MapAtlasRoot
+    {
+        public List<MapAtlasFrame> frames { get; set; }
+        public MapAtlasMeta meta { get; set; }
+    }
+
+    internal class MapAtlasFrame
+    {
+        public string filename { get; set; }
+        public MapAtlasRect frame { get; set; }
+    }
+
+    internal class MapAtlasMeta
+    {
+        public string image { get; set; }
+    }
+
+    internal class MapAtlasRect
+    {
+        public int x { get; set; }
+        public int y { get; set; }
+        public int w { get; set; }
+        public int h { get; set; }
+    }
+}

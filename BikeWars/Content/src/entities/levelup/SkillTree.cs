@@ -15,7 +15,7 @@ public class SkillTree
     }
 
     // Dictionary: Welcher Skill hat welche Beschreibung?
-    public static readonly Dictionary<SkillId, string> All = new()
+    public static IReadOnlyDictionary<SkillId, string> All { get; } = new Dictionary<SkillId, string>
     {
         { SkillId.MoreHp, ("Mehr Leben: +30 HP") },
 

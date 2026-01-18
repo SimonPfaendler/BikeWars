@@ -138,9 +138,9 @@ namespace BikeWars.Content.screens
             _gameObjectManager.AddItem(new Frelo(new Vector2(5700, 5700), new Point(32, 32)));
             _gameObjectManager.AddItem(new RacingBike(new Vector2(5800, 5800), new Point(32, 32)));
             string energy = "Energygel";
-            _gameObjectManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32), energy));
+            _gameObjectManager.AddObject(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32), energy));
             string doping = "DopingSpritze";
-            _gameObjectManager.AddItem(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 90), new Point(32, 32), doping));
+            _gameObjectManager.AddObject(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 90), new Point(32, 32), doping));
 
             _gameObjectManager.AddTower(new TowerAlly(new Vector2(5600, 5750), new Point(128, 128), _audioService));
             _freelook = false;
@@ -167,7 +167,7 @@ namespace BikeWars.Content.screens
             if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);
             if (_gameObjectManager.Player2 != null) players.Add(_gameObjectManager.Player2);
 
-            _collisionManager.Insertions(_gameObjectManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(), _gameObjectManager.Towers);
+            _collisionManager.Insertions(_gameObjectManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(), _gameObjectManager.Objects, _gameObjectManager.Towers);
 
             GameEvents.OnResumeTimer += ResumeTimer;
             HandleLoadNonInGameData();
@@ -203,8 +203,8 @@ namespace BikeWars.Content.screens
             _collisionManager.OnAOEHit += _combatManager.HandleAOEHit;
             _collisionManager.OnCharacterCollision += _combatManager.HandleCharacterCollision;
             _collisionManager.OnItemPickup += _gameObjectManager.Player1.OnPickUpItem;
-            _collisionManager.OnItemInteraction += _gameObjectManager.Player1.OnPickUpItem;
             _collisionManager.OnTowerInteraction += _gameObjectManager.OnActivateTower;
+            _collisionManager.OnObjectInteraction += _gameObjectManager.Player1.OnInteractObject;
             _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
             _collisionManager.OnTramHit += _combatManager.HandleTramHit;
 
@@ -215,7 +215,7 @@ namespace BikeWars.Content.screens
             if (_gameObjectManager.Player2 != null)
             {
                 _collisionManager.OnItemPickup += _gameObjectManager.Player2.OnPickUpItem;
-                _collisionManager.OnItemInteraction += _gameObjectManager.Player2.OnPickUpItem;
+                _collisionManager.OnObjectInteraction += _gameObjectManager.Player2.OnInteractObject;
                 _gameObjectManager.Player2.ItemPickedUp += _collisionManager.OnRemoveItem;
             }
 
@@ -343,8 +343,6 @@ namespace BikeWars.Content.screens
             }
 
             _overlay.SetPaused(false, gameTime);
-            _overlay.SetPaused(false, gameTime);
-
             // Hit Stop Logic
             if (_hitStopTimer > 0f)
             {
@@ -371,8 +369,7 @@ namespace BikeWars.Content.screens
             _repathScheduler?.Update();
 
             _gameObjectManager.Update(gameTime, InputHandler.MakeMouseWorldPosByCamera(camera));
-            _collisionManager.Update(players, _gameObjectManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(_gameObjectManager.Trams), _gameObjectManager.Towers);
-
+            _collisionManager.Update(players, _gameObjectManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(_gameObjectManager.Trams), _gameObjectManager.Objects, _gameObjectManager.Towers);
 
             if (InputHandler.IsPressed(GameAction.DEBUG_HEAL))
                 _gameObjectManager.Player1.Attributes.Health = _gameObjectManager.Player1.Attributes.MaxHealth;
@@ -434,9 +431,9 @@ namespace BikeWars.Content.screens
 
             bool playerNearMusicians = false;
 
-            foreach (var item in _gameObjectManager.Items)
+            foreach (var obj in _gameObjectManager.Objects)
             {
-                if (item is Musicians musicians)
+                if (obj is Musicians musicians)
                 {
                     if (musicians.IsPlayerNearby(_gameObjectManager.Player1.Transform.Position) ||
                         (_gameObjectManager.Player2 != null && musicians.IsPlayerNearby(_gameObjectManager.Player2.Transform.Position)))
@@ -450,9 +447,9 @@ namespace BikeWars.Content.screens
             // logic for interaction with musicians (music change and attack)
             if (!_musicOverrideActive)
             {
-                foreach (var item in _gameObjectManager.Items)
+                foreach (var obj in _gameObjectManager.Objects)
                 {
-                    if (item is not Musicians musicians)
+                    if (obj is not Musicians musicians)
                         continue;
 
                     bool p1Interact =
@@ -619,11 +616,7 @@ namespace BikeWars.Content.screens
                 Vector2 pos = p.Position.ToVector2();
                 Point size = p.Size.ToPoint();
 
-                if (p.Type == SaveLoad.TYPES.CHEST)
-                {
-                    _gameObjectManager.AddItem(new Chest(pos, size, p.Item, p.IsOpen ?? false));
-                }
-                else if (p.Type == SaveLoad.TYPES.BEER)
+                if (p.Type == SaveLoad.TYPES.BEER)
                 {
                     _gameObjectManager.AddItem(new Xp_Beer(pos, size));
                 }
@@ -642,6 +635,23 @@ namespace BikeWars.Content.screens
                 else if (p.Type == SaveLoad.TYPES.RACINGBIKE)
                 {
                     _gameObjectManager.AddItem(new RacingBike(pos, size));
+                }
+            }
+            _gameObjectManager.Objects.Clear();
+            foreach (var o in state.Objects)
+            {
+                var pos = o.Position.ToVector2();
+                var size = o.Size.ToPoint();
+
+                if (o.Type == SaveLoad.TYPES.CHEST)
+                {
+                    _gameObjectManager.AddObject(new Chest(pos, size, o.Item, o.IsOpen ?? false));
+                }
+                else if (o.Type == SaveLoad.TYPES.BIKESHOP)
+                { _gameObjectManager.AddObject(new BikeShop(pos, size));}
+                else if (o.Type == SaveLoad.TYPES.DOGBOWL)
+                {
+                    _gameObjectManager.AddObject(new DogBowl(pos, size, full: o.IsFull ?? false));
                 }
             }
             _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level);
@@ -738,7 +748,8 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.Items,
                     _gameObjectManager.Projectiles,
                     _gameObjectManager.AOEAttacks,
-                    new List<Tram>(_gameObjectManager.Trams)
+                    new List<Tram>(_gameObjectManager.Trams),
+                    _gameObjectManager.Objects
                 );
             }
 

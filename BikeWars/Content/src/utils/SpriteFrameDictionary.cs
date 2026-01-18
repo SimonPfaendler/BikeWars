@@ -26,7 +26,7 @@ namespace BikeWars.Content.utils
         private static Dictionary<string, TexturePackerRect> _atlasEntries = new Dictionary<string, TexturePackerRect>();
 
         // ZENTRALES DICTIONARY
-        public static readonly Dictionary<string, List<Rectangle>> AnimationFrames = new Dictionary<string, List<Rectangle>>();
+        private static readonly Dictionary<string, List<Rectangle>> AnimationFrames = new Dictionary<string, List<Rectangle>>();
 
         static SpriteFrameDictionary()
         {

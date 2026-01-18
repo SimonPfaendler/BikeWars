@@ -26,7 +26,29 @@ public abstract class ItemBase : IItem
     public Texture2D TexRight {get => _texRight; set => _texRight = value;}
     public Texture2D CurrentTex {get => _currentTex; set => _currentTex = value;}
 
-    public abstract void Update(GameTime gameTime);
-    public abstract void Draw(SpriteBatch spriteBatch);
-    public abstract bool Intersects(ICollider other);
+    public virtual void Update(GameTime gameTime)
+    {}
+
+    public virtual void Draw(SpriteBatch spriteBatch)
+    {
+        spriteBatch.Draw(CurrentTex, Transform.Bounds, Color.White);
+    }
+
+    public virtual bool Intersects(ICollider other)
+    {
+        return Collider.Intersects(other);
+    }
+    protected void InitpickupRange(int pickupRange = 40)   // should be used for real Items
+    {
+
+        Collider = new BoxCollider(
+            new Vector2(Transform.Position.X - pickupRange / 2f,
+                Transform.Position.Y - pickupRange / 2f),
+            Transform.Size.X + pickupRange,
+            Transform.Size.Y + pickupRange,
+            CollisionLayer.ITEM,
+            this
+        );
+    }
+    
 }

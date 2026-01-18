@@ -5,12 +5,14 @@ using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.engine.interfaces;
 
 namespace BikeWars.Content.entities.items;
-public class Chest: ItemBase
+public class Chest: ObjectBase
 {
     private bool _open;
     public bool Open => _open;
     public string Item { get; private set; }
     private BoxCollider _collisionCollider {get;set;}
+    private Texture2D _texClosed;
+    private Texture2D _texOpen;
     public BoxCollider CollisionCollider {get => _collisionCollider; set => _collisionCollider = value; }
     private int PADDING_INTERACTION_AREA = 40;
 
@@ -21,11 +23,14 @@ public class Chest: ItemBase
         Transform = new Transform(start, size);
         Collider = new BoxCollider(new Vector2(Transform.Position.X - PADDING_INTERACTION_AREA / 2, Transform.Position.Y - PADDING_INTERACTION_AREA / 2), Transform.Size.X + PADDING_INTERACTION_AREA, Transform.Size.Y + PADDING_INTERACTION_AREA, CollisionLayer.INTERACT, this);
         CollisionCollider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.WALL, this);
-        if (_open == false)
-        {TexRight = managers.SpriteManager.GetTexture("Chest");}
+        _texClosed = managers.SpriteManager.GetTexture("Chest");
+        _texOpen = managers.SpriteManager.GetTexture("Chest_open");
+        if (_open)
+        {CurrentTex = _texOpen;}
         else
-        {TexRight = managers.SpriteManager.GetTexture("Chest_open");}
-        CurrentTex = TexRight;
+        {
+            CurrentTex = _texClosed;
+        }
     }
 
     public override void Draw(SpriteBatch spriteBatch)
