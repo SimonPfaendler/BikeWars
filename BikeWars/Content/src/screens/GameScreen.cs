@@ -743,7 +743,8 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.Items,
                     _gameObjectManager.Projectiles,
                     _gameObjectManager.AOEAttacks,
-                    new List<Tram>(_gameObjectManager.Trams)
+                    new List<Tram>(_gameObjectManager.Trams),
+                    _gameObjectManager.Objects
                 );
             }
 

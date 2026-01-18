@@ -987,7 +987,7 @@ public class CollisionManager
     // makes the hitboxes visible for when in the tech demo
     public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
         Player player, HashSet<CharacterBase> characters,
-        HashSet<ItemBase> items, HashSet<ProjectileBase> projectiles, HashSet<AreaOfEffectBase> aoeAttacks, List<Tram> trams)
+        HashSet<ItemBase> items, HashSet<ProjectileBase> projectiles, HashSet<AreaOfEffectBase> aoeAttacks, List<Tram> trams, HashSet<ObjectBase> objects)
     {
         foreach (var cell in StaticHash._cells)
         {
@@ -1050,6 +1050,16 @@ public class CollisionManager
             {
                 var itemRect = GetColliderRectangle(item.Collider);
                 DrawRectOutline(spriteBatch, pixel, itemRect, Color.Red * 0.7f);
+            }
+        }
+        
+        //Objects hitboxes
+        foreach (var obj in objects)
+        {
+            if (obj?.Collider != null)
+            {
+                var objRect = GetColliderRectangle(obj.Collider);
+                DrawRectOutline(spriteBatch, pixel, objRect, Color.Red * 0.7f);
             }
         }
 
