@@ -10,6 +10,7 @@ using BikeWars.Content.entities.items;
 using BikeWars.Content.managers;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
+using BikeWars.Content.entities.MapObjects;
 using BikeWars.Entities.Characters.MapObjects;
 
 namespace BikeWars.Content.src.utils.SaveLoadExample;
@@ -29,7 +30,8 @@ public static class SaveLoad
         MONEY,
         FRELO,
         RACINGBIKE,
-        BIKESHOP
+        BIKESHOP,
+        DOGBOWL
     }
     // save file path in the user's Documents folder
     private static readonly string SAVE_PATH = Path.Combine(
@@ -145,8 +147,9 @@ public static class SaveLoad
         public Vector2Save Position { get; set; } = new();
         public PointSave Size { get; set; } = new();
 
-        public bool? IsOpen { get; set; }   // z.B. Chest
-        public string? Item { get; set; }   // z.B. Chest drop item
+        public bool? IsOpen { get; set; }
+        public string? Item { get; set; }
+        public bool? IsFull { get; set; }
         public ObjectSaveModel() { }
         public ObjectSaveModel(TYPES type, Vector2 position, Point size)
         {
@@ -334,6 +337,10 @@ public static class SaveLoad
             Chest c => new ObjectSaveModel(TYPES.CHEST, obj.Transform.Position, obj.Transform.Size)
             {
                 IsOpen = c.Open,
+            },
+            DogBowl db => new ObjectSaveModel(TYPES.DOGBOWL, obj.Transform.Position, obj.Transform.Size)
+            {
+                IsFull = db.Full,
             },
             BikeShop bs => new ObjectSaveModel(TYPES.BIKESHOP, obj.Transform.Position, obj.Transform.Size),
             _ => throw new NotSupportedException($"Object type {obj.GetType().Name} is not supported for saving.")

@@ -9,6 +9,7 @@ namespace BikeWars.Content.entities.MapObjects;
 public class DogBowl: ObjectBase
 {
     private bool _full;
+    public bool Full => _full;
     private Texture2D _texEmpty;
     private Texture2D _texFull;
 
