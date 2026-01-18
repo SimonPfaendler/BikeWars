@@ -13,27 +13,11 @@ public class BikeShop: ItemBase
     public BoxCollider CollisionCollider {get => _collisionCollider; set => _collisionCollider = value; } // Now this collider is for collision
 
     private int PADDING_INTERACTION_AREA = 40;
-    public BikeShop(Vector2 start, Point size, TiledObjectInfo attributes)
+    public BikeShop(Vector2 start, Point size)
     {
         Transform = new Transform(start, size);
         Collider = new BoxCollider(new Vector2(Transform.Position.X - PADDING_INTERACTION_AREA / 2, Transform.Position.Y - PADDING_INTERACTION_AREA / 2), Transform.Size.X + PADDING_INTERACTION_AREA, Transform.Size.Y + PADDING_INTERACTION_AREA, CollisionLayer.INTERACT, this);
         CollisionCollider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.WALL, this);
-        TexRight = SpriteManager.GetTexture("Fahrradwerkstatt");
-        CurrentTex = TexRight;
-    }
-    public override void Draw(SpriteBatch spriteBatch)
-    {
-        if (CurrentTex == null) return;
-        spriteBatch.Draw(CurrentTex, Transform.Bounds, Color.White);
-    }
-
-    public override void Update(GameTime gameTime)
-    {
-        // nichts
-    }
-
-    public override bool Intersects(ICollider other)
-    {
-        return Collider.Intersects(other);
+        CurrentTex = SpriteManager.GetTexture("Fahrradwerkstatt");
     }
 }

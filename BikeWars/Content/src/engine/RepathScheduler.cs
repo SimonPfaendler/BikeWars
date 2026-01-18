@@ -1,5 +1,5 @@
-using BikeWars.Content.engine;
 
+namespace BikeWars.Content.engine;
 public sealed class RepathScheduler
 {
     private readonly EnemyMovement[] _buffer;

@@ -449,7 +449,7 @@ public class GameObjectManager
         switch (type)
         {
             case "Bike_Shop":
-                return new BikeShop(start, size, spawn);
+                return new BikeShop(start, size);
             case "Destructible":
                 return new DestructibleObject(start, size, spawn);
             case "chest":
