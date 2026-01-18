@@ -53,7 +53,6 @@ public class GameObjectManager
     public ContentManager _contentManager {get; set;} // TODO do we need this one?
 
     private WorldAudioManager? _worldAudioManager;
-
     public GameObjectManager(ContentManager content, Player? player1, Player? player2)
     {
         Player1 = player1;
@@ -256,6 +255,8 @@ public class GameObjectManager
             _pendingDamage.Clear();
             _damageAggregationTimer = AggregationInterval;
         }
+
+        DogBowl.UpdateBowl(gameTime);
     }
 
     private void OnPlayerShotBullet(Player player)
@@ -427,11 +428,14 @@ public class GameObjectManager
                 case BikeShop bs: // It works but Bikeshop shouldn't be a item.
                     AddStatic(bs.CollisionCollider);
                     break;
+                case DogBowl db:
+                    AddStatic(db.CollisionCollider);
+                    break;
                 case DestructibleObject:
                     AddStatic(created.Collider);
                     break;
-                case Chest:
-                    AddItem(created);
+                case Chest chest:
+                    AddStatic(chest.CollisionCollider);
                     break;
             }
         }
@@ -462,10 +466,18 @@ public class GameObjectManager
                 return null;
         }
     }
-
     public void Unload()
     {
         OnTookDamage = null;
         OnCharacterDied = null;
+        OnScreenShakeRequested = null;
+
+        Characters.Clear();
+        Items.Clear();
+        Projectiles.Clear();
+        AOEAttacks.Clear();
+        Trams.Clear();
+
+        Statics.Clear();
     }
 }

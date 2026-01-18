@@ -1,13 +1,14 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Entities.Characters;
+using Autofac.Util;
+using System;
 
 namespace BikeWars.Content.screens
 {
-    public class HUD
+    public class HUD: IDisposable
     {
-        private readonly Texture2D _sheet;
-        private readonly Texture2D _pixel;
+        private Texture2D _sheet;
         private readonly Rectangle _hpfill;
         private readonly Rectangle _sprintIcon;
         private readonly Rectangle _xpfill;
@@ -15,21 +16,22 @@ namespace BikeWars.Content.screens
         public Vector2 Position;
 
 
-        public HUD(Texture2D sheet)
+        public HUD()
         {
-            _sheet = sheet;
-            _pixel = new Texture2D(sheet.GraphicsDevice, 1, 1);
-            _pixel.SetData(new[] { Color.White });
             _xpfill = new Rectangle(44, 25, 100, 5);
             _hpfill = new Rectangle(32, 34, 118, 17);
             _bikefill = new Rectangle(48, 60, 102, 8);
             _sprintIcon = new Rectangle(12, 36, 16, 15);
             Position = new Vector2(0, 0);
         }
+
+        public void LoadContent(Texture2D sheet)
+        {
+            _sheet = sheet;
+        }
         private const float Scale = 2f;
         public void Draw(SpriteBatch sb, Player player)
         {
-
             sb.Draw(_sheet, Position, null, Color.White, 0f, Vector2.Zero, Scale, SpriteEffects.None, 0f);
 
             float hpPercent = (float)player.Attributes.Health / player.Attributes.MaxHealth;
@@ -79,8 +81,7 @@ namespace BikeWars.Content.screens
                 scaledLostWidth,
                 scaledHeight
             );
-
-            sb.Draw(_pixel, dest, Color.Gray);
+            sb.Draw(RenderPrimitives.Pixel, dest, Color.Gray);
         }
 
 
@@ -102,6 +103,9 @@ namespace BikeWars.Content.screens
 
             sb.Draw(_sheet, iconPos, _sprintIcon, tint, 0f, Vector2.Zero, Scale, SpriteEffects.None, 0f);
         }
-
+        public void Dispose()
+        {
+            _sheet = null;
+        }
     }
 }

@@ -71,7 +71,7 @@ namespace BikeWars.Content.screens
                 id: 1,
                 texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(30, 290, 200, 60),
-                text: "Spawn 50 Dogs",
+                text: "Spawn 10 Dogs",
                 font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
@@ -114,7 +114,7 @@ namespace BikeWars.Content.screens
                 SpawnEnemies(EnemyType.BikeThief, 15);
 
             if(_spawnDogBtn.IsClicked(mouse, _prevMouse))
-                SpawnEnemies(EnemyType.Dog, 50);
+                SpawnEnemies(EnemyType.Dog, 10);
 
             if (_spawnKamikazeBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Kamikaze, 1);

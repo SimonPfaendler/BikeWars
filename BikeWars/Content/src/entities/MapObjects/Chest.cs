@@ -10,14 +10,17 @@ public class Chest: ItemBase
     private bool _open;
     public bool Open => _open;
     public string Item { get; private set; }
-    
+    private BoxCollider _collisionCollider {get;set;}
+    public BoxCollider CollisionCollider {get => _collisionCollider; set => _collisionCollider = value; }
+    private int PADDING_INTERACTION_AREA = 40;
 
     public Chest(Vector2 start, Point size, string item, bool open = false)
     {
         Item = item;
         _open = open;
         Transform = new Transform(start, size);
-        Collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.ITEM, this);
+        Collider = new BoxCollider(new Vector2(Transform.Position.X - PADDING_INTERACTION_AREA / 2, Transform.Position.Y - PADDING_INTERACTION_AREA / 2), Transform.Size.X + PADDING_INTERACTION_AREA, Transform.Size.Y + PADDING_INTERACTION_AREA, CollisionLayer.INTERACT, this);
+        CollisionCollider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.WALL, this);
         if (_open == false)
         {TexRight = managers.SpriteManager.GetTexture("Chest");}
         else
@@ -52,6 +55,7 @@ public class Chest: ItemBase
             "Frelo"      => new Frelo(dropPos, new Point(32, 32)),
             "Racingbike" => new RacingBike(dropPos, new Point(32, 32)),
             "DogFood" => new DogFood(dropPos, new Point(32, 32)),
+            "DopingSpritze" => new DopingSpritze(dropPos, new Point(32, 32)),
         };
     }
 }

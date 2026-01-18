@@ -63,6 +63,7 @@ namespace BikeWars.Content.managers
             { "XP_Beer", "assets/sprites/XP/xp_beer_texture" },
             { "XP_Money", "assets/sprites/XP/xp_money_texture" },
             { "EnergyGel", "assets/images/EnergyGel" },
+            { "DopingSpritze", "assets/images/DopingSpritze" },
             { "DogFood", "assets/images/DogFood" },
             // TRAM
             { "Tram", "assets/sprites/Tram_final" },
@@ -75,9 +76,11 @@ namespace BikeWars.Content.managers
 
         // No single-image map sprites here; map sprites are loaded from atlas JSON.
 
-        // Atlas regions for large map atlases (tilemap_1 etc.)
-        private static Dictionary<string, Rectangle> _mapAtlasEntries = new Dictionary<string, Rectangle>();
-        private static Texture2D _mapAtlasTexture;
+        // Atlas regions for large map atlases (tilemap_1, tilemap_2, etc.)
+        // Structure: tilemap name -> (sprite filename -> rectangle)
+        private static Dictionary<string, Dictionary<string, Rectangle>> _mapAtlasEntries = new Dictionary<string, Dictionary<string, Rectangle>>();
+        // Structure: tilemap name -> texture
+        private static Dictionary<string, Texture2D> _mapAtlasTextures = new Dictionary<string, Texture2D>();
 
         // liste aller animationen, die beim start gecached werden
         private static readonly List<string> AnimationKeys = new List<string>
@@ -173,16 +176,23 @@ namespace BikeWars.Content.managers
             }
             // Note: single-image map sprites were removed — map objects use atlas regions now.
 
-            // Try to load map atlas JSON (tilemap_1_regions.json) — prefer Content/sprites, fallback to Content/assets/sprites
+            // Try to load map atlas JSON files (tilemap_1_regions.json, tilemap_2_regions.json, etc.)
+            // — prefer Content/sprites, fallback to Content/assets/sprites
+            LoadMapAtlas(content, "tilemap_1_regions");
+            LoadMapAtlas(content, "tilemap_2_regions");
+        }
+
+        private static void LoadMapAtlas(ContentManager content, string atlasName)
+        {
             try
             {
                 string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-                string candidate1 = System.IO.Path.Combine(baseDir, "Content", "sprites", "tilemap_1_regions");
+                string candidate1 = System.IO.Path.Combine(baseDir, "Content", "sprites", atlasName);
                 string path = System.IO.File.Exists(candidate1) ? candidate1 : candidate1 + ".json";
 
                 if (!System.IO.File.Exists(path))
                 {
-                    string candidate2 = System.IO.Path.Combine(baseDir, "Content", "assets", "sprites", "tilemap_1_regions");
+                    string candidate2 = System.IO.Path.Combine(baseDir, "Content", "assets", "sprites", atlasName);
                     path = System.IO.File.Exists(candidate2) ? candidate2 : candidate2 + ".json";
                 }
 
@@ -195,16 +205,23 @@ namespace BikeWars.Content.managers
                         string imageName = System.IO.Path.GetFileNameWithoutExtension(root.meta.image);
                         try
                         {
-                            _mapAtlasTexture = content.Load<Texture2D>("assets/Map/" + imageName);
+                            Texture2D atlasTexture = content.Load<Texture2D>("assets/Map/" + imageName);
+                            _mapAtlasTextures[atlasName] = atlasTexture;
                         }
-                        catch { _mapAtlasTexture = null; }
+                        catch { }
 
+                        // Store sprite entries for this atlas
+                        var entries = new Dictionary<string, Rectangle>();
                         foreach (var f in root.frames)
                         {
                             if (f.filename != null && f.frame != null)
                             {
-                                _mapAtlasEntries[f.filename] = new Rectangle(f.frame.x, f.frame.y, f.frame.w, f.frame.h);
+                                entries[f.filename] = new Rectangle(f.frame.x, f.frame.y, f.frame.w, f.frame.h);
                             }
+                        }
+                        if (entries.Count > 0)
+                        {
+                            _mapAtlasEntries[atlasName] = entries;
                         }
                     }
                 }
@@ -213,19 +230,30 @@ namespace BikeWars.Content.managers
         }
 
         /// <summary>
-        /// Try to retrieve an atlas region from the loaded map atlas.
+        /// Try to retrieve an atlas region from any of the loaded map atlases.
         /// Returns the atlas Texture2D (if loaded) and the source rectangle.
         /// </summary>
         public static bool TryGetMapAtlasRegion(string filename, out Texture2D atlas, out Rectangle rect)
         {
             atlas = null;
             rect = Rectangle.Empty;
-            if (_mapAtlasTexture == null) return false;
-            if (_mapAtlasEntries.TryGetValue(filename, out rect))
+
+            // Search through all loaded atlases
+            foreach (var atlasEntry in _mapAtlasEntries)
             {
-                atlas = _mapAtlasTexture;
-                return true;
+                string atlasName = atlasEntry.Key;
+                Dictionary<string, Rectangle> entries = atlasEntry.Value;
+
+                if (entries.TryGetValue(filename, out rect))
+                {
+                    // Found the sprite in this atlas
+                    if (_mapAtlasTextures.TryGetValue(atlasName, out atlas))
+                    {
+                        return true;
+                    }
+                }
             }
+
             return false;
         }
 
