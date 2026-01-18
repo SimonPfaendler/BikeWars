@@ -18,7 +18,6 @@ using BikeWars.Content.managers;
 using BikeWars.Content.events;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.entities.MapObjects;
-using System.Dynamic;
 using BikeWars.Entities.Characters.MapObjects;
 
 namespace BikeWars.Content.screens
