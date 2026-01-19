@@ -207,6 +207,7 @@ namespace BikeWars.Content.screens
             _collisionManager.OnObjectInteraction += _gameObjectManager.Player1.OnInteractObject;
             _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
             _collisionManager.OnTramHit += _combatManager.HandleTramHit;
+            _collisionManager.OnBaechleHit += _combatManager.HandleBaechleHit;
 
             _combatManager.OnHitStopRequested += TriggerHitStop;
             _combatManager.OnScreenShakeRequested += (intensity, duration) => camera.Shake(intensity, duration);
