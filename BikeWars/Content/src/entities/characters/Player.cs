@@ -560,6 +560,16 @@ namespace BikeWars.Entities.Characters
                 {
                     _dopingTimer = 10f;
                 }
+                else if (item is Beer beer)
+                {
+                    if (!beer.TryActivateBeer())
+                    {
+                        return;
+                    }
+                    //wurffunktion dann hier
+                    
+                    
+                }
 
                 Inventory.RemoveAt(_currentItemIndex);
             }
