@@ -186,51 +186,46 @@ namespace BikeWars.Entities.Characters
                 }
                 return;
             }
-            if (item is BikeShop shop)
-            {
-                if (_input.IsPressed(GameAction.INTERACT))
-                {
-                    OnBikeShopOpen?.Invoke(shop);
-                }
-                return;
-            }
-
-            if (item is Chest chest)
-            {
-                if (_input.IsPressed(GameAction.INTERACT))
-                {
-                    var drop = chest.OpenChest();
-                    if (drop != null)
-                    {
-                        ChestItemSpawn?.Invoke(drop);
-                    }
-                }
-
-                return;
-            }
-
-            if (item is DogBowl dogBowl)
-            {
-                if (_input.IsPressed(GameAction.INTERACT))
-                {
-                    var selected = Inventory.GetItemAt(_selectedInventoryIndex);
-                    if (selected is DogFood)
-                    {
-                        if (!dogBowl.TryActivateDogBowl())
-                        {
-                            return;
-                        }
-
-                        dogBowl.ActivateDogBowl(dogBowl.Transform.Position);
-                        dogBowl.FillUpDogBowl();
-                        Inventory.RemoveAt(_selectedInventoryIndex);
-                    }
-                }
-                return;
-            }
-
             item.IsPickedUp = true;
             ItemPickedUp?.Invoke(item);
+        }
+
+        public void OnInteractObject(Player player, ObjectBase obj)
+        {
+            if (player != this) return;
+            if (!_input.IsPressed(GameAction.INTERACT)) return;
+            if (obj is BikeShop shop)
+            {
+                OnBikeShopOpen?.Invoke(shop);
+                return;
+            }
+
+            if (obj is Chest chest)
+            {
+                var drop = chest.OpenChest();
+                if (drop != null)
+                {
+                    ChestItemSpawn?.Invoke(drop);
+                }
+                return;
+            }
+
+            if (obj is DogBowl dogBowl)
+            {
+                var selected = Inventory.GetItemAt(_selectedInventoryIndex);
+                if (selected is DogFood)
+                {
+                    if (!dogBowl.TryActivateDogBowl())
+                    {
+                        return;
+                    }
+
+                    dogBowl.ActivateDogBowl(dogBowl.Transform.Position);
+                    dogBowl.FillUpDogBowl();
+                    Inventory.RemoveAt(_selectedInventoryIndex);
+                }
+                return;
+            }
         }
 
         public Player(Vector2 start, Point size, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")

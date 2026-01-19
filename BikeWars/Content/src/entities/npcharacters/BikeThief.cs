@@ -21,7 +21,8 @@ namespace BikeWars.Entities.Characters
         private readonly RepathScheduler _repathScheduler;
 
         // 1x1 Texture to represent the enemy
-        public static Texture2D pixel;
+        private static Texture2D _pixel;
+        public static Texture2D Pixel => _pixel;
 
         // 1x1 Texture to represent the enemy
         public BikeThief(Vector2 start, Point size, AudioService audio, PathFinding pathFinding,

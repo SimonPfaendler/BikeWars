@@ -10,6 +10,7 @@ using BikeWars.Content.entities.items;
 using BikeWars.Content.managers;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
+using BikeWars.Content.entities.MapObjects;
 using BikeWars.Entities.Characters.MapObjects;
 
 namespace BikeWars.Content.src.utils.SaveLoadExample;
@@ -29,7 +30,8 @@ public static class SaveLoad
         MONEY,
         FRELO,
         RACINGBIKE,
-        BIKESHOP
+        BIKESHOP,
+        DOGBOWL
     }
     // save file path in the user's Documents folder
     private static readonly string SAVE_PATH = Path.Combine(
@@ -49,6 +51,7 @@ public static class SaveLoad
         public List<ProjectileSaveModel> Projectiles {get; set;} = new();
         public List<CharacterSaveModel> Characters {get; set;} = new();
         public List<ItemSaveModel> Items {get; set;} = new();
+        public List<ObjectSaveModel> Objects { get; set; } = new();
         public List<Statistic> Statistics{get; set;} = new();
         public Statistic Statistic{get; set;} = new();
         public int GameMode { get; set; } = 0;
@@ -128,9 +131,27 @@ public static class SaveLoad
 
         public string? Item { get; set; }
 
-        public ItemSaveModel() {}
+        public ItemSaveModel() { }
 
         public ItemSaveModel(TYPES type, Vector2 position, Point size)
+        {
+            Type = type;
+            Position = new Vector2Save(position);
+            Size = new PointSave(size);
+        }
+    }
+
+    public class ObjectSaveModel
+    {
+        public TYPES Type { get; set; }
+        public Vector2Save Position { get; set; } = new();
+        public PointSave Size { get; set; } = new();
+
+        public bool? IsOpen { get; set; }
+        public string? Item { get; set; }
+        public bool? IsFull { get; set; }
+        public ObjectSaveModel() { }
+        public ObjectSaveModel(TYPES type, Vector2 position, Point size)
         {
             Type = type;
             Position = new Vector2Save(position);
@@ -195,6 +216,7 @@ public static class SaveLoad
                 Projectiles = MakeProjectileSaveList(gameObjectManager.Projectiles),
                 Characters = MakeCharacterSaveList(gameObjectManager.Characters),
                 Items = MakeItemSaveList(gameObjectManager.Items),
+                Objects = MakeObjectSaveList(gameObjectManager.Objects),
                 Statistics = statisticsManager.Statistics,
                 Statistic = statisticsManager.Statistic
             };
@@ -239,6 +261,7 @@ public static class SaveLoad
                 Projectiles = loadState.Projectiles,
                 Characters = loadState.Characters,
                 Items = loadState.Items,
+                Objects = loadState.Objects,
                 Statistics = statisticsManager.Statistics,
                 Statistic = statisticsManager.Statistic
             };
@@ -298,19 +321,33 @@ public static class SaveLoad
     {
         return item switch
         {
-            Chest c => new ItemSaveModel(TYPES.CHEST, item.Transform.Position, item.Transform.Size)
-            {
-                IsOpen = c.Open,
-            },
             Xp_Beer b => new ItemSaveModel(TYPES.BEER, item.Transform.Position, item.Transform.Size),
             Xp_Money b => new ItemSaveModel(TYPES.MONEY, item.Transform.Position, item.Transform.Size),
             EnergyGel e => new ItemSaveModel(TYPES.ENERGY_GEL, item.Transform.Position, item.Transform.Size),
             Frelo f => new ItemSaveModel(TYPES.FRELO, item.Transform.Position, item.Transform.Size),
             RacingBike r => new ItemSaveModel(TYPES.RACINGBIKE, item.Transform.Position, item.Transform.Size),
-            BikeShop bs => new ItemSaveModel(TYPES.BIKESHOP, item.Transform.Position, item.Transform.Size),
             _ => throw new NotSupportedException($"Item type {item.GetType().Name} is not supported for saving.")
         };
     }
+
+    private static ObjectSaveModel MakeObjectSaveModel(ObjectBase obj)
+    {
+        return obj switch
+        {
+            Chest c => new ObjectSaveModel(TYPES.CHEST, obj.Transform.Position, obj.Transform.Size)
+            {
+                IsOpen = c.Open,
+            },
+            DogBowl db => new ObjectSaveModel(TYPES.DOGBOWL, obj.Transform.Position, obj.Transform.Size)
+            {
+                IsFull = db.Full,
+            },
+            BikeShop bs => new ObjectSaveModel(TYPES.BIKESHOP, obj.Transform.Position, obj.Transform.Size),
+            _ => throw new NotSupportedException($"Object type {obj.GetType().Name} is not supported for saving.")
+
+        };
+    }
+
     private static CharacterSaveModel MakeCharacterSaveModel(CharacterBase character)
     {
         return character switch
@@ -348,6 +385,14 @@ public static class SaveLoad
             crtList.Add(MakeItemSaveModel(p));
         }
         return crtList;
+    }
+
+    private static List<ObjectSaveModel> MakeObjectSaveList(List<ObjectBase> list)
+    {
+        var set = new List<ObjectSaveModel>();
+        foreach (var o in list)
+            set.Add(MakeObjectSaveModel(o));
+        return set;
     }
 
     private static string FormatTime(float seconds)

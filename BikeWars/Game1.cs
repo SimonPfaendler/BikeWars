@@ -28,6 +28,7 @@ public class Game1 : Game
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
+        IsFixedTimeStep = false;
 
         _graphics.PreferredBackBufferWidth = 1280;
         _graphics.PreferredBackBufferHeight = 720;
@@ -140,6 +141,7 @@ public class Game1 : Game
                             GameMode savedMode = (GameMode)loadedState.GameMode;
 
                             GameScreen gameScreen = new GameScreen(_audioService, savedMode);
+                            gameScreen.ViewPort = GraphicsDevice.Viewport;
                             gameScreen.LoadContent(Content, GraphicsDevice);
                             gameScreen.BtnClicked += OnBtnClicked;
                             gameScreen.PauseBtnPressed += OnPauseBtnPressed;
@@ -169,6 +171,7 @@ public class Game1 : Game
 
                     case ButtonAction.TechDemo:
                         TechDemoScreen tds = new TechDemoScreen(_audioService);
+                        tds.ViewPort = GraphicsDevice.Viewport;
                         tds.LoadContent(Content, GraphicsDevice);
                         tds.BtnClicked += OnBtnClicked;
                         ScreenManager.AddScreen(tds);

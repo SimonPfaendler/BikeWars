@@ -190,11 +190,7 @@ public class PathFinding
 
         Node startNode = _grid[startX, startY];
         Node targetNode = _grid[endX, endY];
-
-        // If either start or end is blocked, no path exists
-        // if (!startNode.Walkable || !targetNode.Walkable)
-        //     return new List<Node>();
-
+        
         _searchId++;
         PrepareNodeForSearch(startNode);
         PrepareNodeForSearch(targetNode);

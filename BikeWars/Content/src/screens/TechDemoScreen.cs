@@ -1,3 +1,5 @@
+using System.Linq;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework.Content;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.managers;
@@ -32,6 +34,9 @@ namespace BikeWars.Content.screens
 
         private MenuButton _spawnKamikazeBtn;
         private MenuButton _spawnTramBtn;
+        private MenuButton _spawnEnemyCircleBtn;
+
+        private readonly List<RaveGroup> _raveGroups = new List<RaveGroup>();
 
         private MouseState _prevMouse;
 
@@ -93,11 +98,32 @@ namespace BikeWars.Content.screens
                 font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
+
+            _spawnEnemyCircleBtn = new MenuButton(
+                id: 6,
+                texture: RenderPrimitives.Pixel,
+                bounds: new Rectangle(30, 500, 200, 60),
+                text: "Spawn Enemy Circle",
+                font: UIAssets.DefaultFont,
+                audioService: AudioService
+            );
         }
 
+        protected override void OnTechDemoReset()
+        {
+            _raveGroups.Clear();
+        }
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+
+            for (int i = _raveGroups.Count - 1; i >= 0; i--)
+            {
+                _raveGroups[i].Update(gameTime);
+
+                if (!_raveGroups[i].IsActive)
+                    _raveGroups.RemoveAt(i);
+            }
 
             MouseState mouse = Mouse.GetState();
 
@@ -106,6 +132,7 @@ namespace BikeWars.Content.screens
             _spawnDogBtn.Update(mouse, gameTime);
             _spawnKamikazeBtn.Update(mouse, gameTime);
             _spawnTramBtn.Update(mouse, gameTime);
+            _spawnEnemyCircleBtn.Update(mouse, gameTime);
 
             if(_spawnHoboBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Hobo, 100);
@@ -122,7 +149,8 @@ namespace BikeWars.Content.screens
             if (_spawnTramBtn.IsClicked(mouse, _prevMouse))
                  _spawnManager.SpawnTram(1500f);
 
-
+            if (_spawnEnemyCircleBtn.IsClicked(mouse, _prevMouse))
+                SpawnRaveCircle(count: 16, startRadius: 200f);
 
             _prevMouse = mouse;
         }
@@ -188,6 +216,28 @@ namespace BikeWars.Content.screens
             }
         }
 
+        // spawn the circle
+        private void SpawnRaveCircle(int count, float startRadius)
+        {
+            if (_raveGroups.Any(g => g.IsActive))
+                return;
+
+            var group = RaveGroup.SpawnAroundPlayer(
+                count: count,
+                startRadius: startRadius,
+                raverSize: new Point(32, 32),
+                audioService: AudioService,
+                gameObjectManager: GameObjectManager,
+                collisionManager: CollisionManager,
+                shrinkSpeed: 25f,
+                minRadius: 70f
+            );
+
+            if (group != null)
+                _raveGroups.Add(group);
+        }
+
+
         // draws the buttons
         public override void Draw(GameTime gameTime, SpriteBatch sb)
         {
@@ -198,6 +248,7 @@ namespace BikeWars.Content.screens
             _spawnDogBtn.Draw(sb);
             _spawnKamikazeBtn.Draw(sb);
             _spawnTramBtn.Draw(sb);
+            _spawnEnemyCircleBtn.Draw(sb);
             sb.End();
         }
     }

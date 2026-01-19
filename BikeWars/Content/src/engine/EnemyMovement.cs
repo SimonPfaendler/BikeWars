@@ -352,7 +352,8 @@ public class EnemyMovement : MovementBase
 
        Vector2 avoid = Vector2.Zero;
        _nearbyEnemies.Clear();
-       _gridMapper.DynamicHash.QueryNearby(EnemyPosition, 3, _nearbyEnemies);
+    //    _gridMapper.DynamicHash.QueryNearby(EnemyPosition, 3, _nearbyEnemies);
+       _gridMapper.DynamicHash.QueryNearby(EnemyPosition, 1, _nearbyEnemies);
 
        foreach (ICollider otherCollider in _nearbyEnemies)
        {

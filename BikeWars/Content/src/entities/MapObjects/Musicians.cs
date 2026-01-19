@@ -8,7 +8,7 @@ using BikeWars.Content.managers;
 
 namespace BikeWars.Content.entities.MapObjects;
 
-public class Musicians : ItemBase
+public class Musicians : ObjectBase
 {
     private const int PADDING_INTERACTION_AREA = 100;
     private BoxCollider _collisionCollider { get; set; }
@@ -20,9 +20,7 @@ public class Musicians : ItemBase
         
         Collider = new BoxCollider(new Vector2(Transform.Position.X - PADDING_INTERACTION_AREA / 2, Transform.Position.Y - PADDING_INTERACTION_AREA / 2), Transform.Size.X + PADDING_INTERACTION_AREA, Transform.Size.Y + PADDING_INTERACTION_AREA, CollisionLayer.INTERACT, this);
         CollisionCollider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.WALL, this);
-        
-        TexRight = managers.SpriteManager.GetTexture("Straßenmusikanten");
-        CurrentTex = TexRight;
+        CurrentTex = managers.SpriteManager.GetTexture("Straßenmusikanten");
     }
 
     public override void Draw(SpriteBatch spriteBatch)

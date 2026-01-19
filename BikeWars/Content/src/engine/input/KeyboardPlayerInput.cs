@@ -7,7 +7,7 @@ namespace BikeWars.Content.engine.input
 {
     public class KeyboardPlayerInput : IPlayerInput
     {
-        private Camera2D _camera;
+        private readonly Camera2D _camera;
 
         public bool IsAnalog => false;
 

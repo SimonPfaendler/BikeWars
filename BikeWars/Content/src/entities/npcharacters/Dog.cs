@@ -27,7 +27,8 @@ namespace BikeWars.Entities.Characters
         protected override string WalkingSound => AudioAssets.Walking;
 
         // 1x1 Texture to represent the enemy
-        public static Texture2D pixel;
+        private static Texture2D _pixel;
+        public static Texture2D Pixel => _pixel;
         
         private float _barkTimer = 0f;
         private const float BARK_INTERVAL = 2.0f;

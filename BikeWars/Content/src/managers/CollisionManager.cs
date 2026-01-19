@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using BikeWars;
+using BikeWars.Entities;
 
 namespace BikeWars.Content.managers;
 
@@ -23,7 +23,8 @@ public class CollisionManager
 {
     // Events that can be followed by other classes
     public event Action<Player, ItemBase> OnItemPickup;
-    public event Action<Player, ItemBase> OnItemInteraction; // Will be used for the bikeshop too
+    public event Action<Player, TowerAlly> OnTowerInteraction; // Should be used that the tower will interact // TODOJL I think Player is not necessary here
+    public event Action<Player, ObjectBase> OnObjectInteraction; // Will be used for the bikeshop too
     public event Action<CharacterBase, ProjectileBase> OnProjectileHit;
     public event Action<CharacterBase, CharacterBase> OnCharacterCollision;
     public event Action<CharacterBase, AreaOfEffectBase> OnAOEHit;
@@ -58,6 +59,7 @@ public class CollisionManager
     private readonly List<ProjectileBase> _removeProjectiles = new(16);
     private readonly List<ItemBase> _removeItems = new(16);
     private readonly List<CharacterBase> _removeCharacters = new(16);
+    private readonly List<Tower> _removeTowers = new(16);
 
     public SpatialHash StaticHash
     {
@@ -161,9 +163,9 @@ public class CollisionManager
         // Mark destructible items as non-walkable in the base grid, then pad once
         if (PathGrid != null && _baseWalkableGrid != null)
         {
-            foreach (var item in _gameObjectManager.Items)
+            foreach (var obj in _gameObjectManager.Objects)
             {
-                if (item is DestructibleObject d)
+                if (obj is DestructibleObject d)
                 {
                     SetBaseWalkableForRect(d.Transform.Bounds, false);
                 }
@@ -424,14 +426,21 @@ public class CollisionManager
     }
 
     public void Insertions(List<ItemBase> items, HashSet<Player> players, List<ProjectileBase> projectiles,
-        List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters, List<Tram> trams)
+        List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters, List<Tram> trams, List<ObjectBase> objects, List<Tower> towers)
     {
         foreach (ItemBase c in items)
         {
             if (c is Musicians)
                 continue;
-
+        }
+        foreach (ItemBase c in items)
+        {
             AddDynamic(c.Collider);
+        }
+
+        foreach (ObjectBase o in objects)
+        {
+            AddDynamic(o.Collider);
         }
 
         foreach (var p in players)
@@ -464,6 +473,17 @@ public class CollisionManager
             }
         }
 
+        foreach (Tower t in towers)
+        {
+            if (t is TowerAlly ta)
+            {
+                StaticHash.Insert(ta.CollisionCollider);
+                AddDynamic(ta.Collider);
+            } else
+            {
+                StaticHash.Insert(t.Collider);
+            }
+        }
         foreach (var t in trams)
         {
             foreach (var col in t.Colliders)
@@ -565,7 +585,7 @@ public class CollisionManager
                     _toRemoveStaticColliders.Add(b);
 
                     // remove drawable/game object now
-                    _gameObjectManager.Remove(destructible);
+                    _gameObjectManager.RemoveObject(destructible);
 
                     // Notify enemies to recalculate paths (they will see grid changes after deferred apply)
                     _gameObjectManager.NotifyPathGridChanged();
@@ -614,7 +634,7 @@ public class CollisionManager
         {
             _toUpdateWalkableRects.Add(destructible.Transform.Bounds);
             _toRemoveStaticColliders.Add(b);
-            _gameObjectManager.Remove(destructible);
+            _gameObjectManager.RemoveObject(destructible);
             _gameObjectManager.NotifyPathGridChanged();
         }
     }
@@ -625,8 +645,28 @@ public class CollisionManager
         {
             HandleCharacterWithStatic(b, c);
             HandleProjectileWithStatic(b, c);
+            HandleProjectileWithTower(b, c);
             HandleAOEWithStatic(b, c);
+            HandleAOEWithTower(b, c);
         }
+    }
+
+    private void HandleAOEWithTower(ICollider towerCol, ICollider aoeCol)
+    {
+        if (towerCol.Layer != CollisionLayer.TOWER ||
+            aoeCol.Layer != CollisionLayer.AOE)
+            return;
+
+        if (!towerCol.Intersects(aoeCol))
+            return;
+
+        Tower tower = (Tower)towerCol.Owner;
+        AreaOfEffectBase aoe = (AreaOfEffectBase)aoeCol.Owner;
+
+        if (!aoe.CanDamageObject(tower))
+            return;
+
+        tower.TakeDamage(aoe.Damage);
     }
 
     private void HandleDynamics(ICollider c, List<ICollider> dynamics)
@@ -635,7 +675,9 @@ public class CollisionManager
         {
             PickingUpItem(c, d);
             HandleInteractions(c, d);
+            HandleInteractionsTower(c, d);
             HandleCharacters(c, d);
+            HandleTowers(c, d);
             HandleTramCollision(c, d);
         }
     }
@@ -681,6 +723,8 @@ public class CollisionManager
         }
 
         CharacterBase ch = (CharacterBase)c.Owner;
+        CharacterBase chd = (CharacterBase)d.Owner;
+
         Vector2 delta = ch.Transform.Position - ch.LastTransform.Position;
 
         if (!WillCollide((BoxCollider)c, delta, d))
@@ -695,11 +739,24 @@ public class CollisionManager
         if (t.LengthSquared() < 0.0001f)
             return;
 
-        CharacterBase chd = (CharacterBase)d.Owner;
-
-
         if (t.LengthSquared() < 0.0001f)
             return;
+
+        if (ch is Player)
+        {
+            ApplySafePush(ch, c, -t);
+            return;
+        }
+        if (chd is Player)
+        {
+            // t is for (c,d). If we want to move d out of c, compute it the other way.
+            Vector2 td = GetPenetrationVector(d, c);
+            if (td.LengthSquared() < 0.0001f) return;
+
+            ApplySafePush(chd, d, -td);
+            return;
+        }
+
 
         // split 2 characters apart by 50%
         Vector2 separation = t * 0.5f;
@@ -709,8 +766,6 @@ public class CollisionManager
 
         // Push character B (Forwards)
         ApplySafePush(chd, d, separation);
-
-
     }
 
     // slide the enemies along walls instead of them being pushed into the hitboxes
@@ -797,7 +852,6 @@ public class CollisionManager
         //         return true;
         // }
         return false;
-
     }
 
 
@@ -836,6 +890,27 @@ public class CollisionManager
         _toRemoveColliders.Add(p.Collider);
     }
 
+    private void HandleProjectileWithTower(ICollider towerCol, ICollider projCol)
+    {
+        if (towerCol.Layer != CollisionLayer.TOWER ||
+            projCol.Layer != CollisionLayer.PROJECTILE)
+            return;
+
+        if (!towerCol.Intersects(projCol))
+            return;
+
+        Tower tower = (Tower)towerCol.Owner;
+        ProjectileBase p = (ProjectileBase)projCol.Owner;
+
+        if (p.HasHit)
+            return;
+
+        tower.TakeDamage(p.Damage);
+        p.HasHit = true;
+
+        _toRemoveColliders.Add(p.Collider);
+    }
+
     private void HandleCharacters(ICollider c, ICollider d)
     {
         if (c.Layer != CollisionLayer.CHARACTER && c.Layer != CollisionLayer.PLAYER)
@@ -845,6 +920,46 @@ public class CollisionManager
 
         HandleCharacterCollision(c, d);
         HandleCharacterProjectiles(c, d);
+        // AOE damage handling
+        if (d.Layer != CollisionLayer.AOE)
+        {
+            return;
+        }
+
+        AreaOfEffectBase aoe = (AreaOfEffectBase)d.Owner;
+
+        // prevent hitting yourself
+        if (aoe.Owner == c.Owner)
+            return;
+
+        if (c.Intersects(d))
+        {
+            CharacterBase ch = (CharacterBase)c.Owner;
+
+            // Only apply damage if enough time has passed (once per DamageInterval)
+            if (aoe.CanDamage(ch))
+            {
+                // Call proper AOE damage event
+                OnAOEHit?.Invoke(ch, aoe);
+            }
+
+            if (ch.IsDead)
+            {
+                _toRemoveColliders.Add(ch.Collider);
+            }
+        }
+
+        return; // don't run projectile logic
+    }
+
+    private void HandleTowers(ICollider c, ICollider d)
+    {
+        if (c.Layer != CollisionLayer.TOWER)
+        {
+            return;
+        }
+
+        HandleProjectileWithTower(c, d);
         // AOE damage handling
         if (d.Layer != CollisionLayer.AOE)
         {
@@ -899,19 +1014,28 @@ public class CollisionManager
     {
         if (c.Layer == CollisionLayer.PLAYER && d.Layer == CollisionLayer.INTERACT && c.Intersects(d))
         {
-            if (c.Owner is Player p && d.Owner is ItemBase i)
+            if (c.Owner is Player p && d.Owner is ObjectBase i)
             {
-                OnItemInteraction?.Invoke(p, i);
+                OnObjectInteraction?.Invoke(p, i);
             }
         }
     }
-
+    private void HandleInteractionsTower(ICollider c, ICollider d)
+    {
+        if (c.Layer == CollisionLayer.PLAYER && d.Layer == CollisionLayer.INTERACT && c.Intersects(d))
+        {
+            if (c.Owner is Player p && d.Owner is TowerAlly ta)
+            {
+                OnTowerInteraction?.Invoke(p, ta);
+            }
+        }
+    }
     public void Update(HashSet<Player> players, List<ItemBase> items, List<ProjectileBase> projectiles,
-        List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters, List<Tram> trams)
+        List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters, List<Tram> trams, List<ObjectBase> objects, List<Tower> towers)
     {
         allDynamics.Clear();
         DynamicHash.Clear();
-        Insertions(items, players, projectiles, aoeAttacks, characters, trams);
+        Insertions(items, players, projectiles, aoeAttacks, characters, trams, objects, towers);
 
         foreach (var c in allDynamics)
         {
@@ -922,8 +1046,11 @@ public class CollisionManager
                 continue;
             }
 
+            // DynamicHash.QueryNearby(c.Position, 1, _nearbyDynamics);
+            // StaticHash.QueryNearby(c.Position, 2, _nearbyStatics);
+
             DynamicHash.QueryNearby(c.Position, 1, _nearbyDynamics);
-            StaticHash.QueryNearby(c.Position, 2, _nearbyStatics);
+            StaticHash.QueryNearby(c.Position, 1, _nearbyStatics);
 
             HandleDynamics(c, _nearbyDynamics);
             HandleStatics(c, _nearbyStatics);
@@ -933,6 +1060,8 @@ public class CollisionManager
         _removeProjectiles.Clear();
         _removeItems.Clear();
         _removeCharacters.Clear();
+        _removeTowers.Clear();
+
         foreach (var c in _toRemoveColliders)
         {
             switch (c.Owner)
@@ -940,6 +1069,7 @@ public class CollisionManager
                 case ProjectileBase p: _removeProjectiles.Add(p); break;
                 case ItemBase i: _removeItems.Add(i); break;
                 case CharacterBase ch: _removeCharacters.Add(ch); break;
+                case Tower t: _removeTowers.Add(t); break;
             }
         }
 
@@ -979,6 +1109,12 @@ public class CollisionManager
             _gameObjectManager.Statics.Remove((BoxCollider)c);
         }
 
+        foreach (ICollider c in _removeTowers)
+        {
+            StaticHash.Remove(c);
+            _gameObjectManager.Statics.Remove((BoxCollider)c);
+        }
+
         // Apply deferred grid updates (localized to avoid full-grid stalls)
         foreach (var rect in _toUpdateWalkableRects)
         {
@@ -993,7 +1129,7 @@ public class CollisionManager
     // makes the hitboxes visible for when in the tech demo
     public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
         Player player, List<CharacterBase> characters,
-        List<ItemBase> items, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks, List<Tram> trams)
+        List<ItemBase> items, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks, List<Tram> trams, List<ObjectBase> objects)
     {
         foreach (var cell in StaticHash._cells)
         {
@@ -1056,6 +1192,16 @@ public class CollisionManager
             {
                 var itemRect = GetColliderRectangle(item.Collider);
                 DrawRectOutline(spriteBatch, pixel, itemRect, Color.Red * 0.7f);
+            }
+        }
+
+        //Objects hitboxes
+        foreach (var obj in objects)
+        {
+            if (obj?.Collider != null)
+            {
+                var objRect = GetColliderRectangle(obj.Collider);
+                DrawRectOutline(spriteBatch, pixel, objRect, Color.Red * 0.7f);
             }
         }
 
@@ -1182,7 +1328,6 @@ public class CollisionManager
     public void Unload()
     {
         OnItemPickup = null;
-        OnItemInteraction = null;
         OnProjectileHit = null;
         OnCharacterCollision = null;
         OnAOEHit = null;

@@ -230,9 +230,10 @@ public class SoundManager
         foreach (var inst in _loopInstances.Values)
         {
             try
+            // if (_loopInstances.TryGetValue(id, out var inst) &&
+            //     inst.State == SoundState.Playing)
             {
-                if (inst.State == SoundState.Playing)
-                    inst.Pause();
+                inst.Pause();
             }
             catch(Exception ex)
             {
