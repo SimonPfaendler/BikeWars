@@ -132,4 +132,18 @@ public class CombatManager
             HandleDeath(target);
         }
     }
+
+    public void HandleBaechleHit(CharacterBase target)
+    {
+        if (target.IsDead) return;
+        if (target.IsGodMode) return;
+
+        target.TakeDamage(1);
+        // TODO: Add sound
+        
+        if (target.Attributes.Health <= 0)
+        {
+            HandleDeath(target);
+        }
+    }
 }

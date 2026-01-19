@@ -80,6 +80,7 @@ public class Game1 : Game
 
     protected override void Update(GameTime gameTime)
     {
+        IsFixedTimeStep = false;
         InputHandler.Update();
 
         ScreenManager.Update(gameTime);
