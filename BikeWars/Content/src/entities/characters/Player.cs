@@ -53,6 +53,8 @@ namespace BikeWars.Entities.Characters
         public event Action IceTrail;
         public event Action DamageCircle;
         public event Action<Vector2> ThrowBook;
+        public event Action<Vector2> ThrowBanana;
+        public event Action<Vector2> ThrowBottle;
         private Vector2 _mouseWorldPos;
         private bool _isThrowTargetInRange;
 
@@ -110,7 +112,9 @@ namespace BikeWars.Entities.Characters
             Flamethrower,
             IceTrail,
             DamageCircle,
-            BookThrow
+            BookThrow,
+            BananaThrow,
+            BottleThrow
         }
 
         public WeaponType CurrentWeapon { get; private set; } = WeaponType.Gun;
@@ -158,6 +162,20 @@ namespace BikeWars.Entities.Characters
                     if (!_isThrowTargetInRange) return false;
                     Attributes.AttackCooldown = 1.0f;
                     ThrowBook?.Invoke(_mouseWorldPos);
+                    _audio.Sounds.Play(AudioAssets.WoodCrack);
+                    return true;
+
+                case WeaponType.BananaThrow:
+                    if (!_isThrowTargetInRange) return false;
+                    Attributes.AttackCooldown = 1.0f;
+                    ThrowBanana?.Invoke(_mouseWorldPos);
+                    _audio.Sounds.Play(AudioAssets.WoodCrack);
+                    return true;
+
+                case WeaponType.BottleThrow:
+                    if (!_isThrowTargetInRange) return false;
+                    Attributes.AttackCooldown = 1.0f;
+                    ThrowBottle?.Invoke(_mouseWorldPos);
                     _audio.Sounds.Play(AudioAssets.WoodCrack);
                     return true;
             }
@@ -421,7 +439,7 @@ namespace BikeWars.Entities.Characters
                 DrawUtils.DrawLine(spriteBatch, pixel, center, aimEnd, Color.Red);
             }
 
-            if (CurrentWeapon == WeaponType.BookThrow && _isThrowTargetInRange)
+            if ((CurrentWeapon == WeaponType.BookThrow || CurrentWeapon == WeaponType.BananaThrow || CurrentWeapon == WeaponType.BottleThrow) && _isThrowTargetInRange)
             {
                 DrawUtils.DrawCircleOutline(spriteBatch, pixel, _mouseWorldPos, 10f, Color.Gold);
             }
@@ -673,7 +691,7 @@ namespace BikeWars.Entities.Characters
             if (!_input.IsPressed(GameAction.SWITCH_WEAPON))
                 return;
 
-            // Toggle between the two weapons
+            // Cycle through all weapons
             if (CurrentWeapon == WeaponType.Gun)
                 CurrentWeapon = WeaponType.Flamethrower;
             else if (CurrentWeapon == WeaponType.Flamethrower)
@@ -682,6 +700,10 @@ namespace BikeWars.Entities.Characters
                 CurrentWeapon = WeaponType.DamageCircle;
             else if (CurrentWeapon == WeaponType.DamageCircle)
                 CurrentWeapon = WeaponType.BookThrow;
+            else if (CurrentWeapon == WeaponType.BookThrow)
+                CurrentWeapon = WeaponType.BananaThrow;
+            else if (CurrentWeapon == WeaponType.BananaThrow)
+                CurrentWeapon = WeaponType.BottleThrow;
             else
                 CurrentWeapon = WeaponType.Gun;
         }

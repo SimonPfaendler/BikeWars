@@ -83,6 +83,8 @@ public class GameObjectManager
             Player1.IceTrail += () => OnPlayerIceTrail(Player1);
             Player1.DamageCircle += () => OnPlayerDamageCircle(Player1);
             Player1.ThrowBook += target => OnPlayerThrowBook(Player1, target);
+            Player1.ThrowBanana += target => OnPlayerThrowBanana(Player1, target);
+            Player1.ThrowBottle += target => OnPlayerThrowBottle(Player1, target);
             Player1.OnTookDamage += HandleTookDamage;
         }
 
@@ -93,6 +95,8 @@ public class GameObjectManager
             Player2.IceTrail += () => OnPlayerIceTrail(Player2);
             Player2.DamageCircle += () => OnPlayerDamageCircle(Player2);
             Player2.ThrowBook += target => OnPlayerThrowBook(Player2, target);
+            Player2.ThrowBanana += target => OnPlayerThrowBanana(Player2, target);
+            Player2.ThrowBottle += target => OnPlayerThrowBottle(Player2, target);
             Player2.OnTookDamage += HandleTookDamage;
         }
     }
@@ -420,6 +424,36 @@ public class GameObjectManager
         }
         var book = new ThrowBook(spawnPos, target, player);
         AddProjectile(book);
+    }
+
+    private void OnPlayerThrowBanana(Player player, Vector2 target)
+    {
+        Vector2 spawnPos = player.Transform.Bounds.Center.ToVector2();
+        Vector2 toTarget = target - spawnPos;
+        float distance = toTarget.Length();
+        if (distance > Player.ThrowRange)
+        {
+            target = distance > 0.001f
+                ? spawnPos + Vector2.Normalize(toTarget) * Player.ThrowRange
+                : spawnPos;
+        }
+        var banana = new ThrowBanana(spawnPos, target, player);
+        AddProjectile(banana);
+    }
+
+    private void OnPlayerThrowBottle(Player player, Vector2 target)
+    {
+        Vector2 spawnPos = player.Transform.Bounds.Center.ToVector2();
+        Vector2 toTarget = target - spawnPos;
+        float distance = toTarget.Length();
+        if (distance > Player.ThrowRange)
+        {
+            target = distance > 0.001f
+                ? spawnPos + Vector2.Normalize(toTarget) * Player.ThrowRange
+                : spawnPos;
+        }
+        var bottle = new ThrowBottle(spawnPos, target, player);
+        AddProjectile(bottle);
     }
 
     public void RequestScreenShake(float intensity, float duration)
