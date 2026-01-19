@@ -8,6 +8,7 @@ using BikeWars.Content.entities.interfaces;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using BikeWars.Content.components;
+using BikeWars.Utilities;
 
 
 
@@ -41,7 +42,6 @@ namespace BikeWars.Content.managers
         // raver logic
         private List<RaveGroup> _raveGroups = new List<RaveGroup>();
 
-        private readonly Random _random;
         private readonly RepathScheduler _repathScheduler;
 
 
@@ -50,7 +50,6 @@ namespace BikeWars.Content.managers
             _gameObjectManager = gameObjectManager;
             _collisionManager = collisionManager;
             _audioService = audioService;
-            _random = new Random();
             _spawnInterval = START_SPAWN_INTERVAL;
             _pathFinding = pathFinding;
             _repathScheduler = repathScheduler;
@@ -114,12 +113,12 @@ namespace BikeWars.Content.managers
 
             // Spawn far outside the screen
             Vector2 playerPos = _gameObjectManager.Player1.Transform.Position;
-            float angle = (float)(_random.NextDouble() * Math.PI * 2);
+            float angle = (float)(RandomUtil.NextDouble() * Math.PI * 2);
             
             Vector2 startPos = playerPos + new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * spawnRadius;
             
             // Target a position near the player with some randomness
-            Vector2 targetOffset = new Vector2((float)(_random.NextDouble() - 0.5) * 10, (float)(_random.NextDouble() - 0.5) * 10);
+            Vector2 targetOffset = new Vector2((float)(RandomUtil.NextDouble() - 0.5) * 10, (float)(RandomUtil.NextDouble() - 0.5) * 10);
             Vector2 targetPos = playerPos + targetOffset;
 
             var tram = new Tram(startPos, targetPos,  _audioService, _gameObjectManager.Player1);
@@ -132,7 +131,7 @@ namespace BikeWars.Content.managers
         {
 
             // Spawn 10-15 Hobos
-            int count = _random.Next(10, 16);
+            int count = RandomUtil.NextInt(10, 16);
 
 
             float speedMultiplier = 1.5f + (0.5f * (float)progress); // Start fast, get faster
@@ -145,7 +144,7 @@ namespace BikeWars.Content.managers
              for (int i = 0; i < count; i++)
              {
                  // Small random offset from cluster center for each unit
-                 Vector2 offset = new Vector2((float)(_random.NextDouble() - 0.5) * 100, (float)(_random.NextDouble() - 0.5) * 100);
+                 Vector2 offset = new Vector2((float)(RandomUtil.NextDouble() - 0.5) * 100, (float)(RandomUtil.NextDouble() - 0.5) * 100);
                  Vector2 spawnPos = clusterCenter + offset;
 
                  if (!IsValidSpawnPosition(spawnPos))
@@ -167,7 +166,7 @@ namespace BikeWars.Content.managers
             // Determine type of enemy
             // As time progresses, higher chance for stronger enemies (BikeThief vs Hobo)
 
-            bool spawnHobo = _random.NextDouble() > (0.2 + 0.3 * progress); // Chance of BikeThief/ Dog increases from 20% to 50%
+            bool spawnHobo = RandomUtil.NextDouble() > (0.2 + 0.3 * progress); // Chance of BikeThief/ Dog increases from 20% to 50%
 
             Vector2 spawnPos = GetRandomSpawnPosition();
 
@@ -186,7 +185,7 @@ namespace BikeWars.Content.managers
             else
             {
                 // Remaining probability split between Dog, Thief, and Kamikaze
-                double val = _random.NextDouble();
+                double val = RandomUtil.NextDouble();
                 // Dog: 40% of remaining
                 // Thief: 40% of remaining
                 // Kamikaze: 20% of remaining
@@ -304,9 +303,9 @@ namespace BikeWars.Content.managers
             for (int i = 0; i < 20; i++) // Try 20 times to find a valid position
             {
                 // Random angle
-                float angle = (float)(_random.NextDouble() * Math.PI * 2);
+                float angle = (float)(RandomUtil.NextDouble() * Math.PI * 2);
                 // Random distance
-                float distance = MIN_SPAWN_RADIUS + (float)(_random.NextDouble() * (MAX_SPAWN_RADIUS - MIN_SPAWN_RADIUS));
+                float distance = MIN_SPAWN_RADIUS + (float)(RandomUtil.NextDouble() * (MAX_SPAWN_RADIUS - MIN_SPAWN_RADIUS));
 
                 Vector2 offset = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * distance;
                 Vector2 pos = playerPos + offset;

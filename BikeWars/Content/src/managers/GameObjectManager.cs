@@ -16,6 +16,7 @@ using BikeWars.Content.components;
 using BikeWars.Content.engine.ui;
 using BikeWars.Content.entities.MapObjects;
 using BikeWars.Entities;
+using BikeWars.Utilities;
 using System.Linq;
 
 
@@ -458,8 +459,7 @@ public class GameObjectManager
         xp = new Xp_Money(pos, new Point(16, 16));
         AddItem(xp);
 
-        Random rnd = new Random();
-        if (rnd.NextDouble() <= 0.05) // 5% chance to drop an energy gel
+        if (RandomUtil.NextDouble() <= 0.05) // 5% chance to drop an energy gel
         {
             EnergyGel energyGel = new EnergyGel(pos, new Point(32, 32));
             AddItem(energyGel);
@@ -489,8 +489,7 @@ public class GameObjectManager
 
         // Create a velocity: Move OUT and UP
         // Randomize slightly for "juice"
-        Random rnd = new Random();
-        float angle = (float)(rnd.NextDouble() * 0.5f - 0.25f); // +/- ~15 degrees variation
+        float angle = (float)(RandomUtil.NextDouble() * 0.5f - 0.25f); // +/- ~15 degrees variation
 
         // Rotate direction slightly
         float cos = MathF.Cos(angle);
