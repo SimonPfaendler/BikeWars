@@ -455,12 +455,7 @@ public class GameObjectManager
         // spawns Xp_Item at the location of character
         // function is used in CharacterBase.cs
         Vector2 pos = character.Transform.Position;
-
-        if (character is Hobo)
-            xp = new Xp_Beer(pos, new Point(16, 16));
-        // other cases will be added later
-        else
-            xp = new Xp_Money(pos, new Point(16, 16));
+        xp = new Xp_Money(pos, new Point(16, 16));
         AddItem(xp);
 
         Random rnd = new Random();

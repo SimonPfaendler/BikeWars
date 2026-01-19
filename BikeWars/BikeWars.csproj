@@ -51,7 +51,6 @@
     </ItemGroup>
     <ItemGroup>
       <Folder Include="Content\assets\fonts\" />
-      <Folder Include="Content\assets\images\" />
       <Folder Include="Content\assets\sounds\" />
       <Folder Include="Content\assets\sprites\XP\" />
     </ItemGroup>

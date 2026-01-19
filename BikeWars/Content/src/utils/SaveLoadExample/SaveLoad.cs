@@ -321,7 +321,7 @@ public static class SaveLoad
     {
         return item switch
         {
-            Xp_Beer b => new ItemSaveModel(TYPES.BEER, item.Transform.Position, item.Transform.Size),
+            Beer b => new ItemSaveModel(TYPES.BEER, item.Transform.Position, item.Transform.Size),
             Xp_Money b => new ItemSaveModel(TYPES.MONEY, item.Transform.Position, item.Transform.Size),
             EnergyGel e => new ItemSaveModel(TYPES.ENERGY_GEL, item.Transform.Position, item.Transform.Size),
             Frelo f => new ItemSaveModel(TYPES.FRELO, item.Transform.Position, item.Transform.Size),

@@ -46,6 +46,18 @@
 /processorParam:TextureFormat=Color
 /build:assets/images/DopingSpritze.png
 
+#begin assets/images/beer_destroyed.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/beer_destroyed.png
+
 #begin assets/images/EnergyGel.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -574,7 +586,7 @@
 /processorParam:TextureFormat=Color
 /build:assets/sprites/videos/PogacarWinSpriteSheet.png
 
-#begin assets/sprites/XP/xp_beer_texture.png
+#begin assets/images/beer_texture.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -584,7 +596,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:assets/sprites/XP/xp_beer_texture.png
+/build:assets/images/beer_texture.png
 
 #begin assets/sprites/XP/xp_money_texture.png
 /importer:TextureImporter
