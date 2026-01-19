@@ -118,6 +118,18 @@
 /processorParam:TextureFormat=Color
 /build:assets/images/StartButton.png
 
+#begin assets/images/tower_ally.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/tower_ally.png
+
 #begin assets/Map/Bike_Shop_Template.tx
 /copy:assets/Map/Bike_Shop_Template.tx
 

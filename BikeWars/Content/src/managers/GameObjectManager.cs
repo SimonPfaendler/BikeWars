@@ -15,13 +15,17 @@ using BikeWars.Entities.Characters.MapObjects;
 using BikeWars.Content.components;
 using BikeWars.Content.engine.ui;
 using BikeWars.Content.entities.MapObjects;
+using BikeWars.Entities;
+using System.Linq;
 
 
 namespace BikeWars.Content.managers;
 public class GameObjectManager
 {
     public event Action<CharacterBase>? OnCharacterDied;
+    public event Action<Tower>? OnTowerDied;
     public event Action<CharacterBase, int>? OnTookDamage;
+    public event Action<Tower, int>? OnTowerTookDamage;
     private Player? _player1 {get; set;}
     public Player? Player1{get => _player1; set => _player1 = value;}
     private Player? _player2 {get; set;}
@@ -29,6 +33,9 @@ public class GameObjectManager
 
     private HashSet<CharacterBase> _characters {get; set;}
     public HashSet<CharacterBase> Characters {get => _characters;}
+
+    private List<Tower> _towers {get; set;}
+    public List<Tower> Towers {get => _towers;}
 
     private readonly HashSet<ItemBase> _items = new();
     public HashSet<ItemBase> Items => _items;
@@ -65,6 +72,7 @@ public class GameObjectManager
         _items = new HashSet<ItemBase>();
         _statics = new HashSet<BoxCollider>();
         _projectiles = new HashSet<ProjectileBase>();
+        _towers = new List<Tower>();
 
         if (Player1 != null)
         {
@@ -83,7 +91,30 @@ public class GameObjectManager
             Player2.DamageCircle += () => OnPlayerDamageCircle(Player2);
             Player2.OnTookDamage += HandleTookDamage;
         }
-
+    }
+    public void AddTower(Tower tower)
+    {
+        Towers.Add(tower);
+        tower.Attributes.OnDied += HandleTowerDeath;
+        tower.OnTookDamage += HandleTowerTookDamage;
+        if (tower is TowerAlly ta)
+        {
+            ta.OnShoot += OnTowerShotBullet;
+            Statics.Add(ta.CollisionCollider);
+            return;
+        }
+        Statics.Add(tower.Collider);
+    }
+    public void DestroyTower(Tower tower)
+    {
+        Towers.Remove(tower);
+        NotifyPathGridChanged();
+        if (tower is TowerAlly ta)
+        {
+            Statics.Remove(ta.CollisionCollider);
+            return;
+        }
+        Statics.Remove(tower.Collider);
     }
 
     public void AddCharacter(CharacterBase character)
@@ -106,6 +137,10 @@ public class GameObjectManager
         if (_pendingDamage.ContainsKey(c)) _pendingDamage.Remove(c);
     }
 
+    private void HandleTowerDeath(Tower t)
+    {
+        OnTowerDied?.Invoke(t);
+    }
     private void HandleTookDamage(CharacterBase c, int amount)
     {
         // Aggregate damage
@@ -122,7 +157,10 @@ public class GameObjectManager
              OnScreenShakeRequested?.Invoke(5.5f, 0.2f);
         }
     }
-
+    private void HandleTowerTookDamage(Tower t, int amount)
+    {
+        OnTowerTookDamage?.Invoke(t, amount);
+    }
     public void AddItem(ItemBase item)
     {
         Items.Add(item);
@@ -177,6 +215,10 @@ public class GameObjectManager
         {
             c.Draw(spriteBatch);
         }
+        foreach (Tower t in Towers)
+        {
+            t.Draw(spriteBatch);
+        }
         foreach (ItemBase i in Items)
         {
             i.Draw(spriteBatch);
@@ -223,6 +265,10 @@ public class GameObjectManager
             }
             c.Update(gameTime);
             c.UpdateCollider();
+        }
+        foreach (Tower t in Towers)
+        {
+            t.Update(gameTime, Characters.ToList());
         }
         foreach (ItemBase i in Items)
         {
@@ -288,6 +334,37 @@ public class GameObjectManager
         OnScreenShakeRequested?.Invoke(1.5f, 0.05f);
     }
 
+    private void OnTowerShotBullet(Tower tower)
+    {
+        Vector2 cannonOffset = new Vector2(-100, 0);
+        Vector2 rotatedOffset = RotateVector(cannonOffset, tower.Rotation);
+
+        Vector2 spawnPos = tower.Transform.Bounds.Center.ToVector2() + rotatedOffset;
+        Bullet b = new Bullet(spawnPos, new Point(10, 10), tower);
+        b.Movement.Direction = -tower.GazeDirection;
+        b.Movement.IsMoving = true;
+        b.Movement.Speed = 500f;
+
+        AddProjectile(b);
+
+        OnScreenShakeRequested?.Invoke(1.5f, 0.05f);
+    }
+
+    private Vector2 RotateVector(Vector2 vec, float angle)
+    {
+        float cos = MathF.Cos(angle);
+        float sin = MathF.Sin(angle);
+        return new Vector2(
+            vec.X * cos - vec.Y * sin,
+            vec.X * sin + vec.Y * cos
+        );
+}
+
+    public void OnActivateTower(Player player, TowerAlly tower)
+    {
+        tower.Activate();
+    }
+
     private void OnPlayerFlamethrower(Player player)
     {
         Vector2 direction = player.GazeDirection;
@@ -295,6 +372,8 @@ public class GameObjectManager
         f.LoadContent(_contentManager);
         AddAOE(f);
     }
+
+
 
     private void OnPlayerIceTrail(Player player)
     {
@@ -340,6 +419,12 @@ public class GameObjectManager
         foreach (var c in Characters)
         {
             if (c is IWorldAudioAware wa)
+                wa.SetWorldAudioManager(worldAudioManager);
+        }
+
+        foreach (Tower t in Towers)
+        {
+            if (t is IWorldAudioAware wa)
                 wa.SetWorldAudioManager(worldAudioManager);
         }
     }
@@ -458,8 +543,8 @@ public class GameObjectManager
         }
     }
 
+    // spawn = properties
     private ObjectBase? CreateFromTiled(TiledObjectInfo spawn)
-    // spawn = properties 
     {
         var start = new Vector2(spawn.Rect.X, spawn.Rect.Y);
         var size  = new Point(spawn.Rect.Width, spawn.Rect.Height);

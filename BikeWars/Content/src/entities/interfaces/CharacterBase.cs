@@ -2,7 +2,6 @@
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
-using BikeWars.Content.managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Entities.Characters;

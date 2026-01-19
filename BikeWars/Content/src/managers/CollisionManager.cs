@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using BikeWars;
+using BikeWars.Entities;
 
 namespace BikeWars.Content.managers;
 
@@ -23,6 +23,7 @@ public class CollisionManager
 {
     // Events that can be followed by other classes
     public event Action<Player, ItemBase> OnItemPickup;
+    public event Action<Player, TowerAlly> OnTowerInteraction; // Should be used that the tower will interact // TODOJL I think Player is not necessary here
     public event Action<Player, ObjectBase> OnObjectInteraction; // Will be used for the bikeshop too
     public event Action<CharacterBase, ProjectileBase> OnProjectileHit;
     public event Action<CharacterBase, CharacterBase> OnCharacterCollision;
@@ -389,7 +390,7 @@ public class CollisionManager
 
             if (px <= 0 || py <= 0)
                 return Vector2.Zero;
-            
+
             // Extra buffer to ensure characters are definitely separated
             float buffer = 1.0f;
 
@@ -415,8 +416,13 @@ public class CollisionManager
     }
 
     public void Insertions(HashSet<ItemBase> items, HashSet<Player> players, HashSet<ProjectileBase> projectiles,
-        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters, List<Tram> trams, HashSet<ObjectBase> objects)
+        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters, List<Tram> trams, HashSet<ObjectBase> objects, List<Tower> towers)
     {
+        foreach (ItemBase c in items)
+        {
+            if (c is Musicians)
+                continue;
+        }
         foreach (ItemBase c in items)
         {
             AddDynamic(c.Collider);
@@ -457,6 +463,17 @@ public class CollisionManager
             }
         }
 
+        foreach (Tower t in towers)
+        {
+            if (t is TowerAlly ta)
+            {
+                StaticHash.Insert(ta.CollisionCollider);
+                AddDynamic(ta.Collider);
+            } else
+            {
+                StaticHash.Insert(t.Collider);
+            }
+        }
         foreach (var t in trams)
         {
             foreach (var col in t.Colliders)
@@ -618,9 +635,30 @@ public class CollisionManager
         {
             HandleCharacterWithStatic(b, c);
             HandleProjectileWithStatic(b, c);
+            HandleProjectileWithTower(b, c);
             HandleAOEWithStatic(b, c);
+            HandleAOEWithTower(b, c);
         }
     }
+
+    private void HandleAOEWithTower(ICollider towerCol, ICollider aoeCol)
+    {
+        if (towerCol.Layer != CollisionLayer.TOWER ||
+            aoeCol.Layer != CollisionLayer.AOE)
+            return;
+
+        if (!towerCol.Intersects(aoeCol))
+            return;
+
+        Tower tower = (Tower)towerCol.Owner;
+        AreaOfEffectBase aoe = (AreaOfEffectBase)aoeCol.Owner;
+
+        if (!aoe.CanDamageObject(tower))
+            return;
+
+        tower.TakeDamage(aoe.Damage);
+    }
+
 
     private void HandleDynamics(ICollider c, HashSet<ICollider> dynamics)
     {
@@ -628,7 +666,9 @@ public class CollisionManager
         {
             PickingUpItem(c, d);
             HandleInteractions(c, d);
+            HandleInteractionsTower(c, d);
             HandleCharacters(c, d);
+            HandleTowers(c, d);
             HandleTramCollision(c, d);
         }
     }
@@ -684,7 +724,7 @@ public class CollisionManager
         }
 
         OnCharacterCollision?.Invoke((CharacterBase)c.Owner, (CharacterBase)d.Owner);
-        
+
         // calculate vector that separates 2 characters
         Vector2 t = GetPenetrationVector(c, d);
         if (t.LengthSquared() < 0.0001f)
@@ -700,21 +740,22 @@ public class CollisionManager
             // t is for (c,d). If we want to move d out of c, compute it the other way.
             Vector2 td = GetPenetrationVector(d, c);
             if (td.LengthSquared() < 0.0001f) return;
-
+            
             ApplySafePush(chd, d, -td);
             return;
         }
         
+
         // split 2 characters apart by 50%
         Vector2 separation = t * 0.5f;
-        
+
         // Push character A (Backwards)
         ApplySafePush(ch, c, -separation);
-        
+
         // Push character B (Forwards)
         ApplySafePush(chd, d, separation);
     }
-    
+
     // slide the enemies along walls instead of them being pushed into the hitboxes
     private void ApplySafePush(CharacterBase ch, ICollider collider, Vector2 push)
     {
@@ -727,7 +768,7 @@ public class CollisionManager
             ch.UpdateCollider();
             return;
         }
-        
+
         // try sliding X (horizontal only)
         // We only try this if the push actually has an X component
         if (Math.Abs(push.X) > 0.01f)
@@ -741,7 +782,7 @@ public class CollisionManager
                 return;
             }
         }
-        
+
         // try sliding Y (horizontal only)
         // We only try this if the push actually has an Y component
         if (Math.Abs(push.Y) > 0.01f)
@@ -755,7 +796,7 @@ public class CollisionManager
                 return;
             }
         }
-        
+
         // 4) last resort: try smaller (scaled) pushes
         // This helps a lot with corners: full push collides, but a partial push might be valid.
         for (float t = 0.75f; t >= 0.1f; t -= 0.15f)
@@ -769,7 +810,7 @@ public class CollisionManager
                 return;
             }
         }
-        
+
     }
 
     // helper function for HandleCharacterCollision
@@ -779,7 +820,7 @@ public class CollisionManager
         // create a temporary hitbox at the new position
         // to see if the enemy will hit a wall or not
         BoxCollider testBox = new BoxCollider(newPos, collider.Width, collider.Height, collider.Layer, collider.Owner);
-        
+
         // check nearby statics
         var statics = StaticHash.QueryNearby(newPos + new Vector2(collider.Width/2f, collider.Height/2f), 5);
 
@@ -787,8 +828,8 @@ public class CollisionManager
         foreach (var s in statics)
         {
             // IGNORE things that don't block movement
-            if (s.Layer == CollisionLayer.SPAWNENEMIES || 
-                s.Layer == CollisionLayer.TERRAIN || 
+            if (s.Layer == CollisionLayer.SPAWNENEMIES ||
+                s.Layer == CollisionLayer.TERRAIN ||
                 s.Layer == CollisionLayer.AOE ||
                 s.Layer == CollisionLayer.INTERACT)
             {
@@ -796,7 +837,7 @@ public class CollisionManager
             }
             // If it hits ANYTHING else (Wall, Water, Destructible, etc.), it's a block.
             if (s.Intersects(testBox))
-                return true; 
+                return true;
         }
         return false;
 
@@ -838,6 +879,27 @@ public class CollisionManager
         _toRemoveColliders.Add(p.Collider);
     }
 
+    private void HandleProjectileWithTower(ICollider towerCol, ICollider projCol)
+    {
+        if (towerCol.Layer != CollisionLayer.TOWER ||
+            projCol.Layer != CollisionLayer.PROJECTILE)
+            return;
+
+        if (!towerCol.Intersects(projCol))
+            return;
+
+        Tower tower = (Tower)towerCol.Owner;
+        ProjectileBase p = (ProjectileBase)projCol.Owner;
+
+        if (p.HasHit)
+            return;
+
+        tower.TakeDamage(p.Damage);
+        p.HasHit = true;
+
+        _toRemoveColliders.Add(p.Collider);
+    }
+
     private void HandleCharacters(ICollider c, ICollider d)
     {
         if (c.Layer != CollisionLayer.CHARACTER && c.Layer != CollisionLayer.PLAYER)
@@ -847,6 +909,46 @@ public class CollisionManager
 
         HandleCharacterCollision(c, d);
         HandleCharacterProjectiles(c, d);
+        // AOE damage handling
+        if (d.Layer != CollisionLayer.AOE)
+        {
+            return;
+        }
+
+        AreaOfEffectBase aoe = (AreaOfEffectBase)d.Owner;
+
+        // prevent hitting yourself
+        if (aoe.Owner == c.Owner)
+            return;
+
+        if (c.Intersects(d))
+        {
+            CharacterBase ch = (CharacterBase)c.Owner;
+
+            // Only apply damage if enough time has passed (once per DamageInterval)
+            if (aoe.CanDamage(ch))
+            {
+                // Call proper AOE damage event
+                OnAOEHit?.Invoke(ch, aoe);
+            }
+
+            if (ch.IsDead)
+            {
+                _toRemoveColliders.Add(ch.Collider);
+            }
+        }
+
+        return; // don't run projectile logic
+    }
+
+    private void HandleTowers(ICollider c, ICollider d)
+    {
+        if (c.Layer != CollisionLayer.TOWER)
+        {
+            return;
+        }
+
+        HandleProjectileWithTower(c, d);
         // AOE damage handling
         if (d.Layer != CollisionLayer.AOE)
         {
@@ -907,13 +1009,22 @@ public class CollisionManager
             }
         }
     }
-
+    private void HandleInteractionsTower(ICollider c, ICollider d)
+    {
+        if (c.Layer == CollisionLayer.PLAYER && d.Layer == CollisionLayer.INTERACT && c.Intersects(d))
+        {
+            if (c.Owner is Player p && d.Owner is TowerAlly ta)
+            {
+                OnTowerInteraction?.Invoke(p, ta);
+            }
+        }
+    }
     public void Update(HashSet<Player> players, HashSet<ItemBase> items, HashSet<ProjectileBase> projectiles,
-        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters, List<Tram> trams, HashSet<ObjectBase> objects)
+        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters, List<Tram> trams, HashSet<ObjectBase> objects, List<Tower> towers)
     {
         allDynamics.Clear();
         DynamicHash.Clear();
-        Insertions(items, players, projectiles, aoeAttacks, characters, trams, objects);
+        Insertions(items, players, projectiles, aoeAttacks, characters, trams, objects, towers);
 
         foreach (var c in allDynamics)
         {
@@ -935,6 +1046,7 @@ public class CollisionManager
         HashSet<ProjectileBase> removeProjectiles = new();
         HashSet<ItemBase> removeItems = new();
         HashSet<CharacterBase> removeCharacters = new();
+        List<Tower> removeTowers = new();
 
         foreach (var c in _toRemoveColliders)
         {
@@ -943,6 +1055,7 @@ public class CollisionManager
                 case ProjectileBase p: removeProjectiles.Add(p); break;
                 case ItemBase i: removeItems.Add(i); break;
                 case CharacterBase ch: removeCharacters.Add(ch); break;
+                case Tower t: removeTowers.Add(t); break;
             }
         }
 
@@ -977,6 +1090,12 @@ public class CollisionManager
         }
 
         foreach (var c in _toRemoveStaticColliders)
+        {
+            StaticHash.Remove(c);
+            _gameObjectManager.Statics.Remove((BoxCollider)c);
+        }
+
+        foreach (ICollider c in removeTowers)
         {
             StaticHash.Remove(c);
             _gameObjectManager.Statics.Remove((BoxCollider)c);
@@ -1061,7 +1180,7 @@ public class CollisionManager
                 DrawRectOutline(spriteBatch, pixel, itemRect, Color.Red * 0.7f);
             }
         }
-        
+
         //Objects hitboxes
         foreach (var obj in objects)
         {

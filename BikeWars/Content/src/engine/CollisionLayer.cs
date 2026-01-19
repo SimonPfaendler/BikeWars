@@ -13,5 +13,6 @@ public enum CollisionLayer
     SPAWNENEMIES,
     INTERACT, // Like interacting while walking on it. Similar like Terrain
     AOE, // area-of-affect damange
+    TOWER,
     TRAM
 }

@@ -69,13 +69,13 @@ namespace BikeWars.Entities.Characters
             if (Movement.IsMoving)
             {
                 float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
-                
+
                 if (direction.LengthSquared() > 0.0001f)
                 {
                     direction.Normalize();
                     Transform.Position += direction * Speed * delta;
                 }
-                
+
                 if (System.Math.Abs(direction.X) > System.Math.Abs(direction.Y))
                 {
 
@@ -106,7 +106,7 @@ namespace BikeWars.Entities.Characters
                 return;
             if (_currentAnimation == null)
                 return;
-            
+
             Color drawColor = (_hitFlashTimer > 0f) ? _hitColor : Color.White;
             _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, 0f, _renderScale, drawColor);
         }
