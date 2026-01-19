@@ -55,7 +55,7 @@ namespace BikeWars.Content.engine
         private float _shakeTimer;
         private float _shakeIntensity;
         private Vector2 _shakeOffset;
-        private Random _rnd = new Random();
+        private readonly Random _rnd = new Random();
 
         public void Shake(float intensity, float duration)
         {

@@ -43,15 +43,15 @@ namespace BikeWars.Content.components
 
         private Color _backgroundColor = new Color(255, 255, 255, 128);
         private Color _borderColor = Color.White;
-        private int _borderThickness = 3;
+        private readonly int _borderThickness = 3;
 
-        private int _padding = 5; // For the content. We can adapt it if we need like multiple directions.
+        private readonly int _padding = 5; // For the content. We can adapt it if we need like multiple directions.
 
         protected Texture2D _backgroundTexture;
         protected SpriteFont _font;
         public ScreenManager ScreenManager { get; set; }
 
-        private int _fadeHeight = 20; // Fading effect
+        private readonly int _fadeHeight = 20; // Fading effect
         private Color _fadeColor = Color.White * 0.3f;
 
         public bool UpdateLower => throw new System.NotImplementedException();

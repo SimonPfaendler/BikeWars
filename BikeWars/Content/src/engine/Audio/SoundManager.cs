@@ -169,10 +169,10 @@ namespace BikeWars.Content.engine.Audio
 
         public void PauseLoop(string id)
         {
-            if (_loopInstances.TryGetValue(id, out var inst))
+            if (_loopInstances.TryGetValue(id, out var inst) &&
+                inst.State == SoundState.Playing)
             {
-                if (inst.State == SoundState.Playing)
-                    inst.Pause();
+                inst.Pause();
             }
         }
 

@@ -10,8 +10,8 @@ public class DogBowl: ObjectBase
 {
     private bool _full;
     public bool Full => _full;
-    private Texture2D _texEmpty;
-    private Texture2D _texFull;
+    private readonly Texture2D _texEmpty;
+    private readonly Texture2D _texFull;
 
     private BoxCollider _collisionCollider {get;set;}
     public BoxCollider CollisionCollider {get => _collisionCollider; set => _collisionCollider = value; }

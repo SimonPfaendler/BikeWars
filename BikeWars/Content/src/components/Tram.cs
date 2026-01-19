@@ -20,7 +20,7 @@ namespace BikeWars.Content.components
         public bool HasHonked { get; set; } = false;
         public bool IsExpired { get; set; } = false;
 
-        private Texture2D _texture;
+        private readonly Texture2D _texture;
         private const int COLLIDER_SEGMENT_SIZE = 40;
         private const float SPEED = 700f;
         
