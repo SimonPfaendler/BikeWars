@@ -12,6 +12,7 @@ using BikeWars.Content.components;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.engine;
 using BikeWars.Content.entities.npcharacters;
+using BikeWars.Utilities;
 
 
 // adds debugging tools for testing
@@ -48,7 +49,6 @@ namespace BikeWars.Content.screens
         private SpriteFont _font;
         private MouseState _prevMouse;
 
-        private readonly System.Random _random = new System.Random();
 
         public TechDemoScreen(AudioService audioService)
             : base(audioService, GameMode.SinglePlayer, true)
@@ -193,8 +193,8 @@ namespace BikeWars.Content.screens
                 // Try up to 20 times to find a walkable spawn tile
                 for (int attempt = 0; attempt < 20; attempt++)
                 {
-                    float spawnX = _random.Next(-300, 301);
-                    float spawnY = _random.Next(-300, 301);
+                    float spawnX = RandomUtil.NextInt(-300, 301);
+                    float spawnY = RandomUtil.NextInt(-300, 301);
 
                     var candidate = playerPos + new Vector2(spawnX, spawnY);
                     var grid = CollisionManager.WorldToGrid(candidate);

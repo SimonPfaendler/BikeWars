@@ -38,6 +38,9 @@ namespace BikeWars.Entities.Characters
         private Vector2 _facingDirection = Vector2.UnitX; // Default to right
         private Vector2 _lastGazeDirection = Vector2.UnitX;
         private const float AimLength = 100f;
+        
+        //Range for throwing objects around the player
+        public const float ThrowRange = 400f;
         public TerrainCollider CurrentTerrain { get; set; }
         public float TerrainSpeedMultiplier = 1.0f;
         private const float IncreaseSpeed = 1.1f;
@@ -49,6 +52,11 @@ namespace BikeWars.Entities.Characters
         public event Action Flamethrower;
         public event Action IceTrail;
         public event Action DamageCircle;
+        public event Action<Vector2> ThrowBook;
+        public event Action<Vector2> ThrowBanana;
+        public event Action<Vector2> ThrowBottle;
+        private Vector2 _mouseWorldPos;
+        private bool _isThrowTargetInRange;
 
 
         public event Action<Bike> Dismounted;
@@ -103,7 +111,10 @@ namespace BikeWars.Entities.Characters
             Gun,
             Flamethrower,
             IceTrail,
-            DamageCircle
+            DamageCircle,
+            BookThrow,
+            BananaThrow,
+            BottleThrow
         }
 
         public WeaponType CurrentWeapon { get; private set; } = WeaponType.Gun;
@@ -114,12 +125,12 @@ namespace BikeWars.Entities.Characters
         private float _dopingTimer = 0f;
         public bool IsDoped => _dopingTimer > 0f;
 
-        private void Shooting()
+        private bool TryShoot()
         {
             // Only shoot if we have a valid gaze direction
             Vector2 finalDirection = GazeDirection == Vector2.Zero ? _facingDirection : GazeDirection;
 
-            if (finalDirection == Vector2.Zero) return;
+            if (finalDirection == Vector2.Zero) return false;
 
             switch (CurrentWeapon)
             {
@@ -127,26 +138,49 @@ namespace BikeWars.Entities.Characters
                     Attributes.AttackCooldown = 0.25f;
                     ShotBullet?.Invoke();
                     _audio.Sounds.Play(AudioAssets.GunShot);
-                    break;
+                    return true;
 
                 case WeaponType.Flamethrower:
                     Attributes.AttackCooldown = 3.0f;
                     Flamethrower?.Invoke();
                     _audio.Sounds.Play(AudioAssets.Flamethrower);
-                    break;
+                    return true;
 
                 case WeaponType.IceTrail:
                     Attributes.AttackCooldown = 3.0f;
                     IceTrail?.Invoke();
                     _audio.Sounds.Play(AudioAssets.IceTrail);
-                    break;
+                    return true;
 
                 case WeaponType.DamageCircle:
                     Attributes.AttackCooldown = 3.0f;
                     DamageCircle?.Invoke();
                     _audio.Sounds.Play(AudioAssets.DamageCircle);
-                    break;
+                    return true;
+
+                case WeaponType.BookThrow:
+                    if (!_isThrowTargetInRange) return false;
+                    Attributes.AttackCooldown = 1.0f;
+                    ThrowBook?.Invoke(_mouseWorldPos);
+                    _audio.Sounds.Play(AudioAssets.WoodCrack);
+                    return true;
+
+                case WeaponType.BananaThrow:
+                    if (!_isThrowTargetInRange) return false;
+                    Attributes.AttackCooldown = 1.0f;
+                    ThrowBanana?.Invoke(_mouseWorldPos);
+                    _audio.Sounds.Play(AudioAssets.WoodCrack);
+                    return true;
+
+                case WeaponType.BottleThrow:
+                    if (!_isThrowTargetInRange) return false;
+                    Attributes.AttackCooldown = 1.0f;
+                    ThrowBottle?.Invoke(_mouseWorldPos);
+                    _audio.Sounds.Play(AudioAssets.WoodCrack);
+                    return true;
             }
+
+            return false;
         }
 
         public void OnPickUpItem(Player player, ItemBase item)
@@ -276,6 +310,9 @@ namespace BikeWars.Entities.Characters
 
         public void Update(GameTime gameTime, Vector2 mousePos)
         {
+            _mouseWorldPos = mousePos;
+            var throwOrigin = Transform.Bounds.Center.ToVector2();
+            _isThrowTargetInRange = Vector2.Distance(throwOrigin, _mouseWorldPos) <= ThrowRange;
             UpdateAttackCooldown(gameTime);
             UpdateMountTimer(gameTime);
             
@@ -400,6 +437,11 @@ namespace BikeWars.Entities.Characters
                 // Draw aiming line
                 Vector2 aimEnd = center + GazeDirection * 50f;
                 DrawUtils.DrawLine(spriteBatch, pixel, center, aimEnd, Color.Red);
+            }
+
+            if ((CurrentWeapon == WeaponType.BookThrow || CurrentWeapon == WeaponType.BananaThrow || CurrentWeapon == WeaponType.BottleThrow) && _isThrowTargetInRange)
+            {
+                DrawUtils.DrawCircleOutline(spriteBatch, pixel, _mouseWorldPos, 10f, Color.Gold);
             }
         }
 
@@ -649,13 +691,19 @@ namespace BikeWars.Entities.Characters
             if (!_input.IsPressed(GameAction.SWITCH_WEAPON))
                 return;
 
-            // Toggle between the two weapons
+            // Cycle through all weapons
             if (CurrentWeapon == WeaponType.Gun)
                 CurrentWeapon = WeaponType.Flamethrower;
             else if (CurrentWeapon == WeaponType.Flamethrower)
                 CurrentWeapon = WeaponType.IceTrail;
             else if (CurrentWeapon == WeaponType.IceTrail)
                 CurrentWeapon = WeaponType.DamageCircle;
+            else if (CurrentWeapon == WeaponType.DamageCircle)
+                CurrentWeapon = WeaponType.BookThrow;
+            else if (CurrentWeapon == WeaponType.BookThrow)
+                CurrentWeapon = WeaponType.BananaThrow;
+            else if (CurrentWeapon == WeaponType.BananaThrow)
+                CurrentWeapon = WeaponType.BottleThrow;
             else
                 CurrentWeapon = WeaponType.Gun;
         }
@@ -760,8 +808,11 @@ namespace BikeWars.Entities.Characters
                  _input.IsPressed(GameAction.SHOOT)) && CanAttack();
             if (shooting)
             {
-                Shooting();
-                ResetAttackCooldown();
+                bool fired = TryShoot();
+                if (fired)
+                {
+                    ResetAttackCooldown();
+                }
             }
         }
 

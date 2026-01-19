@@ -1,6 +1,8 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using BikeWars.Utilities;
+
 
 namespace BikeWars.Content.engine.ui
 {
@@ -13,7 +15,6 @@ namespace BikeWars.Content.engine.ui
         public bool IsCrit { get; private set; }
         public Vector2 Velocity { get; private set; }
         private Color _tint;
-        private static Random _rnd = new Random();
         private float _scaleAnim = 0f;
 
         private const float MaxLifetime = 0.8f;
@@ -34,7 +35,7 @@ namespace BikeWars.Content.engine.ui
             else
             {
                 // Simple color variation
-                int variant = _rnd.Next(0, 4);
+                int variant = RandomUtil.NextInt(0, 4);
                 switch(variant)
                 {
                     case 0: _tint = Color.Orange; break;

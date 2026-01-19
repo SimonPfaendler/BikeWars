@@ -53,6 +53,9 @@ namespace BikeWars.Content.managers
         {
             // PROJEKTILE
             { "Bullet", "assets/sprites/projectiles/bullet" },
+            { "Banana", "assets/sprites/projectiles/banana" },
+            { "Book", "assets/sprites/projectiles/book" },
+            { "Bottle", "assets/sprites/projectiles/bottle" },
 
 
             // HUD

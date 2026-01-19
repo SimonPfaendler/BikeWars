@@ -7,6 +7,7 @@ using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.entities.MapObjects;
 using BikeWars.Content.managers;
+using BikeWars.Utilities;
 
 
 namespace BikeWars.Entities.Characters
@@ -43,8 +44,6 @@ namespace BikeWars.Entities.Characters
             AudioAssets.BarkFritz,
             AudioAssets.Miau,
         };
-        
-        private static readonly System.Random _random = new System.Random();
 
 
         public Dog(Vector2 start, Point size, AudioService audio, PathFinding pathFinding,
@@ -177,7 +176,7 @@ namespace BikeWars.Entities.Characters
 
             if (volume > 0)
             {
-                int index = _random.Next(BarkSounds.Length);
+                int index = RandomUtil.NextInt(0, BarkSounds.Length);
                 string randomBark = BarkSounds[index];
 
                 _audio.Sounds.Play(randomBark);
