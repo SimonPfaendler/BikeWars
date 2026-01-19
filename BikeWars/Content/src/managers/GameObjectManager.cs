@@ -15,6 +15,7 @@ using BikeWars.Entities.Characters.MapObjects;
 using BikeWars.Content.components;
 using BikeWars.Content.engine.ui;
 using BikeWars.Content.entities.MapObjects;
+using BikeWars.Content.entities.projectiles;
 using BikeWars.Entities;
 using BikeWars.Utilities;
 using System.Linq;
@@ -81,6 +82,7 @@ public class GameObjectManager
             Player1.Flamethrower += () => OnPlayerFlamethrower(Player1);
             Player1.IceTrail += () => OnPlayerIceTrail(Player1);
             Player1.DamageCircle += () => OnPlayerDamageCircle(Player1);
+            Player1.ThrowBook += target => OnPlayerThrowBook(Player1, target);
             Player1.OnTookDamage += HandleTookDamage;
         }
 
@@ -90,6 +92,7 @@ public class GameObjectManager
             Player2.Flamethrower += () => OnPlayerFlamethrower(Player2);
             Player2.IceTrail += () => OnPlayerIceTrail(Player2);
             Player2.DamageCircle += () => OnPlayerDamageCircle(Player2);
+            Player2.ThrowBook += target => OnPlayerThrowBook(Player2, target);
             Player2.OnTookDamage += HandleTookDamage;
         }
     }
@@ -283,6 +286,7 @@ public class GameObjectManager
         {
             p.Update(gameTime);
         }
+        Projectiles.RemoveWhere(p => p is ThrowObject lp && lp.IsFinished);
         _aoeAttacks.RemoveWhere(aoe =>
         {
             aoe.Update(gameTime);
@@ -401,6 +405,21 @@ public class GameObjectManager
         //OnScreenShakeRequested?.Invoke(6f, 0.8f);
         OnScreenShakeRequested?.Invoke(7f, 2.0f);
 
+    }
+
+    private void OnPlayerThrowBook(Player player, Vector2 target)
+    {
+        Vector2 spawnPos = player.Transform.Bounds.Center.ToVector2();
+        Vector2 toTarget = target - spawnPos;
+        float distance = toTarget.Length();
+        if (distance > Player.ThrowRange)
+        {
+            target = distance > 0.001f
+                ? spawnPos + Vector2.Normalize(toTarget) * Player.ThrowRange
+                : spawnPos;
+        }
+        var book = new ThrowBook(spawnPos, target, player);
+        AddProjectile(book);
     }
 
     public void RequestScreenShake(float intensity, float duration)
