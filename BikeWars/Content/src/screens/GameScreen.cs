@@ -618,7 +618,7 @@ namespace BikeWars.Content.screens
 
                 if (p.Type == SaveLoad.TYPES.BEER)
                 {
-                    _gameObjectManager.AddItem(new Xp_Beer(pos, size));
+                    _gameObjectManager.AddItem(new Beer(pos, size));
                 }
                 else if (p.Type == SaveLoad.TYPES.MONEY)
                 {
