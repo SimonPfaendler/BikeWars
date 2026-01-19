@@ -418,17 +418,17 @@
 /processorParam:Quality=Best
 /build:assets/sounds/Walking.mp3
 
-#begin assets/sounds/wood-crack.wav
+#begin assets/sounds/wood_crack.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:assets/sounds/wood-crack.wav;assets/sounds/wood_crack
+/build:assets/sounds/wood_crack.wav
 
-#begin assets/sounds/wood-destory.wav
+#begin assets/sounds/wood_destroy.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
-/build:assets/sounds/wood-destory.wav;assets/sounds/wood_destroy
+/build:assets/sounds/wood_destroy.wav
 
 #begin assets/sprites/characters/character_atlas.png
 /importer:TextureImporter
