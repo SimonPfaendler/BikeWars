@@ -7,6 +7,7 @@ using System;
 using BikeWars.Content.entities.interfaces;
 using System.Collections.Generic;
 
+namespace BikeWars.Entities;
 public class TowerAlly : Tower
 {
     private int PADDING_INTERACTION_AREA = 40;
