@@ -122,7 +122,7 @@ namespace BikeWars.Content.components
             Vector2 scale = Vector2.One;
 
             spriteBatch.Draw(
-                RenderPrimitives.Pixel,
+                _texture,
                 Position,
                 null,
                 Color.White,
