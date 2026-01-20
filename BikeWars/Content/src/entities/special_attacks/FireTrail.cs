@@ -9,9 +9,9 @@ using BikeWars.Content.managers;
 
 namespace BikeWars.Content.entities.items
 {
-    public class IceTrail : AreaOfEffectBase
+    public class FireTrail : AreaOfEffectBase
     {
-        private const string SPRITE_KEY = "IceTrail";
+        private const string SPRITE_KEY = "FireTrail";
 
         private Texture2D _spriteSheet;
 
@@ -20,7 +20,7 @@ namespace BikeWars.Content.entities.items
         private int _frameCount = 5;
         private int _currentFrame = 0;
 
-        private float _frameTime = 0.18f; // How fast he animation runs
+        private float _frameTime = 0.18f; // Animation speed
         private float _frameTimer = 0f;
 
         private Player _player;
@@ -28,7 +28,6 @@ namespace BikeWars.Content.entities.items
         private float _rotation;
         private Vector2 _spritePos;
 
-        // stores previously spawned animation frames
         private class TrailSprite
         {
             public Vector2 Pos;
@@ -46,7 +45,7 @@ namespace BikeWars.Content.entities.items
         private float _spawnInterval = 0.15f; // spawn every X seconds
 
 
-        public IceTrail(Player player, Vector2 dir)
+        public FireTrail(Player player, Vector2 dir)
             : base(owner: player, damage: 10, duration: 3.0f)
         {
             _player = player;
@@ -68,7 +67,6 @@ namespace BikeWars.Content.entities.items
 
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            // position behind player
             Vector2 playerCenter = _player.Transform.Position +
                 new Vector2(_player.Transform.Size.X / 2f,
                             _player.Transform.Size.Y / 2f);
@@ -76,10 +74,8 @@ namespace BikeWars.Content.entities.items
             Vector2 offset = new Vector2(-30, -30);
             Vector2 trailCenter = playerCenter - offset;
 
-            // draw location
             _spritePos = trailCenter - new Vector2(_frameWidth, _frameHeight);
 
-            // animation advance
             _frameTimer += dt;
             if (_frameTimer >= _frameTime)
             {
@@ -87,16 +83,13 @@ namespace BikeWars.Content.entities.items
                 _currentFrame = (_currentFrame + 1) % _frameCount;
             }
 
-            // spawn hitbox + trail sprite only on interval
             _spawnTimer += dt;
             if (_spawnTimer >= _spawnInterval)
             {
                 _spawnTimer = 0f;
 
-                // store a visual trail copy
                 _trailSprites.Add(new TrailSprite(_spritePos));
 
-                // add regular hitbox for collision manager
                 _hitboxes.Add(new BoxCollider(
                     _spritePos,
                     _frameWidth,
@@ -121,7 +114,6 @@ namespace BikeWars.Content.entities.items
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            // draw trail first (behind)
             foreach (var t in _trailSprites)
             {
                 Rectangle srcTrail = new Rectangle(
@@ -133,7 +125,6 @@ namespace BikeWars.Content.entities.items
                 spriteBatch.Draw(_spriteSheet, t.Pos, srcTrail, Color.White);
             }
 
-            // draw current animation on top
             Rectangle src = new Rectangle(
                 _currentFrame * _frameWidth,
                 0,
@@ -146,7 +137,7 @@ namespace BikeWars.Content.entities.items
                 src,
                 Color.White,
                 _rotation,
-                Vector2.Zero, // origin was not defined in original, so keep zero
+                Vector2.Zero,
                 1f,
                 SpriteEffects.None,
                 0f

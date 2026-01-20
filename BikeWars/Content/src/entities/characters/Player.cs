@@ -51,6 +51,7 @@ namespace BikeWars.Entities.Characters
         public event Action<ItemBase> ItemPickedUp;
         public event Action Flamethrower;
         public event Action IceTrail;
+        public event Action FireTrail;
         public event Action DamageCircle;
         public event Action<Vector2> ThrowBook;
         public event Action<Vector2> ThrowBanana;
@@ -111,6 +112,7 @@ namespace BikeWars.Entities.Characters
             Gun,
             Flamethrower,
             IceTrail,
+            FireTrail,
             DamageCircle,
             BookThrow,
             BananaThrow,
@@ -150,6 +152,12 @@ namespace BikeWars.Entities.Characters
                     Attributes.AttackCooldown = 3.0f;
                     IceTrail?.Invoke();
                     _audio.Sounds.Play(AudioAssets.IceTrail);
+                    return true;
+
+                case WeaponType.FireTrail:
+                    Attributes.AttackCooldown = 3.0f;
+                    FireTrail?.Invoke();
+                    _audio.Sounds.Play(AudioAssets.Flamethrower);
                     return true;
 
                 case WeaponType.DamageCircle:
@@ -697,6 +705,8 @@ namespace BikeWars.Entities.Characters
             else if (CurrentWeapon == WeaponType.Flamethrower)
                 CurrentWeapon = WeaponType.IceTrail;
             else if (CurrentWeapon == WeaponType.IceTrail)
+                CurrentWeapon = WeaponType.FireTrail;
+            else if (CurrentWeapon == WeaponType.FireTrail)
                 CurrentWeapon = WeaponType.DamageCircle;
             else if (CurrentWeapon == WeaponType.DamageCircle)
                 CurrentWeapon = WeaponType.BookThrow;
