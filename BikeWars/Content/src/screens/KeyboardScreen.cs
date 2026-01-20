@@ -15,6 +15,9 @@ public class KeyboardScreen: MenuScreenBase, IScreen
     private readonly AudioService _audioService;
     public string DesiredMusic => AudioAssets.MenuMusic;
     public float MusicVolume => 1f;
+    private float _uiScale;
+    private float _imageScale;
+    private int _imageOffsetX;
     
     private Texture2D _keyboardLayoutTexture;
     public KeyboardScreen(Texture2D background, SpriteFont font, AudioService audioService)
@@ -27,33 +30,41 @@ public class KeyboardScreen: MenuScreenBase, IScreen
     }
     
     protected sealed override void InitializeButtons()
-        {
-            Game1 game = Game1.Instance;
-            int screenWidth = game.GraphicsDevice.Viewport.Width;
-            int screenHeight = game.GraphicsDevice.Viewport.Height;
-    
-            int buttonWidth = 250;
-            int buttonHeight = 60;
-            int verticalSpacing = 20;
-            int horizontalSpacing = screenWidth / 15;
-            
-            int leftStartY = screenHeight / 7;
+    {
+        // sizes of the screens components change when the screen size changes
+        _buttons.Clear();
 
-            _buttonTexture = CreateSimpleTexture(game.GraphicsDevice, buttonWidth, buttonHeight);
+        Game1 game = Game1.Instance;
+        var viewport = game.GraphicsDevice.Viewport;
+        
+        _uiScale = viewport.Height / 1080f;
+        
+        int buttonWidth = (int)(250 * _uiScale);
+        int buttonHeight = (int)(60 * _uiScale);
+        int verticalSpacing = (int)(20 * _uiScale);
+        int horizontalSpacing = (int)(viewport.Width * 0.05f);
 
-            // Buttons on the left side
+        int leftStartY = (int)(viewport.Height * 0.25f);
 
-            _buttons.Add(new MenuButton(
-                id: (int)ButtonAction.Back,
-                texture: _buttonTexture,
-                bounds: new Rectangle(horizontalSpacing, leftStartY + 3 * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
-                text: "Back",
-                font: _font,
-                audioService: _audioService
-            ));
-            
-            UpdateSelection(0);
-        }
+        _buttonTexture = CreateSimpleTexture(game.GraphicsDevice, 1, 1);
+
+        _buttons.Add(new MenuButton(
+            id: (int)ButtonAction.Back,
+            texture: _buttonTexture,
+            bounds: new Rectangle(
+                horizontalSpacing,
+                leftStartY + 3 * (buttonHeight + verticalSpacing),
+                buttonWidth,
+                buttonHeight),
+            text: "Back",
+            font: _font,
+            audioService: _audioService
+        ));
+        
+        _imageScale = 0.75f * _uiScale;
+        _imageOffsetX = (int)(viewport.Width * 0.07f);
+        UpdateSelection(0);
+    }
     
     public override void Draw(GameTime gameTime)
     {
@@ -69,19 +80,16 @@ public class KeyboardScreen: MenuScreenBase, IScreen
 
         spriteBatch.Draw(_backgroundTexture, destinationRect, Color.White);
 
-        // draw controller image
+        // draw keyboard image
         if (_keyboardLayoutTexture != null)
         {
             var viewport = game.GraphicsDevice.Viewport;
             
-            float scale = 0.5f;
+            int scaledWidth = (int)(_keyboardLayoutTexture.Width * _imageScale);
+            int scaledHeight = (int)(_keyboardLayoutTexture.Height * _imageScale);
             
-            int scaledWidth = (int)(_keyboardLayoutTexture.Width * scale);
-            int scaledHeight = (int)(_keyboardLayoutTexture.Height * scale);
 
-            int offsetX = 140;
-
-            int x = (viewport.Width - scaledWidth) / 2 + offsetX;
+            int x = (viewport.Width - scaledWidth) / 2 + _imageOffsetX;
             int y = (viewport.Height - scaledHeight) / 2;
             
             Rectangle destRect = new Rectangle(x, y, scaledWidth, scaledHeight);
