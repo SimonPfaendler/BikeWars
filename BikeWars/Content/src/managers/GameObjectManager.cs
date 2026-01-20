@@ -81,6 +81,7 @@ public class GameObjectManager
             Player1.ShotBullet += () => OnPlayerShotBullet(Player1);
             Player1.Flamethrower += () => OnPlayerFlamethrower(Player1);
             Player1.IceTrail += () => OnPlayerIceTrail(Player1);
+            Player1.FireTrail += () => OnPlayerFireTrail(Player1);
             Player1.DamageCircle += () => OnPlayerDamageCircle(Player1);
             Player1.ThrowBook += target => OnPlayerThrowBook(Player1, target);
             Player1.ThrowBanana += target => OnPlayerThrowBanana(Player1, target);
@@ -93,6 +94,7 @@ public class GameObjectManager
             Player2.ShotBullet += () => OnPlayerShotBullet(Player2);
             Player2.Flamethrower += () => OnPlayerFlamethrower(Player2);
             Player2.IceTrail += () => OnPlayerIceTrail(Player2);
+            Player2.FireTrail += () => OnPlayerFireTrail(Player2);
             Player2.DamageCircle += () => OnPlayerDamageCircle(Player2);
             Player2.ThrowBook += target => OnPlayerThrowBook(Player2, target);
             Player2.ThrowBanana += target => OnPlayerThrowBanana(Player2, target);
@@ -390,6 +392,14 @@ public class GameObjectManager
         IceTrail ice = new IceTrail(player, direction);
         ice.LoadContent(_contentManager);
         AddAOE(ice);
+    }
+
+    private void OnPlayerFireTrail(Player player)
+    {
+        Vector2 direction = player.GazeDirection;
+        FireTrail fire = new FireTrail(player, direction);
+        fire.LoadContent(_contentManager);
+        AddAOE(fire);
     }
 
     public event Action<float, float>? OnScreenShakeRequested;
