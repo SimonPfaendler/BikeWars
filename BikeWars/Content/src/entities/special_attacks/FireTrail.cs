@@ -5,12 +5,13 @@ using System.Collections.Generic;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
+using BikeWars.Content.managers;
 
 namespace BikeWars.Content.entities.items
 {
     public class FireTrail : AreaOfEffectBase
     {
-        private const string SPRITE_PATH = "assets/sprites/projectiles/fire_trail";
+        private const string SPRITE_KEY = "FireTrail";
 
         private Texture2D _spriteSheet;
 
@@ -54,7 +55,7 @@ namespace BikeWars.Content.entities.items
 
         public override void LoadContent(ContentManager content)
         {
-            _spriteSheet = content.Load<Texture2D>(SPRITE_PATH);
+            _spriteSheet = SpriteManager.GetTexture(SPRITE_KEY);
 
             _frameWidth = _spriteSheet.Width / _frameCount;
             _frameHeight = _spriteSheet.Height;
