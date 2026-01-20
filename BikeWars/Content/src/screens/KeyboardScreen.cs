@@ -15,10 +15,14 @@ public class KeyboardScreen: MenuScreenBase, IScreen
     private readonly AudioService _audioService;
     public string DesiredMusic => AudioAssets.MenuMusic;
     public float MusicVolume => 1f;
+    
+    private Texture2D _keyboardLayoutTexture;
     public KeyboardScreen(Texture2D background, SpriteFont font, AudioService audioService)
         : base(background, font)
     {
         _audioService = audioService;
+        _keyboardLayoutTexture = Game1.Instance.Content
+            .Load<Texture2D>("assets/images/TastaturBelegung");
         InitializeButtons();
     }
     
@@ -50,6 +54,53 @@ public class KeyboardScreen: MenuScreenBase, IScreen
             
             UpdateSelection(0);
         }
+    
+    public override void Draw(GameTime gameTime)
+    {
+        Game1 game = Game1.Instance;
+        SpriteBatch spriteBatch = game.SpriteBatch;
+
+        spriteBatch.Begin();
+        
+        Rectangle destinationRect = new Rectangle(
+            0, 0,
+            game.GraphicsDevice.Viewport.Width,
+            game.GraphicsDevice.Viewport.Height);
+
+        spriteBatch.Draw(_backgroundTexture, destinationRect, Color.White);
+
+        // draw controller image
+        if (_keyboardLayoutTexture != null)
+        {
+            var viewport = game.GraphicsDevice.Viewport;
+            
+            float scale = 0.5f;
+            
+            int scaledWidth = (int)(_keyboardLayoutTexture.Width * scale);
+            int scaledHeight = (int)(_keyboardLayoutTexture.Height * scale);
+
+            int offsetX = 140;
+
+            int x = (viewport.Width - scaledWidth) / 2 + offsetX;
+            int y = (viewport.Height - scaledHeight) / 2;
+            
+            Rectangle destRect = new Rectangle(x, y, scaledWidth, scaledHeight);
+
+            spriteBatch.Draw(
+                _keyboardLayoutTexture,
+                destRect,
+                Color.White
+            );
+        }
+        
+        // draw buttons
+        foreach (var button in _buttons)
+        {
+            button.Draw(spriteBatch);
+        }
+
+        spriteBatch.End();
+    }
 
         
     protected override void HandleButtonClick(MenuButton button)
