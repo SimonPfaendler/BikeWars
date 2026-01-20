@@ -40,19 +40,19 @@ public class OptionScreen : MenuScreenBase, IScreen
 
             // Buttons on the left side
             _buttons.Add(new MenuButton(
-                id: (int)ButtonAction.KeyBindingsKeyBoard,
+                id: (int)ButtonAction.KeyBindingsPlayer1,
                 texture: _buttonTexture,
                 bounds: new Rectangle(horizontalSpacing, leftStartY, buttonWidth, buttonHeight),
-                text: "Steuerung Tastatur",
+                text: "Steuerung Spieler 1",
                 font: _font,
                 audioService: _audioService
             ));
 
             _buttons.Add(new MenuButton(
-                id: (int)ButtonAction.KeyBindingsController,
+                id: (int)ButtonAction.KeyBindingsPlayer2,
                 texture: _buttonTexture,
                 bounds: new Rectangle(horizontalSpacing, leftStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
-                text: "Steuerung Controller", 
+                text: "Steuerung Spieler 2", 
                 font: _font,
                 audioService: _audioService
             ));
@@ -93,12 +93,12 @@ public class OptionScreen : MenuScreenBase, IScreen
     {
         switch ((ButtonAction)button.Id)
         {
-            case ButtonAction.KeyBindingsKeyBoard:
-                ScreenManager.AddScreen(new KeyboardScreen(_backgroundTexture, _font, _audioService));
+            case ButtonAction.KeyBindingsPlayer1:
+                ScreenManager.AddScreen(new InputTypeScreen(_backgroundTexture, _font, _audioService, true));
                 break;
             
-            case ButtonAction.KeyBindingsController:
-                ScreenManager.AddScreen(new ControllerScreen(_backgroundTexture, _font, _audioService));
+            case ButtonAction.KeyBindingsPlayer2:
+                ScreenManager.AddScreen(new InputTypeScreen(_backgroundTexture, _font, _audioService, false));
                 break;
             
             case ButtonAction.Back:
