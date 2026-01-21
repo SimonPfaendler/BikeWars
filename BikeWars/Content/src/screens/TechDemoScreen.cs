@@ -52,7 +52,6 @@ namespace BikeWars.Content.screens
             base.LoadContent(content, gd);
 
             // creates simple button texture
-
             // makes the 3 tech-demo buttons
             _spawnHoboBtn = new MenuButton(
                 id: 1,
@@ -180,8 +179,8 @@ namespace BikeWars.Content.screens
                 // Try up to 20 times to find a walkable spawn tile
                 for (int attempt = 0; attempt < 20; attempt++)
                 {
-                    float spawnX = RandomUtil.NextInt(-300, 301);
-                    float spawnY = RandomUtil.NextInt(-300, 301);
+                    float spawnX = RandomUtil.NextInt(-500, 501);
+                    float spawnY = RandomUtil.NextInt(-500, 501);
 
                     var candidate = playerPos + new Vector2(spawnX, spawnY);
                     var grid = CollisionManager.WorldToGrid(candidate);

@@ -20,7 +20,6 @@ public class EnemyMovement : MovementBase
    private readonly PathFinding _pathFinding;
    private readonly CollisionManager _gridMapper;
 
-
     private List<Node> _currentPath = new();
     private int _pathIndex = 0;
     public IReadOnlyList<Node> CurrentPath => _currentPath;

@@ -22,7 +22,7 @@ public abstract class CharacterBase : ICharacter, ICombat
     public float CurrentSpeed { get; set; }
     private BoxCollider _collider { get; set; }
     public BoxCollider Collider {get => _collider; set => _collider = value;}
-
+    public Vector2 GazeDirection {get; set;}
     private CharacterAttributes _attributes {get;set;}
     public CharacterAttributes Attributes {get => _attributes; set => _attributes = value;}
     private float _attackCooldownTimer = 0f;
@@ -61,7 +61,6 @@ public abstract class CharacterBase : ICharacter, ICombat
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
         // Apply fallback movement
-        // LastTransform = new Transform(Transform.Position, Transform.Size);
         Transform.Position += _knockbackVelocity * dt;
 
         // Decay velocity
@@ -176,12 +175,6 @@ public abstract class CharacterBase : ICharacter, ICombat
         target.TakeDamage(Attributes.AttackDamage);
         ResetAttackCooldown();
     }
-
-    // Is Helpful for example with colliders to set the original position back.
-    // public virtual void SetLastTransform()
-    // {
-    //     Transform = new Transform(new Vector2(LastTransform.Position.X, LastTransform.Position.Y), LastTransform.Size);
-    // }
 
     public void ResetAttackCooldown()
     {

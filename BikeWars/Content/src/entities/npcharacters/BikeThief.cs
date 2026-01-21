@@ -64,7 +64,6 @@ namespace BikeWars.Entities.Characters
             HandleSound(Movement.IsMoving);
 
             Vector2 direction = Movement.Direction;
-            // LastTransform = new Transform(Transform.Position, Transform.Size);
 
             if (Movement.IsMoving)
             {

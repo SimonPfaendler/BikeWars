@@ -26,11 +26,10 @@ namespace BikeWars.Entities.Characters
     public class Player : CharacterBase, IWorldAudioAware
     {
         public Inventory Inventory { get; private set; }
-        private PlayerMovement movement { get; set; }
+        public PlayerMovement movement { get; set; }
         public Bike CurrentBike => movement?.CrtBike;
         private IPlayerInput _input;
         private CooldownWithDuration sprint { get; }
-        public Vector2 GazeDirection { get; private set; }
         public int XpCounter { get; private set; } = 0;
         public int XpLevelUp = 10;
         public int CurrentLevel { get; private set; } = 1;
