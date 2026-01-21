@@ -12,6 +12,8 @@ using BikeWars.Content.components;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.engine;
 using BikeWars.Utilities;
+using BikeWars.Content.entities.npcharacters;
+using BikeWars.Utilities;
 
 
 // adds debugging tools for testing
@@ -26,7 +28,8 @@ namespace BikeWars.Content.screens
         Hobo,
         BikeThief,
         Dog,
-        Kamikaze
+        Kamikaze,
+        Dozent
     }
 
     public class TechDemoScreen : GameScreen
@@ -39,6 +42,7 @@ namespace BikeWars.Content.screens
         private MenuButton _spawnKamikazeBtn;
         private MenuButton _spawnTramBtn;
         private MenuButton _spawnEnemyCircleBtn;
+        private MenuButton _spawnDozentBtn;
         
         private readonly List<RaveGroup> _raveGroups = new List<RaveGroup>();
 
@@ -117,6 +121,16 @@ namespace BikeWars.Content.screens
                 font: _font,
                 audioService: AudioService
             );
+            
+            _spawnDozentBtn = new MenuButton(
+                id: 6,
+                texture: _buttonTex,
+                bounds: new Rectangle(30, 570, 200, 60),
+                text: "Spawn 10 Dozents",
+                font: _font,
+                audioService: AudioService
+            );
+            
         }
         
         protected override void OnTechDemoReset()
@@ -146,6 +160,9 @@ namespace BikeWars.Content.screens
 
             if(_spawnHoboBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Hobo, 100);
+            
+            if(_spawnDozentBtn.IsClicked(mouse, _prevMouse))
+                SpawnEnemies(EnemyType.Dozent, 10);
 
             if (_spawnBikeBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.BikeThief, 15);
@@ -217,6 +234,10 @@ namespace BikeWars.Content.screens
                     case EnemyType.Kamikaze:
                         enemy = new KamikazeOpa(spawnPos, new Point(32, 32), AudioService, PathFinding,
                             CollisionManager, GameObjectManager, RepathScheduler);
+                        break;
+                    case EnemyType.Dozent:
+                        enemy = new Dozent(spawnPos, new Point(32, 32), AudioService, PathFinding,
+                            CollisionManager, RepathScheduler);
                         break;
 
                     default:
