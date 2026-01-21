@@ -776,6 +776,13 @@ namespace BikeWars.Content.screens
             {
                 _bikeShopScreen.Draw(spriteBatch);
             }
+            
+            DrawAttackIcon(spriteBatch, player);
+            var player2 = _gameObjectManager.Player2;
+            if (player2 != null)
+            {
+                DrawAttackIcon(spriteBatch, player2);
+            }
 
             spriteBatch.End();
         }
@@ -909,6 +916,46 @@ namespace BikeWars.Content.screens
                 }
             }
         }
+        
+        private void DrawAttackIcon(SpriteBatch spriteBatch, Player player)
+        {
+            // draw the icon of the current attack used by the player
+            Texture2D icon = null;
+
+            switch (player.CurrentWeapon)
+            {
+                case Player.WeaponType.IceTrail:
+                    icon = SpriteManager.GetTexture("Eisreifen");
+                    break;
+
+                case Player.WeaponType.FireTrail:
+                    icon = SpriteManager.GetTexture("Feuerreifen");
+                    break;
+                
+                default:
+                    return;
+            }
+            
+            var viewport = Game1.Instance.GraphicsDevice.Viewport;
+            
+            int targetSize = 80;
+            int topMargin = 20;
+            
+            float xFactor = 0.75f;
+
+            int x = (int)(viewport.Width * xFactor) - targetSize / 2;
+            int y = topMargin;
+
+            Rectangle destRect = new Rectangle(
+                x,
+                y,
+                targetSize,
+                targetSize
+            );
+
+            spriteBatch.Draw(icon, destRect, Color.White);
+        }
+
 
 
     }

@@ -85,7 +85,11 @@ namespace BikeWars.Content.managers
             { "Straßenmusikanten", "assets/MapObjects/Straßenmusikanten" },
 
             // Tower
-            { "TowerAlly", "assets/images/tower_ally"}
+            { "TowerAlly", "assets/images/tower_ally"},
+            
+            // Attack icons
+            { "Eisreifen", "assets/images/Eisreifen_new"},
+            { "Feuerreifen", "assets/images/Feuerreifen"}
         };
 
         // No single-image map sprites here; map sprites are loaded from atlas JSON.
