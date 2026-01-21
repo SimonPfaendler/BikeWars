@@ -86,6 +86,7 @@ public class GameObjectManager
             Player1.ThrowBook += target => OnPlayerThrowBook(Player1, target);
             Player1.ThrowBanana += target => OnPlayerThrowBanana(Player1, target);
             Player1.ThrowBottle += target => OnPlayerThrowBottle(Player1, target);
+            Player1.ThrowBeer += target => OnPlayerThrowBeer(Player1, target);
             Player1.OnTookDamage += HandleTookDamage;
         }
 
@@ -284,6 +285,7 @@ public class GameObjectManager
         {
             i.Update(gameTime);
         }
+        _items.RemoveWhere(i => i is Beer b && b.IsExpired);
         foreach (ObjectBase o in Objects)
         {
             o.Update(gameTime);
@@ -465,6 +467,30 @@ public class GameObjectManager
         var bottle = new ThrowBottle(spawnPos, target, player);
         AddProjectile(bottle);
     }
+
+    private void OnPlayerThrowBeer(Player player, Vector2 target)
+    {
+        Vector2 spawnPos = player.Transform.Bounds.Center.ToVector2();
+        Vector2 toTarget = target - spawnPos;
+        float distance = toTarget.Length();
+        if (distance > Player.ThrowRange)
+        {
+            target = distance > 0.001f
+                ? spawnPos + Vector2.Normalize(toTarget) * Player.ThrowRange
+                : spawnPos;
+        }
+        var beer = new ThrowBeer(spawnPos, target, player);
+        AddProjectile(beer);
+    }
+
+    public Beer SpawnLandedBeer(Vector2 pos)
+    {
+        var beer = new Beer(pos, new Point(32, 32));
+        beer.LandedBeer(pos);
+        AddItem(beer);
+        return beer;
+    }
+    
 
     public void RequestScreenShake(float intensity, float duration)
     {

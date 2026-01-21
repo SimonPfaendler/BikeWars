@@ -56,6 +56,8 @@ namespace BikeWars.Entities.Characters
         public event Action<Vector2> ThrowBook;
         public event Action<Vector2> ThrowBanana;
         public event Action<Vector2> ThrowBottle;
+        public event Action<Vector2> ThrowBeer;
+        
         private Vector2 _mouseWorldPos;
         private bool _isThrowTargetInRange;
 
@@ -90,8 +92,10 @@ namespace BikeWars.Entities.Characters
         private int _currentItemIndex = -1;
         private int _selectedInventoryIndex = 0;
         public int SelectedInventoryIndex => _selectedInventoryIndex;
-
-
+        
+        private WeaponType _weaponBefore;
+        private bool _beerThrowSelected = false;
+        private int _inventoryIndexBeer = -1;
 
         private struct GhostFrame
         {
@@ -116,7 +120,9 @@ namespace BikeWars.Entities.Characters
             DamageCircle,
             BookThrow,
             BananaThrow,
-            BottleThrow
+            BottleThrow,
+            // BeerThrow isn t an actual Weapon and can t be reached with weapon switch
+            BeerThrow
         }
 
         public WeaponType CurrentWeapon { get; private set; } = WeaponType.Gun;
@@ -185,6 +191,15 @@ namespace BikeWars.Entities.Characters
                     Attributes.AttackCooldown = 1.0f;
                     ThrowBottle?.Invoke(_mouseWorldPos);
                     _audio.Sounds.Play(AudioAssets.WoodCrack);
+                    return true;
+                case WeaponType.BeerThrow:
+                    if (!_isThrowTargetInRange) return false;
+                    Attributes.AttackCooldown = 0.0f;
+                    ThrowBeer?.Invoke(_mouseWorldPos);
+                    _audio.Sounds.Play(AudioAssets.WoodCrack);
+                    Inventory.RemoveAt(_inventoryIndexBeer);
+                    _beerThrowSelected = false;
+                    CurrentWeapon = _weaponBefore;
                     return true;
             }
 
@@ -447,7 +462,7 @@ namespace BikeWars.Entities.Characters
                 DrawUtils.DrawLine(spriteBatch, pixel, center, aimEnd, Color.Red);
             }
 
-            if ((CurrentWeapon == WeaponType.BookThrow || CurrentWeapon == WeaponType.BananaThrow || CurrentWeapon == WeaponType.BottleThrow) && _isThrowTargetInRange)
+            if ((CurrentWeapon == WeaponType.BookThrow || CurrentWeapon == WeaponType.BananaThrow || CurrentWeapon == WeaponType.BottleThrow || CurrentWeapon == WeaponType.BeerThrow) && _isThrowTargetInRange)
             {
                 DrawUtils.DrawCircleOutline(spriteBatch, pixel, _mouseWorldPos, 10f, Color.Gold);
             }
@@ -612,16 +627,20 @@ namespace BikeWars.Entities.Characters
                 }
                 else if (item is Beer beer)
                 {
-                    if (!beer.TryActivateBeer())
+                    
+                    if (beer.TryActivateBeer())
                     {
-                        return;
+                        _weaponBefore = CurrentWeapon;
+                        _beerThrowSelected = true;
+                        CurrentWeapon = WeaponType.BeerThrow;
+                        _inventoryIndexBeer = _currentItemIndex;
                     }
-                    //wurffunktion dann hier
-                    
-                    
                 }
 
-                Inventory.RemoveAt(_currentItemIndex);
+                if (item is not Beer)
+                {
+                    Inventory.RemoveAt(_currentItemIndex);
+                }
             }
 
             _isUsingItem = false;
@@ -696,6 +715,8 @@ namespace BikeWars.Entities.Characters
 
         private void HandleWeaponSwitch()
         {
+            if (CurrentWeapon == WeaponType.BeerThrow)
+                return;
             if (!_input.IsPressed(GameAction.SWITCH_WEAPON))
                 return;
 
@@ -926,6 +947,11 @@ namespace BikeWars.Entities.Characters
             {
                 _selectedInventoryIndex = (_selectedInventoryIndex + 4) % 5;
             }
+            if (_input.IsPressed(GameAction.INVENTORY_1)) _selectedInventoryIndex = 0;
+            else if (_input.IsPressed(GameAction.INVENTORY_2)) _selectedInventoryIndex = 1;
+            else if (_input.IsPressed(GameAction.INVENTORY_3)) _selectedInventoryIndex = 2;
+            else if (_input.IsPressed(GameAction.INVENTORY_4)) _selectedInventoryIndex = 3;
+            else if (_input.IsPressed(GameAction.INVENTORY_5)) _selectedInventoryIndex = 4;
         }
         
         public bool IsInteractPressed()
