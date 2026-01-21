@@ -89,7 +89,15 @@ namespace BikeWars.Content.managers
             
             // Attack icons
             { "Eisreifen", "assets/images/Eisreifen_new"},
-            { "Feuerreifen", "assets/images/Feuerreifen"}
+            { "Feuerreifen", "assets/images/Feuerreifen"},
+            { "banana_icon", "assets/images/banana_icon"},
+            { "beer_icon", "assets/images/beer_icon"},
+            { "book_icon", "assets/images/book_icon"},
+            { "flamethrower_icon", "assets/images/flamethrower_icon"},
+            { "klingel", "assets/images/klingel"},
+            { "pfand_icon", "assets/images/pfand_icon"},
+            { "Revolver", "assets/images/Revolver"},
+            
         };
 
         // No single-image map sprites here; map sprites are loaded from atlas JSON.

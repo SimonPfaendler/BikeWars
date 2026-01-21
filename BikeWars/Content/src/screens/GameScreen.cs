@@ -932,6 +932,34 @@ namespace BikeWars.Content.screens
                     icon = SpriteManager.GetTexture("Feuerreifen");
                     break;
                 
+                case Player.WeaponType.Gun:
+                    icon = SpriteManager.GetTexture("Revolver");
+                    break;
+                
+                case Player.WeaponType.DamageCircle:
+                    icon = SpriteManager.GetTexture("klingel");
+                    break;
+                
+                case Player.WeaponType.Flamethrower:
+                    icon = SpriteManager.GetTexture("flamethrower_icon");
+                    break;
+                
+                case Player.WeaponType.BananaThrow:
+                    icon = SpriteManager.GetTexture("banana_icon");
+                    break;
+                
+                case Player.WeaponType.BeerThrow:
+                    icon = SpriteManager.GetTexture("beer_icon");
+                    break;
+                
+                case Player.WeaponType.BookThrow:
+                    icon = SpriteManager.GetTexture("book_icon");
+                    break;
+                
+                case Player.WeaponType.BottleThrow:
+                    icon = SpriteManager.GetTexture("pfand_icon");
+                    break;
+                
                 default:
                     return;
             }
