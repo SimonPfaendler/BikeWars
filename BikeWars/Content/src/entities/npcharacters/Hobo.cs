@@ -4,6 +4,7 @@ using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
+using BikeWars.Content.entities.items;
 using BikeWars.Content.managers;
 
 namespace BikeWars.Entities.Characters
@@ -56,7 +57,12 @@ namespace BikeWars.Entities.Characters
             if (Movement is EnemyMovement em)
             {
                 em.EnemyPosition = Transform.Position;
-                em.PlayerPosition = _collisionManager.GameObjectManager.Player1.Transform.Position;
+                if (!Beer.BeerIsActive)
+                {em.PlayerPosition = _collisionManager.GameObjectManager.Player1.Transform.Position;}
+                else
+                {
+                    em.PlayerPosition = Beer.BeerPosition;
+                }
             }
             Movement.HandleMovement(gameTime);
             Vector2 direction = Movement.Direction;

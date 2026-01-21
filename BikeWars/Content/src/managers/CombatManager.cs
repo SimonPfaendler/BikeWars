@@ -3,6 +3,7 @@ using BikeWars.Content.entities.interfaces;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.entities.items;
+using BikeWars.Utilities;
 using Microsoft.Xna.Framework;
 
 namespace BikeWars.Content.managers;
@@ -43,12 +44,11 @@ public class CombatManager
         if (target == projectile.Owner) return;
 
         // Crit Logic
-        Random rnd = new Random();
         int damage = projectile.Damage;
 
         if (projectile.Owner is CharacterBase owner)
         {
-            if (rnd.NextDouble() < owner.Attributes.CritChance)
+            if (RandomUtil.NextDouble() < owner.Attributes.CritChance)
             {
                 damage = (int)(damage * owner.Attributes.CritMultiplier);
             }
@@ -127,6 +127,20 @@ public class CombatManager
         target.TakeDamage(10);
         _audio.Sounds.Play(AudioAssets.TrainHit);
 
+        if (target.Attributes.Health <= 0)
+        {
+            HandleDeath(target);
+        }
+    }
+
+    public void HandleBaechleHit(CharacterBase target)
+    {
+        if (target.IsDead) return;
+        if (target.IsGodMode) return;
+
+        target.TakeDamage(1);
+        // TODO: Add sound
+        
         if (target.Attributes.Health <= 0)
         {
             HandleDeath(target);

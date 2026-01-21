@@ -14,6 +14,7 @@ namespace BikeWars.Utilities
     public sealed class Debugger
     {
         private readonly Player _player;
+        private float _fps;
         private bool _isVisible = true;
 
         public Debugger(Player player)
@@ -27,6 +28,13 @@ namespace BikeWars.Utilities
             {
                 _isVisible = !_isVisible;
             }
+
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (dt > 0f)
+            {
+                float instantaneousFps = 1f / dt;
+                _fps = _fps <= 0f ? instantaneousFps : MathHelper.Lerp(_fps, instantaneousFps, 0.1f); // light smoothing to avoid jitter
+            }
         }
         public void Draw(SpriteBatch spriteBatch)
         {
@@ -34,7 +42,8 @@ namespace BikeWars.Utilities
 
             // Display player position, velocity and bounds, Sprint status
             // You can add more debug information as needed e.g. collider info, Bounds, FPS, etc.
-            string debugInfo = $"Player Position: X: {(int)_player.Transform.Position.X} Y: {(int)_player.Transform.Position.Y}\n" +
+            string debugInfo = $"FPS: {(int)_fps}\n" +
+                               $"Player Position: X: {(int)_player.Transform.Position.X} Y: {(int)_player.Transform.Position.Y}\n" +
                                $"Player Velocity: {_player.CurrentSpeed * _player.TerrainSpeedMultiplier}\n" +
                                $"Player Bounds: {_player.Transform.Size}\n" +
                                $"Player Sprint Cooldown: {(int)_player.CooldownTimer()}\n" +

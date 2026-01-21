@@ -15,9 +15,10 @@ using BikeWars.Entities.Characters.MapObjects;
 using BikeWars.Content.components;
 using BikeWars.Content.engine.ui;
 using BikeWars.Content.entities.MapObjects;
+using BikeWars.Content.entities.projectiles;
 using BikeWars.Entities;
+using BikeWars.Utilities;
 using System.Linq;
-
 
 namespace BikeWars.Content.managers;
 public class GameObjectManager
@@ -80,7 +81,12 @@ public class GameObjectManager
             Player1.ShotBullet += () => OnPlayerShotBullet(Player1);
             Player1.Flamethrower += () => OnPlayerFlamethrower(Player1);
             Player1.IceTrail += () => OnPlayerIceTrail(Player1);
+            Player1.FireTrail += () => OnPlayerFireTrail(Player1);
             Player1.DamageCircle += () => OnPlayerDamageCircle(Player1);
+            Player1.ThrowBook += target => OnPlayerThrowBook(Player1, target);
+            Player1.ThrowBanana += target => OnPlayerThrowBanana(Player1, target);
+            Player1.ThrowBottle += target => OnPlayerThrowBottle(Player1, target);
+            Player1.ThrowBeer += target => OnPlayerThrowBeer(Player1, target);
             Player1.OnTookDamage += HandleTookDamage;
         }
 
@@ -89,7 +95,12 @@ public class GameObjectManager
             Player2.ShotBullet += () => OnPlayerShotBullet(Player2);
             Player2.Flamethrower += () => OnPlayerFlamethrower(Player2);
             Player2.IceTrail += () => OnPlayerIceTrail(Player2);
+            Player2.FireTrail += () => OnPlayerFireTrail(Player2);
             Player2.DamageCircle += () => OnPlayerDamageCircle(Player2);
+            Player2.ThrowBook += target => OnPlayerThrowBook(Player2, target);
+            Player2.ThrowBanana += target => OnPlayerThrowBanana(Player2, target);
+            Player2.ThrowBottle += target => OnPlayerThrowBottle(Player2, target);
+            Player2.ThrowBeer += target => OnPlayerThrowBeer(Player2, target);
             Player2.OnTookDamage += HandleTookDamage;
         }
     }
@@ -275,6 +286,20 @@ public class GameObjectManager
         {
             i.Update(gameTime);
         }
+        for (int i = _items.Count - 1; i >= 0; i--)
+        {
+            var item = _items[i];
+            item.Update(gameTime);
+
+            if (item is Beer b)
+            {
+                if (b.IsExpired)
+                {
+                    _items.RemoveAt(i);
+                }
+            }
+        }
+
         foreach (ObjectBase o in Objects)
         {
             o.Update(gameTime);
@@ -282,6 +307,20 @@ public class GameObjectManager
         foreach (ProjectileBase p in Projectiles)
         {
             p.Update(gameTime);
+        }
+
+        for (int i = Projectiles.Count - 1; i >= 0; i--)
+        {
+            var lp = Projectiles[i];
+            lp.Update(gameTime);
+
+            if (lp is ThrowObject to)
+            {
+                if (to.IsFinished)
+                {
+                    Projectiles.RemoveAt(i);
+                }
+            }
         }
         for (int i = _aoeAttacks.Count - 1; i >= 0; i--)
         {
@@ -387,6 +426,14 @@ public class GameObjectManager
         AddAOE(ice);
     }
 
+    private void OnPlayerFireTrail(Player player)
+    {
+        Vector2 direction = player.GazeDirection;
+        FireTrail fire = new FireTrail(player, direction);
+        fire.LoadContent(_contentManager);
+        AddAOE(fire);
+    }
+
     public event Action<float, float>? OnScreenShakeRequested;
 
     private void OnPlayerDamageCircle(Player player)
@@ -405,6 +452,75 @@ public class GameObjectManager
         OnScreenShakeRequested?.Invoke(7f, 2.0f);
 
     }
+
+    private void OnPlayerThrowBook(Player player, Vector2 target)
+    {
+        Vector2 spawnPos = player.Transform.Bounds.Center.ToVector2();
+        Vector2 toTarget = target - spawnPos;
+        float distance = toTarget.Length();
+        if (distance > Player.ThrowRange)
+        {
+            target = distance > 0.001f
+                ? spawnPos + Vector2.Normalize(toTarget) * Player.ThrowRange
+                : spawnPos;
+        }
+        var book = new ThrowBook(spawnPos, target, player);
+        AddProjectile(book);
+    }
+
+    private void OnPlayerThrowBanana(Player player, Vector2 target)
+    {
+        Vector2 spawnPos = player.Transform.Bounds.Center.ToVector2();
+        Vector2 toTarget = target - spawnPos;
+        float distance = toTarget.Length();
+        if (distance > Player.ThrowRange)
+        {
+            target = distance > 0.001f
+                ? spawnPos + Vector2.Normalize(toTarget) * Player.ThrowRange
+                : spawnPos;
+        }
+        var banana = new ThrowBanana(spawnPos, target, player);
+        AddProjectile(banana);
+    }
+
+    private void OnPlayerThrowBottle(Player player, Vector2 target)
+    {
+        Vector2 spawnPos = player.Transform.Bounds.Center.ToVector2();
+        Vector2 toTarget = target - spawnPos;
+        float distance = toTarget.Length();
+        if (distance > Player.ThrowRange)
+        {
+            target = distance > 0.001f
+                ? spawnPos + Vector2.Normalize(toTarget) * Player.ThrowRange
+                : spawnPos;
+        }
+        var bottle = new ThrowBottle(spawnPos, target, player);
+        AddProjectile(bottle);
+    }
+
+    private void OnPlayerThrowBeer(Player player, Vector2 target)
+    {
+        Vector2 spawnPos = player.Transform.Bounds.Center.ToVector2();
+        Vector2 toTarget = target - spawnPos;
+        float distance = toTarget.Length();
+        if (distance > Player.ThrowRange)
+        {
+            target = distance > 0.001f
+                ? spawnPos + Vector2.Normalize(toTarget) * Player.ThrowRange
+                : spawnPos;
+        }
+        var beer = new ThrowBeer(spawnPos, target, player);
+        AddProjectile(beer);
+    }
+
+    public Beer SpawnLandedBeer(Vector2 pos)
+    {
+        var beer = new Beer(pos, new Point(32, 32));
+        beer.LandedBeer(pos);
+        AddItem(beer);
+        return beer;
+    }
+
 
     public void RequestScreenShake(float intensity, float duration)
     {
@@ -459,16 +575,10 @@ public class GameObjectManager
         // spawns Xp_Item at the location of character
         // function is used in CharacterBase.cs
         Vector2 pos = character.Transform.Position;
-
-        if (character is Hobo)
-            xp = new Xp_Beer(pos, new Point(16, 16));
-        // other cases will be added later
-        else
-            xp = new Xp_Money(pos, new Point(16, 16));
+        xp = new Xp_Money(pos, new Point(16, 16));
         AddItem(xp);
 
-        Random rnd = new Random();
-        if (rnd.NextDouble() <= 0.05) // 5% chance to drop an energy gel
+        if (RandomUtil.NextDouble() <= 0.05) // 5% chance to drop an energy gel
         {
             EnergyGel energyGel = new EnergyGel(pos, new Point(32, 32));
             AddItem(energyGel);
@@ -498,8 +608,7 @@ public class GameObjectManager
 
         // Create a velocity: Move OUT and UP
         // Randomize slightly for "juice"
-        Random rnd = new Random();
-        float angle = (float)(rnd.NextDouble() * 0.5f - 0.25f); // +/- ~15 degrees variation
+        float angle = (float)(RandomUtil.NextDouble() * 0.5f - 0.25f); // +/- ~15 degrees variation
 
         // Rotate direction slightly
         float cos = MathF.Cos(angle);

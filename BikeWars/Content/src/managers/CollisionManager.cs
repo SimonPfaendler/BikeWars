@@ -7,6 +7,7 @@ using BikeWars.Content.entities.MapObjects;
 using BikeWars.Entities.Characters;
 using BikeWars.Entities.Characters.MapObjects;
 using BikeWars.Content.components;
+using BikeWars.Content.entities.projectiles;
 using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
 using Microsoft.Xna.Framework;
@@ -26,8 +27,11 @@ public class CollisionManager
     public event Action<Player, ObjectBase> OnObjectInteraction; // Will be used for the bikeshop too
     public event Action<CharacterBase, ProjectileBase> OnProjectileHit;
     public event Action<CharacterBase, CharacterBase> OnCharacterCollision;
+
+    public event Action<Vector2> OnBeerLanded;
     public event Action<CharacterBase, AreaOfEffectBase> OnAOEHit;
     public event Action<CharacterBase> OnTramHit;
+    public event Action<CharacterBase> OnBaechleHit;
 
     public List<TiledObjectInfo> ObjectSpawns { get; } = new();
     private readonly GameObjectManager _gameObjectManager;
@@ -135,6 +139,7 @@ public class CollisionManager
         }
         LoadTerrainLayer("Streets", TerrainType.ROAD);
         LoadTerrainLayer("Floor", TerrainType.GRASS);
+        LoadTerrainLayer("Baechle", TerrainType.BAECHLE);
         LoadSpawnLayer("Enemy_Spawn");
         LoadObjectLayer("BIke_Shops_Layer");
         // spawn shops/objects
@@ -1208,6 +1213,11 @@ public class CollisionManager
             if (s.Layer == CollisionLayer.TERRAIN && s.Intersects(c))
             {
                 player.CurrentTerrain = (TerrainCollider)s;
+
+                if (player.CurrentTerrain.TerrainType == TerrainType.BAECHLE)
+                {
+                    OnBaechleHit?.Invoke(player);
+                }
                 return;
             }
         }
@@ -1278,6 +1288,10 @@ public class CollisionManager
         {
             if (_toRemoveColliders.Contains(p.Collider))
             {
+                if (p is ThrowBeer beerProj)
+                {
+                    OnBeerLanded?.Invoke(beerProj.Transform.Position); 
+                }
                 projectiles.Remove(p);
             }
         }

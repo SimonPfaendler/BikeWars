@@ -53,6 +53,13 @@ namespace BikeWars.Content.managers
         {
             // PROJEKTILE
             { "Bullet", "assets/sprites/projectiles/bullet" },
+            { "Banana", "assets/sprites/projectiles/banana" },
+            { "Book", "assets/sprites/projectiles/book" },
+            { "Bottle", "assets/sprites/projectiles/bottle" },
+            { "Flamethrower", "assets/sprites/projectiles/flamethrower" },
+            { "IceTrail", "assets/sprites/projectiles/ice_trail" },
+            { "FireTrail", "assets/sprites/projectiles/fire_trail" },
+            { "DamageCircle", "assets/sprites/projectiles/damage_circle" },
 
 
             // HUD
@@ -63,7 +70,8 @@ namespace BikeWars.Content.managers
             { "Chest_open", "assets/sprites/chest_open_texture" },
             { "Frelo", "assets/images/Frelo" },
             { "RacingBike", "assets/images/RacingBike" },
-            { "XP_Beer", "assets/sprites/XP/xp_beer_texture" },
+            { "Beer", "assets/images/beer_texture" },
+            { "Beer_destroyed", "assets/images/beer_destroyed"},
             { "XP_Money", "assets/sprites/XP/xp_money_texture" },
             { "EnergyGel", "assets/images/EnergyGel" },
             { "DopingSpritze", "assets/images/DopingSpritze" },
@@ -77,7 +85,19 @@ namespace BikeWars.Content.managers
             { "Straßenmusikanten", "assets/MapObjects/Straßenmusikanten" },
 
             // Tower
-            { "TowerAlly", "assets/images/tower_ally"}
+            { "TowerAlly", "assets/images/tower_ally"},
+            
+            // Attack icons
+            { "Eisreifen", "assets/images/Eisreifen_new"},
+            { "Feuerreifen", "assets/images/Feuerreifen"},
+            { "banana_icon", "assets/images/banana_icon"},
+            { "beer_icon", "assets/images/beer_icon"},
+            { "book_icon", "assets/images/book_icon"},
+            { "flamethrower_icon", "assets/images/flamethrower_icon"},
+            { "klingel", "assets/images/klingel"},
+            { "pfand_icon", "assets/images/pfand_icon"},
+            { "Revolver", "assets/images/Revolver"},
+            
         };
 
         // No single-image map sprites here; map sprites are loaded from atlas JSON.

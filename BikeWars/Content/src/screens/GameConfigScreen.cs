@@ -46,8 +46,6 @@ public class GameConfigScreen : MenuScreenBase, IScreen
         int leftStartY = screenHeight / 4;
         int rightStartY = screenHeight / 4;
 
-        // _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
-
         // Buttons on the left side
         AddButton(new MenuButton(
             id: (int)ButtonAction.NewProfile,

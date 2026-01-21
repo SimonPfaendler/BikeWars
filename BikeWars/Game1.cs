@@ -10,6 +10,7 @@ using BikeWars.Content.src.utils.SaveLoadExample;
 using System;
 using BikeWars.Content.events;
 using System.Collections.Generic;
+using BikeWars.Content.engine.input;
 
 namespace BikeWars;
 
@@ -209,11 +210,17 @@ public class Game1 : Game
                 switch ((ButtonAction)id)
                 {
                     case ButtonAction.KeyBindingsPlayer1:
-                        // TODO: Make KeyBindings customizable
+                        InputTypeScreen its = new InputTypeScreen(background, UIAssets.DefaultFont, _audioService, true, GraphicsDevice.Viewport);
+                        its.LoadContent(Content, GraphicsDevice);
+                        its.BtnClicked += OnBtnClicked;
+                        ScreenManager.AddScreen(its);
                         break;
 
                     case ButtonAction.KeyBindingsPlayer2:
-                        // TODO: Make KeyBindings customizable
+                        InputTypeScreen itss = new InputTypeScreen(background, UIAssets.DefaultFont, _audioService, false, GraphicsDevice.Viewport);
+                        itss.LoadContent(Content, GraphicsDevice);
+                        itss.BtnClicked += OnBtnClicked;
+                        ScreenManager.AddScreen(itss);
                         break;
 
                     case ButtonAction.Back:
@@ -424,6 +431,24 @@ public class Game1 : Game
                         break;
                 }
                 break;
+            case InputTypeScreen its:
+                switch ((ButtonAction)id)
+                {
+                    case ButtonAction.Back:
+                        ScreenManager.RemoveScreen(screen);
+                        break;
+
+                    case ButtonAction.Controller:
+                        InputSettings.SetControlType(its.IsPlayer1(), ControlType.Controller);
+                        its.UpdateUIState();
+                        break;
+
+                    case ButtonAction.Keyboard:
+                        InputSettings.SetControlType(its.IsPlayer1(), ControlType.Keyboard);
+                        its.UpdateUIState();
+                        break;
+                }
+                break;
         }
     }
 
@@ -456,6 +481,7 @@ public class Game1 : Game
 
     protected override void Update(GameTime gameTime)
     {
+        IsFixedTimeStep = false;
         InputHandler.Update();
 
         ScreenManager.Update(gameTime);

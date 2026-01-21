@@ -42,70 +42,53 @@ public class OptionScreen : MenuScreenBase, IScreen
         int rightStartY = screenHeight / 7;
 
         // Buttons on the left side
-
-        MenuButton mb = new MenuButton(
+        AddButton(new MenuButton(
             id: (int)ButtonAction.KeyBindingsPlayer1,
             texture: RenderPrimitives.Pixel,
             bounds: new Rectangle(horizontalSpacing, leftStartY, buttonWidth, buttonHeight),
-            text: "Key-Bindings Spieler 1",
+            text: "Steuerung Spieler 1",
             font: _font,
             audioService: _audioService
-        );
-        mb.Clicked += RaiseBtnClicked;
-        _buttons.Add(mb);
-        mb = new MenuButton(
+        ));
+
+        AddButton(new MenuButton(
             id: (int)ButtonAction.KeyBindingsPlayer2,
-            // texture: _buttonTexture,
             texture: RenderPrimitives.Pixel,
             bounds: new Rectangle(horizontalSpacing, leftStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
-            text: "Key-Bindings Spieler 1",
+            text: "Steuerung Spieler 2",
             font: _font,
             audioService: _audioService
-        );
-        mb.Clicked += RaiseBtnClicked;
-        _buttons.Add(mb);
+        ));
 
-        mb = new MenuButton(
+        AddButton(new MenuButton(
             id: (int)ButtonAction.Back,
             texture: RenderPrimitives.Pixel,
             bounds: new Rectangle(horizontalSpacing, leftStartY + 3 * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
             text: "Back",
             font: _font,
             audioService: _audioService
-        );
-        mb.Clicked += RaiseBtnClicked;
-        _buttons.Add(mb);
+        ));
 
-        mb = new MenuButton(
+        // Buttons on the right side
+        AddButton(new MenuButton(
             id: (int)ButtonAction.GraphicOptions,
             texture: RenderPrimitives.Pixel,
             bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY, buttonWidth, buttonHeight),
             text: "Grafikeinstellungen",
             font: _font,
             audioService: _audioService
-        );
-        mb.Clicked += RaiseBtnClicked;
+        ));
 
-        // Buttons on the right side
-        _buttons.Add(mb);
-
-        mb = new MenuButton(
+        AddButton(new MenuButton(
             id: (int)ButtonAction.SoundOptions,
             texture: RenderPrimitives.Pixel,
             bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
             text: "Soundeinstellungen",
             font: _font,
             audioService: _audioService
-        );
-        mb.Clicked += RaiseBtnClicked;
-        _buttons.Add(mb);
+        ));
 
         UpdateSelection(0);
-    }
-
-    private void Forward(GraphicsCommand cmd)
-    {
-        GraphicsRequested?.Invoke(cmd);
     }
 
     public override bool DrawLower => false;

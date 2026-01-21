@@ -15,7 +15,7 @@ namespace BikeWars.Content.components
         TechDemo = 10,
         SoundOptions = 11,
         GraphicOptions = 12,
-        KeyBindingsPlayer1 = 13,
+        KeyBindingsPlayer1= 13,
         KeyBindingsPlayer2 = 14,
         Back = 15,
         StartGame = 16,
@@ -34,6 +34,8 @@ namespace BikeWars.Content.components
         ResolutionPortrait600x800 = 30,
         ResolutionPortrait864x1536 = 31,
         ResolutionPortrait1080x1920 = 32,
-        ToggleFullscreen = 26
+        ToggleFullscreen = 26,
+        Keyboard = 27,
+        Controller = 28
     }
 }

@@ -9,6 +9,8 @@ using Microsoft.Xna.Framework.Input;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.components;
 using BikeWars.Content.entities.interfaces;
+using BikeWars.Utilities;
+using BikeWars.Content.entities.npcharacters;
 
 // adds debugging tools for testing
 // like allowing the dev to spawn a large groups of enemies
@@ -16,13 +18,13 @@ using BikeWars.Content.entities.interfaces;
 
 namespace BikeWars.Content.screens
 {
-
     public enum EnemyType
     {
         Hobo,
         BikeThief,
         Dog,
-        Kamikaze
+        Kamikaze,
+        Dozent
     }
 
     public class TechDemoScreen : GameScreen
@@ -35,12 +37,10 @@ namespace BikeWars.Content.screens
         private MenuButton _spawnKamikazeBtn;
         private MenuButton _spawnTramBtn;
         private MenuButton _spawnEnemyCircleBtn;
-
+        private MenuButton _spawnDozentBtn;
         private readonly List<RaveGroup> _raveGroups = new List<RaveGroup>();
-
         private MouseState _prevMouse;
 
-        private readonly System.Random _random = new System.Random();
 
         public TechDemoScreen(AudioService audioService)
             : base(audioService, GameMode.SinglePlayer, true)
@@ -107,6 +107,16 @@ namespace BikeWars.Content.screens
                 font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
+
+            _spawnDozentBtn = new MenuButton(
+                id: 6,
+                texture: RenderPrimitives.Pixel,
+                bounds: new Rectangle(30, 570, 200, 60),
+                text: "Spawn 10 Dozents",
+                font: UIAssets.DefaultFont,
+                audioService: AudioService
+            );
+
         }
 
         protected override void OnTechDemoReset()
@@ -136,6 +146,9 @@ namespace BikeWars.Content.screens
 
             if(_spawnHoboBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Hobo, 100);
+
+            if(_spawnDozentBtn.IsClicked(mouse, _prevMouse))
+                SpawnEnemies(EnemyType.Dozent, 10);
 
             if (_spawnBikeBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.BikeThief, 15);
@@ -167,8 +180,8 @@ namespace BikeWars.Content.screens
                 // Try up to 20 times to find a walkable spawn tile
                 for (int attempt = 0; attempt < 20; attempt++)
                 {
-                    float spawnX = _random.Next(-300, 301);
-                    float spawnY = _random.Next(-300, 301);
+                    float spawnX = RandomUtil.NextInt(-300, 301);
+                    float spawnY = RandomUtil.NextInt(-300, 301);
 
                     var candidate = playerPos + new Vector2(spawnX, spawnY);
                     var grid = CollisionManager.WorldToGrid(candidate);
@@ -207,6 +220,10 @@ namespace BikeWars.Content.screens
                     case EnemyType.Kamikaze:
                         enemy = new KamikazeOpa(spawnPos, new Point(24, 24), AudioService, PathFinding,
                             CollisionManager, GameObjectManager, RepathScheduler);
+                        break;
+                    case EnemyType.Dozent:
+                        enemy = new Dozent(spawnPos, new Point(32, 32), AudioService, PathFinding,
+                            CollisionManager, RepathScheduler);
                         break;
 
                     default:

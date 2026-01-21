@@ -61,6 +61,7 @@ public class Chest: ObjectBase
             "Racingbike" => new RacingBike(dropPos, new Point(32, 32)),
             "DogFood" => new DogFood(dropPos, new Point(32, 32)),
             "DopingSpritze" => new DopingSpritze(dropPos, new Point(32, 32)),
+            "Beer" => new Beer(dropPos, new Point(32, 32)),
         };
     }
 }
