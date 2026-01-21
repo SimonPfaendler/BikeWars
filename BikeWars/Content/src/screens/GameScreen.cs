@@ -88,7 +88,6 @@ namespace BikeWars.Content.screens
         private readonly GameMode _gameMode;
         public GameMode GameMode => _gameMode;
         public bool IsMultiplayer => _gameMode == GameMode.MultiPlayer; // might be helpful later
-        private InputMode _inputMode = InputMode.Keyboard;
 
         private float _hitStopTimer = 0f;
 
@@ -301,6 +300,7 @@ namespace BikeWars.Content.screens
             {
                 InitializeTimer();
             }
+            ApplyInputSettings();
         }
         public virtual void Update(GameTime gameTime)
         {
@@ -313,22 +313,6 @@ namespace BikeWars.Content.screens
                 _hudP2.Position = new Vector2(viewW - 350, viewH - 170);
             }
             _timerPosition = new Vector2(viewW / 2f, 40f);
-
-            if (InputHandler.IsPressed(GameAction.MODE_SWITCH))
-            {
-                if (_inputMode == InputMode.Keyboard)
-                {
-                    _inputMode = InputMode.Controller;
-                    // Strict Controller Mode for Player1 on Pad 1
-                    _gameObjectManager.Player1.SetInput(new GamepadPlayerInput(PlayerIndex.One));
-                }
-                else
-                {
-                    _inputMode = InputMode.Keyboard;
-                    _gameObjectManager.Player1.SetInput(new KeyboardPlayerInput(camera));
-                }
-                Console.WriteLine("Input mode switched to: " + _inputMode);
-            }
 
             // if the LevelUp is Open only the LevelUpMenu gets Updated all the other stuff is basically paused
             // if you want to add something before this or change order please double-check
@@ -557,6 +541,7 @@ namespace BikeWars.Content.screens
                     _audioService.Music.PlayWithFade(AudioAssets.GameMusic, true);
                 }
             }
+            ApplyInputSettings();
         }
 
         // Load here stuff like statistics or options that is not related to the
@@ -774,7 +759,8 @@ namespace BikeWars.Content.screens
             DrawTimer(spriteBatch, gameTime);
 
             var player = _gameObjectManager.Player1;
-            player.Inventory.Draw(spriteBatch, _pixel, player.SelectedInventoryIndex, true);
+            bool showSelection = (InputSettings.Player1Control== ControlType.Controller);
+            player.Inventory.Draw(spriteBatch, _pixel, player.SelectedInventoryIndex, showSelection);
             hud.Draw(spriteBatch, _gameObjectManager.Player1);
 
             if (_gameObjectManager.Player2 != null)
@@ -888,11 +874,6 @@ namespace BikeWars.Content.screens
         {
             GameEvents.OnResumeTimer -= ResumeTimer;
         }
-        public enum InputMode
-        {
-            Keyboard,
-            Controller
-        }
 
         private void StartMusicOverride(Musicians musicians)
         {
@@ -906,7 +887,28 @@ namespace BikeWars.Content.screens
             _musicOverrideDelayTimer = METAL_DELAY_SECONDS;
             _waitingForMetal = true;
         }
-
+        
+        private void ApplyInputSettings()
+        {
+            // apply the UI input settings chosen by the Players in the InputTypeScreen
+            if (InputSettings.Player1Control == ControlType.Keyboard)
+                _gameObjectManager.Player1.SetInput(new KeyboardPlayerInput(camera));
+            else
+                _gameObjectManager.Player1.SetInput(new GamepadPlayerInput(PlayerIndex.One));
+            
+            if (_gameObjectManager.Player2 != null)
+            {
+                if (InputSettings.Player2Control == ControlType.Keyboard)
+                    _gameObjectManager.Player2.SetInput(new KeyboardPlayerInput(camera));
+                else  // if both players are using the controller, the second player receives the second one
+                {
+                    if (InputSettings.Player1Control == ControlType.Controller)
+                        _gameObjectManager.Player2.SetInput(new GamepadPlayerInput(PlayerIndex.Two));
+                    else
+                        _gameObjectManager.Player2.SetInput(new GamepadPlayerInput(PlayerIndex.One));
+                }
+            }
+        }
 
 
     }
