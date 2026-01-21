@@ -128,7 +128,6 @@ namespace BikeWars.Content.screens
                 System.Diagnostics.Debug.WriteLine($"FEHLER beim Laden der Animation: {ex.Message}");
             }
         }
-
         protected sealed override void InitializeButtons()
         {
             int screenWidth = ViewPort.Width;
@@ -162,9 +161,8 @@ namespace BikeWars.Content.screens
                     buttonX = screenWidth - buttonWidth - horizontalMargin;
                 }
 
-                _buttons.Add(new MenuButton(
+                AddButton(new MenuButton(
                     id: (int)definition.id,
-                    // texture: _buttonTexture,
                     texture: RenderPrimitives.Pixel,
                     bounds: new Rectangle(buttonX, startY, buttonWidth, buttonHeight),
                     text: definition.text,
@@ -175,39 +173,12 @@ namespace BikeWars.Content.screens
             UpdateSelection(0);
         }
 
-        // protected override void HandleButtonClick(MenuButton button, ContentManager content, GraphicsDevice gd)
-        // {
-        //     switch ((ButtonAction)button.Id)
-        //     {
-        //         case ButtonAction.MainMenu:
-        //             _audioService.Sounds.StopAll();
-        //             _audioService.Sounds.Play(AudioAssets.SoftClick);
-        //             // ScreenManager.ReturnToMainMenu();
-        //             break;
-
-        //         case ButtonAction.Exit:
-        //             ConfirmationDialogScreen confirmDialog = new ConfirmationDialogScreen(
-        //                 _font,
-        //                 "Bist Du Dir sicher?",
-        //                 this,
-        //                 _audioService,
-        //                 ViewPort
-        //             );
-        //             // ScreenManager.AddScreen(confirmDialog);
-        //             break;
-        //     }
-        // }
-
         public override void Draw(GameTime gameTime, SpriteBatch sb)
         {
             int screenWidth = sb.GraphicsDevice.Viewport.Width;
             int screenHeight = sb.GraphicsDevice.Viewport.Height;
 
             sb.Begin();
-
-            Texture2D overlay = CreateOverlayTexture(sb.GraphicsDevice, sb.GraphicsDevice.Viewport.Width, sb.GraphicsDevice.Viewport.Height);
-            sb.Draw(overlay, Vector2.Zero, Color.White * 0.7f);
-
             if (_isAnimationLoaded)
             {
                 List<AnimationFrame> currentFrames = _currentState == AnimationState.Win ? _winFrames : _beerFrames;
@@ -278,19 +249,9 @@ namespace BikeWars.Content.screens
             }
 
             StatisticsComponent sc = new StatisticsComponent(Statistic);
-            // sc.Draw(spriteBatch, overlay, 400, 600, _font);
+            sc.Draw(sb, RenderPrimitives.Pixel, Color.DarkSlateGray, new Vector2(400, 600), UIAssets.DefaultFont);
 
             sb.End();
-        }
-
-        private Texture2D CreateOverlayTexture(GraphicsDevice graphicsDevice, int width, int height)
-        {
-            Texture2D texture = new Texture2D(graphicsDevice, width, height);
-            Color[] data = new Color[width * height];
-            for (int i = 0; i < data.Length; i++)
-                data[i] = Color.Black;
-            texture.SetData(data);
-            return texture;
         }
 
         public override void Update(GameTime gameTime)

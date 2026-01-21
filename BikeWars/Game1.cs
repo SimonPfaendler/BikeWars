@@ -9,6 +9,7 @@ using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.src.utils.SaveLoadExample;
 using System;
 using BikeWars.Content.events;
+using System.Collections.Generic;
 
 namespace BikeWars;
 
@@ -143,9 +144,12 @@ public class Game1 : Game
                             GameScreen gameScreen = new GameScreen(_audioService, savedMode);
                             gameScreen.ViewPort = GraphicsDevice.Viewport;
                             gameScreen.LoadContent(Content, GraphicsDevice);
+                            gameScreen.HandleLoadGame();
                             gameScreen.BtnClicked += OnBtnClicked;
                             gameScreen.PauseBtnPressed += OnPauseBtnPressed;
-                            gameScreen.HandleLoadGame();
+                            gameScreen.GameOver += OnGameOver;
+                            gameScreen.GameWon += OnGameWon;
+                            gameScreen.StartTechDemo += OnStartTech;
                             ScreenManager.RemoveScreen(screen);
                             ScreenManager.AddScreen(gameScreen);
                         }
@@ -173,6 +177,7 @@ public class Game1 : Game
                         TechDemoScreen tds = new TechDemoScreen(_audioService);
                         tds.ViewPort = GraphicsDevice.Viewport;
                         tds.LoadContent(Content, GraphicsDevice);
+                        tds.PauseBtnPressed += OnPauseBtnPressed;
                         tds.BtnClicked += OnBtnClicked;
                         ScreenManager.AddScreen(tds);
                         break;
@@ -193,6 +198,7 @@ public class Game1 : Game
                             _audioService,
                             GraphicsDevice.Viewport
                         );
+                        confirmDialog.LoadContent(Content, GraphicsDevice);
                         confirmDialog.BtnClicked += OnBtnClicked;
                         ScreenManager.AddScreen(confirmDialog);
                         break;
@@ -301,9 +307,12 @@ public class Game1 : Game
                     case ButtonAction.StartGame:
                         GameScreen gameScreen = new GameScreen(_audioService, _selectedGameMode);
                         gameScreen.ViewPort = GraphicsDevice.Viewport;
+                        gameScreen.LoadContent(Content, GraphicsDevice);
                         gameScreen.BtnClicked += OnBtnClicked;
                         gameScreen.PauseBtnPressed += OnPauseBtnPressed;
-                        gameScreen.LoadContent(Content, GraphicsDevice);
+                        gameScreen.StartTechDemo += OnStartTech;
+                        gameScreen.GameWon += OnGameWon;
+                        gameScreen.GameOver += OnGameOver;
                         ScreenManager.RemoveScreen(screen);
                         ScreenManager.AddScreen(gameScreen);
                         break;
@@ -351,7 +360,7 @@ public class Game1 : Game
                     case ButtonAction.Options:
                         OptionScreen optionScreen = new OptionScreen(background, UIAssets.DefaultFont, _audioService, GraphicsDevice.Viewport);
                         optionScreen.LoadContent(Content, GraphicsDevice);
-                        // optionScreen.GraphicsRequested += Forward;
+                        optionScreen.BtnClicked += OnBtnClicked;
                         ScreenManager.AddScreen(optionScreen);
                         break;
 
@@ -363,11 +372,86 @@ public class Game1 : Game
                             _audioService,
                             GraphicsDevice.Viewport
                         );
+                        confirmDialog.LoadContent(Content, GraphicsDevice);
+                        confirmDialog.BtnClicked += OnBtnClicked;
+                        ScreenManager.AddScreen(confirmDialog);
+                        break;
+                }
+                break;
+            case GameOverScreen:
+                switch ((ButtonAction)id)
+                {
+                    case ButtonAction.MainMenu:
+                        _audioService.Sounds.StopAll();
+                        _audioService.Sounds.Play(AudioAssets.SoftClick);
+                        ScreenManager.ReturnToMainMenu();
+                        break;
+
+                    case ButtonAction.Exit:
+                        ConfirmationDialogScreen confirmDialog = new ConfirmationDialogScreen(
+                            UIAssets.DefaultFont,
+                            "Bist Du Dir sicher?",
+                            screen,
+                            _audioService,
+                            GraphicsDevice.Viewport
+                        );
+                        confirmDialog.LoadContent(Content, GraphicsDevice);
+                        confirmDialog.BtnClicked += OnBtnClicked;
+                        ScreenManager.AddScreen(confirmDialog);
+                        break;
+                }
+                break;
+            case GameWonScreen:
+                switch ((ButtonAction)id)
+                {
+                    case ButtonAction.MainMenu:
+                        _audioService.Sounds.StopAll();
+                        _audioService.Sounds.Play(AudioAssets.SoftClick);
+                        ScreenManager.ReturnToMainMenu();
+                        break;
+
+                    case ButtonAction.Exit:
+                        ConfirmationDialogScreen confirmDialog = new ConfirmationDialogScreen(
+                            UIAssets.DefaultFont,
+                            "Bist Du Dir sicher?",
+                            screen,
+                            _audioService,
+                            GraphicsDevice.Viewport
+                        );
+                        confirmDialog.LoadContent(Content, GraphicsDevice);
+                        confirmDialog.BtnClicked += OnBtnClicked;
                         ScreenManager.AddScreen(confirmDialog);
                         break;
                 }
                 break;
         }
+    }
+
+    private void OnStartTech(IScreen screen)
+    {
+        TechDemoScreen tds = new TechDemoScreen(_audioService);
+        tds.ViewPort = GraphicsDevice.Viewport;
+        tds.LoadContent(Content, GraphicsDevice);
+        tds.PauseBtnPressed += OnPauseBtnPressed;
+        tds.BtnClicked += OnBtnClicked;
+        ScreenManager.RemoveScreen(screen);
+        ScreenManager.AddScreen(tds);
+    }
+
+    private void OnGameOver(Statistic statistic)
+    {
+        GameOverScreen gos = new GameOverScreen(UIAssets.DefaultFont, _audioService, statistic, GraphicsDevice.Viewport);
+        gos.LoadContent(Content, GraphicsDevice);
+        gos.BtnClicked += OnBtnClicked;
+        ScreenManager.AddScreen(gos);
+    }
+
+    private void OnGameWon(Statistic statistic)
+    {
+        GameWonScreen gws = new GameWonScreen(UIAssets.DefaultFont, _audioService, statistic, GraphicsDevice.Viewport);
+        gws.LoadContent(Content, GraphicsDevice);
+        gws.BtnClicked += OnBtnClicked;
+        ScreenManager.AddScreen(gws);
     }
 
     protected override void Update(GameTime gameTime)

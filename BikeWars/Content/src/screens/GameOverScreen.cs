@@ -115,9 +115,6 @@ namespace BikeWars.Content.screens
 
             int startY = screenHeight / 2 + 50;
 
-            // _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
-            // _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
-
             var buttonDefinitions = new[]
             {
                 (id: ButtonAction.MainMenu, text: "Hauptmenu", isLeft: true),
@@ -137,9 +134,8 @@ namespace BikeWars.Content.screens
                     buttonX = screenWidth - buttonWidth - horizontalMargin;
                 }
 
-                _buttons.Add(new MenuButton(
+                AddButton(new MenuButton(
                     id: (int)definition.id,
-                    // texture: _buttonTexture,
                     texture: RenderPrimitives.Pixel,
                     bounds: new Rectangle(buttonX, startY, buttonWidth, buttonHeight),
                     text: definition.text,
@@ -150,32 +146,12 @@ namespace BikeWars.Content.screens
             UpdateSelection(0);
         }
 
-        // protected override void HandleButtonClick(MenuButton button, ContentManager content, GraphicsDevice gd)
-        // {
-        //     // Use _currentGameTime from ScreenBase class if GameTime is needed
-        //     switch ((ButtonAction)button.Id)
-        //     {
-        //         case ButtonAction.MainMenu:
-        //             _audioService.Sounds.StopAll();
-        //             _audioService.Sounds.Play(AudioAssets.SoftClick);
-        //             // ScreenManager.ReturnToMainMenu();
-        //             break;
-
-        //         case ButtonAction.Exit:
-        //             // ScreenManager.AddScreen(_confirmDialog);
-        //             break;
-        //     }
-        // }
-
         public override void Draw(GameTime gameTime, SpriteBatch sb)
         {
             int screenWidth = ViewPort.Width;
             int screenHeight = ViewPort.Height;
 
             sb.Begin();
-            // Texture2D overlay = CreateOverlayTexture(screenWidth, screenHeight);
-            // sb.Draw(overlay, Vector2.Zero, Color.White * 0.7f);
-
             if (_isAnimationLoaded)
             {
                 if (_currentFrameIndex >= _frames.Count) _currentFrameIndex = 0;
@@ -216,7 +192,6 @@ namespace BikeWars.Content.screens
                 140
             );
 
-
             sb.DrawString(
                 _font,
                 title,
@@ -246,25 +221,9 @@ namespace BikeWars.Content.screens
                 button.Draw(sb);
             }
             StatisticsComponent sc = new StatisticsComponent(Statistic);
-            // sc.Draw(spriteBatch, overlay, 400, 600, _font);
+            sc.Draw(sb, RenderPrimitives.Pixel, Color.DarkSlateGray, new Vector2(400, 600), UIAssets.DefaultFont);
             // shown text
             sb.End();
-        }
-
-        // private Texture2D CreateOverlayTexture(int width, int height)
-        // {
-        //     Texture2D texture = new Texture2D(ScreenManager.GraphicsDevice, width, height);
-        //     Color[] data = new Color[width * height];
-        //     for (int i = 0; i < data.Length; i++)
-        //         data[i] = Color.Black;
-        //     texture.SetData(data);
-        //     return texture;
-        // }
-
-        // Pass it through until we get to Game1
-        private void OnExit()
-        {
-            Exit?.Invoke();
         }
 
         public override void Update(GameTime gameTime)

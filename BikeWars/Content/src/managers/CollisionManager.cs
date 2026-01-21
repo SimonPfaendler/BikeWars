@@ -891,6 +891,8 @@ public class CollisionManager
         ch.Transform.Position -= separation;
         chd.Transform.Position += separation;
 
+        OnCharacterCollision?.Invoke(ch, chd);
+
         ch.UpdateCollider();
         chd.UpdateCollider();
         return;

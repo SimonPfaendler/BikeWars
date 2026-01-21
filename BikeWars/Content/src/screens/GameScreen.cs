@@ -19,7 +19,6 @@ using BikeWars.Content.events;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.entities.MapObjects;
 using BikeWars.Entities.Characters.MapObjects;
-using BikeWars.Entities;
 
 namespace BikeWars.Content.screens
 {
@@ -34,6 +33,7 @@ namespace BikeWars.Content.screens
         private Overlay _overlay;
         private TiledMapRenderer _tiledMapRenderer;
         private Debugger _debugger;
+        private bool _isAlive = true; // If the Screen is still alive. Necessary for the switch
 
         private Action<float, float> _onScreenShake;
         private Action<int, int> _onPlayerLevelUp;
@@ -43,8 +43,10 @@ namespace BikeWars.Content.screens
         public Viewport ViewPort {get; set;}
         public event Action<int, IScreen> BtnClicked;
         public event Action PauseBtnPressed;
+        public event Action<Statistic> GameOver;
+        public event Action<Statistic> GameWon;
+        public event Action<IScreen> StartTechDemo;
         private Action _onGameOverExit;
-        // private const int CELL_SIZE = 16;
         private const int CELL_SIZE = 16;
         private WorldAudioManager _worldAudioManager;
 
@@ -86,7 +88,7 @@ namespace BikeWars.Content.screens
         private bool _showStaticHitboxes = true;
 
         private GameTimer _gameTimer;
-        private const float GAME_TIME_LIMIT = 300f;
+        private const float GAME_TIME_LIMIT = 3f;
         private SpriteFont _timerFont;
         private Vector2 _timerPosition;
         private readonly GameMode _gameMode;
@@ -112,8 +114,6 @@ namespace BikeWars.Content.screens
         private const float MUSICIAN_DAMAGE_CIRCLE_INTERVAL = 3f;
         private Musicians? _activeMusiciansForAOE = null;
 
-
-        private GameOverScreen _gameOverScreen;
         public event Action Exit;
 
         public void TriggerHitStop(float duration)
@@ -183,8 +183,8 @@ namespace BikeWars.Content.screens
             _collisionManager.Insertions(_gameObjectManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(), _gameObjectManager.Objects, _gameObjectManager.Towers);
 
             _onGameOverExit = OnExit;
-            _gameOverScreen = new GameOverScreen(UIAssets.DefaultFont, _audioService, _statisticsManager.Statistic, ViewPort);
-            _gameOverScreen.Exit += _onGameOverExit;
+            // _gameOverScreen = new GameOverScreen(UIAssets.DefaultFont, _audioService, _statisticsManager.Statistic, ViewPort);
+            // _gameOverScreen.Exit += _onGameOverExit;
 
             GameEvents.OnResumeTimer += ResumeTimer;
             HandleLoadNonInGameData();
@@ -250,7 +250,12 @@ namespace BikeWars.Content.screens
             _worldAudioManager = new WorldAudioManager(initialView);
             _gameObjectManager.SetWorldAudioManager(_worldAudioManager);
 
-            _levelUpScreen = new LevelUpScreen();
+            _levelUpScreen = new LevelUpScreen(
+                UIAssets.DefaultFont,
+                "Level UP!",
+                _audioService,
+                ViewPort
+            );
             _levelUpScreen.Closed += () =>
             {
                 _audioService.Sounds.ResumeAll();
@@ -307,6 +312,10 @@ namespace BikeWars.Content.screens
         }
         public virtual void Update(GameTime gameTime)
         {
+            if (!_isAlive)
+            {
+                return;
+            }
             // Update HUD and Timer alignment for resolution changes
             int viewW = ViewPort.Width;
             int viewH = ViewPort.Height;
@@ -384,7 +393,7 @@ namespace BikeWars.Content.screens
             if (InputHandler.IsPressed(GameAction.TECH_DEMO))
             {
                 _audioService.Sounds.StopAll();
-                // ScreenManager.AddScreen(new TechDemoScreen(_audioService));
+                StartTechDemo?.Invoke(this);
             }
 
             if (InputHandler.IsPressed(GameAction.DEBUG_HITBOXES) && _isTechDemo)
@@ -398,12 +407,12 @@ namespace BikeWars.Content.screens
                 _audioService.Music.Stop();
                 _overlay.SetPaused(true, gameTime);
                 _audioService.Sounds.Play(AudioAssets.CarCrash);
-                // ScreenManager.AddScreen(_gameOverScreen);
+                GameOver?.Invoke(_statisticsManager.Statistic);
                 _statisticsManager.SaveStatistic();
                 SaveLoad.SaveNonGame(_statisticsManager);
             }
 
-            _debugger.Update(gameTime);
+            _debugger?.Update(gameTime);
             // Needs to be implemented elsewhere.
             if (InputHandler.IsPressed(GameAction.TOGGLE_CAMERA))
             {
@@ -412,13 +421,13 @@ namespace BikeWars.Content.screens
             }
             if (_gameObjectManager.Player2 == null)
             {
-                camera.Update(gameTime, _gameObjectManager.Player1.Transform.Position, null, _freelook);
+                camera?.Update(gameTime, _gameObjectManager.Player1.Transform.Position, null, _freelook);
             } else
             {
-                camera.Update(gameTime, _gameObjectManager.Player1.Transform.Position, _gameObjectManager.Player2.Transform.Position, _freelook);
+                camera?.Update(gameTime, _gameObjectManager.Player1.Transform.Position, _gameObjectManager.Player2.Transform.Position, _freelook);
             }
 
-            _tiledMapRenderer.Update(gameTime);
+            _tiledMapRenderer?.Update(gameTime);
             HandleSaveLoadInput();
 
             if (InputHandler.IsPressed(GameAction.PAUSE))
@@ -793,6 +802,7 @@ namespace BikeWars.Content.screens
         {
             Unload();
             _tiledMapRenderer?.Dispose();
+            _isAlive = false;
             // hudTexture?.Dispose();
 
             _hud = null;
@@ -833,6 +843,7 @@ namespace BikeWars.Content.screens
             _overlay.SetPaused(true, Game1.CurrentGameTime);
             _audioService.Sounds.Play(AudioAssets.CarHorn);
             // ScreenManager.AddScreen(new GameWonScreen(UIAssets.DefaultFont, _audioService, _statisticsManager.Statistic));
+            GameWon?.Invoke(_statisticsManager.Statistic);
             _statisticsManager.SaveStatistic();
             SaveLoad.SaveNonGame(_statisticsManager);
         }
@@ -936,8 +947,6 @@ namespace BikeWars.Content.screens
             _bikeShopScreen.Closed -= _onBikeShopClose;
 
             _gameTimer.OnTimerFinished -= OnGameTimerFinished;
-            _gameOverScreen.Exit -= _onGameOverExit;
-            _gameOverScreen.Unload();
 
             _hud?.Dispose();
             _hud = null;

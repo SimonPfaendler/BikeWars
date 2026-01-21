@@ -1,18 +1,23 @@
 ﻿using System;
+using BikeWars.Content.components;
 using BikeWars.Content.engine;
+using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.levelup;
 using BikeWars.Content.managers;
 using BikeWars.Entities.Characters;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
 // screen shown if level up is triggered if an option is selected is closes
 // not in screen manager is loaded directly in gamescreen
 namespace BikeWars.Content.screens;
-public class LevelUpScreen : IScreen
+public class LevelUpScreen : MenuScreenBase, IScreen
 {
     public bool IsOpen { get; private set; }
+    private readonly string _message;
+    private readonly AudioService _audioService;
 
     private SkillTree.SkillId _option1;
     private SkillTree.SkillId _option2;
@@ -23,12 +28,19 @@ public class LevelUpScreen : IScreen
     public event Action<SkillTree.SkillId> OnOptionSelected;
     public event Action Closed;
 
-    public Viewport ViewPort {get; set;}
-
     public event Action<int, IScreen> BtnClicked;
 
-    public LevelUpScreen()
+    public LevelUpScreen(SpriteFont font, string message, AudioService audioService, Viewport vp): base(null, font, vp)
     {
+        _message = message;
+        _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
+
+    }
+
+    public override void LoadContent(ContentManager content, GraphicsDevice gd)
+    {
+        base.LoadContent(content, gd);
+        InitializeButtons();
     }
 
     public void Open(Player player)
@@ -78,6 +90,10 @@ public class LevelUpScreen : IScreen
             Close();
         }
     }
+    protected sealed override void InitializeButtons()
+        {
+
+        }
 
     public void Draw(GameTime gameTime, SpriteBatch sb)
     {

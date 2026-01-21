@@ -3,7 +3,6 @@ using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
-using BikeWars.Content.managers;
 using System;
 using Microsoft.Xna.Framework.Content;
 
@@ -12,7 +11,6 @@ namespace BikeWars.Content.screens
     public class ConfirmationDialogScreen : MenuScreenBase, IScreen
     {
         private readonly string _message;
-        private readonly IScreen _previousScreen;
         private readonly AudioService _audioService;
         public float MusicVolume => 0.5f;
 
@@ -22,7 +20,6 @@ namespace BikeWars.Content.screens
             : base(null, font, vp)
         {
             _message = message;
-            _previousScreen = previousScreen;
             _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
         }
 
