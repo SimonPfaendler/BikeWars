@@ -777,11 +777,11 @@ namespace BikeWars.Content.screens
                 _bikeShopScreen.Draw(spriteBatch);
             }
             
-            DrawAttackIcon(spriteBatch, player);
+            DrawAttackIcon(spriteBatch, player, 1);
             var player2 = _gameObjectManager.Player2;
             if (player2 != null)
             {
-                DrawAttackIcon(spriteBatch, player2);
+                DrawAttackIcon(spriteBatch, player2, 2);
             }
 
             spriteBatch.End();
@@ -917,7 +917,7 @@ namespace BikeWars.Content.screens
             }
         }
         
-        private void DrawAttackIcon(SpriteBatch spriteBatch, Player player)
+        private void DrawAttackIcon(SpriteBatch spriteBatch, Player player, int playerIndex)
         {
             // draw the icon of the current attack used by the player
             Texture2D icon = null;
@@ -965,14 +965,23 @@ namespace BikeWars.Content.screens
             }
             
             var viewport = Game1.Instance.GraphicsDevice.Viewport;
-            
             int targetSize = 80;
-            int topMargin = 20;
+            int margin = 20;
+            float xFactor;
+            int y;
             
-            float xFactor = 0.75f;
-
+            if (playerIndex == 1)
+            {
+                xFactor = 0.75f;
+                y = margin;
+            }
+            else
+            {
+                xFactor = 0.25f;
+                y = viewport.Height - 5 * margin;
+            }
+            
             int x = (int)(viewport.Width * xFactor) - targetSize / 2;
-            int y = topMargin;
 
             Rectangle destRect = new Rectangle(
                 x,
