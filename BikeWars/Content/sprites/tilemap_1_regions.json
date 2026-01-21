@@ -36,10 +36,101 @@
       "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 160 },
       "sourceSize": { "w": 144, "h": 160 },
       "pivot": { "x": 0.5, "y": 0.5 }
+    },
+    {
+      "filename": "ub_1.png",
+      "frame": { "x": 32, "y": 384, "w": 336, "h": 384 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 336, "h": 384 },
+      "sourceSize": { "w": 336, "h": 384 },
+      "pivot": { "x": 0.5, "y": 0.5 }
+    },
+    {
+      "filename": "ub_2.png",
+      "frame": { "x": 368, "y": 416, "w": 208, "h": 448 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 208, "h": 448 },
+      "sourceSize": { "w": 208, "h": 448 },
+      "pivot": { "x": 0.5, "y": 0.5 }
+    },
+    {
+      "filename": "ub_3.png",
+      "frame": { "x": 576, "y": 416, "w": 256, "h": 516 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 256, "h": 516 },
+      "sourceSize": { "w": 256, "h": 516 },
+      "pivot": { "x": 0.5, "y": 0.5 }
+    },
+    {
+      "filename": "ub_4.png",
+      "frame": { "x": 832, "y": 432, "w": 176, "h": 416 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 176, "h": 416 },
+      "sourceSize": { "w": 176, "h": 416 },
+      "pivot": { "x": 0.5, "y": 0.5 }
+    },
+    {
+      "filename": "m_1.png",
+      "frame": { "x": 1552, "y": 688, "w": 272, "h": 1152 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 272, "h": 1152 },
+      "sourceSize": { "w": 272, "h": 1152 },
+      "pivot": { "x": 0.5, "y": 0.5 }
+    },
+    {
+      "filename": "m_2.png",
+      "frame": { "x": 1824, "y": 1264, "w": 176, "h": 560 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 176, "h": 560 },
+      "sourceSize": { "w": 176, "h": 560 },
+      "pivot": { "x": 0.5, "y": 0.5 }
+    },
+    {
+      "filename": "m_3.png",
+      "frame": { "x": 2000, "y": 1040, "w": 192, "h": 656 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 192, "h": 656 },
+      "sourceSize": { "w": 192, "h": 656 },
+      "pivot": { "x": 0.5, "y": 0.5 }
+    },
+    {
+      "filename": "m_4.png",
+      "frame": { "x": 2192, "y": 1072, "w": 208, "h": 528 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 208, "h": 528 },
+      "sourceSize": { "w": 208, "h": 528 },
+      "pivot": { "x": 0.5, "y": 0.5 }
+    },
+    {
+      "filename": "tf_101.png",
+      "frame": { "x": 1552, "y": 48, "w": 784, "h": 512 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 784, "h": 512 },
+      "sourceSize": { "w": 784, "h": 512 },
+      "pivot": { "x": 0.5, "y": 0.5 }
+    },
+    {
+      "filename": "sc.png",
+      "frame": { "x": 64, "y": 1200, "w": 1216, "h": 592 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 1216, "h": 592 },
+      "sourceSize": { "w": 1216, "h": 592 },
+      "pivot": { "x": 0.5, "y": 0.5 }
     }
+
   ],
   "meta": {
     "image": "tilemap_1.png",
-    "size": { "w": 1500, "h": 1500 }
+    "size": { "w": 2500, "h": 2500 }
   }
 }

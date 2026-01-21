@@ -56,6 +56,10 @@ namespace BikeWars.Content.managers
             { "Banana", "assets/sprites/projectiles/banana" },
             { "Book", "assets/sprites/projectiles/book" },
             { "Bottle", "assets/sprites/projectiles/bottle" },
+            { "Flamethrower", "assets/sprites/projectiles/flamethrower" },
+            { "IceTrail", "assets/sprites/projectiles/ice_trail" },
+            { "FireTrail", "assets/sprites/projectiles/fire_trail" },
+            { "DamageCircle", "assets/sprites/projectiles/damage_circle" },
 
 
             // HUD
