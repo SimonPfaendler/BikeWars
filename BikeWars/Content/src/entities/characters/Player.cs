@@ -228,11 +228,12 @@ namespace BikeWars.Entities.Characters
             }
         }
 
-        public Player(Vector2 start, Point size, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")
+        public Player(Vector2 start, Point size, Point renderSize, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")
         {
             Attributes = new CharacterAttributes(this, 300, 0, 10, 2f, false);
             Transform = new Transform(start, size);
-            LastTransform = new Transform(start, size);
+            // LastTransform = new Transform(start, size);
+            RenderTransform = new Transform(start, renderSize);
             _input = input;
             movement = new PlayerMovement(canMove: true, isMoving: false, _input);
 
@@ -278,6 +279,7 @@ namespace BikeWars.Entities.Characters
             HandleWeaponSwitch();
             HandleShooting();
             UpdateMovement(gameTime);
+            UpdateCollider();
             HandleInventoryNavigation();
             HandleItemUsage(gameTime);
             HandleMovementSound();
@@ -285,9 +287,7 @@ namespace BikeWars.Entities.Characters
             UpdateGazeDirection(mousePos);
             HandleGhostTrail(gameTime);
             HandleSwitchMovement();
-
             UpdateHitFlash(gameTime);
-            UpdateCollider();
         }
 
         public override bool IsCharacterMoving()
@@ -361,12 +361,12 @@ namespace BikeWars.Entities.Characters
             if (movement.CurrentMovement.GetType() ==
                 typeof(WalkingMovement)) // TODO THIS IS ONLY INSERTED TO SHOW. BUT NOT GOOD!
             {
-                _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size,
+                _currentAnimation.Draw(spriteBatch, RenderTransform.Position, RenderTransform.Size,
                     movement.CurrentMovement.Rotation, _renderScale);
             }
             else
             {
-                _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size,
+                _currentAnimation.Draw(spriteBatch, RenderTransform.Position, RenderTransform.Size,
                     movement.CurrentMovement.Rotation + MathHelper.PiOver2, _renderScale);
             }
 
@@ -387,11 +387,11 @@ namespace BikeWars.Entities.Characters
         }
 
         // Is Helpful for example with colliders to set the original position back.
-        public override void SetLastTransform()
-        {
-            Transform = new Transform(new Vector2(LastTransform.Position.X, LastTransform.Position.Y),
-                LastTransform.Size);
-        }
+        // public override void SetLastTransform()
+        // {
+        //     Transform = new Transform(new Vector2(LastTransform.Position.X, LastTransform.Position.Y),
+        //         LastTransform.Size);
+        // }
 
         public void Immobalize(bool value)
         {
@@ -590,8 +590,8 @@ namespace BikeWars.Entities.Characters
             CurrentSpeed = sprint.IsActive ? movement.CurrentMovement.Speed *movement.CurrentMovement.SprintAcceleration : movement.CurrentMovement.Speed;
             Vector2 direction = movement.CurrentMovement.Direction;
 
-            if (Transform.Position.X != LastTransform.Position.X || Transform.Position.Y != LastTransform.Position.Y)
-                LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
+            // if (Transform.Position.X != LastTransform.Position.X || Transform.Position.Y != LastTransform.Position.Y)
+            //     LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
 
             TerrainSpeedMultiplier = GetTerrainMultiplier();
             if (IsDoped)

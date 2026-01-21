@@ -9,8 +9,8 @@ public class MusicManager
 {
     private readonly Dictionary<string, Song> _songs = new();
     private string _currentSongId = null;
-    public float MasterVolume { get; set; } = 0.25f;
-    public float MusicVolume { get; set; } = 0.5f;
+    public float MasterVolume { get; set; } = 0.0f;
+    public float MusicVolume { get; set; } = 0.0f;
 
     public bool IsPlaying => MediaPlayer.State == MediaState.Playing;
     private float _fadeTargetVolume = 1f;

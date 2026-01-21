@@ -11,8 +11,11 @@ public abstract class CharacterBase : ICharacter, ICombat
 {
     private Transform _transform { get; set; }
     public Transform Transform { get => _transform;  set => _transform = value; }
-    private Transform _lastTransform { get; set; }
-    public Transform LastTransform { get => _lastTransform; set => _lastTransform = value; }
+    // private Transform _lastTransform { get; set; }
+    // public Transform LastTransform { get => _lastTransform; set => _lastTransform = value; }
+
+    private Transform _renderTransform { get; set; }
+    public Transform RenderTransform { get => _renderTransform; set => _renderTransform = value; }
     public float Speed;
     public bool slowed;
     public float SprintSpeed;
@@ -58,7 +61,7 @@ public abstract class CharacterBase : ICharacter, ICombat
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
         // Apply fallback movement
-        LastTransform = new Transform(Transform.Position, Transform.Size);
+        // LastTransform = new Transform(Transform.Position, Transform.Size);
         Transform.Position += _knockbackVelocity * dt;
 
         // Decay velocity
@@ -75,7 +78,7 @@ public abstract class CharacterBase : ICharacter, ICombat
             _knockbackVelocity.Normalize();
             _knockbackVelocity *= speed;
         }
-        
+
     }
 
     public void UpdateAttackCooldown(GameTime gameTime)
@@ -111,10 +114,10 @@ public abstract class CharacterBase : ICharacter, ICombat
         // Continuous Pulse (only if close to 1,1 to avoid conflict with squash)
         if (Vector2.Distance(_renderScale, Vector2.One) < 0.15f)
         {
-            _pulseTimer += dt * 5f; 
+            _pulseTimer += dt * 5f;
             float intensity = 0.1f * GetPulseMultiplier();
             float pulse = MathF.Sin(_pulseTimer) * intensity;
-            _renderScale = new Vector2(1f + pulse, 1f - pulse); 
+            _renderScale = new Vector2(1f + pulse, 1f - pulse);
         }
         else
         {
@@ -139,12 +142,12 @@ public abstract class CharacterBase : ICharacter, ICombat
 
         OnTookDamage?.Invoke(this, amount);
         Attributes.Health -= amount;
-        _hitFlashTimer = 0.2f; 
-        
+        _hitFlashTimer = 0.2f;
+
         // Squash effect on hit
         if (shouldSquash)
         {
-            TriggerSquash(1.5f, 1.2f); 
+            TriggerSquash(1.5f, 1.2f);
         }
     }
 
@@ -175,10 +178,10 @@ public abstract class CharacterBase : ICharacter, ICombat
     }
 
     // Is Helpful for example with colliders to set the original position back.
-    public virtual void SetLastTransform()
-    {
-        Transform = new Transform(new Vector2(LastTransform.Position.X, LastTransform.Position.Y), LastTransform.Size);
-    }
+    // public virtual void SetLastTransform()
+    // {
+    //     Transform = new Transform(new Vector2(LastTransform.Position.X, LastTransform.Position.Y), LastTransform.Size);
+    // }
 
     public void ResetAttackCooldown()
     {
@@ -201,11 +204,13 @@ public abstract class CharacterBase : ICharacter, ICombat
                 CollisionLayer.PLAYER,
                 this
             );
-            return;
+        } else
+        {
+            Collider.Position = colliderPosition;
+            Collider.Width = Transform.Size.X;
+            Collider.Height = Transform.Size.Y;
         }
-        Collider.Position = colliderPosition;
-        Collider.Width = Transform.Size.X;
-        Collider.Height = Transform.Size.Y;
+        RenderTransform.Position = Transform.Position;
     }
     public void UpdateHitFlash(GameTime gameTime)
     {
@@ -215,7 +220,7 @@ public abstract class CharacterBase : ICharacter, ICombat
         }
         UpdateTweens(gameTime);
     }
-    public abstract void Update(GameTime gameTime); 
+    public abstract void Update(GameTime gameTime);
     public abstract void Draw(SpriteBatch spriteBatch);
     public bool Intersects(ICollider other)
     {

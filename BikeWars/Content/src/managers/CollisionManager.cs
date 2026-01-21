@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using BikeWars.Content.engine;
-using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.entities.MapObjects;
@@ -54,6 +53,7 @@ public class CollisionManager
     // Reusable query buffers
     private readonly List<ICollider> _nearbyDynamics = new(64);
     private readonly List<ICollider> _nearbyStatics  = new(64);
+    private readonly List<ICollider> _wallStatics  = new(16);
 
     // Reusable removal buffers
     private readonly List<ProjectileBase> _removeProjectiles = new(16);
@@ -517,46 +517,58 @@ public class CollisionManager
 
         if (c.Layer == CollisionLayer.CHARACTER || c.Layer == CollisionLayer.PLAYER)
         {
+            // if (!WillCollide(b, c)) return;
+            Vector2 penetration = GetPenetrationVector(c, b);
+            if (penetration.LengthSquared() < 0.0001f)
+                return;
+
             CharacterBase ch = (CharacterBase)c.Owner;
-            Vector2 delta = ch.Transform.Position - ch.LastTransform.Position;
-
-            if (delta.X != 0)
-            {
-                if (WillCollide((BoxCollider)c, new Vector2(delta.X, 0), b))
-                {
-                    ch.SetLastTransform();
-                    ch.Transform.Position = new Vector2(
-                        ch.LastTransform.Position.X,
-                        ch.Transform.Position.Y
-                    );
-                }
-            }
-
+            ch.Transform.Position -= penetration;
             ch.UpdateCollider();
-            if (delta.Y != 0)
-            {
-                if (WillCollide((BoxCollider)c, new Vector2(0, delta.Y), b))
-                {
-                    ch.SetLastTransform();
-                    ch.Transform.Position = new Vector2(
-                        ch.Transform.Position.X,
-                        ch.LastTransform.Position.Y
-                    );
-                }
-            }
 
-            ch.UpdateCollider();
+
+
+            // Vector2 delta = (ch.Transform.Position - ch.LastTransform.Position) * new Vector2(0.25f, 0.25f);
+            // ch.Transform.Position += velocity * dt;
+
+            // if (delta.X != 0)
+            // {
+            //     if (WillCollide((BoxCollider)c, new Vector2(delta.X, 0), b))
+            //     {
+            //         ch.SetLastTransform();
+            //         ch.Transform.Position = new Vector2(
+            //             ch.LastTransform.Position.X,
+            //             ch.Transform.Position.Y
+            //         );
+            //     }
+            // }
+            // Vector2 penetration = GetPenetrationVector(dynamic, static);
+            // Transform.Position -= penetration;
+            // ch.UpdateCollider();
+            // if (delta.Y != 0)
+            // {
+            //     if (WillCollide((BoxCollider)c, new Vector2(0, delta.Y), b))
+            //     {
+            //         ch.SetLastTransform();
+            //         ch.Transform.Position = new Vector2(
+            //             ch.Transform.Position.X,
+            //             ch.LastTransform.Position.Y
+            //         );
+            //     }
+            // }
+
+            // ch.UpdateCollider();
         }
 
         // If already overlapping a static (e.g., pushed in by another entity), push the character out
-        if (c.Intersects(b))
-        {
-            var penetration = GetPenetrationVector(c, b);
-            if (penetration.LengthSquared() > 0.0001f && c.Owner is CharacterBase stuck)
-            {
-                ApplySafePush(stuck, c, -penetration);
-            }
-        }
+        // if (c.Intersects(b))
+        // {
+        //     var penetration = GetPenetrationVector(c, b);
+        //     if (penetration.LengthSquared() > 0.0001f && c.Owner is CharacterBase stuck)
+        //     {
+        //         ApplySafePush(stuck, c, -penetration);
+        //     }
+        // }
     }
 
     private void HandleProjectileWithStatic(ICollider b, ICollider c)
@@ -714,58 +726,245 @@ public class CollisionManager
         allDynamics.Remove(item.Collider);
     }
 
+    // private void HandleCharacterCollision(ICollider c, ICollider d)
+    // {
+    //     if (c == d || c.GetHashCode() > d.GetHashCode() ||
+    //         (d.Layer != CollisionLayer.CHARACTER && d.Layer != CollisionLayer.PLAYER))
+    //     {
+    //         return;
+    //     }
+
+    //     CharacterBase ch = (CharacterBase)c.Owner;
+    //     CharacterBase chd = (CharacterBase)d.Owner;
+
+    //     // Vector2 delta = ch.Transform.Position - ch.LastTransform.Position;
+
+    //     // if (delta.X != 0)
+    //     // {
+    //     //     if (WillCollide((BoxCollider)c, new Vector2(delta.X, 0), d))
+    //     //     {
+    //     //         ch.SetLastTransform();
+    //     //         ch.Transform.Position = new Vector2(
+    //     //             ch.LastTransform.Position.X,
+    //     //             ch.Transform.Position.Y
+    //     //         );
+    //     //         // chd.SetLastTransform();
+    //     //         // chd.Transform.Position = new Vector2(
+    //     //         //     chd.LastTransform.Position.X,
+    //     //         //     chd.Transform.Position.Y
+    //     //         // );
+    //     //     }
+    //     // }
+
+    //     // ch.UpdateCollider();
+    //     // // chd.UpdateCollider();
+    //     // if (delta.Y != 0)
+    //     // {
+    //     //     if (WillCollide((BoxCollider)c, new Vector2(0, delta.Y), d))
+    //     //     {
+    //     //         ch.SetLastTransform();
+    //     //         ch.Transform.Position = new Vector2(
+    //     //             ch.Transform.Position.X,
+    //     //             ch.LastTransform.Position.Y
+    //     //         );
+    //     //         // chd.SetLastTransform();
+    //     //         // chd.Transform.Position = new Vector2(
+    //     //         //     chd.Transform.Position.X,
+    //     //         //     chd.LastTransform.Position.Y
+    //     //         // );
+    //     //     }
+    //     // }
+
+    //     // ch.UpdateCollider();
+    //     // chd.UpdateCollider();
+
+
+
+    //     // Vector2 delta = ch.Transform.Position - ch.LastTransform.Position;
+
+    //     // if (!WillCollide((BoxCollider)c, delta, d))
+    //     // {
+    //     //     return;
+    //     // }
+
+    //     // ch.SetLastTransform();
+    //     // ch.Transform.Position = new Vector2(
+    //     //     ch.LastTransform.Position.X,
+    //     //     ch.LastTransform.Position.Y
+    //     // );
+
+    //     // chd.SetLastTransform();
+    //     // chd.Transform.Position = new Vector2(
+    //     //     chd.LastTransform.Position.X,
+    //     //     chd.LastTransform.Position.Y
+    //     // );
+    //     // return;
+
+    //     OnCharacterCollision?.Invoke((CharacterBase)c.Owner, (CharacterBase)d.Owner);
+
+
+    //     Vector2 t = GetPenetrationVector(c, d);
+    //     if (t.LengthSquared() < 0.0001f)
+    //         return;
+
+    //     // MAX 1 Pixel pro Frame
+    //     const float MAX_PUSH = 1.0f;
+
+    //     if (t.Length() > MAX_PUSH)
+    //     {
+    //         t.Normalize();
+    //         t *= MAX_PUSH;
+    //     }
+
+    //     Vector2 separation = t * 0.5f;
+
+    //     // A zurück, B vor
+    //     if (!IsInsideWall(c, ch.Transform.Position - separation))
+    //     {
+    //         ch.Transform.Position -= separation;
+    //         ch.UpdateCollider();
+    //     }
+
+    //     if (!IsInsideWall(d, chd.Transform.Position + separation))
+    //     {
+    //         chd.Transform.Position += separation;
+    //         chd.UpdateCollider();
+    //     }
+
+    //     // calculate vector that separates 2 characters
+    //     // Vector2 t = GetPenetrationVector(c, d);
+    //     // if (t.LengthSquared() < 0.0001f)
+    //     //     return;
+
+    //     // if (t.LengthSquared() < 0.0001f)
+    //     //     return;
+
+    //     // if (ch is Player)
+    //     // {
+    //     //     ApplySafePush(ch, c, -t);
+    //     //     return;
+    //     // }
+    //     // if (chd is Player)
+    //     // {
+    //     //     // t is for (c,d). If we want to move d out of c, compute it the other way.
+    //     //     Vector2 td = GetPenetrationVector(d, c);
+    //     //     if (td.LengthSquared() < 0.0001f) return;
+
+    //     //     ApplySafePush(chd, d, -td);
+    //     //     return;
+    //     // }
+
+    //     // split 2 characters apart by 50%
+    //     // Vector2 separation = t * 0.5f;
+
+    //     // // Vector2 t = GetPenetrationVector(c, d);
+    //     // if (t.LengthSquared() < 0.0001f)
+    //     //     return;
+
+    //     // // 50/50 trennen
+    //     // // Vector2 separation = t * 0.5f;
+
+    //     // ch.Transform.Position -= separation;
+    //     // chd.Transform.Position += separation;
+
+    //     // ch.UpdateCollider();
+    //     // chd.UpdateCollider();
+
+    //     // Push character A (Backwards)
+    //     // ApplySafePush(ch, c, -separation);
+
+    //     // // Push character B (Forwards)
+    //     // ApplySafePush(chd, d, separation);
+    // }
+
     private void HandleCharacterCollision(ICollider c, ICollider d)
     {
-        if (c == d || c.GetHashCode() > d.GetHashCode() ||
-            (d.Layer != CollisionLayer.CHARACTER && d.Layer != CollisionLayer.PLAYER))
-        {
+        if (d.Layer != CollisionLayer.CHARACTER && d.Layer != CollisionLayer.PLAYER) return;
+        Vector2 penetration = GetPenetrationVector(c, d);
+        if (penetration.LengthSquared() < 0.0001f)
             return;
-        }
+        Vector2 separation = penetration * 0.5f;
 
         CharacterBase ch = (CharacterBase)c.Owner;
         CharacterBase chd = (CharacterBase)d.Owner;
 
-        Vector2 delta = ch.Transform.Position - ch.LastTransform.Position;
+        ch.Transform.Position -= separation;
+        chd.Transform.Position += separation;
 
-        if (!WillCollide((BoxCollider)c, delta, d))
-        {
+        ch.UpdateCollider();
+        chd.UpdateCollider();
+        return;
+        // if (ReferenceEquals(c, d)) return;
+        // // if (RuntimeHelpers.GetHashCode(c) > RuntimeHelpers.GetHashCode(d)) return;
+        // if (d.Layer != CollisionLayer.CHARACTER && d.Layer != CollisionLayer.PLAYER) return;
+
+        // CharacterBase a = (CharacterBase)c.Owner;
+        // CharacterBase b = (CharacterBase)d.Owner;
+
+        // OnCharacterCollision?.Invoke(a, b);
+
+        // Vector2 t = GetPenetrationVector(c, d);
+        // if (t.LengthSquared() < 0.0001f)
+        // {
+        //     // Kein Overlap → optional: check Contact-Damping
+        //     ApplyContactDamping(a, b);
+        //     return;
+        // }
+
+        // const float MAX_PUSH = 1.0f;
+        // if (t.Length() > MAX_PUSH)
+        // {
+        //     t.Normalize();
+        //     t *= MAX_PUSH;
+        // }
+
+        // Vector2 separation = t * 0.5f;
+
+        // if (!IsInsideWall(c, a.Transform.Position - separation))
+        // {
+        //     a.Transform.Position -= separation;
+        //     a.UpdateCollider();
+        // }
+
+        // if (!IsInsideWall(d, b.Transform.Position + separation))
+        // {
+        //     b.Transform.Position += separation;
+        //     b.UpdateCollider();
+        // }
+
+        // ApplyContactDamping(a, b);
+    }
+    private void ApplyContactDamping(CharacterBase a, CharacterBase b)
+    {
+        // Richtungsvektor zwischen Figuren
+        Vector2 diff = a.Transform.Position - b.Transform.Position;
+        if (diff.LengthSquared() < 0.0001f)
             return;
+        diff.Normalize();
+
+        // Berechne aktuelle Bewegungsvektoren
+        Vector2 velA = a.Transform.Position - Vector2.Zero;
+        Vector2 velB = b.Transform.Position - Vector2.Zero;
+
+        // Prüfen, ob sie sich aufeinander zu bewegen
+        float approachA = Vector2.Dot(velA, -diff);
+        float approachB = Vector2.Dot(velB, diff);
+
+        const float CONTACT_DAMPING = 0.9f; // Je höher → stärker abbremsen
+
+        if (approachA > 0)
+        {
+            velA -= (-diff) * approachA * CONTACT_DAMPING;
+            a.Transform.Position = velA;
+            a.UpdateCollider();
         }
 
-        OnCharacterCollision?.Invoke((CharacterBase)c.Owner, (CharacterBase)d.Owner);
-
-        // calculate vector that separates 2 characters
-        Vector2 t = GetPenetrationVector(c, d);
-        if (t.LengthSquared() < 0.0001f)
-            return;
-
-        if (t.LengthSquared() < 0.0001f)
-            return;
-
-        if (ch is Player)
+        if (approachB > 0)
         {
-            ApplySafePush(ch, c, -t);
-            return;
+            velB -= diff * approachB * CONTACT_DAMPING;
+            b.Transform.Position = velB;
+            b.UpdateCollider();
         }
-        if (chd is Player)
-        {
-            // t is for (c,d). If we want to move d out of c, compute it the other way.
-            Vector2 td = GetPenetrationVector(d, c);
-            if (td.LengthSquared() < 0.0001f) return;
-
-            ApplySafePush(chd, d, -td);
-            return;
-        }
-
-
-        // split 2 characters apart by 50%
-        Vector2 separation = t * 0.5f;
-
-        // Push character A (Backwards)
-        ApplySafePush(ch, c, -separation);
-
-        // Push character B (Forwards)
-        ApplySafePush(chd, d, separation);
     }
 
     // slide the enemies along walls instead of them being pushed into the hitboxes
@@ -773,9 +972,12 @@ public class CollisionManager
     {
         // try full push
         Vector2 fullPos = ch.Transform.Position + push;
+        // CharacterBase ch = (CharacterBase)c.Owner;
+        // Vector2 delta = ch.Transform.Position - ch.LastTransform.Position;
+        // if (WillCollide(collider, fullPos))
         if (!IsInsideWall(collider, fullPos))
         {
-            ch.SetLastTransform();
+            // ch.SetLastTransform();
             ch.Transform.Position = fullPos;
             ch.UpdateCollider();
             return;
@@ -788,7 +990,7 @@ public class CollisionManager
             Vector2 slideXPos = ch.Transform.Position + new Vector2(push.X, 0);
             if (!IsInsideWall(collider, slideXPos))
             {
-                ch.SetLastTransform();
+                // ch.SetLastTransform();
                 ch.Transform.Position = slideXPos;
                 ch.UpdateCollider();
                 return;
@@ -802,7 +1004,7 @@ public class CollisionManager
             Vector2 slideYPos = ch.Transform.Position + new Vector2(0, push.Y);
             if (!IsInsideWall(collider, slideYPos))
             {
-                ch.SetLastTransform();
+                // ch.SetLastTransform();
                 ch.Transform.Position = slideYPos;
                 ch.UpdateCollider();
                 return;
@@ -816,7 +1018,7 @@ public class CollisionManager
             Vector2 scaledPos = ch.Transform.Position + push * t;
             if (!IsInsideWall(collider, scaledPos))
             {
-                ch.SetLastTransform();
+                // ch.SetLastTransform();
                 ch.Transform.Position = scaledPos;
                 ch.UpdateCollider();
                 return;
@@ -831,26 +1033,26 @@ public class CollisionManager
     {
         // create a temporary hitbox at the new position
         // to see if the enemy will hit a wall or not
-        // BoxCollider testBox = new BoxCollider(newPos, collider.Width, collider.Height, collider.Layer, collider.Owner);
+        BoxCollider testBox = new BoxCollider(newPos, collider.Width, collider.Height, collider.Layer, collider.Owner);
 
-        // // check nearby statics
-        // StaticHash.QueryNearby(newPos + new Vector2(collider.Width/2f, collider.Height/2f), 5);
+        // check nearby statics
+        _wallStatics.Clear();
+        StaticHash.QueryNearby(newPos + new Vector2(collider.Width/2f, collider.Height/2f), 5, _wallStatics);
 
-
-        // foreach (var s in statics)
-        // {
-        //     // IGNORE things that don't block movement
-        //     if (s.Layer == CollisionLayer.SPAWNENEMIES ||
-        //         s.Layer == CollisionLayer.TERRAIN ||
-        //         s.Layer == CollisionLayer.AOE ||
-        //         (s.Layer == CollisionLayer.INTERACT && s.Owner is not ItemBase))
-        //     {
-        //         continue;
-        //     }
-        //     // If it hits ANYTHING else (Wall, Water, Destructible, etc.), it's a block.
-        //     if (s.Intersects(testBox))
-        //         return true;
-        // }
+        foreach (var s in _wallStatics)
+        {
+            // IGNORE things that don't block movement
+            if (s.Layer == CollisionLayer.SPAWNENEMIES ||
+                s.Layer == CollisionLayer.TERRAIN ||
+                s.Layer == CollisionLayer.AOE ||
+                (s.Layer == CollisionLayer.INTERACT && s.Owner is not ItemBase))
+            {
+                continue;
+            }
+            // If it hits ANYTHING else (Wall, Water, Destructible, etc.), it's a block.
+            if (s.Intersects(testBox))
+                return true;
+        }
         return false;
     }
 
@@ -1046,11 +1248,8 @@ public class CollisionManager
                 continue;
             }
 
-            // DynamicHash.QueryNearby(c.Position, 1, _nearbyDynamics);
-            // StaticHash.QueryNearby(c.Position, 2, _nearbyStatics);
-
             DynamicHash.QueryNearby(c.Position, 1, _nearbyDynamics);
-            StaticHash.QueryNearby(c.Position, 1, _nearbyStatics);
+            StaticHash.QueryNearby(c.Position, 2, _nearbyStatics);
 
             HandleDynamics(c, _nearbyDynamics);
             HandleStatics(c, _nearbyStatics);
