@@ -22,6 +22,18 @@
 /processorParam:TextureFormat=Compressed
 /build:assets/fonts/Arial.spritefont;assets/fonts/Arial
 
+#begin assets/images/banana_icon.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/banana_icon.png
+
 #begin assets/images/beer_destroyed.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -34,6 +46,18 @@
 /processorParam:TextureFormat=Color
 /build:assets/images/beer_destroyed.png
 
+#begin assets/images/beer_icon.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/beer_icon.png
+
 #begin assets/images/beer_texture.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -45,6 +69,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:assets/images/beer_texture.png
+
+#begin assets/images/book_icon.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/book_icon.jpg
 
 #begin assets/images/ControllerBelegung.png
 /importer:TextureImporter
@@ -82,6 +118,18 @@
 /processorParam:TextureFormat=Color
 /build:assets/images/DopingSpritze.png
 
+#begin assets/images/Eisreifen_new.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/Eisreifen_new.jpg
+
 #begin assets/images/EnergyGel.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -94,6 +142,30 @@
 /processorParam:TextureFormat=Color
 /build:assets/images/EnergyGel.png
 
+#begin assets/images/Feuerreifen.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/Feuerreifen.jpg
+
+#begin assets/images/flamethrower_icon.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/flamethrower_icon.jpg
+
 #begin assets/images/Frelo.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -105,6 +177,30 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:assets/images/Frelo.png
+
+#begin assets/images/klingel.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/klingel.jpg
+
+#begin assets/images/pfand_icon.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/pfand_icon.jpg
 
 #begin assets/images/PlainButton.png
 /importer:TextureImporter
@@ -129,6 +225,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:assets/images/RacingBike.png
+
+#begin assets/images/Revolver.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/Revolver.jpg
 
 #begin assets/images/Startbildschirm.png
 /importer:TextureImporter

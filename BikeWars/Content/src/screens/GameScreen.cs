@@ -776,6 +776,13 @@ namespace BikeWars.Content.screens
             {
                 _bikeShopScreen.Draw(spriteBatch);
             }
+            
+            DrawAttackIcon(spriteBatch, player, 1);
+            var player2 = _gameObjectManager.Player2;
+            if (player2 != null)
+            {
+                DrawAttackIcon(spriteBatch, player2, 2);
+            }
 
             spriteBatch.End();
         }
@@ -909,6 +916,83 @@ namespace BikeWars.Content.screens
                 }
             }
         }
+        
+        private void DrawAttackIcon(SpriteBatch spriteBatch, Player player, int playerIndex)
+        {
+            // draw the icon of the current attack used by the player
+            Texture2D icon = null;
+
+            switch (player.CurrentWeapon)
+            {
+                case Player.WeaponType.IceTrail:
+                    icon = SpriteManager.GetTexture("Eisreifen");
+                    break;
+
+                case Player.WeaponType.FireTrail:
+                    icon = SpriteManager.GetTexture("Feuerreifen");
+                    break;
+                
+                case Player.WeaponType.Gun:
+                    icon = SpriteManager.GetTexture("Revolver");
+                    break;
+                
+                case Player.WeaponType.DamageCircle:
+                    icon = SpriteManager.GetTexture("klingel");
+                    break;
+                
+                case Player.WeaponType.Flamethrower:
+                    icon = SpriteManager.GetTexture("flamethrower_icon");
+                    break;
+                
+                case Player.WeaponType.BananaThrow:
+                    icon = SpriteManager.GetTexture("banana_icon");
+                    break;
+                
+                case Player.WeaponType.BeerThrow:
+                    icon = SpriteManager.GetTexture("beer_icon");
+                    break;
+                
+                case Player.WeaponType.BookThrow:
+                    icon = SpriteManager.GetTexture("book_icon");
+                    break;
+                
+                case Player.WeaponType.BottleThrow:
+                    icon = SpriteManager.GetTexture("pfand_icon");
+                    break;
+                
+                default:
+                    return;
+            }
+            
+            var viewport = Game1.Instance.GraphicsDevice.Viewport;
+            int targetSize = 80;
+            int margin = 20;
+            float xFactor;
+            int y;
+            
+            if (playerIndex == 1)
+            {
+                xFactor = 0.75f;
+                y = margin;
+            }
+            else
+            {
+                xFactor = 0.25f;
+                y = viewport.Height - 5 * margin;
+            }
+            
+            int x = (int)(viewport.Width * xFactor) - targetSize / 2;
+
+            Rectangle destRect = new Rectangle(
+                x,
+                y,
+                targetSize,
+                targetSize
+            );
+
+            spriteBatch.Draw(icon, destRect, Color.White);
+        }
+
 
 
     }
