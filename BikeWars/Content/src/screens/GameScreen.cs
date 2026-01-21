@@ -168,7 +168,6 @@ namespace BikeWars.Content.screens
             if (_gameObjectManager.Player2 != null) players.Add(_gameObjectManager.Player2);
 
             _collisionManager.Insertions(_gameObjectManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(), _gameObjectManager.Objects, _gameObjectManager.Towers);
-
             GameEvents.OnResumeTimer += ResumeTimer;
             HandleLoadNonInGameData();
             _gameTimer.OnTimerFinished += OnGameTimerFinished;
@@ -183,6 +182,11 @@ namespace BikeWars.Content.screens
 
             // Tiled Map
             _collisionManager.LoadContent(content);
+            
+            _collisionManager.OnBeerLanded += pos =>
+            {
+                _gameObjectManager.SpawnLandedBeer(pos);
+            };
 
             // pathfinding object
             _pathFinding = new PathFinding(_collisionManager.PathGrid);
@@ -770,8 +774,7 @@ namespace BikeWars.Content.screens
             DrawTimer(spriteBatch, gameTime);
 
             var player = _gameObjectManager.Player1;
-            bool showSelection = (_inputMode == InputMode.Controller);
-            player.Inventory.Draw(spriteBatch, _pixel, player.SelectedInventoryIndex, showSelection);
+            player.Inventory.Draw(spriteBatch, _pixel, player.SelectedInventoryIndex, true);
             hud.Draw(spriteBatch, _gameObjectManager.Player1);
 
             if (_gameObjectManager.Player2 != null)

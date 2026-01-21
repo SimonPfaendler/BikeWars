@@ -11,6 +11,9 @@ public class Beer: ItemBase, IPickable
     public override bool IsConsumable => true;
     
     public static Vector2 BeerPosition { get; private set; }
+    
+    public bool IsExpired { get; private set; }
+
     public static bool BeerIsActive { get; private set; }
     
     private static readonly CooldownWithDuration _beerCooldown =
@@ -25,12 +28,21 @@ public class Beer: ItemBase, IPickable
         TexRight = managers.SpriteManager.GetTexture("Beer");
         CurrentTex = TexRight;
     }
-    
-    public void ActivateBeer(Vector2 beerposition)
+
+    public override void Update(GameTime gameTime)
+    {
+        _beerCooldown.Update(gameTime);
+        if (BeerIsActive && !_beerCooldown.IsActive)
+        {
+            BeerIsActive = false;
+            IsExpired = true;
+        }
+    }
+    public void LandedBeer(Vector2 beerposition)
     {
         BeerPosition = beerposition;
-        _beerCooldown.Activate();
         CurrentTex = managers.SpriteManager.GetTexture("Beer_destroyed");
+        BeerIsActive = true;
         // wenn cooldown vorbei sowas wie OnRemove(beer)
     }
     
@@ -38,6 +50,7 @@ public class Beer: ItemBase, IPickable
     {
         if (_beerCooldown.Ready)
         {
+            _beerCooldown.Activate();
             return true;
         }
         return false;
