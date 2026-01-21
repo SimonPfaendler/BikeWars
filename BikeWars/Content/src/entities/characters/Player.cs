@@ -194,7 +194,7 @@ namespace BikeWars.Entities.Characters
                     return true;
                 case WeaponType.BeerThrow:
                     if (!_isThrowTargetInRange) return false;
-                    Attributes.AttackCooldown = 0.0f;
+                    Attributes.AttackCooldown = 0.1f;
                     ThrowBeer?.Invoke(_mouseWorldPos);
                     _audio.Sounds.Play(AudioAssets.WoodCrack);
                     Inventory.RemoveAt(_inventoryIndexBeer);

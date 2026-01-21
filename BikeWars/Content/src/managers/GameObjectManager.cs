@@ -100,6 +100,7 @@ public class GameObjectManager
             Player2.ThrowBook += target => OnPlayerThrowBook(Player2, target);
             Player2.ThrowBanana += target => OnPlayerThrowBanana(Player2, target);
             Player2.ThrowBottle += target => OnPlayerThrowBottle(Player2, target);
+            Player2.ThrowBeer += target => OnPlayerThrowBeer(Player2, target);
             Player2.OnTookDamage += HandleTookDamage;
         }
     }
