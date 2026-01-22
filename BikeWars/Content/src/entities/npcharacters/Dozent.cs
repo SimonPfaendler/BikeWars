@@ -25,7 +25,7 @@ public class Dozent: CharacterBase, IWorldAudioAware
         protected override string WalkingSound => AudioAssets.Walking;
 
 
-        public Dozent(Vector2 start, Point size, AudioService audio, PathFinding pathFinding,
+        public Dozent(Vector2 start, float size, AudioService audio, PathFinding pathFinding,
             CollisionManager collisionManager, RepathScheduler repathScheduler)
         {
             _audio = audio;

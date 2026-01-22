@@ -11,8 +11,8 @@ public abstract class CharacterBase : ICharacter, ICombat
 {
     private Transform _transform { get; set; }
     public Transform Transform { get => _transform;  set => _transform = value; }
-    // private Transform _lastTransform { get; set; }
-    // public Transform LastTransform { get => _lastTransform; set => _lastTransform = value; }
+    private Transform _lastTransform { get; set; }
+    public Transform LastTransform { get => _lastTransform; set => _lastTransform = value; }
 
     private Transform _renderTransform { get; set; }
     public Transform RenderTransform { get => _renderTransform; set => _renderTransform = value; }
@@ -20,8 +20,8 @@ public abstract class CharacterBase : ICharacter, ICombat
     public bool slowed;
     public float SprintSpeed;
     public float CurrentSpeed { get; set; }
-    private BoxCollider _collider { get; set; }
-    public BoxCollider Collider {get => _collider; set => _collider = value;}
+    private CircleCollider _collider { get; set; }
+    public CircleCollider Collider {get => _collider; set => _collider = value;}
     public Vector2 GazeDirection {get; set;}
     private CharacterAttributes _attributes {get;set;}
     public CharacterAttributes Attributes {get => _attributes; set => _attributes = value;}
@@ -190,10 +190,9 @@ public abstract class CharacterBase : ICharacter, ICombat
 
         if (Collider == null)
         {
-            Collider = new BoxCollider(
+            Collider = new CircleCollider(
+                Transform.Radius,
                 colliderPosition,
-                Transform.Size.X,
-                Transform.Size.Y,
                 CollisionLayer.PLAYER,
                 this
             );

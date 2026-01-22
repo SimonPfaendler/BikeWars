@@ -391,37 +391,79 @@ public class CollisionManager
 
     public Vector2 GetPenetrationVector(ICollider a, ICollider b)
     {
-        // const float SEPARATION = 1.25f; // fixed Push
-        if (a is BoxCollider A && b is BoxCollider B)
-        {
-            Vector2 aCenter = A.Position + new Vector2(A.Width / 2f, A.Height / 2f);
-            Vector2 bCenter = B.Position + new Vector2(B.Width / 2f, B.Height / 2f);
+        if (a is CircleCollider circle && b is BoxCollider box)
+            return CircleVsBox(circle, box);
 
-            float dx = bCenter.X - aCenter.X;
-            float dy = bCenter.Y - aCenter.Y;
+        if (a is CircleCollider c1 && b is CircleCollider c2)
+            return CircleVsCircle(c1, c2);
 
-            float px = (A.Width / 2f + B.Width / 2f) - Math.Abs(dx);
-            float py = (A.Height / 2f + B.Height / 2f) - Math.Abs(dy);
-
-            if (px <= 0 || py <= 0)
-                return Vector2.Zero;
-
-            // Extra buffer to ensure characters are definitely separated
-            float buffer = 1.0f;
-
-            if (px < py)
-            {
-                // horizontal push
-                return new Vector2(Math.Sign(dx) * (px + buffer), 0);
-            }
-            else
-            {
-                // vertical push
-                return new Vector2(0, Math.Sign(dy) * (py + buffer));
-            }
-        }
-
+        if (a is BoxCollider b1 && b is BoxCollider b2)
+            return BoxVsBox(b1, b2);
         return Vector2.Zero;
+    }
+
+    private Vector2 CircleVsCircle(CircleCollider a, CircleCollider b)
+    {
+        Vector2 delta = b.Center() - a.Center();
+        float dist = delta.Length();
+
+        float penetration = (a.Radius + b.Radius) - dist;
+        if (penetration <= 0)
+            return Vector2.Zero;
+
+        if (dist == 0)
+            return new Vector2(0, -penetration);
+
+        return Vector2.Normalize(delta) * penetration;
+    }
+
+    private Vector2 CircleVsBox(CircleCollider circle, BoxCollider box)
+    {
+        Vector2 aCenter = circle.Position + new Vector2(circle.Width / 2f, circle.Height / 2f);
+        Vector2 bCenter = box.Position + new Vector2(box.Width / 2f, box.Height / 2f);
+
+        float dx = bCenter.X - aCenter.X;
+        float dy = bCenter.Y - aCenter.Y;
+
+        float px = (circle.Width / 2f + box.Width / 2f) - Math.Abs(dx);
+        float py = (circle.Height / 2f + box.Height / 2f) - Math.Abs(dy);
+
+        if (px <= 0 || py <= 0)
+            return Vector2.Zero;
+
+        // Extra buffer to ensure characters are definitely separated
+        float buffer = 1.0f;
+
+        if (px < py)
+        {
+            // horizontal push
+            return new Vector2(Math.Sign(dx) * (px + buffer), 0);
+        }
+        else
+        {
+            // vertical push
+            return new Vector2(0, Math.Sign(dy) * (py + buffer));
+        }
+    }
+
+    private Vector2 BoxVsBox(BoxCollider A, BoxCollider B)
+    {
+        Vector2 aCenter = A.Center();
+        Vector2 bCenter = B.Center();
+
+        float dx = bCenter.X - aCenter.X;
+        float dy = bCenter.Y - aCenter.Y;
+
+        float px = (A.Width / 2f + B.Width / 2f) - Math.Abs(dx);
+        float py = (A.Height / 2f + B.Height / 2f) - Math.Abs(dy);
+
+        if (px <= 0 || py <= 0)
+            return Vector2.Zero;
+
+        if (px < py)
+            return new Vector2(Math.Sign(dx) * px, 0);
+        else
+            return new Vector2(0, Math.Sign(dy) * py);
     }
 
     public void AddDynamic(ICollider c)
@@ -689,17 +731,24 @@ public class CollisionManager
     private void HandleCharacterCollision(ICollider c, ICollider d, GameTime gameTime, List<(CharacterBase, CharacterBase)> charPairs)
     {
         if (d.Layer != CollisionLayer.CHARACTER && d.Layer != CollisionLayer.PLAYER) return;
+        if (c==d) return;
+        if (c.GetHashCode() > d.GetHashCode()) return;
         Vector2 penetration = GetPenetrationVector(c, d);
         if (penetration.LengthSquared() < 0.0001f)
             return;
-        Vector2 separation = penetration * 0.5f;
+        Vector2 separation = penetration * 0.25f;
+
+        const float SLOP = 0.01f;
+        if (penetration.LengthSquared() < SLOP * SLOP)
+            return;
 
         CharacterBase ch = (CharacterBase)c.Owner;
         CharacterBase chd = (CharacterBase)d.Owner;
 
         ch.Transform.Position -= separation;
         chd.Transform.Position += separation;
-
+        // ch.Transform = ch.LastTransform;
+        // chd.Transform = chd.LastTransform;
         OnCharacterCollision?.Invoke(ch, chd);
 
         ch.UpdateCollider();
@@ -995,7 +1044,6 @@ public class CollisionManager
                 {
                     continue;
                 }
-
                 var rect = new Rectangle(
                     (int)box.Position.X,
                     (int)box.Position.Y,
@@ -1019,8 +1067,10 @@ public class CollisionManager
         // Player hitbox
         if (player?.Collider != null)
         {
-            var playerRect = GetColliderRectangle(player.Collider);
-            DrawRectOutline(spriteBatch, pixel, playerRect, Color.Red * 0.7f);
+            // var playerRect = GetColliderRectangle(player.Collider);
+            var playerCirc = GetColliderCircle(player.Collider);
+            // DrawRectOutline(spriteBatch, pixel, playerRect, Color.Red * 0.7f);
+            DrawCircleOutline(spriteBatch, pixel, player.Collider.Center(), playerCirc.Radius, Color.Red * 0.7f);
 
             // Draw a small indicator for player position
             spriteBatch.Draw(pixel,
@@ -1037,8 +1087,11 @@ public class CollisionManager
                 continue;
             }
 
-            var charRect = GetColliderRectangle(character.Collider);
-            DrawRectOutline(spriteBatch, pixel, charRect, Color.Red * 0.7f);
+            var charCirc = GetColliderCircle(character.Collider);
+            DrawCircleOutline(spriteBatch, pixel, character.Collider.Center(), charCirc.Radius, Color.Red * 0.7f);
+
+            // var charRect = GetColliderRectangle(character.Collider);
+            // DrawRectOutline(spriteBatch, pixel, charRect, Color.Red * 0.7f);
         }
 
         // Item hitboxes
@@ -1098,6 +1151,20 @@ public class CollisionManager
         return Rectangle.Empty;
     }
 
+    private Circle GetColliderCircle(ICollider collider)
+    {
+        if (collider is CircleCollider circle)
+        {
+            return new Circle(
+                circle.Position.X,
+                circle.Position.Y,
+                circle.Radius
+            );
+        }
+
+        return Circle.Empty;
+    }
+
     private void DrawRectOutline(SpriteBatch spriteBatch, Texture2D pixel, Rectangle rect, Color color)
     {
         if (rect.Width <= 0 || rect.Height <= 0) return;
@@ -1110,6 +1177,56 @@ public class CollisionManager
         spriteBatch.Draw(pixel, new Rectangle(rect.Left, rect.Top, 1, rect.Height), color);
         // right
         spriteBatch.Draw(pixel, new Rectangle(rect.Right - 1, rect.Top, 1, rect.Height), color);
+    }
+
+    private void DrawCircleOutline(
+        SpriteBatch spriteBatch,
+        Texture2D pixel,
+        Vector2 center,
+        float radius,
+        Color color,
+        int segments = 32)
+    {
+        if (radius <= 0) return;
+
+        Vector2 prevPoint = center + new Vector2(radius, 0f);
+
+        for (int i = 1; i <= segments; i++)
+        {
+            float angle = MathHelper.TwoPi * i / segments;
+            Vector2 nextPoint = center + new Vector2(
+                MathF.Cos(angle) * radius,
+                MathF.Sin(angle) * radius
+            );
+            DrawLine(spriteBatch, pixel, prevPoint, nextPoint, color);
+            prevPoint = nextPoint;
+        }
+    }
+
+    private void DrawLine(
+        SpriteBatch spriteBatch,
+        Texture2D pixel,
+        Vector2 start,
+        Vector2 end,
+        Color color)
+    {
+        Vector2 edge = end - start;
+        float angle = MathF.Atan2(edge.Y, edge.X);
+
+        spriteBatch.Draw(
+            pixel,
+            new Rectangle(
+                (int)start.X,
+                (int)start.Y,
+                (int)edge.Length(),
+                1),
+            null,
+            color,
+            angle,
+            Vector2.Zero,
+            SpriteEffects.None,
+            0
+        );
     }
 
     private void LoadTerrainLayer(string layerName, TerrainType type)

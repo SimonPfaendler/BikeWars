@@ -30,7 +30,7 @@ namespace BikeWars.Entities.Characters
 
         protected override string WalkingSound => AudioAssets.Walking;
 
-        public KamikazeOpa(Vector2 start, Point size, AudioService audio, PathFinding pathFinding,
+        public KamikazeOpa(Vector2 start, float size, AudioService audio, PathFinding pathFinding,
             CollisionManager collisionManager, GameObjectManager gameObjectManager, RepathScheduler repathScheduler)
         {
             _audio = audio;
@@ -40,7 +40,6 @@ namespace BikeWars.Entities.Characters
             // High speed, low health
             Attributes = new CharacterAttributes(this, 10, 0, 0, 0f, false);
             Transform = new Transform(start, size);
-            // LastTransform = new Transform(start, size);
             RenderTransform = new Transform(start, new Point(32, 32));
             Speed = 200f; // Very fast
 

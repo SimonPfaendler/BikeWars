@@ -54,7 +54,6 @@ public class SoundConfigScreen : MenuScreenBase, IScreen
         int btnHeight = (int)(60 * _uiScale);
         int margin = (int)(50 * _uiScale);
 
-
         AddButton(new MenuButton(
             id: (int)ButtonAction.Back,
             texture: RenderPrimitives.Pixel,
@@ -174,6 +173,17 @@ public class SoundConfigScreen : MenuScreenBase, IScreen
 
     private void DrawSlider(SpriteBatch sb, Rectangle track, float volume, string label, bool isSelected)
     {
+        string text = $"{label}: {(int)(volume * 100)}%";
+        float fontScale = 1.4f * _uiScale;
+        Vector2 textSize = _font.MeasureString(text) * fontScale;
+
+        Rectangle box = new Rectangle(track.X - 20, track.Y - 20, track.Width + 40, track.Height * 5);
+        sb.Draw(RenderPrimitives.Pixel, box, Color.White);
+
+        Rectangle box2 = new Rectangle((int)(track.Center.X - textSize.X / 2) - 5, (int)(track.Y - (70 * _uiScale)) - 5, 200, 30);
+        sb.Draw(RenderPrimitives.Pixel, box2, Color.White);
+
+
         // track
         Color trackColor = isSelected ? Color.White * 0.8f : Color.Gray * 0.5f;
         sb.Draw(RenderPrimitives.Pixel, track, trackColor);
@@ -183,10 +193,6 @@ public class SoundConfigScreen : MenuScreenBase, IScreen
 
         // knob
         sb.Draw(RenderPrimitives.Pixel, knobRect, isSelected ? Color.Gold : Color.DarkGoldenrod);
-
-        string text = $"{label}: {(int)(volume * 100)}%";
-        float fontScale = 1.4f * _uiScale;
-        Vector2 textSize = _font.MeasureString(text) * fontScale;
 
         // text
         Color textColor = isSelected ? Color.Yellow : Color.Black;

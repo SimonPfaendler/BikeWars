@@ -45,7 +45,7 @@ namespace BikeWars.Entities.Characters
             AudioAssets.Miau,
         };
         private static readonly Random _random = new Random();
-        public Dog(Vector2 start, Point size, AudioService audio, PathFinding pathFinding,
+        public Dog(Vector2 start, float size, AudioService audio, PathFinding pathFinding,
             CollisionManager collisionManager, RepathScheduler repathScheduler)
         {
             _audio = audio;
@@ -55,7 +55,6 @@ namespace BikeWars.Entities.Characters
 
             Attributes = new CharacterAttributes(this, 25, 0, 3, 2f, false);
             Transform = new Transform(start, size);
-            // LastTransform = new Transform(start, size);
             RenderTransform = new Transform(start, new Point(32, 32));
             Speed = 155f;
             Movement = new EnemyMovement(canMove: true, isMoving: false, pathFinding: _pathFinding,

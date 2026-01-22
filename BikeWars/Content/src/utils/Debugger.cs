@@ -2,6 +2,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
+using System.Collections.Generic;
+using BikeWars.Content.entities.interfaces;
+using System;
 // ============================================================
 // Debugger.cs
 //
@@ -17,17 +20,21 @@ namespace BikeWars.Utilities
         private float _fps;
         private bool _isVisible = true;
 
+        private List<CharacterBase> _characters;
+
         public Debugger(Player player)
         {
             _player = player;
+            _characters = new List<CharacterBase>();
         }
 
-        public void Update(GameTime gameTime)
+        public void Update(GameTime gameTime, List<CharacterBase> characters)
         {
             if (InputHandler.IsPressed(GameAction.DEBUG_TOGGLE))
             {
                 _isVisible = !_isVisible;
             }
+            _characters = characters;
 
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
             if (dt > 0f)
@@ -43,6 +50,7 @@ namespace BikeWars.Utilities
             // Display player position, velocity and bounds, Sprint status
             // You can add more debug information as needed e.g. collider info, Bounds, FPS, etc.
             string debugInfo = $"FPS: {(int)_fps}\n" +
+                               $"Characters in Game: CountX: {_characters.Count}\n" +
                                $"Player Position: X: {(int)_player.Transform.Position.X} Y: {(int)_player.Transform.Position.Y}\n" +
                                $"Player Velocity: {_player.CurrentSpeed * _player.TerrainSpeedMultiplier}\n" +
                                $"Player Bounds: {_player.Transform.Size}\n" +

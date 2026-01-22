@@ -24,7 +24,20 @@ public abstract class TransformBase : ITransform
             Update();
         }
     }
-    
+
+    // Should be used for CircleCollider
+    private float _radius {get; set;}
+    public float Radius
+    {
+        get => _radius;
+        set
+        {
+            _radius = value;
+            Update();
+        }
+    }
+
+
     public Rectangle Bounds { get; protected set; }
     protected abstract void Update();
 }

@@ -204,24 +204,24 @@ namespace BikeWars.Content.screens
                 switch (type)
                 {
                     case EnemyType.Hobo:
-                        enemy = new Hobo(spawnPos, new Point(24, 24), AudioService, PathFinding,
+                        enemy = new Hobo(spawnPos, 15, AudioService, PathFinding,
                             CollisionManager, RepathScheduler);
                         break;
 
                     case EnemyType.BikeThief:
-                        enemy = new BikeThief(spawnPos, new Point(24, 24), AudioService, PathFinding,
+                        enemy = new BikeThief(spawnPos, 15, AudioService, PathFinding,
                             CollisionManager, RepathScheduler);
                         break;
                     case EnemyType.Dog:
-                        enemy = new Dog(spawnPos, new Point(24, 24), AudioService, PathFinding,
+                        enemy = new Dog(spawnPos, 13, AudioService, PathFinding,
                             CollisionManager, RepathScheduler);
                         break;
                     case EnemyType.Kamikaze:
-                        enemy = new KamikazeOpa(spawnPos, new Point(24, 24), AudioService, PathFinding,
+                        enemy = new KamikazeOpa(spawnPos, 13, AudioService, PathFinding,
                             CollisionManager, GameObjectManager, RepathScheduler);
                         break;
                     case EnemyType.Dozent:
-                        enemy = new Dozent(spawnPos, new Point(32, 32), AudioService, PathFinding,
+                        enemy = new Dozent(spawnPos, 17, AudioService, PathFinding,
                             CollisionManager, RepathScheduler);
                         break;
 
@@ -241,7 +241,7 @@ namespace BikeWars.Content.screens
             var group = RaveGroup.SpawnAroundPlayer(
                 count: count,
                 startRadius: startRadius,
-                raverSize: new Point(32, 32),
+                raverSize: 17,
                 audioService: AudioService,
                 gameObjectManager: GameObjectManager,
                 collisionManager: CollisionManager,

@@ -55,7 +55,7 @@ namespace BikeWars.Content.managers
         public static RaveGroup? SpawnAroundPlayer(
             int count,
             float startRadius,
-            Point raverSize,
+            float raverSize,
             AudioService audioService,
             GameObjectManager gameObjectManager,
             CollisionManager collisionManager,

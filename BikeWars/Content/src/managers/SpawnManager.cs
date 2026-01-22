@@ -145,7 +145,8 @@ namespace BikeWars.Content.managers
                      spawnPos = clusterCenter;
                  }
 
-                 var hobo = new Hobo(spawnPos, new Point(24, 24), _audioService, _pathFinding,
+                //  var hobo = new Hobo(spawnPos, new Point(24, 24), _audioService, _pathFinding,
+                 var hobo = new Hobo(spawnPos, 12, _audioService, _pathFinding,
                      _collisionManager, _repathScheduler);
                  ApplyScaling(hobo, difficultyMultiplier, speedMultiplier); // Apply extra speed
                  _gameObjectManager.AddCharacter(hobo);
@@ -169,7 +170,7 @@ namespace BikeWars.Content.managers
 
             if (spawnHobo)
             {
-                var hobo = new Hobo(spawnPos, new Point(24, 24), _audioService, _pathFinding, _collisionManager,  _repathScheduler);
+                var hobo = new Hobo(spawnPos, 12, _audioService, _pathFinding, _collisionManager,  _repathScheduler);
                 ApplyScaling(hobo, difficultyMultiplier, speedMultiplier);
                 _gameObjectManager.AddCharacter(hobo);
             }
@@ -183,20 +184,20 @@ namespace BikeWars.Content.managers
 
                 if (val < 0.4)
                 {
-                    var dog = new Dog(spawnPos, new Point(24, 24), _audioService, _pathFinding, _collisionManager, _repathScheduler);
+                    var dog = new Dog(spawnPos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler);
                     ApplyScaling(dog, difficultyMultiplier, speedMultiplier);
                     dog.SetWorldAudioManager(_worldAudioManager);
                     _gameObjectManager.AddCharacter(dog);
                 }
                 else if (val < 0.8)
                 {
-                    var thief = new BikeThief(spawnPos, new Point(24, 24), _audioService, _pathFinding, _collisionManager, _repathScheduler);
+                    var thief = new BikeThief(spawnPos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler);
                     ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
                     _gameObjectManager.AddCharacter(thief);
                 }
                 else
                 {
-                    var kamikaze = new KamikazeOpa(spawnPos, new Point(24, 24), _audioService, _pathFinding, _collisionManager, _gameObjectManager, _repathScheduler);
+                    var kamikaze = new KamikazeOpa(spawnPos, 15, _audioService, _pathFinding, _collisionManager, _gameObjectManager, _repathScheduler);
                     ApplyScaling(kamikaze, difficultyMultiplier, speedMultiplier);
                     _gameObjectManager.AddCharacter(kamikaze);
                 }
@@ -249,7 +250,7 @@ namespace BikeWars.Content.managers
             var group = RaveGroup.SpawnAroundPlayer(
                 count: count,
                 startRadius: startRadius,
-                raverSize: raverSize,
+                raverSize: 17,
                 audioService: _audioService,
                 gameObjectManager: _gameObjectManager,
                 collisionManager: _collisionManager,
@@ -279,8 +280,7 @@ namespace BikeWars.Content.managers
 
                 if (!IsValidSpawnPosition(pos)) continue;
 
-                // Alternate between Hobo and BikeThief
-                CharacterBase enemy = new Hobo(pos, new Point(24, 24), _audioService, _pathFinding, _collisionManager, _repathScheduler);
+                CharacterBase enemy = new Hobo(pos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler);
 
                 ApplyScaling(enemy, difficultyMultiplier, speedMultiplier);
                 _gameObjectManager.AddCharacter(enemy);

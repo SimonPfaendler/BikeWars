@@ -14,13 +14,12 @@ namespace BikeWars.Entities.Characters
         public const int ContactDamageBike = 2;
         private readonly SpriteAnimation _idleAnimation;
 
-        public Raver(Vector2 start, Point size, AudioService audio)
+        public Raver(Vector2 start, float size, AudioService audio)
         {
             _audio = audio;
             Attributes = new CharacterAttributes(this, maxHealth: 35, health: 35, attackDamage: 2, attackCoolDown: 0f, canAutoAttack: false);
 
             Transform = new Transform(start, size);
-            // LastTransform = new Transform(start, size);
             RenderTransform = new Transform(start, new Point(32, 32));
 
             Speed = 0.5f;
@@ -29,7 +28,6 @@ namespace BikeWars.Entities.Characters
             Movement = null;
 
             _idleAnimation = SpriteManager.GetAnimation("Hobo_Idle");
-
             UpdateCollider();
         }
 

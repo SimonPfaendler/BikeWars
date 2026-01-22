@@ -15,6 +15,11 @@ public class Transform: TransformBase
         Position = position;
         Size = size;
     }
+    public Transform(Vector2 position, float radius)
+    {
+        Position = position;
+        Radius = radius;
+    }
     protected override void Update()
     {
         Bounds = new Rectangle((int)Position.X, (int)Position.Y, Size.X, Size.Y);

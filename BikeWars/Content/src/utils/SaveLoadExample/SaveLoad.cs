@@ -109,6 +109,8 @@ public static class SaveLoad
 
         public PointSave Size {get;set;}  = new();
 
+        public float Radius {get;set;}
+
         public CharacterSaveModel() {}
 
         public CharacterSaveModel(TYPES type, Vector2 position, Point size)
@@ -116,6 +118,13 @@ public static class SaveLoad
             Type = type;
             Position = new Vector2Save(position);
             Size = new PointSave(size);
+        }
+
+        public CharacterSaveModel(TYPES type, Vector2 position, float radius)
+        {
+            Type = type;
+            Position = new Vector2Save(position);
+            Radius = radius;
         }
     }
 

@@ -24,7 +24,9 @@ namespace BikeWars.Entities.Characters
 
         protected override string WalkingSound => AudioAssets.Walking;
 
-        public Hobo(Vector2 start, Point size, AudioService audio, PathFinding pathFinding,
+        // public Hobo(Vector2 start, Point size, AudioService audio, PathFinding pathFinding,
+        //     CollisionManager collisionManager, RepathScheduler repathScheduler)
+        public Hobo(Vector2 start, float radius, AudioService audio, PathFinding pathFinding,
             CollisionManager collisionManager, RepathScheduler repathScheduler)
         {
             _audio = audio;
@@ -33,8 +35,8 @@ namespace BikeWars.Entities.Characters
             _repathScheduler = repathScheduler;
 
             Attributes = new CharacterAttributes(this, 40, 0, 5, 2f, false);
-            Transform = new Transform(start, size);
-            // LastTransform = new Transform(start, size);
+            Transform = new Transform(start, radius);
+            LastTransform = new Transform(start, radius);
             RenderTransform = new Transform(start, new Point(32, 32));
             Speed = 130f;
             Movement = new EnemyMovement(canMove: true, isMoving: false, pathFinding: _pathFinding,
@@ -66,7 +68,7 @@ namespace BikeWars.Entities.Characters
             }
             Movement.HandleMovement(gameTime);
             Vector2 direction = Movement.Direction;
-            // LastTransform = new Transform(Transform.Position, Transform.Size);
+            LastTransform = new Transform(Transform.Position, Transform.Size);
             if (Movement.IsMoving)
             {
                 float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;

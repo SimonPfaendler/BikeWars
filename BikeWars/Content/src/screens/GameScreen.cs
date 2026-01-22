@@ -397,7 +397,7 @@ namespace BikeWars.Content.screens
                 SaveLoad.SaveNonGame(_statisticsManager);
             }
 
-            _debugger?.Update(gameTime);
+            _debugger?.Update(gameTime, _gameObjectManager.Characters);
             // Needs to be implemented elsewhere.
             if (InputHandler.IsPressed(GameAction.TOGGLE_CAMERA))
             {
@@ -592,19 +592,19 @@ namespace BikeWars.Content.screens
             {
                 if (p.Type == SaveLoad.TYPES.HOBO)
                 {
-                    Hobo b = new Hobo(p.Position.ToVector2(), p.Size.ToPoint(), _audioService, _pathFinding,
+                    Hobo b = new Hobo(p.Position.ToVector2(), p.Radius, _audioService, _pathFinding,
                         _collisionManager, _repathScheduler);
                     _gameObjectManager.AddCharacter(b);
                 }
                 if (p.Type == SaveLoad.TYPES.BIKETHIEF)
                 {
-                    BikeThief b = new BikeThief(p.Position.ToVector2(), p.Size.ToPoint(), _audioService, _pathFinding,
+                    BikeThief b = new BikeThief(p.Position.ToVector2(), p.Radius, _audioService, _pathFinding,
                         _collisionManager, _repathScheduler);
                     _gameObjectManager.AddCharacter(b);
                 }
                 if (p.Type == SaveLoad.TYPES.DOG)
                 {
-                    Dog b = new Dog(p.Position.ToVector2(), p.Size.ToPoint(), _audioService, _pathFinding,
+                    Dog b = new Dog(p.Position.ToVector2(), p.Radius, _audioService, _pathFinding,
                         _collisionManager, _repathScheduler);
                     _gameObjectManager.AddCharacter(b);
                 }

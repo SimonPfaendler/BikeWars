@@ -284,11 +284,12 @@ namespace BikeWars.Entities.Characters
             }
         }
 
-        public Player(Vector2 start, Point size, Point renderSize, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")
+        // public Player(Vector2 start, Point size, Point renderSize, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")
+        public Player(Vector2 start, float radius, Point renderSize, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")
         {
             Attributes = new CharacterAttributes(this, 300, 0, 10, 2f, false);
-            Transform = new Transform(start, size);
-            // LastTransform = new Transform(start, size);
+            Transform = new Transform(start, radius);
+            LastTransform = new Transform(start, radius);
             RenderTransform = new Transform(start, renderSize);
             _input = input;
             movement = new PlayerMovement(canMove: true, isMoving: false, _input);
@@ -663,8 +664,8 @@ namespace BikeWars.Entities.Characters
             CurrentSpeed = sprint.IsActive ? movement.CurrentMovement.Speed *movement.CurrentMovement.SprintAcceleration : movement.CurrentMovement.Speed;
             Vector2 direction = movement.CurrentMovement.Direction;
 
-            // if (Transform.Position.X != LastTransform.Position.X || Transform.Position.Y != LastTransform.Position.Y)
-            //     LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
+            if (Transform.Position.X != LastTransform.Position.X || Transform.Position.Y != LastTransform.Position.Y)
+                LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Radius);
 
             TerrainSpeedMultiplier = GetTerrainMultiplier();
             if (IsDoped)
