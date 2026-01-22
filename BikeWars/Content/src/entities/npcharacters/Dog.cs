@@ -44,7 +44,7 @@ namespace BikeWars.Entities.Characters
             AudioAssets.BarkFritz,
             AudioAssets.Miau,
         };
-        private static readonly Random _random = new Random();
+        
         public Dog(Vector2 start, float size, AudioService audio, PathFinding pathFinding,
             CollisionManager collisionManager, RepathScheduler repathScheduler)
         {
