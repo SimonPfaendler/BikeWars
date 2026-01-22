@@ -194,7 +194,7 @@ namespace BikeWars.Entities.Characters
                     return true;
                 case WeaponType.BeerThrow:
                     if (!_isThrowTargetInRange) return false;
-                    if (Beer.TryActivateBeer())
+                    if (_beerThrowSelected)
                     {
                         Attributes.AttackCooldown = 0.1f;
                         ThrowBeer?.Invoke(_mouseWorldPos);
@@ -364,6 +364,7 @@ namespace BikeWars.Entities.Characters
 
             UpdateHitFlash(gameTime);
             UpdateCollider();
+            Beer.UpdateCooldown(gameTime);
         }
 
         public override bool IsCharacterMoving()
@@ -635,7 +636,7 @@ namespace BikeWars.Entities.Characters
                 else if (item is Beer beer)
                 {
                     
-                    if (!_beerThrowSelected)
+                    if (beer.TryActivateBeer())
                     {
                         _weaponBefore = CurrentWeapon;
                         _beerThrowSelected = true;

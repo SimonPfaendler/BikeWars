@@ -31,12 +31,17 @@ public class Beer: ItemBase, IPickable
 
     public override void Update(GameTime gameTime)
     {
-        _beerCooldown.Update(gameTime);
+        base.Update(gameTime);
         if (BeerIsActive && !_beerCooldown.IsActive)
         {
             BeerIsActive = false;
             IsExpired = true;
         }
+    }
+
+    public static void UpdateCooldown(GameTime gameTime)
+    {
+        _beerCooldown.Update(gameTime);
     }
     public void LandedBeer(Vector2 beerposition)
     {
@@ -46,7 +51,7 @@ public class Beer: ItemBase, IPickable
         // wenn cooldown vorbei sowas wie OnRemove(beer)
     }
     
-    public static bool TryActivateBeer()
+    public bool TryActivateBeer()
     {
         if (_beerCooldown.Ready)
         {
