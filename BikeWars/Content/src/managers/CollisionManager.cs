@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BikeWars.Content.engine;
+using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.entities.MapObjects;
@@ -35,6 +36,7 @@ public class CollisionManager
 
     public List<TiledObjectInfo> ObjectSpawns { get; } = new();
     private readonly GameObjectManager _gameObjectManager;
+    private readonly AudioService _audioService;
     public GameObjectManager GameObjectManager => _gameObjectManager;
 
     private const string MAP = "assets/Map/Bike_Wars_Map";
@@ -89,7 +91,7 @@ public class CollisionManager
     // base (unpadded) walkability snapshot to support cheap local updates
     private bool[,] _baseWalkableGrid;
 
-    public CollisionManager(int cellSize, int worldBounds, GameObjectManager gameObjectManager)
+    public CollisionManager(int cellSize, int worldBounds, GameObjectManager gameObjectManager, AudioService audioService)
     {
         _cellSize = cellSize;
         DynamicHash = new SpatialHash(cellSize, worldBounds);
@@ -98,6 +100,7 @@ public class CollisionManager
         _toRemoveStaticColliders = new HashSet<ICollider>();
         _toUpdateWalkableRects = new List<Rectangle>();
         _gameObjectManager = gameObjectManager;
+        _audioService = audioService;
     }
 
     public bool isColliding(ICollider collisionBox1, ICollider collisionBox2)
@@ -581,11 +584,18 @@ public class CollisionManager
 
             ProjectileBase p = (ProjectileBase)c.Owner;
 
+            // prevent multiple hits from the same projectile in one frame
+            if (p.HasHit)
+            {
+                return;
+            }
+
             // If the wall belongs to a destructible map object, apply damage
             if (b.Owner is DestructibleObject destructible)
             {
+                p.HasHit = true;
                 destructible.TakeDamage(p.Damage);
-                // Game1.Audio.Sounds.Play(destructible.Health > 0 ? AudioAssets.WoodCrack : AudioAssets.WoodDestroy);
+                _audioService.Sounds.Play(destructible.Health > 0 ? AudioAssets.WoodCrack : AudioAssets.WoodDestroy);
                 _gameObjectManager.SpawnDamageNumber(GetObjectCenter(destructible), p.Damage);
                 _toRemoveColliders.Add(p.Collider);
 
@@ -641,7 +651,7 @@ public class CollisionManager
         }
 
         destructible.TakeDamage(aoe.Damage);
-        // Game1.Audio.Sounds.Play(destructible.Health > 0 ? AudioAssets.WoodCrack : AudioAssets.WoodDestroy);
+        _audioService.Sounds.Play(destructible.Health > 0 ? AudioAssets.WoodCrack : AudioAssets.WoodDestroy);
         _gameObjectManager.SpawnDamageNumber(GetObjectCenter(destructible), aoe.Damage);
 
         if (destructible.Health <= 0)

@@ -174,7 +174,7 @@ namespace BikeWars.Content.screens
             _gameObjectManager.Player1.OnLevelUp += _statisticsManager.HandleLevel;
             _gameObjectManager.Player1.OnMoreXP += _statisticsManager.HandleExperience;
 
-            _collisionManager = new CollisionManager(CELL_SIZE, worldBounds.Height, _gameObjectManager);
+            _collisionManager = new CollisionManager(CELL_SIZE, worldBounds.Height, _gameObjectManager, _audioService);
             var players = new HashSet<Player>();
             if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);
             if (_gameObjectManager.Player2 != null) players.Add(_gameObjectManager.Player2);
