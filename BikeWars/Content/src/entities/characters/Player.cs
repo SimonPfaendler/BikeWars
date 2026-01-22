@@ -375,7 +375,7 @@ namespace BikeWars.Entities.Characters
                 bike.TakeDamage(amount);
 
                 int reducedDamage = Math.Max(0, amount - bike.Attributes.Armor);
-                if (IsDoped) reducedDamage = (int)(reducedDamage * 1.7f);
+                if (IsDoped) reducedDamage = 0; // Invulnerable
                 base.TakeDamage(reducedDamage, shouldSquash);
 
                 if (bike.IsDestroyed)
@@ -385,7 +385,7 @@ namespace BikeWars.Entities.Characters
             }
             else
             {
-                if (IsDoped) amount = (int)(amount * 1.7f);
+                if (IsDoped) amount = 0; // Invulnerable
                 base.TakeDamage(amount, shouldSquash);
             }
         }
@@ -598,7 +598,8 @@ namespace BikeWars.Entities.Characters
                 }
                 else if (item is DopingSpritze doping)
                 {
-                    _dopingTimer = 10f;
+                    _dopingTimer = 5f;
+                    Attributes.Health = Math.Max(1, Attributes.Health - 50);
                 }
                 else if (item is Beer beer)
                 {
