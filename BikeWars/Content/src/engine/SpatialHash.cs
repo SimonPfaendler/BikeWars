@@ -153,7 +153,7 @@ public class SpatialHash
     public void QueryNearby(Vector2 pos, int radius, List<ICollider> results)
     {
         results.Clear();
-        // _queryId++;
+        _queryId++;
 
         var (cellX, cellY) = ToCellCoords(pos);
         for (int x = cellX - radius; x <= cellX + radius; x++)
@@ -167,10 +167,11 @@ public class SpatialHash
 
                 foreach (ICollider c in cell.Colliders!)
                 {
-                    // if (c.LastQueryId == _queryId)
-                    //     continue;
+                    // Skip duplicates when a collider spans multiple cells
+                    if (c.LastQueryId == _queryId)
+                        continue;
 
-                    // c.LastQueryId = _queryId;
+                    c.LastQueryId = _queryId;
                     results.Add(c);
                 }
             }
