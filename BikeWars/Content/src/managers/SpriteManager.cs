@@ -71,6 +71,7 @@ namespace BikeWars.Content.managers
             { "Frelo", "assets/images/Frelo" },
             { "RacingBike", "assets/images/RacingBike" },
             { "Beer", "assets/images/beer_texture" },
+            { "Beer_throw", "assets/sprites/projectiles/beer_throw"},
             { "Beer_destroyed", "assets/images/beer_destroyed"},
             { "XP_Money", "assets/sprites/XP/xp_money_texture" },
             { "EnergyGel", "assets/images/EnergyGel" },

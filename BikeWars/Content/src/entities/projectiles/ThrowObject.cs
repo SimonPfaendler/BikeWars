@@ -16,7 +16,7 @@ namespace BikeWars.Content.entities.projectiles
     public class ThrowObject : ProjectileBase
     {
         private readonly Vector2 _start;
-        private readonly Vector2 _target;
+        public Vector2 _target;
         private readonly float _duration;
         private float _elapsed;
 
@@ -86,6 +86,7 @@ namespace BikeWars.Content.entities.projectiles
                 _collider.SetSize(width, height);
                 _collider.Layer = CollisionLayer.NONE; // no hits while in the air
 
+                
                 if (t >= 1f)
                 {
                     OnLanded();

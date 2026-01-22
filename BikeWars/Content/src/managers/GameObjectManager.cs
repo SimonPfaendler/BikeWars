@@ -481,6 +481,11 @@ public class GameObjectManager
                 : spawnPos;
         }
         var beer = new ThrowBeer(spawnPos, target, player);
+        beer.OnBeerLanded += pos =>
+        {
+            SpawnLandedBeer(pos);
+        };
+        
         AddProjectile(beer);
     }
 

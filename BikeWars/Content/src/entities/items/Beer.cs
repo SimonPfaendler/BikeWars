@@ -17,7 +17,7 @@ public class Beer: ItemBase, IPickable
     public static bool BeerIsActive { get; private set; }
     
     private static readonly CooldownWithDuration _beerCooldown =
-        new CooldownWithDuration(durationSeconds: 10f, cooldownSeconds: 0.5f);
+        new CooldownWithDuration(durationSeconds: 20f, cooldownSeconds: 0.5f);
 
     public Beer(Vector2 start, Point size)
     {
@@ -46,7 +46,7 @@ public class Beer: ItemBase, IPickable
         // wenn cooldown vorbei sowas wie OnRemove(beer)
     }
     
-    public bool TryActivateBeer()
+    public static bool TryActivateBeer()
     {
         if (_beerCooldown.Ready)
         {

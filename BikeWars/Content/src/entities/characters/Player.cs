@@ -194,13 +194,20 @@ namespace BikeWars.Entities.Characters
                     return true;
                 case WeaponType.BeerThrow:
                     if (!_isThrowTargetInRange) return false;
-                    Attributes.AttackCooldown = 0.1f;
-                    ThrowBeer?.Invoke(_mouseWorldPos);
-                    _audio.Sounds.Play(AudioAssets.WoodCrack);
-                    Inventory.RemoveAt(_inventoryIndexBeer);
-                    _beerThrowSelected = false;
-                    CurrentWeapon = _weaponBefore;
-                    return true;
+                    if (Beer.TryActivateBeer())
+                    {
+                        Attributes.AttackCooldown = 0.1f;
+                        ThrowBeer?.Invoke(_mouseWorldPos);
+                        _audio.Sounds.Play(AudioAssets.WoodCrack);
+                        Inventory.RemoveAt(_inventoryIndexBeer);
+                        _beerThrowSelected = false;
+                        CurrentWeapon = _weaponBefore;
+                        return true;
+                    }
+
+                    return false;
+                    
+                    
             }
 
             return false;
@@ -628,7 +635,7 @@ namespace BikeWars.Entities.Characters
                 else if (item is Beer beer)
                 {
                     
-                    if (beer.TryActivateBeer())
+                    if (!_beerThrowSelected)
                     {
                         _weaponBefore = CurrentWeapon;
                         _beerThrowSelected = true;

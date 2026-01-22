@@ -183,10 +183,6 @@ namespace BikeWars.Content.screens
             // Tiled Map
             _collisionManager.LoadContent(content);
             
-            _collisionManager.OnBeerLanded += pos =>
-            {
-                _gameObjectManager.SpawnLandedBeer(pos);
-            };
 
             // pathfinding object
             _pathFinding = new PathFinding(_collisionManager.PathGrid);
