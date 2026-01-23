@@ -334,6 +334,18 @@ namespace BikeWars.Entities.Characters
         public void Update(GameTime gameTime, Vector2 mousePos)
         {
             _mouseWorldPos = mousePos;
+
+            // Simple virtual cursor for controller: aim in front of the player
+                        if (_input.IsAnalog)
+                        {
+                            var dir = GazeDirection != Vector2.Zero ? Vector2.Normalize(GazeDirection) : _facingDirection;
+                            if (dir == Vector2.Zero)
+                            {
+                                dir = Vector2.UnitX;
+                            }
+                            _mouseWorldPos = Transform.Position + dir * 100f;
+                        }
+
             var throwOrigin = Transform.Bounds.Center.ToVector2();
             _isThrowTargetInRange = Vector2.Distance(throwOrigin, _mouseWorldPos) <= ThrowRange;
             UpdateAttackCooldown(gameTime);
@@ -352,7 +364,7 @@ namespace BikeWars.Entities.Characters
             HandleItemUsage(gameTime);
             HandleMovementSound();
             HandleAnimation(gameTime);
-            UpdateGazeDirection(mousePos);
+            UpdateGazeDirection(_mouseWorldPos);
             HandleGhostTrail(gameTime);
             HandleSwitchMovement();
             UpdateHitFlash(gameTime);
