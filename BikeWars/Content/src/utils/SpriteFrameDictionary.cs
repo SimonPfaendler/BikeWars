@@ -171,6 +171,26 @@ namespace BikeWars.Content.utils
 
              // Death (1 row, 9 columns, 9 frames total)
              AnimationFrames["KamikazeOpa_Death"] = GetFramesFromAtlas("e4_kamikazeopa_death_animation.png", 9, 1);
+             
+             // Dozent
+             AnimationFrames["Dozent_Idle"] = GetFramesFromAtlas("e5_dozent_down2.png", 1, 1);
+             var dozentLeft = GetFramesFromAtlas("e5_dozent_down2.png", 1, 1);
+             // dogLeft.AddRange(GetFramesFromAtlas("e3_dog_walking_left_2.png", 1, 1));
+             AnimationFrames["Dozent_WalkLeft"] = dozentLeft;
+             var dozentRight = GetFramesFromAtlas("e5_dozent_right1.png", 1, 1);
+             dozentRight.AddRange(GetFramesFromAtlas("e5_dozent_right2.png", 1, 1));
+             dozentRight.AddRange(GetFramesFromAtlas("e5_dozent_right3.png", 1, 1));
+             dozentRight.AddRange(GetFramesFromAtlas("e5_dozent_right4.png", 1, 1));
+             dozentRight.AddRange(GetFramesFromAtlas("e5_dozent_right5.png", 1, 1));
+             AnimationFrames["Dozent_WalkRight"] = dozentRight;
+             
+             var dozentUp = GetFramesFromAtlas("e5_dozent_up1.png", 1, 1);
+             dozentUp.AddRange(GetFramesFromAtlas("e5_dozent_up2.png", 1, 1));
+             AnimationFrames["Dozent_WalkUp"] = dozentUp;
+
+             var dozentDown = GetFramesFromAtlas("e5_dozent_down1.png", 1, 1);
+             dozentDown.AddRange(GetFramesFromAtlas("e5_dozent_down2.png", 1, 1));
+             AnimationFrames["Dozent_WalkDown"] = dozentDown;
         }
 
         public static List<Rectangle> GetFrames(string key)

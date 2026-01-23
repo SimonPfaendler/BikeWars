@@ -158,6 +158,13 @@ namespace BikeWars.Content.managers
             "KamikazeOpa_BikeRight",
             "KamikazeOpa_BikeUp",
             "KamikazeOpa_Death",
+            
+            // Dozent
+            "Dozent_Idle",
+            "Dozent_WalkLeft",
+            "Dozent_WalkRight",
+            "Dozent_WalkDown",
+            "Dozent_WalkUp",
         };
 
         private static float GetAnimationSpeed(string key)
