@@ -39,7 +39,7 @@ namespace BikeWars.Content.entities.projectiles
 
         public override ICollider Collider => _collider;
 
-        public ThrowObject(Vector2 start, Vector2 target, object owner, string textureKey, int damage, float speed = 500f, float arcScale = 1.2f, float lingerDuration = 0.25f)
+        public ThrowObject(Vector2 start, Vector2 target, object owner, string textureKey, int damage, float speed = 100f, float arcScale = 1.2f, float lingerDuration = 0.25f)
         {
             Owner = owner;
             Damage = damage;
