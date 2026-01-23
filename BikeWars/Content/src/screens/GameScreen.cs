@@ -370,7 +370,7 @@ namespace BikeWars.Content.screens
             // Let up to 50 enemies recalc their paths this frame
             _repathScheduler?.Update();
             _gameObjectManager.Update(gameTime, InputHandler.MakeMouseWorldPosByCamera(camera));
-            _collisionManager.Update(gameTime, players, _gameObjectManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(_gameObjectManager.Trams), _gameObjectManager.Objects, _gameObjectManager.Towers);
+            _collisionManager.Update(players, _gameObjectManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(_gameObjectManager.Trams), _gameObjectManager.Objects, _gameObjectManager.Towers);
 
             if (InputHandler.IsPressed(GameAction.DEBUG_HEAL))
                 _gameObjectManager.Player1.Attributes.Health = _gameObjectManager.Player1.Attributes.MaxHealth;
@@ -835,7 +835,6 @@ namespace BikeWars.Content.screens
             _audioService.Music.Stop();
             _overlay.SetPaused(true, Game1.CurrentGameTime);
             _audioService.Sounds.Play(AudioAssets.CarHorn);
-            // ScreenManager.AddScreen(new GameWonScreen(UIAssets.DefaultFont, _audioService, _statisticsManager.Statistic));
             GameWon?.Invoke(_statisticsManager.Statistic);
             _statisticsManager.SaveStatistic();
             SaveLoad.SaveNonGame(_statisticsManager);

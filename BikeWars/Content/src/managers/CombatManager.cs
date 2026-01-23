@@ -58,7 +58,6 @@ public class CombatManager
         target.TakeDamage(damage);
         projectile.HasHit = true;
 
-
         // Notify GameScreen to Shake
         OnScreenShakeRequested?.Invoke(2.75f, 0.10f);
 
@@ -140,7 +139,7 @@ public class CombatManager
 
         target.TakeDamage(1);
         // TODO: Add sound
-        
+
         if (target.Attributes.Health <= 0)
         {
             HandleDeath(target);

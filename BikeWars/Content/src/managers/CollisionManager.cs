@@ -59,7 +59,6 @@ public class CollisionManager
     // Reusable query buffers
     private readonly List<ICollider> _nearbyDynamics = new(64);
     private readonly List<ICollider> _nearbyStatics  = new(64);
-    private readonly List<ICollider> _wallStatics  = new(16);
 
     // Reusable removal buffers
     private readonly List<ProjectileBase> _removeProjectiles = new(16);
@@ -395,7 +394,9 @@ public class CollisionManager
     public Vector2 GetPenetrationVector(ICollider a, ICollider b)
     {
         if (a is CircleCollider circle && b is BoxCollider box)
+        {
             return CircleVsBox(circle, box);
+        }
 
         if (a is CircleCollider c1 && b is CircleCollider c2)
             return CircleVsCircle(c1, c2);
@@ -422,31 +423,24 @@ public class CollisionManager
 
     private Vector2 CircleVsBox(CircleCollider circle, BoxCollider box)
     {
-        Vector2 aCenter = circle.Position + new Vector2(circle.Width / 2f, circle.Height / 2f);
-        Vector2 bCenter = box.Position + new Vector2(box.Width / 2f, box.Height / 2f);
+        float dx = box.Center().X - circle.Center().X;
+        float dy = box.Center().Y - circle.Center().Y;
 
-        float dx = bCenter.X - aCenter.X;
-        float dy = bCenter.Y - aCenter.Y;
-
-        float px = (circle.Width / 2f + box.Width / 2f) - Math.Abs(dx);
-        float py = (circle.Height / 2f + box.Height / 2f) - Math.Abs(dy);
+        float px = (circle.Radius /2f + box.Width / 2f) - Math.Abs(dx);
+        float py = (circle.Radius /2f+ box.Height / 2f) - Math.Abs(dy);
 
         if (px <= 0 || py <= 0)
             return Vector2.Zero;
+        px = Math.Max(px, 0f);
+        py = Math.Max(py, 0f);
 
         // Extra buffer to ensure characters are definitely separated
         float buffer = 1.0f;
 
         if (px < py)
-        {
-            // horizontal push
             return new Vector2(Math.Sign(dx) * (px + buffer), 0);
-        }
         else
-        {
-            // vertical push
             return new Vector2(0, Math.Sign(dy) * (py + buffer));
-        }
     }
 
     private Vector2 BoxVsBox(BoxCollider A, BoxCollider B)
@@ -560,20 +554,17 @@ public class CollisionManager
         return projected.Intersects(obstacle);
     }
 
-    private void HandleCharacterWithStatic(ICollider b, ICollider c, GameTime gameTime)
+    private void HandleCharacterWithStatic(ICollider b, ICollider c)
     {
         // Ignore SPAWNENEMIES layer for characters
         if (b.Layer == CollisionLayer.SPAWNENEMIES) return;
-
-        if (c.Layer == CollisionLayer.CHARACTER || c.Layer == CollisionLayer.PLAYER)
-        {
-            Vector2 penetration = GetPenetrationVector(c, b);
-            if (penetration.LengthSquared() < 0.0001f)
-                return;
-            CharacterBase ch = (CharacterBase)c.Owner;
-            ch.Transform.Position -= penetration;
-            ch.UpdateCollider();
-        }
+        if (c.Layer != CollisionLayer.CHARACTER & c.Layer != CollisionLayer.PLAYER) return;
+        Vector2 penetration = GetPenetrationVector(c, b);
+        if (penetration.LengthSquared() < 0.0001f)
+            return;
+        CharacterBase ch = (CharacterBase)c.Owner;
+        ch.Transform.Position -= penetration;
+        ch.UpdateCollider();
     }
 
     private void HandleProjectileWithStatic(ICollider b, ICollider c)
@@ -663,11 +654,11 @@ public class CollisionManager
         }
     }
 
-    private void HandleStatics(ICollider c, List<ICollider> statics, GameTime gameTime)
+    private void HandleStatics(ICollider c, List<ICollider> statics)
     {
         foreach (var b in statics)
         {
-            HandleCharacterWithStatic(b, c, gameTime);
+            HandleCharacterWithStatic(b, c);
             HandleProjectileWithStatic(b, c);
             HandleProjectileWithTower(b, c);
             HandleAOEWithStatic(b, c);
@@ -693,14 +684,14 @@ public class CollisionManager
         tower.TakeDamage(aoe.Damage);
     }
 
-    private void HandleDynamics(ICollider c, List<ICollider> dynamics, GameTime gameTime)
+    private void HandleDynamics(ICollider c, List<ICollider> dynamics)
     {
         foreach (var d in dynamics)
         {
             PickingUpItem(c, d);
             HandleInteractions(c, d);
             HandleInteractionsTower(c, d);
-            HandleCharacters(c, d, gameTime);
+            HandleCharacters(c, d);
             HandleTowers(c, d);
             HandleTramCollision(c, d);
         }
@@ -738,7 +729,7 @@ public class CollisionManager
         allDynamics.Remove(item.Collider);
     }
 
-    private void HandleCharacterCollision(ICollider c, ICollider d, GameTime gameTime, List<(CharacterBase, CharacterBase)> charPairs)
+    private void HandleCharacterCollision(ICollider c, ICollider d)
     {
         if (d.Layer != CollisionLayer.CHARACTER && d.Layer != CollisionLayer.PLAYER) return;
         if (c==d) return;
@@ -757,8 +748,6 @@ public class CollisionManager
 
         ch.Transform.Position -= separation;
         chd.Transform.Position += separation;
-        // ch.Transform = ch.LastTransform;
-        // chd.Transform = chd.LastTransform;
         OnCharacterCollision?.Invoke(ch, chd);
 
         ch.UpdateCollider();
@@ -766,11 +755,7 @@ public class CollisionManager
     }
     private void HandleCharacterProjectiles(ICollider c, ICollider d)
     {
-        if (d.Layer != CollisionLayer.PROJECTILE || !c.Intersects(d))
-        {
-            return;
-        }
-
+        if (d.Layer != CollisionLayer.PROJECTILE || !c.Intersects(d)) return;
         ProjectileBase p = (ProjectileBase)d.Owner;
 
         // Make sure projectile cannot hit more than once
@@ -781,10 +766,7 @@ public class CollisionManager
         }
 
         // Ignore self-hit
-        if (c.Owner == p.Owner)
-        {
-            return;
-        }
+        if (c.Owner == p.Owner) return;
 
         // Event for a character or player gets hit by projectile
         OnProjectileHit?.Invoke((CharacterBase)c.Owner, (ProjectileBase)d.Owner);
@@ -820,22 +802,14 @@ public class CollisionManager
         _toRemoveColliders.Add(p.Collider);
     }
 
-    private void HandleCharacters(ICollider c, ICollider d, GameTime gameTime)
+    private void HandleCharacters(ICollider c, ICollider d)
     {
-        if (c.Layer != CollisionLayer.CHARACTER && c.Layer != CollisionLayer.PLAYER)
-        {
-            return;
-        }
+        if (c.Layer != CollisionLayer.CHARACTER && c.Layer != CollisionLayer.PLAYER) return;
 
-        List<(CharacterBase, CharacterBase)> charPairs = new();
-        HandleCharacterCollision(c, d, gameTime, charPairs);
+        HandleCharacterCollision(c, d);
         HandleCharacterProjectiles(c, d);
         // AOE damage handling
-        if (d.Layer != CollisionLayer.AOE)
-        {
-            return;
-        }
-
+        if (d.Layer != CollisionLayer.AOE) return;
         AreaOfEffectBase aoe = (AreaOfEffectBase)d.Owner;
 
         // prevent hitting yourself
@@ -944,7 +918,7 @@ public class CollisionManager
             }
         }
     }
-    public void Update(GameTime gameTime, HashSet<Player> players, List<ItemBase> items, List<ProjectileBase> projectiles,
+    public void Update(HashSet<Player> players, List<ItemBase> items, List<ProjectileBase> projectiles,
         List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters, List<Tram> trams, List<ObjectBase> objects, List<Tower> towers)
     {
         allDynamics.Clear();
@@ -959,13 +933,14 @@ public class CollisionManager
             {
                 continue;
             }
-
+            _nearbyDynamics.Clear();
+            _nearbyStatics.Clear();
             DynamicHash.QueryNearby(c.Position, 1, _nearbyDynamics);
             StaticHash.QueryNearby(c.Position, 2, _nearbyStatics);
 
-            HandleDynamics(c, _nearbyDynamics, gameTime);
-            HandleStatics(c, _nearbyStatics, gameTime);
             HandleTerrain(c, _nearbyStatics);
+            HandleStatics(c, _nearbyStatics);
+            HandleDynamics(c, _nearbyDynamics);
         }
 
         _removeProjectiles.Clear();
