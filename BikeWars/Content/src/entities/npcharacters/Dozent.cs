@@ -23,9 +23,9 @@ public class Dozent: CharacterBase, IWorldAudioAware
         private readonly RepathScheduler _repathScheduler;
 
         protected override string WalkingSound => AudioAssets.Walking;
-        
 
-        public Dozent(Vector2 start, Point size, AudioService audio, PathFinding pathFinding,
+
+        public Dozent(Vector2 start, float size, AudioService audio, PathFinding pathFinding,
             CollisionManager collisionManager, RepathScheduler repathScheduler)
         {
             _audio = audio;
@@ -35,7 +35,6 @@ public class Dozent: CharacterBase, IWorldAudioAware
 
             Attributes = new CharacterAttributes(this, 200, 0, 40, 2f, false);
             Transform = new Transform(start, size);
-            LastTransform = new Transform(start, size);
             Speed = 130f;
             Movement = new EnemyMovement(canMove: true, isMoving: false, pathFinding: _pathFinding,
                 gridMapper: _collisionManager, repathScheduler: _repathScheduler);
@@ -58,13 +57,12 @@ public class Dozent: CharacterBase, IWorldAudioAware
             {
                 em.EnemyPosition = Transform.Position;
                 em.PlayerPosition = _collisionManager.GameObjectManager.Player1.Transform.Position;
- 
+
             }
             Movement.HandleMovement(gameTime);
             HandleSound(Movement.IsMoving);
 
             Vector2 direction = Movement.Direction;
-            LastTransform = new Transform(Transform.Position, Transform.Size);
             if (Movement.IsMoving)
             {
                 float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;

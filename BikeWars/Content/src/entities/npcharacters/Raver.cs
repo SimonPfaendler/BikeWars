@@ -13,44 +13,43 @@ namespace BikeWars.Entities.Characters
         public const int ContactDamageCharacter = 2;
         public const int ContactDamageBike = 2;
         private readonly SpriteAnimation _idleAnimation;
-        
-        public Raver(Vector2 start, Point size, AudioService audio) 
+
+        public Raver(Vector2 start, float size, AudioService audio)
         {
             _audio = audio;
             Attributes = new CharacterAttributes(this, maxHealth: 35, health: 35, attackDamage: 2, attackCoolDown: 0f, canAutoAttack: false);
-            
+
             Transform = new Transform(start, size);
-            LastTransform = new Transform(start, size);
-            
+            RenderTransform = new Transform(start, new Point(32, 32));
+
             Speed = 0.5f;
             CurrentSpeed = Speed;
 
             Movement = null;
-            
-            _idleAnimation = SpriteManager.GetAnimation("Hobo_Idle");
 
+            _idleAnimation = SpriteManager.GetAnimation("Hobo_Idle");
             UpdateCollider();
         }
-        
+
         public override void Update(GameTime gameTime)
         {
             UpdateAttackCooldown(gameTime);
             UpdateKnockback(gameTime);
             UpdateHitFlash(gameTime);
-            
+
             _idleAnimation?.Update(gameTime, false);
-            
+
             UpdateCollider();
         }
-        
+
         public override void Draw(SpriteBatch spriteBatch)
         {
-            if (IsDead) 
+            if (IsDead)
                 return;
 
             // TODO: your animation/sprite here.
             // If you want a placeholder like Hobo.pixel, you can draw a rectangle.
-            
+
             if (_idleAnimation == null)
                 return;
 
@@ -58,8 +57,8 @@ namespace BikeWars.Entities.Characters
 
             _idleAnimation.Draw(
                 spriteBatch,
-                Transform.Position,
-                Transform.Size,
+                RenderTransform.Position,
+                RenderTransform.Size,
                 0f,
                 _renderScale,
                 drawColor

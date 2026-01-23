@@ -42,7 +42,7 @@ public class CombatManager
             return;
         }
         if (target == projectile.Owner) return;
-        
+
         // Crit Logic
         int damage = projectile.Damage;
 
@@ -57,7 +57,7 @@ public class CombatManager
         // Apply Damage
         target.TakeDamage(damage);
         projectile.HasHit = true;
-        
+
 
         // Notify GameScreen to Shake
         OnScreenShakeRequested?.Invoke(2.75f, 0.10f);

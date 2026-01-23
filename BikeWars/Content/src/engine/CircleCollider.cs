@@ -7,7 +7,7 @@ public class CircleCollider : ColliderBase
 {
     private Circle _collisionShape { get; set; }
 
-    public CircleCollider(int r, Vector2 pos, CollisionLayer layer, object owner)
+    public CircleCollider(float r, Vector2 pos, CollisionLayer layer, object owner)
     {
         Radius = r;
         Position = pos;
@@ -20,9 +20,14 @@ public class CircleCollider : ColliderBase
         get => _collisionShape;
     }
 
+    public Vector2 Center()
+    {
+        return new Vector2(Position.X, Position.Y);
+    }
+
     protected override void Update()
     {
-        _collisionShape = new Circle((int)Position.X, (int)Position.Y, (int)Radius);
+        _collisionShape = new Circle(Position.X, Position.Y, Radius);
     }
 
     public override bool Intersects(ICollider otherCollider)

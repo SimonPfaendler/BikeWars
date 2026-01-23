@@ -24,11 +24,9 @@ namespace BikeWars.Entities.Characters
 
         protected override string WalkingSound => AudioAssets.Walking;
 
-        // 1x1 Texture to represent the enemy
-        public static Texture2D pixel;
-
-
-        public Hobo(Vector2 start, Point size, AudioService audio, PathFinding pathFinding,
+        // public Hobo(Vector2 start, Point size, AudioService audio, PathFinding pathFinding,
+        //     CollisionManager collisionManager, RepathScheduler repathScheduler)
+        public Hobo(Vector2 start, float radius, AudioService audio, PathFinding pathFinding,
             CollisionManager collisionManager, RepathScheduler repathScheduler)
         {
             _audio = audio;
@@ -37,8 +35,9 @@ namespace BikeWars.Entities.Characters
             _repathScheduler = repathScheduler;
 
             Attributes = new CharacterAttributes(this, 40, 0, 5, 2f, false);
-            Transform = new Transform(start, size);
-            LastTransform = new Transform(start, size);
+            Transform = new Transform(start, radius);
+            LastTransform = new Transform(start, radius);
+            RenderTransform = new Transform(start, new Point(32, 32));
             Speed = 130f;
             Movement = new EnemyMovement(canMove: true, isMoving: false, pathFinding: _pathFinding,
                 gridMapper: _collisionManager, repathScheduler: _repathScheduler);
@@ -68,8 +67,6 @@ namespace BikeWars.Entities.Characters
                 }
             }
             Movement.HandleMovement(gameTime);
-            HandleSound(Movement.IsMoving);
-
             Vector2 direction = Movement.Direction;
             LastTransform = new Transform(Transform.Position, Transform.Size);
             if (Movement.IsMoving)
@@ -102,7 +99,7 @@ namespace BikeWars.Entities.Characters
             {
                 _currentAnimation.Update(gameTime, Movement.IsMoving);
             }
-
+            HandleSound(Movement.IsMoving);
             UpdateCollider();
         }
 
@@ -114,7 +111,7 @@ namespace BikeWars.Entities.Characters
                 return;
 
             Color drawColor = (_hitFlashTimer > 0f) ? _hitColor : Color.White;
-            _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, 0f, _renderScale, drawColor);
+            _currentAnimation.Draw(spriteBatch, RenderTransform.Position, RenderTransform.Size, 0f, _renderScale, drawColor);
         }
 
         public void SetWorldAudioManager(WorldAudioManager manager)

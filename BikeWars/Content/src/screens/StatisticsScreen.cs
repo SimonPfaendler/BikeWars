@@ -1,54 +1,62 @@
-using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
-using BikeWars.Content.managers;
 using System.Collections.Generic;
 using BikeWars.Content.engine;
 using BikeWars.Content.src.utils.SaveLoadExample;
+using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.screens;
-public class StatisticsScreen : MenuScreenBase, IScreen
+public class StatisticsScreen : MenuScreenBase
 {
     private ScrollBox _statistics;
-
     private readonly AudioService _audioService;
     public string DesiredMusic => AudioAssets.MenuMusic;
     public float MusicVolume => 1f;
 
     public List<Statistic> Statistics;
-    public StatisticsScreen(Texture2D background, SpriteFont font, AudioService audioService)
-        :base(background, font)
+
+    private List<StatisticsComponent> _components;
+
+    public StatisticsScreen(Texture2D background, SpriteFont font, AudioService audioService, Viewport vp)
+    : base(background, font, vp)
     {
         _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
+
         var state = SaveLoad.LoadGame();
         Statistics = state.Statistics ?? new List<Statistic>();
 
-        Texture2D bg = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
-        bg.SetData(new[] { Color.Black });
-
         _statistics = new ScrollBox(
-            bg,
+            RenderPrimitives.Pixel,
             _font,
             new Rectangle(400, 100, 500, 300),
-            Game1.Instance.SpriteBatch,
             MakeAchievementList,
             GetStatisticsHeight
         );
+
+        _components = new List<StatisticsComponent>(Statistics.Count);
+        foreach (var stat in Statistics)
+        {
+            _components.Add(new StatisticsComponent(stat));
+        }
+    }
+
+    public override void LoadContent(ContentManager content, GraphicsDevice gd)
+    {
+        base.LoadContent(content, gd);
         InitializeButtons();
     }
 
     private float GetStatisticsHeight()
     {
-        return Statistics.Count * 110f; // Content of every entry right now.
+        return _components.Count * 110f; // Content of every entry right now.
     }
 
     protected sealed override void InitializeButtons()
     {
-        Game1 game = Game1.Instance;
-        int screenWidth = game.GraphicsDevice.Viewport.Width;
-        int screenHeight = game.GraphicsDevice.Viewport.Height;
+        int screenWidth = ViewPort.Width;
+        int screenHeight = ViewPort.Height;
 
         int buttonWidth = 250;
         int buttonHeight = 60;
@@ -56,11 +64,9 @@ public class StatisticsScreen : MenuScreenBase, IScreen
         int horizontalSpacing = screenWidth / 15;
 
         int leftStartY = screenHeight / 2;
-
-        _buttonTexture = CreateSimpleTexture(game.GraphicsDevice, buttonWidth, buttonHeight);
-        _buttons.Add(new MenuButton(
+        AddButton(new MenuButton(
             id: (int)ButtonAction.Back,
-            texture: _buttonTexture,
+            texture: RenderPrimitives.Pixel,
             bounds: new Rectangle(horizontalSpacing, leftStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
             text: "Back",
             font: _font,
@@ -70,48 +76,28 @@ public class StatisticsScreen : MenuScreenBase, IScreen
         UpdateSelection(0);
     }
 
-    protected override void HandleButtonClick(MenuButton button)
-    {
-        switch ((ButtonAction)button.Id)
-        {
-            case ButtonAction.Back:
-                ScreenManager.RemoveScreen(this);
-                break;
-        }
-    }
     private void MakeAchievementList(SpriteBatch sb, Vector2 startPos)
     {
-        int row = 0;
-        if (Statistics == null)
+        foreach (var comp in _components)
         {
-            return;
+            comp.Draw(sb, RenderPrimitives.Pixel, new Color(50, 50, 50, 200), startPos, _font);
+            startPos.Y += 110;
         }
+}
 
-        Texture2D overlay = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
-        overlay.SetData(new[] { Color.White });
-        foreach (Statistic statistic in Statistics) {
-            new StatisticsComponent(statistic)
-                .Draw(sb, overlay, startPos + new Vector2(0, row), _font);
-            row += 110;
-        }
-    }
-
-    public override void Draw(GameTime gameTime)
+    public override void Draw(GameTime gameTime, SpriteBatch sb)
     {
-        Game1 game = Game1.Instance;
-        SpriteBatch spriteBatch = game.SpriteBatch;
-
-        spriteBatch.Begin();
-        Rectangle destinationRect = new Rectangle(0, 0, game.GraphicsDevice.Viewport.Width, game.GraphicsDevice.Viewport.Height);
-        spriteBatch.Draw(_backgroundTexture, destinationRect, Color.White);
+        sb.Begin();
+        Rectangle destinationRect = new Rectangle(0, 0, ViewPort.Width, ViewPort.Height);
+        sb.Draw(_backgroundTexture, destinationRect, Color.White);
 
         foreach (var button in _buttons)
         {
-            button.Draw(spriteBatch);
+            button.Draw(sb);
         }
 
-        spriteBatch.End();
-        _statistics.Draw();
+        sb.End();
+        _statistics.Draw(sb);
     }
 
     public override void Update(GameTime gameTime)
@@ -119,6 +105,7 @@ public class StatisticsScreen : MenuScreenBase, IScreen
         base.Update(gameTime);
         _statistics.Update();
     }
+
     public override bool DrawLower => false;
     public override bool UpdateLower => false;
 }

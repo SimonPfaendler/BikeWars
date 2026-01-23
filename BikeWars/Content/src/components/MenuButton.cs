@@ -1,3 +1,4 @@
+using System;
 using BikeWars.Content.engine.Audio;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -26,7 +27,7 @@ namespace BikeWars.Content.components
         private const float SELECT_SCALE = 1.18f;
         private const int BORDER_THICKNESS = 4;
 
-        private static Texture2D _pixel;
+        public event Action<int> Clicked;
 
         public int Id { get; }
 
@@ -104,8 +105,12 @@ namespace BikeWars.Content.components
                 else
                     _audioService.Sounds.Play(AudioAssets.SoftClick);
             }
-
             return isClicked;
+        }
+
+        public void TriggerClick()
+        {
+            Clicked?.Invoke(Id);
         }
 
         public bool Contains(Point point)
@@ -156,21 +161,10 @@ namespace BikeWars.Content.components
 
         private void DrawBorder(SpriteBatch spriteBatch, Rectangle rect, int thickness, Color color)
         {
-            EnsurePixel(spriteBatch.GraphicsDevice);
-
-            spriteBatch.Draw(_pixel, new Rectangle(rect.X, rect.Y, rect.Width, thickness), color);
-            spriteBatch.Draw(_pixel, new Rectangle(rect.X, rect.Bottom - thickness, rect.Width, thickness), color);
-            spriteBatch.Draw(_pixel, new Rectangle(rect.X, rect.Y, thickness, rect.Height), color);
-            spriteBatch.Draw(_pixel, new Rectangle(rect.Right - thickness, rect.Y, thickness, rect.Height), color);
-        }
-
-        private void EnsurePixel(GraphicsDevice graphicsDevice)
-        {
-            if (_pixel != null)
-                return;
-
-            _pixel = new Texture2D(graphicsDevice, 1, 1);
-            _pixel.SetData(new[] { Color.White });
+            spriteBatch.Draw(RenderPrimitives.Pixel, new Rectangle(rect.X, rect.Y, rect.Width, thickness), color);
+            spriteBatch.Draw(RenderPrimitives.Pixel, new Rectangle(rect.X, rect.Bottom - thickness, rect.Width, thickness), color);
+            spriteBatch.Draw(RenderPrimitives.Pixel, new Rectangle(rect.X, rect.Y, thickness, rect.Height), color);
+            spriteBatch.Draw(RenderPrimitives.Pixel, new Rectangle(rect.Right - thickness, rect.Y, thickness, rect.Height), color);
         }
     }
 }

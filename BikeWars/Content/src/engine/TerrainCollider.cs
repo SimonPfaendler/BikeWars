@@ -1,6 +1,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using BikeWars.Content.engine.interfaces;
+using BikeWars.Content.components;
 
 namespace BikeWars.Content.engine
 {
@@ -44,6 +45,11 @@ namespace BikeWars.Content.engine
                 );
 
                 return Bounds.Intersects(otherRect);
+            }
+
+            if (other is CircleCollider circle)
+            {
+                return new EnhancedRectangle(Bounds).Intersects(circle.CollisionShape);
             }
 
             return false;

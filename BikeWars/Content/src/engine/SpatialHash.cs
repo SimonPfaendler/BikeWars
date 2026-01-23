@@ -8,9 +8,8 @@ using Microsoft.Xna.Framework;
 namespace BikeWars.Content.engine;
 public class CellData
 {
-    public HashSet<CollisionLayer> Layers = new();
-    public int Count = 0;
-    public HashSet<ICollider>? Colliders = null;
+    // public HashSet<CollisionLayer> Layers = new();
+    public List<ICollider>? Colliders = null;
 }
 
 public class SpatialHash
@@ -19,6 +18,7 @@ public class SpatialHash
     private readonly int _worldWidthInCells;
     private readonly int _xOffset;
     private readonly int _yOffset;
+    private int _queryId = 0;
 
     public Dictionary<int, CellData> _cells = new();
 
@@ -41,18 +41,57 @@ public class SpatialHash
         return (y + _yOffset) * _worldWidthInCells + (x + _xOffset);
     }
 
+    // public void Insert(ICollider c)
+    // {
+    //     float left   = c.Position.X;
+    //     float right  = c.Position.X + c.Width;
+    //     float top    = c.Position.Y;
+    //     float bottom = c.Position.Y + c.Height;
+
+    //     int minX = (int)MathF.Floor(left / _cellSize);
+    //     int maxX = (int)MathF.Floor((right  - 1) / _cellSize);
+    //     int minY = (int)MathF.Floor(top / _cellSize);
+    //     int maxY = (int)MathF.Floor((bottom - 1) / _cellSize);
+
+
+    //     for (int x = minX; x <= maxX; x++)
+    //     {
+    //         for (int y = minY; y <= maxY; y++)
+    //         {
+    //             int key = To1DKey(x, y);
+
+    //             if (!_cells.TryGetValue(key, out var cell))
+    //             {
+    //                 cell = new CellData();
+    //                 _cells[key] = cell;
+    //             }
+
+    //             cell.Count++;
+    //             cell.Layers.Add(c.Layer); // Save layer
+    //             cell.Colliders ??= new HashSet<ICollider>();
+    //             cell.Colliders.Add(c);
+    //         }
+    //     }
+    // }
+
     public void Insert(ICollider c)
     {
-        float left   = c.Position.X;
-        float right  = c.Position.X + c.Width;
-        float top    = c.Position.Y;
-        float bottom = c.Position.Y + c.Height;
+        int minX = (int)(c.Position.X / _cellSize);
+        int maxX = (int)((c.Position.X + c.Width  - 1) / _cellSize);
+        int minY = (int)(c.Position.Y / _cellSize);
+        int maxY = (int)((c.Position.Y + c.Height - 1) / _cellSize);
 
-        int minX = (int)MathF.Floor(left / _cellSize);
-        int maxX = (int)MathF.Floor((right  - 1) / _cellSize);
-        int minY = (int)MathF.Floor(top / _cellSize);
-        int maxY = (int)MathF.Floor((bottom - 1) / _cellSize);
-
+        if (c.Width <= _cellSize && c.Height <= _cellSize) {
+            int key = To1DKey((int)(c.Position.X / _cellSize), (int)(c.Position.Y / _cellSize));
+            if (!_cells.TryGetValue(key, out var cell))
+            {
+                cell = new CellData();
+                cell.Colliders = new List<ICollider>(8);
+                _cells[key] = cell;
+            }
+            cell.Colliders.Add(c);
+            return;
+        }
 
         for (int x = minX; x <= maxX; x++)
         {
@@ -63,12 +102,9 @@ public class SpatialHash
                 if (!_cells.TryGetValue(key, out var cell))
                 {
                     cell = new CellData();
+                    cell.Colliders = new List<ICollider>(8);
                     _cells[key] = cell;
                 }
-
-                cell.Count++;
-                cell.Layers.Add(c.Layer); // Save layer
-                cell.Colliders ??= new HashSet<ICollider>();
                 cell.Colliders.Add(c);
             }
         }
@@ -95,32 +131,31 @@ public class SpatialHash
 
                 if (_cells.TryGetValue(key, out var cell))
                 {
-                    if (cell.Colliders != null)
-                        cell.Colliders.Remove(c);
-                    cell.Count--;
-
-                    if (cell.Count <= 0)
+                    if (cell.Colliders.Remove(c) && cell.Colliders.Count == 0)
                     {
                         _cells.Remove(key);
                         continue;
                     }
 
-                    cell.Layers.Clear();
-                    if (cell.Colliders != null)
-                    {
-                        foreach (var col in cell.Colliders)
-                            cell.Layers.Add(col.Layer);
-                    }
+                    // cell.Layers.Clear();
+                    // if (cell.Colliders != null)
+                    // {
+                    //     foreach (var col in cell.Colliders)
+                    //     {
+                    //         cell.Layers.Add(col.Layer);
+                    //     }
+                    // }
                 }
             }
         }
     }
 
-    public HashSet<ICollider> QueryNearby(Vector2 pos, int radius)
+    public void QueryNearby(Vector2 pos, int radius, List<ICollider> results)
     {
-        var (cellX, cellY) = ToCellCoords(pos);
-        HashSet<ICollider> results = new();
+        results.Clear();
+        _queryId++;
 
+        var (cellX, cellY) = ToCellCoords(pos);
         for (int x = cellX - radius; x <= cellX + radius; x++)
         {
             for (int y = cellY - radius; y <= cellY + radius; y++)
@@ -129,16 +164,18 @@ public class SpatialHash
 
                 if (!_cells.TryGetValue(key, out var cell))
                     continue;
-                if (cell.Colliders != null)
+
+                foreach (ICollider c in cell.Colliders!)
                 {
-                    foreach (ICollider c in cell.Colliders)
-                    {
-                        results.Add(c);
-                    }
+                    // Skip duplicates when a collider spans multiple cells
+                    if (c.LastQueryId == _queryId)
+                        continue;
+
+                    c.LastQueryId = _queryId;
+                    results.Add(c);
                 }
             }
         }
-        return results;
     }
 
     public void Clear()

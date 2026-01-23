@@ -26,7 +26,7 @@ namespace BikeWars.Entities.Characters
     public class Player : CharacterBase, IWorldAudioAware
     {
         public Inventory Inventory { get; private set; }
-        private PlayerMovement movement { get; set; }
+        public PlayerMovement movement { get; set; }
         public Bike CurrentBike => movement?.CrtBike;
         private IPlayerInput _input;
         private CooldownWithDuration sprint { get; }
@@ -38,7 +38,7 @@ namespace BikeWars.Entities.Characters
         private Vector2 _facingDirection = Vector2.UnitX; // Default to right
         private Vector2 _lastGazeDirection = Vector2.UnitX;
         private const float AimLength = 100f;
-        
+
         //Range for throwing objects around the player
         public const float ThrowRange = 400f;
         public TerrainCollider CurrentTerrain { get; set; }
@@ -57,7 +57,7 @@ namespace BikeWars.Entities.Characters
         public event Action<Vector2> ThrowBanana;
         public event Action<Vector2> ThrowBottle;
         public event Action<Vector2> ThrowBeer;
-        
+
         private Vector2 _mouseWorldPos;
         private bool _isThrowTargetInRange;
 
@@ -92,7 +92,7 @@ namespace BikeWars.Entities.Characters
         private int _currentItemIndex = -1;
         private int _selectedInventoryIndex = 0;
         public int SelectedInventoryIndex => _selectedInventoryIndex;
-        
+
         private WeaponType _weaponBefore;
         private bool _beerThrowSelected = false;
         private int _inventoryIndexBeer = -1;
@@ -126,9 +126,6 @@ namespace BikeWars.Entities.Characters
         }
 
         public WeaponType CurrentWeapon { get; private set; } = WeaponType.Gun;
-
-        // 1x1 Texture to represent the player
-        public static Texture2D pixel;
 
         private float _dopingTimer = 0f;
         public bool IsDoped => _dopingTimer > 0f;
@@ -255,7 +252,6 @@ namespace BikeWars.Entities.Characters
             }
             item.IsPickedUp = true;
             ItemPickedUp?.Invoke(item);
-
         }
 
         public void OnInteractObject(Player player, ObjectBase obj)
@@ -296,22 +292,19 @@ namespace BikeWars.Entities.Characters
             }
         }
 
-        public Player(Vector2 start, Point size, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")
+        // public Player(Vector2 start, Point size, Point renderSize, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")
+        public Player(Vector2 start, float radius, Point renderSize, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")
         {
             Attributes = new CharacterAttributes(this, 300, 0, 10, 2f, false);
-            Transform = new Transform(start, size);
-            LastTransform = new Transform(start, size);
+            Transform = new Transform(start, radius);
+            LastTransform = new Transform(start, radius);
+            RenderTransform = new Transform(start, renderSize);
             _input = input;
             movement = new PlayerMovement(canMove: true, isMoving: false, _input);
 
             sprint = new CooldownWithDuration(1f, 5f);
             Inventory = new Inventory();
             _audio = audio;
-            if (pixel == null)
-            {
-                pixel = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
-                pixel.SetData(new[] { Color.White });
-            }
 
             // LOAD BOTH ANIMATION SETS
             _bikeUpAnimation = SpriteManager.GetAnimation($"{characterPrefix}_BikeUp");
@@ -345,7 +338,7 @@ namespace BikeWars.Entities.Characters
             _isThrowTargetInRange = Vector2.Distance(throwOrigin, _mouseWorldPos) <= ThrowRange;
             UpdateAttackCooldown(gameTime);
             UpdateMountTimer(gameTime);
-            
+
             if (_dopingTimer > 0f)
             {
                 _dopingTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -354,6 +347,7 @@ namespace BikeWars.Entities.Characters
             HandleWeaponSwitch();
             HandleShooting();
             UpdateMovement(gameTime);
+            UpdateCollider();
             HandleInventoryNavigation();
             HandleItemUsage(gameTime);
             HandleMovementSound();
@@ -361,7 +355,6 @@ namespace BikeWars.Entities.Characters
             UpdateGazeDirection(mousePos);
             HandleGhostTrail(gameTime);
             HandleSwitchMovement();
-
             UpdateHitFlash(gameTime);
             UpdateCollider();
             Beer.UpdateCooldown(gameTime);
@@ -431,14 +424,6 @@ namespace BikeWars.Entities.Characters
                 );
             }
 
-            // saubere Ganzzahl-Position, sonst „zittert“ Pixelart
-            var dest = new Rectangle(
-                (int)MathF.Round(Transform.Position.X),
-                (int)MathF.Round(Transform.Position.Y),
-                Transform.Size.X,
-                Transform.Size.Y
-            );
-
             // 2) Spieler zeichnen
             if (_currentAnimation == null)
                 return;
@@ -446,12 +431,12 @@ namespace BikeWars.Entities.Characters
             if (movement.CurrentMovement.GetType() ==
                 typeof(WalkingMovement)) // TODO THIS IS ONLY INSERTED TO SHOW. BUT NOT GOOD!
             {
-                _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size,
+                _currentAnimation.Draw(spriteBatch, RenderTransform.Position, RenderTransform.Size,
                     movement.CurrentMovement.Rotation, _renderScale);
             }
             else
             {
-                _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size,
+                _currentAnimation.Draw(spriteBatch, RenderTransform.Position, RenderTransform.Size,
                     movement.CurrentMovement.Rotation + MathHelper.PiOver2, _renderScale);
             }
 
@@ -462,27 +447,19 @@ namespace BikeWars.Entities.Characters
 
                 // Draw static valid zone arc based on facing direction
                 float facingAngle = (float)Math.Atan2(_facingDirection.Y, _facingDirection.X);
-                DrawUtils.DrawArc(spriteBatch, pixel, center, 50f, facingAngle, MathHelper.ToRadians(240),
+                DrawUtils.DrawArc(spriteBatch, RenderPrimitives.Pixel, center, 50f, facingAngle, MathHelper.ToRadians(240),
                     Color.Red * 0.5f);
 
                 // Draw aiming line
                 Vector2 aimEnd = center + GazeDirection * 50f;
-                DrawUtils.DrawLine(spriteBatch, pixel, center, aimEnd, Color.Red);
+                DrawUtils.DrawLine(spriteBatch, RenderPrimitives.Pixel, center, aimEnd, Color.Red);
             }
 
             if ((CurrentWeapon == WeaponType.BookThrow || CurrentWeapon == WeaponType.BananaThrow || CurrentWeapon == WeaponType.BottleThrow || CurrentWeapon == WeaponType.BeerThrow) && _isThrowTargetInRange)
             {
-                DrawUtils.DrawCircleOutline(spriteBatch, pixel, _mouseWorldPos, 10f, Color.Gold);
+                DrawUtils.DrawCircleOutline(spriteBatch, RenderPrimitives.Pixel, _mouseWorldPos, 10f, Color.Gold);
             }
         }
-
-        // Is Helpful for example with colliders to set the original position back.
-        public override void SetLastTransform()
-        {
-            Transform = new Transform(new Vector2(LastTransform.Position.X, LastTransform.Position.Y),
-                LastTransform.Size);
-        }
-
         public void Immobalize(bool value)
         {
             if (value)
@@ -635,7 +612,7 @@ namespace BikeWars.Entities.Characters
                 }
                 else if (item is Beer beer)
                 {
-                    
+
                     if (beer.TryActivateBeer())
                     {
                         _weaponBefore = CurrentWeapon;
@@ -698,7 +675,7 @@ namespace BikeWars.Entities.Characters
             Vector2 direction = movement.CurrentMovement.Direction;
 
             if (Transform.Position.X != LastTransform.Position.X || Transform.Position.Y != LastTransform.Position.Y)
-                LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size);
+                LastTransform = new Transform(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Radius);
 
             TerrainSpeedMultiplier = GetTerrainMultiplier();
             if (IsDoped)
@@ -961,7 +938,7 @@ namespace BikeWars.Entities.Characters
             else if (_input.IsPressed(GameAction.INVENTORY_4)) _selectedInventoryIndex = 3;
             else if (_input.IsPressed(GameAction.INVENTORY_5)) _selectedInventoryIndex = 4;
         }
-        
+
         public bool IsInteractPressed()
         {
             return _input.IsPressed(GameAction.INTERACT);

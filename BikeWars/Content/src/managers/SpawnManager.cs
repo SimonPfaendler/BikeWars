@@ -7,10 +7,9 @@ using BikeWars.Content.managers;
 using BikeWars.Content.entities.interfaces;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
+using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.components;
 using BikeWars.Utilities;
-
-
 
 namespace BikeWars.Content.managers
 {
@@ -27,6 +26,8 @@ namespace BikeWars.Content.managers
         private const double SWARM_INTERVAL = 65.0;
         private const double CIRCLE_SPAWN_INTERVAL = 40.0;
 
+        private readonly List<ICollider> _spawnQueryBuffer = new(32);
+
         private const double GAME_DURATION = 15 * 60; // 15 minutes in seconds
         private const double START_SPAWN_INTERVAL = 4; // Start with 4 seconds
         private const double END_SPAWN_INTERVAL = 0.5;   // End with 0.5 seconds
@@ -38,13 +39,11 @@ namespace BikeWars.Content.managers
         // Tram Logic
         private double _timeSinceLastTram;
         private const double TRAM_SPAWN_INTERVAL = 15.0; // Every 15 seconds
-        
+
         // raver logic
         private List<RaveGroup> _raveGroups = new List<RaveGroup>();
 
         private readonly RepathScheduler _repathScheduler;
-
-
         public SpawnManager(GameObjectManager gameObjectManager, CollisionManager collisionManager, AudioService audioService, PathFinding pathFinding, RepathScheduler repathScheduler, WorldAudioManager worldAudioManager)
         {
             _gameObjectManager = gameObjectManager;
@@ -54,7 +53,6 @@ namespace BikeWars.Content.managers
             _pathFinding = pathFinding;
             _repathScheduler = repathScheduler;
             _worldAudioManager = worldAudioManager;
-
         }
 
         public void Update(GameTime gameTime)
@@ -95,7 +93,7 @@ namespace BikeWars.Content.managers
                 SpawnTram();
                 _timeSinceLastTram = 0;
             }
-            
+
             for (int i = _raveGroups.Count - 1; i >= 0; i--)
             {
                 _raveGroups[i].Update(gameTime);
@@ -114,25 +112,20 @@ namespace BikeWars.Content.managers
             // Spawn far outside the screen
             Vector2 playerPos = _gameObjectManager.Player1.Transform.Position;
             float angle = (float)(RandomUtil.NextDouble() * Math.PI * 2);
-            
             Vector2 startPos = playerPos + new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * spawnRadius;
-            
+
             // Target a position near the player with some randomness
             Vector2 targetOffset = new Vector2((float)(RandomUtil.NextDouble() - 0.5) * 10, (float)(RandomUtil.NextDouble() - 0.5) * 10);
             Vector2 targetPos = playerPos + targetOffset;
 
-            var tram = new Tram(startPos, targetPos,  _audioService, _gameObjectManager.Player1);
+            Tram tram = new Tram(startPos, targetPos,  _audioService, _gameObjectManager.Player1);
             _gameObjectManager.AddTram(tram);
         }
-
-
-
         private void SpawnSwarm(double progress)
         {
 
             // Spawn 10-15 Hobos
             int count = RandomUtil.NextInt(10, 16);
-
 
             float speedMultiplier = 1.5f + (0.5f * (float)progress); // Start fast, get faster
             float difficultyMultiplier = 1.0f + (2.0f * (float)progress);
@@ -152,13 +145,12 @@ namespace BikeWars.Content.managers
                      spawnPos = clusterCenter;
                  }
 
-                 var hobo = new Hobo(spawnPos, new Point(32, 32), _audioService, _pathFinding,
+                //  var hobo = new Hobo(spawnPos, new Point(24, 24), _audioService, _pathFinding,
+                 var hobo = new Hobo(spawnPos, 12, _audioService, _pathFinding,
                      _collisionManager, _repathScheduler);
                  ApplyScaling(hobo, difficultyMultiplier, speedMultiplier); // Apply extra speed
                  _gameObjectManager.AddCharacter(hobo);
              }
-
-
         }
 
         private void SpawnEnemy(double progress)
@@ -178,7 +170,7 @@ namespace BikeWars.Content.managers
 
             if (spawnHobo)
             {
-                var hobo = new Hobo(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager,  _repathScheduler);
+                var hobo = new Hobo(spawnPos, 12, _audioService, _pathFinding, _collisionManager,  _repathScheduler);
                 ApplyScaling(hobo, difficultyMultiplier, speedMultiplier);
                 _gameObjectManager.AddCharacter(hobo);
             }
@@ -189,23 +181,23 @@ namespace BikeWars.Content.managers
                 // Dog: 40% of remaining
                 // Thief: 40% of remaining
                 // Kamikaze: 20% of remaining
-                
+
                 if (val < 0.4)
                 {
-                    var dog = new Dog(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager, _repathScheduler);
+                    var dog = new Dog(spawnPos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler);
                     ApplyScaling(dog, difficultyMultiplier, speedMultiplier);
                     dog.SetWorldAudioManager(_worldAudioManager);
                     _gameObjectManager.AddCharacter(dog);
                 }
                 else if (val < 0.8)
                 {
-                    var thief = new BikeThief(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager, _repathScheduler);
+                    var thief = new BikeThief(spawnPos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler);
                     ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
                     _gameObjectManager.AddCharacter(thief);
                 }
                 else
                 {
-                    var kamikaze = new KamikazeOpa(spawnPos, new Point(32, 32), _audioService, _pathFinding, _collisionManager, _gameObjectManager, _repathScheduler);
+                    var kamikaze = new KamikazeOpa(spawnPos, 15, _audioService, _pathFinding, _collisionManager, _gameObjectManager, _repathScheduler);
                     ApplyScaling(kamikaze, difficultyMultiplier, speedMultiplier);
                     _gameObjectManager.AddCharacter(kamikaze);
                 }
@@ -226,8 +218,10 @@ namespace BikeWars.Content.managers
             // Use 32x32 size (enemy size)
             BoxCollider checkCollider = new BoxCollider(pos, 32, 32, CollisionLayer.CHARACTER, null);
 
-            var nearby = _collisionManager.StaticHash.QueryNearby(pos, 3);
-            foreach (var col in nearby)
+            _spawnQueryBuffer.Clear();
+            // _collisionManager.StaticHash.QueryNearby(pos, 3, _spawnQueryBuffer);
+            _collisionManager.StaticHash.QueryNearby(pos, 3, _spawnQueryBuffer);
+            foreach (var col in _spawnQueryBuffer)
             {
                 if (col.Layer == CollisionLayer.SPAWNENEMIES && col.Intersects(checkCollider))
                 {
@@ -236,7 +230,7 @@ namespace BikeWars.Content.managers
             }
             return false;
         }
-        
+
         // spawn the rave group
         private void SpawnCircle(double progress)
         {
@@ -256,7 +250,7 @@ namespace BikeWars.Content.managers
             var group = RaveGroup.SpawnAroundPlayer(
                 count: count,
                 startRadius: startRadius,
-                raverSize: raverSize,
+                raverSize: 17,
                 audioService: _audioService,
                 gameObjectManager: _gameObjectManager,
                 collisionManager: _collisionManager,
@@ -286,8 +280,7 @@ namespace BikeWars.Content.managers
 
                 if (!IsValidSpawnPosition(pos)) continue;
 
-                // Alternate between Hobo and BikeThief
-                CharacterBase enemy = new Hobo(pos, new Point(32, 32), _audioService, _pathFinding, _collisionManager, _repathScheduler);
+                CharacterBase enemy = new Hobo(pos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler);
 
                 ApplyScaling(enemy, difficultyMultiplier, speedMultiplier);
                 _gameObjectManager.AddCharacter(enemy);
@@ -318,6 +311,11 @@ namespace BikeWars.Content.managers
 
             // Fallback
             return playerPos + new Vector2(MIN_SPAWN_RADIUS, 0);
+        }
+
+        public void Dispose()
+        {
+
         }
     }
 }

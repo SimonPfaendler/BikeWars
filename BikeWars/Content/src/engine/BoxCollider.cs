@@ -19,6 +19,11 @@ public class BoxCollider : ColliderBase
         Owner = owner;
     }
 
+    public Vector2 Center()
+    {
+        return CollisionShape.Rectangle.Center.ToVector2();
+    }
+
     public void SetSize(int w, int h)
     {
         Width = w;

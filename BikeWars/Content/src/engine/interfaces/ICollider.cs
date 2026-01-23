@@ -10,4 +10,5 @@ public interface ICollider
     float Radius {get; set;}
     CollisionLayer Layer {get; set;}
     object Owner {get; set;} // This is necessary and just a reference to like Player or so
+    int LastQueryId { get; set; } // We use this only for the spatial hash. Especially not to insert it double in a cell
 }

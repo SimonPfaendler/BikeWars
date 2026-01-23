@@ -35,6 +35,7 @@ public class CollisionManager
 
     public List<TiledObjectInfo> ObjectSpawns { get; } = new();
     private readonly GameObjectManager _gameObjectManager;
+    private readonly AudioService _audioService;
     public GameObjectManager GameObjectManager => _gameObjectManager;
 
     private const string MAP = "assets/Map/Bike_Wars_Map";
@@ -53,6 +54,17 @@ public class CollisionManager
     public HashSet<ICollider> allDynamics = new();
     public HashSet<ICollider> activeDynamics = new();
     private SpatialHash _staticHash { get; set; }
+
+    // Reusable query buffers
+    private readonly List<ICollider> _nearbyDynamics = new(64);
+    private readonly List<ICollider> _nearbyStatics  = new(64);
+    private readonly List<ICollider> _wallStatics  = new(16);
+
+    // Reusable removal buffers
+    private readonly List<ProjectileBase> _removeProjectiles = new(16);
+    private readonly List<ItemBase> _removeItems = new(16);
+    private readonly List<CharacterBase> _removeCharacters = new(16);
+    private readonly List<Tower> _removeTowers = new(16);
 
     public SpatialHash StaticHash
     {
@@ -78,7 +90,7 @@ public class CollisionManager
     // base (unpadded) walkability snapshot to support cheap local updates
     private bool[,] _baseWalkableGrid;
 
-    public CollisionManager(int cellSize, int worldBounds, GameObjectManager gameObjectManager)
+    public CollisionManager(int cellSize, int worldBounds, GameObjectManager gameObjectManager, AudioService audioService)
     {
         _cellSize = cellSize;
         DynamicHash = new SpatialHash(cellSize, worldBounds);
@@ -87,6 +99,7 @@ public class CollisionManager
         _toRemoveStaticColliders = new HashSet<ICollider>();
         _toUpdateWalkableRects = new List<Rectangle>();
         _gameObjectManager = gameObjectManager;
+        _audioService = audioService;
     }
 
     public bool isColliding(ICollider collisionBox1, ICollider collisionBox2)
@@ -380,37 +393,79 @@ public class CollisionManager
 
     public Vector2 GetPenetrationVector(ICollider a, ICollider b)
     {
-        // const float SEPARATION = 1.25f; // fixed Push
-        if (a is BoxCollider A && b is BoxCollider B)
-        {
-            Vector2 aCenter = A.Position + new Vector2(A.Width / 2f, A.Height / 2f);
-            Vector2 bCenter = B.Position + new Vector2(B.Width / 2f, B.Height / 2f);
+        if (a is CircleCollider circle && b is BoxCollider box)
+            return CircleVsBox(circle, box);
 
-            float dx = bCenter.X - aCenter.X;
-            float dy = bCenter.Y - aCenter.Y;
+        if (a is CircleCollider c1 && b is CircleCollider c2)
+            return CircleVsCircle(c1, c2);
 
-            float px = (A.Width / 2f + B.Width / 2f) - Math.Abs(dx);
-            float py = (A.Height / 2f + B.Height / 2f) - Math.Abs(dy);
-
-            if (px <= 0 || py <= 0)
-                return Vector2.Zero;
-
-            // Extra buffer to ensure characters are definitely separated
-            float buffer = 1.0f;
-
-            if (px < py)
-            {
-                // horizontal push
-                return new Vector2(Math.Sign(dx) * (px + buffer), 0);
-            }
-            else
-            {
-                // vertical push
-                return new Vector2(0, Math.Sign(dy) * (py + buffer));
-            }
-        }
-
+        if (a is BoxCollider b1 && b is BoxCollider b2)
+            return BoxVsBox(b1, b2);
         return Vector2.Zero;
+    }
+
+    private Vector2 CircleVsCircle(CircleCollider a, CircleCollider b)
+    {
+        Vector2 delta = b.Center() - a.Center();
+        float dist = delta.Length();
+
+        float penetration = (a.Radius + b.Radius) - dist;
+        if (penetration <= 0)
+            return Vector2.Zero;
+
+        if (dist == 0)
+            return new Vector2(0, -penetration);
+
+        return Vector2.Normalize(delta) * penetration;
+    }
+
+    private Vector2 CircleVsBox(CircleCollider circle, BoxCollider box)
+    {
+        Vector2 aCenter = circle.Position + new Vector2(circle.Width / 2f, circle.Height / 2f);
+        Vector2 bCenter = box.Position + new Vector2(box.Width / 2f, box.Height / 2f);
+
+        float dx = bCenter.X - aCenter.X;
+        float dy = bCenter.Y - aCenter.Y;
+
+        float px = (circle.Width / 2f + box.Width / 2f) - Math.Abs(dx);
+        float py = (circle.Height / 2f + box.Height / 2f) - Math.Abs(dy);
+
+        if (px <= 0 || py <= 0)
+            return Vector2.Zero;
+
+        // Extra buffer to ensure characters are definitely separated
+        float buffer = 1.0f;
+
+        if (px < py)
+        {
+            // horizontal push
+            return new Vector2(Math.Sign(dx) * (px + buffer), 0);
+        }
+        else
+        {
+            // vertical push
+            return new Vector2(0, Math.Sign(dy) * (py + buffer));
+        }
+    }
+
+    private Vector2 BoxVsBox(BoxCollider A, BoxCollider B)
+    {
+        Vector2 aCenter = A.Center();
+        Vector2 bCenter = B.Center();
+
+        float dx = bCenter.X - aCenter.X;
+        float dy = bCenter.Y - aCenter.Y;
+
+        float px = (A.Width / 2f + B.Width / 2f) - Math.Abs(dx);
+        float py = (A.Height / 2f + B.Height / 2f) - Math.Abs(dy);
+
+        if (px <= 0 || py <= 0)
+            return Vector2.Zero;
+
+        if (px < py)
+            return new Vector2(Math.Sign(dx) * px, 0);
+        else
+            return new Vector2(0, Math.Sign(dy) * py);
     }
 
     public void AddDynamic(ICollider c)
@@ -419,8 +474,8 @@ public class CollisionManager
         allDynamics.Add(c);
     }
 
-    public void Insertions(HashSet<ItemBase> items, HashSet<Player> players, HashSet<ProjectileBase> projectiles,
-        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters, List<Tram> trams, HashSet<ObjectBase> objects, List<Tower> towers)
+    public void Insertions(List<ItemBase> items, HashSet<Player> players, List<ProjectileBase> projectiles,
+        List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters, List<Tram> trams, List<ObjectBase> objects, List<Tower> towers)
     {
         foreach (ItemBase c in items)
         {
@@ -504,52 +559,19 @@ public class CollisionManager
         return projected.Intersects(obstacle);
     }
 
-    private void HandleCharacterWithStatic(ICollider b, ICollider c)
+    private void HandleCharacterWithStatic(ICollider b, ICollider c, GameTime gameTime)
     {
         // Ignore SPAWNENEMIES layer for characters
         if (b.Layer == CollisionLayer.SPAWNENEMIES) return;
 
         if (c.Layer == CollisionLayer.CHARACTER || c.Layer == CollisionLayer.PLAYER)
         {
+            Vector2 penetration = GetPenetrationVector(c, b);
+            if (penetration.LengthSquared() < 0.0001f)
+                return;
             CharacterBase ch = (CharacterBase)c.Owner;
-            Vector2 delta = ch.Transform.Position - ch.LastTransform.Position;
-
-            if (delta.X != 0)
-            {
-                if (WillCollide((BoxCollider)c, new Vector2(delta.X, 0), b))
-                {
-                    ch.SetLastTransform();
-                    ch.Transform.Position = new Vector2(
-                        ch.LastTransform.Position.X,
-                        ch.Transform.Position.Y
-                    );
-                }
-            }
-
+            ch.Transform.Position -= penetration;
             ch.UpdateCollider();
-            if (delta.Y != 0)
-            {
-                if (WillCollide((BoxCollider)c, new Vector2(0, delta.Y), b))
-                {
-                    ch.SetLastTransform();
-                    ch.Transform.Position = new Vector2(
-                        ch.Transform.Position.X,
-                        ch.LastTransform.Position.Y
-                    );
-                }
-            }
-
-            ch.UpdateCollider();
-        }
-
-        // If already overlapping a static (e.g., pushed in by another entity), push the character out
-        if (c.Intersects(b))
-        {
-            var penetration = GetPenetrationVector(c, b);
-            if (penetration.LengthSquared() > 0.0001f && c.Owner is CharacterBase stuck)
-            {
-                ApplySafePush(stuck, c, -penetration);
-            }
         }
     }
 
@@ -561,11 +583,18 @@ public class CollisionManager
 
             ProjectileBase p = (ProjectileBase)c.Owner;
 
+            // prevent multiple hits from the same projectile in one frame
+            if (p.HasHit)
+            {
+                return;
+            }
+
             // If the wall belongs to a destructible map object, apply damage
             if (b.Owner is DestructibleObject destructible)
             {
+                p.HasHit = true;
                 destructible.TakeDamage(p.Damage);
-                Game1.Audio.Sounds.Play(destructible.Health > 0 ? AudioAssets.WoodCrack : AudioAssets.WoodDestroy);
+                _audioService.Sounds.Play(destructible.Health > 0 ? AudioAssets.WoodCrack : AudioAssets.WoodDestroy);
                 _gameObjectManager.SpawnDamageNumber(GetObjectCenter(destructible), p.Damage);
                 _toRemoveColliders.Add(p.Collider);
 
@@ -621,7 +650,7 @@ public class CollisionManager
         }
 
         destructible.TakeDamage(aoe.Damage);
-        Game1.Audio.Sounds.Play(destructible.Health > 0 ? AudioAssets.WoodCrack : AudioAssets.WoodDestroy);
+        _audioService.Sounds.Play(destructible.Health > 0 ? AudioAssets.WoodCrack : AudioAssets.WoodDestroy);
         _gameObjectManager.SpawnDamageNumber(GetObjectCenter(destructible), aoe.Damage);
 
         if (destructible.Health <= 0)
@@ -633,11 +662,11 @@ public class CollisionManager
         }
     }
 
-    private void HandleStatics(ICollider c, HashSet<ICollider> statics)
+    private void HandleStatics(ICollider c, List<ICollider> statics, GameTime gameTime)
     {
         foreach (var b in statics)
         {
-            HandleCharacterWithStatic(b, c);
+            HandleCharacterWithStatic(b, c, gameTime);
             HandleProjectileWithStatic(b, c);
             HandleProjectileWithTower(b, c);
             HandleAOEWithStatic(b, c);
@@ -663,15 +692,14 @@ public class CollisionManager
         tower.TakeDamage(aoe.Damage);
     }
 
-
-    private void HandleDynamics(ICollider c, HashSet<ICollider> dynamics)
+    private void HandleDynamics(ICollider c, List<ICollider> dynamics, GameTime gameTime)
     {
         foreach (var d in dynamics)
         {
             PickingUpItem(c, d);
             HandleInteractions(c, d);
             HandleInteractionsTower(c, d);
-            HandleCharacters(c, d);
+            HandleCharacters(c, d, gameTime);
             HandleTowers(c, d);
             HandleTramCollision(c, d);
         }
@@ -709,145 +737,32 @@ public class CollisionManager
         allDynamics.Remove(item.Collider);
     }
 
-    private void HandleCharacterCollision(ICollider c, ICollider d)
+    private void HandleCharacterCollision(ICollider c, ICollider d, GameTime gameTime, List<(CharacterBase, CharacterBase)> charPairs)
     {
-        if (c == d || c.GetHashCode() > d.GetHashCode() ||
-            (d.Layer != CollisionLayer.CHARACTER && d.Layer != CollisionLayer.PLAYER))
-        {
+        if (d.Layer != CollisionLayer.CHARACTER && d.Layer != CollisionLayer.PLAYER) return;
+        if (c==d) return;
+        if (c.GetHashCode() > d.GetHashCode()) return;
+        Vector2 penetration = GetPenetrationVector(c, d);
+        if (penetration.LengthSquared() < 0.0001f)
             return;
-        }
+        Vector2 separation = penetration * 0.25f;
+
+        const float SLOP = 0.01f;
+        if (penetration.LengthSquared() < SLOP * SLOP)
+            return;
 
         CharacterBase ch = (CharacterBase)c.Owner;
         CharacterBase chd = (CharacterBase)d.Owner;
-        
-        Vector2 delta = ch.Transform.Position - ch.LastTransform.Position;
 
-        if (!WillCollide((BoxCollider)c, delta, d))
-        {
-            return;
-        }
+        ch.Transform.Position -= separation;
+        chd.Transform.Position += separation;
+        // ch.Transform = ch.LastTransform;
+        // chd.Transform = chd.LastTransform;
+        OnCharacterCollision?.Invoke(ch, chd);
 
-        OnCharacterCollision?.Invoke((CharacterBase)c.Owner, (CharacterBase)d.Owner);
-
-        // calculate vector that separates 2 characters
-        Vector2 t = GetPenetrationVector(c, d);
-        if (t.LengthSquared() < 0.0001f)
-            return;
-        
-        if (ch is Player)
-        {
-            ApplySafePush(ch, c, -t);
-            return;
-        }
-        if (chd is Player)
-        {
-            // t is for (c,d). If we want to move d out of c, compute it the other way.
-            Vector2 td = GetPenetrationVector(d, c);
-            if (td.LengthSquared() < 0.0001f) return;
-            
-            ApplySafePush(chd, d, -td);
-            return;
-        }
-        
-
-        // split 2 characters apart by 50%
-        Vector2 separation = t * 0.5f;
-
-        // Push character A (Backwards)
-        ApplySafePush(ch, c, -separation);
-
-        // Push character B (Forwards)
-        ApplySafePush(chd, d, separation);
+        ch.UpdateCollider();
+        chd.UpdateCollider();
     }
-
-    // slide the enemies along walls instead of them being pushed into the hitboxes
-    private void ApplySafePush(CharacterBase ch, ICollider collider, Vector2 push)
-    {
-        // try full push
-        Vector2 fullPos = ch.Transform.Position + push;
-        if (!IsInsideWall(collider, fullPos))
-        {
-            ch.SetLastTransform();
-            ch.Transform.Position = fullPos;
-            ch.UpdateCollider();
-            return;
-        }
-
-        // try sliding X (horizontal only)
-        // We only try this if the push actually has an X component
-        if (Math.Abs(push.X) > 0.01f)
-        {
-            Vector2 slideXPos = ch.Transform.Position + new Vector2(push.X, 0);
-            if (!IsInsideWall(collider, slideXPos))
-            {
-                ch.SetLastTransform();
-                ch.Transform.Position = slideXPos;
-                ch.UpdateCollider();
-                return;
-            }
-        }
-
-        // try sliding Y (horizontal only)
-        // We only try this if the push actually has an Y component
-        if (Math.Abs(push.Y) > 0.01f)
-        {
-            Vector2 slideYPos = ch.Transform.Position + new Vector2(0, push.Y);
-            if (!IsInsideWall(collider, slideYPos))
-            {
-                ch.SetLastTransform();
-                ch.Transform.Position = slideYPos;
-                ch.UpdateCollider();
-                return;
-            }
-        }
-
-        // 4) last resort: try smaller (scaled) pushes
-        // This helps a lot with corners: full push collides, but a partial push might be valid.
-        for (float t = 0.75f; t >= 0.1f; t -= 0.15f)
-        {
-            Vector2 scaledPos = ch.Transform.Position + push * t;
-            if (!IsInsideWall(collider, scaledPos))
-            {
-                ch.SetLastTransform();
-                ch.Transform.Position = scaledPos;
-                ch.UpdateCollider();
-                return;
-            }
-        }
-
-    }
-
-    // helper function for HandleCharacterCollision
-    // makes sure characters don't push each other in static objects
-    private bool IsInsideWall(ICollider collider, Vector2 newPos)
-    {
-        // create a temporary hitbox at the new position
-        // to see if the enemy will hit a wall or not
-        BoxCollider testBox = new BoxCollider(newPos, collider.Width, collider.Height, collider.Layer, collider.Owner);
-
-        // check nearby statics
-        var statics = StaticHash.QueryNearby(newPos + new Vector2(collider.Width/2f, collider.Height/2f), 5);
-
-
-        foreach (var s in statics)
-        {
-            // IGNORE things that don't block movement
-            if (s.Layer == CollisionLayer.SPAWNENEMIES ||
-                s.Layer == CollisionLayer.TERRAIN ||
-                s.Layer == CollisionLayer.AOE ||
-                s.Layer == CollisionLayer.INTERACT)
-            {
-                continue;
-            }
-            // If it hits ANYTHING else (Wall, Water, Destructible, etc.), it's a block.
-            if (s.Intersects(testBox))
-                return true;
-        }
-        return false;
-
-    }
-
-
     private void HandleCharacterProjectiles(ICollider c, ICollider d)
     {
         if (d.Layer != CollisionLayer.PROJECTILE || !c.Intersects(d))
@@ -904,14 +819,15 @@ public class CollisionManager
         _toRemoveColliders.Add(p.Collider);
     }
 
-    private void HandleCharacters(ICollider c, ICollider d)
+    private void HandleCharacters(ICollider c, ICollider d, GameTime gameTime)
     {
         if (c.Layer != CollisionLayer.CHARACTER && c.Layer != CollisionLayer.PLAYER)
         {
             return;
         }
 
-        HandleCharacterCollision(c, d);
+        List<(CharacterBase, CharacterBase)> charPairs = new();
+        HandleCharacterCollision(c, d, gameTime, charPairs);
         HandleCharacterProjectiles(c, d);
         // AOE damage handling
         if (d.Layer != CollisionLayer.AOE)
@@ -944,7 +860,6 @@ public class CollisionManager
 
         return; // don't run projectile logic
     }
-
     private void HandleTowers(ICollider c, ICollider d)
     {
         if (c.Layer != CollisionLayer.TOWER)
@@ -985,7 +900,7 @@ public class CollisionManager
         return; // don't run projectile logic
     }
 
-    private void HandleTerrain(ICollider c, HashSet<ICollider> statics)
+    private void HandleTerrain(ICollider c, List<ICollider> statics)
     {
         if (c.Owner is not Player player)
             return;
@@ -1028,8 +943,8 @@ public class CollisionManager
             }
         }
     }
-    public void Update(HashSet<Player> players, HashSet<ItemBase> items, HashSet<ProjectileBase> projectiles,
-        HashSet<AreaOfEffectBase> aoeAttacks, HashSet<CharacterBase> characters, List<Tram> trams, HashSet<ObjectBase> objects, List<Tower> towers)
+    public void Update(GameTime gameTime, HashSet<Player> players, List<ItemBase> items, List<ProjectileBase> projectiles,
+        List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters, List<Tram> trams, List<ObjectBase> objects, List<Tower> towers)
     {
         allDynamics.Clear();
         DynamicHash.Clear();
@@ -1044,31 +959,31 @@ public class CollisionManager
                 continue;
             }
 
-            var dynamics = DynamicHash.QueryNearby(c.Position, 1);
-            var statics = StaticHash.QueryNearby(c.Position, 2);
+            DynamicHash.QueryNearby(c.Position, 1, _nearbyDynamics);
+            StaticHash.QueryNearby(c.Position, 2, _nearbyStatics);
 
-            HandleDynamics(c, dynamics);
-            HandleStatics(c, statics);
-            HandleTerrain(c, statics);
+            HandleDynamics(c, _nearbyDynamics, gameTime);
+            HandleStatics(c, _nearbyStatics, gameTime);
+            HandleTerrain(c, _nearbyStatics);
         }
 
-        HashSet<ProjectileBase> removeProjectiles = new();
-        HashSet<ItemBase> removeItems = new();
-        HashSet<CharacterBase> removeCharacters = new();
-        List<Tower> removeTowers = new();
+        _removeProjectiles.Clear();
+        _removeItems.Clear();
+        _removeCharacters.Clear();
+        _removeTowers.Clear();
 
         foreach (var c in _toRemoveColliders)
         {
             switch (c.Owner)
             {
-                case ProjectileBase p: removeProjectiles.Add(p); break;
-                case ItemBase i: removeItems.Add(i); break;
-                case CharacterBase ch: removeCharacters.Add(ch); break;
-                case Tower t: removeTowers.Add(t); break;
+                case ProjectileBase p: _removeProjectiles.Add(p); break;
+                case ItemBase i: _removeItems.Add(i); break;
+                case CharacterBase ch: _removeCharacters.Add(ch); break;
+                case Tower t: _removeTowers.Add(t); break;
             }
         }
 
-        foreach (ProjectileBase p in removeProjectiles)
+        foreach (ProjectileBase p in _removeProjectiles)
         {
             if (_toRemoveColliders.Contains(p.Collider))
             { 
@@ -1076,7 +991,7 @@ public class CollisionManager
             }
         }
 
-        foreach (ItemBase i in removeItems)
+        foreach (ItemBase i in _removeItems)
         {
             if (_toRemoveColliders.Contains(i.Collider))
             {
@@ -1084,7 +999,7 @@ public class CollisionManager
             }
         }
 
-        foreach (CharacterBase ch in removeCharacters)
+        foreach (CharacterBase ch in _removeCharacters)
         {
             if (_toRemoveColliders.Contains(ch.Collider))
             {
@@ -1104,7 +1019,7 @@ public class CollisionManager
             _gameObjectManager.Statics.Remove((BoxCollider)c);
         }
 
-        foreach (ICollider c in removeTowers)
+        foreach (ICollider c in _removeTowers)
         {
             StaticHash.Remove(c);
             _gameObjectManager.Statics.Remove((BoxCollider)c);
@@ -1123,8 +1038,8 @@ public class CollisionManager
 
     // makes the hitboxes visible for when in the tech demo
     public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
-        Player player, HashSet<CharacterBase> characters,
-        HashSet<ItemBase> items, HashSet<ProjectileBase> projectiles, HashSet<AreaOfEffectBase> aoeAttacks, List<Tram> trams, HashSet<ObjectBase> objects)
+        Player player, List<CharacterBase> characters,
+        List<ItemBase> items, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks, List<Tram> trams, List<ObjectBase> objects)
     {
         foreach (var cell in StaticHash._cells)
         {
@@ -1134,7 +1049,6 @@ public class CollisionManager
                 {
                     continue;
                 }
-
                 var rect = new Rectangle(
                     (int)box.Position.X,
                     (int)box.Position.Y,
@@ -1158,8 +1072,10 @@ public class CollisionManager
         // Player hitbox
         if (player?.Collider != null)
         {
-            var playerRect = GetColliderRectangle(player.Collider);
-            DrawRectOutline(spriteBatch, pixel, playerRect, Color.Red * 0.7f);
+            // var playerRect = GetColliderRectangle(player.Collider);
+            var playerCirc = GetColliderCircle(player.Collider);
+            // DrawRectOutline(spriteBatch, pixel, playerRect, Color.Red * 0.7f);
+            DrawCircleOutline(spriteBatch, pixel, player.Collider.Center(), playerCirc.Radius, Color.Red * 0.7f);
 
             // Draw a small indicator for player position
             spriteBatch.Draw(pixel,
@@ -1176,8 +1092,11 @@ public class CollisionManager
                 continue;
             }
 
-            var charRect = GetColliderRectangle(character.Collider);
-            DrawRectOutline(spriteBatch, pixel, charRect, Color.Red * 0.7f);
+            var charCirc = GetColliderCircle(character.Collider);
+            DrawCircleOutline(spriteBatch, pixel, character.Collider.Center(), charCirc.Radius, Color.Red * 0.7f);
+
+            // var charRect = GetColliderRectangle(character.Collider);
+            // DrawRectOutline(spriteBatch, pixel, charRect, Color.Red * 0.7f);
         }
 
         // Item hitboxes
@@ -1237,6 +1156,20 @@ public class CollisionManager
         return Rectangle.Empty;
     }
 
+    private Circle GetColliderCircle(ICollider collider)
+    {
+        if (collider is CircleCollider circle)
+        {
+            return new Circle(
+                circle.Position.X,
+                circle.Position.Y,
+                circle.Radius
+            );
+        }
+
+        return Circle.Empty;
+    }
+
     private void DrawRectOutline(SpriteBatch spriteBatch, Texture2D pixel, Rectangle rect, Color color)
     {
         if (rect.Width <= 0 || rect.Height <= 0) return;
@@ -1249,6 +1182,56 @@ public class CollisionManager
         spriteBatch.Draw(pixel, new Rectangle(rect.Left, rect.Top, 1, rect.Height), color);
         // right
         spriteBatch.Draw(pixel, new Rectangle(rect.Right - 1, rect.Top, 1, rect.Height), color);
+    }
+
+    private void DrawCircleOutline(
+        SpriteBatch spriteBatch,
+        Texture2D pixel,
+        Vector2 center,
+        float radius,
+        Color color,
+        int segments = 32)
+    {
+        if (radius <= 0) return;
+
+        Vector2 prevPoint = center + new Vector2(radius, 0f);
+
+        for (int i = 1; i <= segments; i++)
+        {
+            float angle = MathHelper.TwoPi * i / segments;
+            Vector2 nextPoint = center + new Vector2(
+                MathF.Cos(angle) * radius,
+                MathF.Sin(angle) * radius
+            );
+            DrawLine(spriteBatch, pixel, prevPoint, nextPoint, color);
+            prevPoint = nextPoint;
+        }
+    }
+
+    private void DrawLine(
+        SpriteBatch spriteBatch,
+        Texture2D pixel,
+        Vector2 start,
+        Vector2 end,
+        Color color)
+    {
+        Vector2 edge = end - start;
+        float angle = MathF.Atan2(edge.Y, edge.X);
+
+        spriteBatch.Draw(
+            pixel,
+            new Rectangle(
+                (int)start.X,
+                (int)start.Y,
+                (int)edge.Length(),
+                1),
+            null,
+            color,
+            angle,
+            Vector2.Zero,
+            SpriteEffects.None,
+            0
+        );
     }
 
     private void LoadTerrainLayer(string layerName, TerrainType type)
@@ -1319,6 +1302,32 @@ public class CollisionManager
 
             ObjectSpawns.Add(new TiledObjectInfo(rect, obj.Properties));
         }
+    }
+    public void Unload()
+    {
+        OnItemPickup = null;
+        OnProjectileHit = null;
+        OnCharacterCollision = null;
+        OnAOEHit = null;
+        OnTramHit = null;
+
+        DynamicHash?.Clear();
+        StaticHash?.Clear();
+
+        allDynamics.Clear();
+        activeDynamics.Clear();
+
+        _nearbyDynamics.Clear();
+        _nearbyStatics.Clear();
+
+        _toRemoveColliders.Clear();
+        _toRemoveStaticColliders.Clear();
+        _toUpdateWalkableRects.Clear();
+
+        ObjectSpawns.Clear();
+        PathGrid = null;
+        _baseWalkableGrid = null;
+        TiledMap = null;
     }
 
     private void LoadWorldBorderCollision()

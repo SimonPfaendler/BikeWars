@@ -20,7 +20,6 @@ using BikeWars.Entities;
 using BikeWars.Utilities;
 using System.Linq;
 
-
 namespace BikeWars.Content.managers;
 public class GameObjectManager
 {
@@ -33,27 +32,28 @@ public class GameObjectManager
     private Player? _player2 {get; set;}
     public Player? Player2{get => _player2; set => _player2 = value;}
 
-    private HashSet<CharacterBase> _characters {get; set;}
-    public HashSet<CharacterBase> Characters {get => _characters;}
+    private List<CharacterBase> _characters {get; set;}
+    public List<CharacterBase> Characters {get => _characters;}
 
     private List<Tower> _towers {get; set;}
     public List<Tower> Towers {get => _towers;}
 
-    private readonly HashSet<ItemBase> _items = new();
-    public HashSet<ItemBase> Items => _items;
-    private readonly HashSet<ObjectBase> _objects = new();
-    public HashSet<ObjectBase> Objects => _objects;
 
-    private HashSet<BoxCollider> _statics {get; set;}
-    public HashSet<BoxCollider> Statics {get => _statics;}
+    private readonly List<ItemBase> _items = new();
+    public List<ItemBase> Items => _items;
+    private readonly List<ObjectBase> _objects = new();
+    public List<ObjectBase> Objects => _objects;
 
-    private HashSet<ProjectileBase> _projectiles {get; set;}
-    public HashSet<ProjectileBase> Projectiles {get => _projectiles;}
+    private List<BoxCollider> _statics {get; set;}
+    public List<BoxCollider> Statics {get => _statics;}
 
-    private HashSet<AreaOfEffectBase> _aoeAttacks = new();
+    private List<ProjectileBase> _projectiles {get; set;}
+    public List<ProjectileBase> Projectiles {get => _projectiles;}
+
+    private List<AreaOfEffectBase> _aoeAttacks = new();
 
 
-    public HashSet<AreaOfEffectBase> AOEAttacks => _aoeAttacks;
+    public List<AreaOfEffectBase> AOEAttacks => _aoeAttacks;
 
     private HashSet<DamageNumber> _damageNumbers = new HashSet<DamageNumber>();
     private SpriteFont? _damageFont;
@@ -70,10 +70,10 @@ public class GameObjectManager
         Player2 = player2;
         _contentManager = content;
 
-        _characters = new HashSet<CharacterBase>();
-        _items = new HashSet<ItemBase>();
-        _statics = new HashSet<BoxCollider>();
-        _projectiles = new HashSet<ProjectileBase>();
+        _characters = new List<CharacterBase>();
+        _items = new List<ItemBase>();
+        _statics = new List<BoxCollider>();
+        _projectiles = new List<ProjectileBase>();
         _towers = new List<Tower>();
 
         if (Player1 != null)
@@ -286,7 +286,20 @@ public class GameObjectManager
         {
             i.Update(gameTime);
         }
-        _items.RemoveWhere(i => i is Beer b && b.IsExpired);
+        for (int i = _items.Count - 1; i >= 0; i--)
+        {
+            var item = _items[i];
+            item.Update(gameTime);
+
+            if (item is Beer b)
+            {
+                if (b.IsExpired)
+                {
+                    _items.RemoveAt(i);
+                }
+            }
+        }
+
         foreach (ObjectBase o in Objects)
         {
             o.Update(gameTime);
@@ -295,18 +308,34 @@ public class GameObjectManager
         {
             p.Update(gameTime);
         }
-        Projectiles.RemoveWhere(p => p is ThrowObject lp && lp.IsFinished);
-        _aoeAttacks.RemoveWhere(aoe =>
+
+        for (int i = Projectiles.Count - 1; i >= 0; i--)
         {
+            var lp = Projectiles[i];
+            lp.Update(gameTime);
+
+            if (lp is ThrowObject to)
+            {
+                if (to.IsFinished)
+                {
+                    Projectiles.RemoveAt(i);
+                }
+            }
+        }
+        for (int i = _aoeAttacks.Count - 1; i >= 0; i--)
+        {
+            var aoe = _aoeAttacks[i];
             aoe.Update(gameTime);
-            return aoe.IsExpired;
-        });
+            if (aoe.IsExpired)
+            {
+                _aoeAttacks.RemoveAt(i);
+            }
+        }
         foreach (var tram in _trams)
         {
             tram.Update(gameTime);
         }
         _trams.RemoveWhere(t => t.IsExpired);
-
         _damageNumbers.RemoveWhere(dn =>
         {
             dn.Update(gameTime);
@@ -496,7 +525,7 @@ public class GameObjectManager
         AddItem(beer);
         return beer;
     }
-    
+
 
     public void RequestScreenShake(float intensity, float duration)
     {
@@ -656,5 +685,19 @@ public class GameObjectManager
             default:
                 return null;
         }
+    }
+    public void Unload()
+    {
+        OnTookDamage = null;
+        OnCharacterDied = null;
+        OnScreenShakeRequested = null;
+
+        Characters.Clear();
+        Items.Clear();
+        Projectiles.Clear();
+        AOEAttacks.Clear();
+        Trams.Clear();
+
+        Statics.Clear();
     }
 }

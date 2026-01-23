@@ -48,10 +48,10 @@ public static class SaveLoad
         public bool IsGameTimerPaused { get; set; } = false;
         public float PlayerX { get; set; } = _worldBounds;
         public float PlayerY { get; set; } = _worldBounds;
-        public HashSet<ProjectileSaveModel> Projectiles {get; set;} = new();
-        public HashSet<CharacterSaveModel> Characters {get; set;} = new();
-        public HashSet<ItemSaveModel> Items {get; set;} = new();
-        public HashSet<ObjectSaveModel> Objects { get; set; } = new();
+        public List<ProjectileSaveModel> Projectiles {get; set;} = new();
+        public List<CharacterSaveModel> Characters {get; set;} = new();
+        public List<ItemSaveModel> Items {get; set;} = new();
+        public List<ObjectSaveModel> Objects { get; set; } = new();
         public List<Statistic> Statistics{get; set;} = new();
         public Statistic Statistic{get; set;} = new();
         public int GameMode { get; set; } = 0;
@@ -109,6 +109,8 @@ public static class SaveLoad
 
         public PointSave Size {get;set;}  = new();
 
+        public float Radius {get;set;}
+
         public CharacterSaveModel() {}
 
         public CharacterSaveModel(TYPES type, Vector2 position, Point size)
@@ -116,6 +118,13 @@ public static class SaveLoad
             Type = type;
             Position = new Vector2Save(position);
             Size = new PointSave(size);
+        }
+
+        public CharacterSaveModel(TYPES type, Vector2 position, float radius)
+        {
+            Type = type;
+            Position = new Vector2Save(position);
+            Radius = radius;
         }
     }
 
@@ -126,11 +135,11 @@ public static class SaveLoad
         public Vector2Save Position {get;set;}  = new();
 
         public PointSave Size {get;set;}  = new();
-        
+
         public bool? IsOpen { get; set; }
-        
+
         public string? Item { get; set; }
-        
+
         public ItemSaveModel() { }
 
         public ItemSaveModel(TYPES type, Vector2 position, Point size)
@@ -200,7 +209,7 @@ public static class SaveLoad
                 playerX = gameObjectManager.Player1.Transform.Position.X;
                 playerY = gameObjectManager.Player1.Transform.Position.Y;
             }
-            
+
             // serialize the current info into JSON text
             GameState state = new GameState
             {
@@ -329,7 +338,7 @@ public static class SaveLoad
             _ => throw new NotSupportedException($"Item type {item.GetType().Name} is not supported for saving.")
         };
     }
-    
+
     private static ObjectSaveModel MakeObjectSaveModel(ObjectBase obj)
     {
         return obj switch
@@ -344,10 +353,10 @@ public static class SaveLoad
             },
             BikeShop bs => new ObjectSaveModel(TYPES.BIKESHOP, obj.Transform.Position, obj.Transform.Size),
             _ => throw new NotSupportedException($"Object type {obj.GetType().Name} is not supported for saving.")
-            
+
         };
     }
-    
+
     private static CharacterSaveModel MakeCharacterSaveModel(CharacterBase character)
     {
         return character switch
@@ -358,18 +367,18 @@ public static class SaveLoad
             _ => throw new NotSupportedException($"Character type {character.GetType().Name} is not supported for saving.")
         };
     }
-    private static HashSet<ProjectileSaveModel> MakeProjectileSaveList(HashSet<ProjectileBase> pList)
+    private static List<ProjectileSaveModel> MakeProjectileSaveList(List<ProjectileBase> pList)
     {
-        HashSet<ProjectileSaveModel> crtList = new HashSet<ProjectileSaveModel>();
+        List<ProjectileSaveModel> crtList = new List<ProjectileSaveModel>();
         foreach (var p in pList)
         {
             crtList.Add(MakeProjectileSaveModel(p));
         }
         return crtList;
     }
-    private static HashSet<CharacterSaveModel> MakeCharacterSaveList(HashSet<CharacterBase> pList)
+    private static List<CharacterSaveModel> MakeCharacterSaveList(List<CharacterBase> pList)
     {
-        HashSet<CharacterSaveModel> crtList = new HashSet<CharacterSaveModel>();
+        List<CharacterSaveModel> crtList = new List<CharacterSaveModel>();
         foreach (var p in pList)
         {
             crtList.Add(MakeCharacterSaveModel(p));
@@ -377,19 +386,19 @@ public static class SaveLoad
         return crtList;
     }
 
-    private static HashSet<ItemSaveModel> MakeItemSaveList(HashSet<ItemBase> pList)
+    private static List<ItemSaveModel> MakeItemSaveList(List<ItemBase> pList)
     {
-        HashSet<ItemSaveModel> crtList = new HashSet<ItemSaveModel>();
+        List<ItemSaveModel> crtList = new List<ItemSaveModel>();
         foreach (var p in pList)
         {
             crtList.Add(MakeItemSaveModel(p));
         }
         return crtList;
     }
-    
-    private static HashSet<ObjectSaveModel> MakeObjectSaveList(HashSet<ObjectBase> list)
+
+    private static List<ObjectSaveModel> MakeObjectSaveList(List<ObjectBase> list)
     {
-        var set = new HashSet<ObjectSaveModel>();
+        var set = new List<ObjectSaveModel>();
         foreach (var o in list)
             set.Add(MakeObjectSaveModel(o));
         return set;

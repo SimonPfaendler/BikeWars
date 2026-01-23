@@ -3,7 +3,7 @@ using BikeWars.Content.engine;
 using BikeWars.Content.engine.input;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.engine.Audio;
-using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace BikeWars.Content.managers
 {
@@ -19,18 +19,18 @@ namespace BikeWars.Content.managers
         public Player Player2 { get; private set; }
         public Camera2D Camera { get; private set; }
 
-        public void Initialize(GameMode mode, Rectangle worldBounds, AudioService audioService, bool isTechDemo)
+        public PlayerManager(Viewport viewport, GameMode mode, Rectangle worldBounds, AudioService audioService, bool isTechDemo)
         {
-            Game1 game = Game1.Instance;
             Camera = new Camera2D(
-                game.GraphicsDevice.Viewport.Width,
-                game.GraphicsDevice.Viewport.Height,
+                viewport.Width,
+                viewport.Height,
                 worldBounds
             );
 
             // Player 1 - Keyboard
             var inputP1 = new KeyboardPlayerInput(Camera);
-            Player1 = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(32, 32), audioService, inputP1);
+            // Player1 = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), new Point(24, 24), new Point(32,32), audioService, inputP1);
+            Player1 = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), 15, new Point(32,32), audioService, inputP1);
 
             if (isTechDemo)
             {
@@ -38,16 +38,18 @@ namespace BikeWars.Content.managers
             }
 
             // Player 2 - Gamepad
-            if (mode == GameMode.MultiPlayer)
+            if (mode != GameMode.MultiPlayer)
             {
-                // Assign Player 2 to the second controller. Player 1 starts on Keyboard but can switch to Pad 1.
-                var inputP2 = new GamepadPlayerInput(PlayerIndex.Two);
-                Player2 = new Player(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2), new Point(32, 32), audioService, inputP2, "Character2");
-                
-                if (isTechDemo)
-                {
-                    Player2.IsGodMode = true;
-                }
+                return;
+            }
+            // Assign Player 2 to the second controller. Player 1 starts on Keyboard but can switch to Pad 1.
+            var inputP2 = new GamepadPlayerInput(PlayerIndex.Two);
+            // Player2 = new Player(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2), new Point(24, 24), new Point(32, 32), audioService, inputP2, "Character2");
+            Player2 = new Player(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2), 12, new Point(32, 32), audioService, inputP2, "Character2");
+
+            if (isTechDemo)
+            {
+                Player2.IsGodMode = true;
             }
         }
     }

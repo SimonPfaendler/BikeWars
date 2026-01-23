@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework.Content;
@@ -10,11 +9,8 @@ using Microsoft.Xna.Framework.Input;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.components;
 using BikeWars.Content.entities.interfaces;
-using BikeWars.Content.engine;
 using BikeWars.Utilities;
 using BikeWars.Content.entities.npcharacters;
-using BikeWars.Utilities;
-
 
 // adds debugging tools for testing
 // like allowing the dev to spawn a large groups of enemies
@@ -22,7 +18,6 @@ using BikeWars.Utilities;
 
 namespace BikeWars.Content.screens
 {
-
     public enum EnemyType
     {
         Hobo,
@@ -43,96 +38,86 @@ namespace BikeWars.Content.screens
         private MenuButton _spawnTramBtn;
         private MenuButton _spawnEnemyCircleBtn;
         private MenuButton _spawnDozentBtn;
-        
         private readonly List<RaveGroup> _raveGroups = new List<RaveGroup>();
-
-        private Texture2D _buttonTex;
-        private SpriteFont _font;
         private MouseState _prevMouse;
 
 
         public TechDemoScreen(AudioService audioService)
             : base(audioService, GameMode.SinglePlayer, true)
         {
-            LoadContent(Game1.Instance.Content);
         }
 
-        public override void LoadContent(ContentManager content)
+        public override void LoadContent(ContentManager content, GraphicsDevice gd)
         {
-            base.LoadContent(content);
-
-            _font = content.Load<SpriteFont>("assets/fonts/Arial");
+            base.LoadContent(content, gd);
 
             // creates simple button texture
-            _buttonTex = new Texture2D(Game1.Instance.GraphicsDevice, 1, 1);
-            _buttonTex.SetData(new[] { Color.White });
-
             // makes the 3 tech-demo buttons
             _spawnHoboBtn = new MenuButton(
                 id: 1,
-                texture: _buttonTex,
+                texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(30, 150, 200, 60),
                 text: "Spawn 100 Hobos",
-                font: _font,
+                font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
 
             _spawnBikeBtn = new MenuButton(
                 id: 2,
-                texture: _buttonTex,
+                texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(30, 220, 200, 60),
                 text: "Spawn 15 Thieves",
-                font: _font,
+                font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
 
             _spawnDogBtn = new MenuButton(
                 id: 1,
-                texture: _buttonTex,
+                texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(30, 290, 200, 60),
                 text: "Spawn 10 Dogs",
-                font: _font,
+                font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
 
             _spawnKamikazeBtn = new MenuButton(
                 id: 1,
-                texture: _buttonTex,
+                texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(30, 360, 200, 60),
                 text: "Spawn 1 Opa",
-                font: _font,
+                font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
-            
+
             _spawnTramBtn = new MenuButton(
                 id: 1,
-                texture: _buttonTex,
+                texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(30, 430, 200, 60),
                 text: "Spawn 1 Tram",
-                font: _font,
+                font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
-            
+
             _spawnEnemyCircleBtn = new MenuButton(
                 id: 6,
-                texture: _buttonTex,
+                texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(30, 500, 200, 60),
                 text: "Spawn Enemy Circle",
-                font: _font,
+                font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
-            
+
             _spawnDozentBtn = new MenuButton(
                 id: 6,
-                texture: _buttonTex,
+                texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(30, 570, 200, 60),
                 text: "Spawn 10 Dozents",
-                font: _font,
+                font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
-            
+
         }
-        
+
         protected override void OnTechDemoReset()
         {
             _raveGroups.Clear();
@@ -140,7 +125,7 @@ namespace BikeWars.Content.screens
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            
+
             for (int i = _raveGroups.Count - 1; i >= 0; i--)
             {
                 _raveGroups[i].Update(gameTime);
@@ -160,7 +145,7 @@ namespace BikeWars.Content.screens
 
             if(_spawnHoboBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Hobo, 100);
-            
+
             if(_spawnDozentBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Dozent, 10);
 
@@ -175,10 +160,10 @@ namespace BikeWars.Content.screens
 
             if (_spawnTramBtn.IsClicked(mouse, _prevMouse))
                  _spawnManager.SpawnTram(1500f);
-            
+
             if (_spawnEnemyCircleBtn.IsClicked(mouse, _prevMouse))
                 SpawnRaveCircle(count: 16, startRadius: 200f);
-            
+
             _prevMouse = mouse;
         }
 
@@ -194,8 +179,8 @@ namespace BikeWars.Content.screens
                 // Try up to 20 times to find a walkable spawn tile
                 for (int attempt = 0; attempt < 20; attempt++)
                 {
-                    float spawnX = RandomUtil.NextInt(-300, 301);
-                    float spawnY = RandomUtil.NextInt(-300, 301);
+                    float spawnX = RandomUtil.NextInt(-500, 501);
+                    float spawnY = RandomUtil.NextInt(-500, 501);
 
                     var candidate = playerPos + new Vector2(spawnX, spawnY);
                     var grid = CollisionManager.WorldToGrid(candidate);
@@ -219,24 +204,24 @@ namespace BikeWars.Content.screens
                 switch (type)
                 {
                     case EnemyType.Hobo:
-                        enemy = new Hobo(spawnPos, new Point(32, 32), AudioService, PathFinding,
+                        enemy = new Hobo(spawnPos, 15, AudioService, PathFinding,
                             CollisionManager, RepathScheduler);
                         break;
 
                     case EnemyType.BikeThief:
-                        enemy = new BikeThief(spawnPos, new Point(32, 32), AudioService, PathFinding,
+                        enemy = new BikeThief(spawnPos, 15, AudioService, PathFinding,
                             CollisionManager, RepathScheduler);
                         break;
                     case EnemyType.Dog:
-                        enemy = new Dog(spawnPos, new Point(32, 32), AudioService, PathFinding,
+                        enemy = new Dog(spawnPos, 13, AudioService, PathFinding,
                             CollisionManager, RepathScheduler);
                         break;
                     case EnemyType.Kamikaze:
-                        enemy = new KamikazeOpa(spawnPos, new Point(32, 32), AudioService, PathFinding,
+                        enemy = new KamikazeOpa(spawnPos, 13, AudioService, PathFinding,
                             CollisionManager, GameObjectManager, RepathScheduler);
                         break;
                     case EnemyType.Dozent:
-                        enemy = new Dozent(spawnPos, new Point(32, 32), AudioService, PathFinding,
+                        enemy = new Dozent(spawnPos, 17, AudioService, PathFinding,
                             CollisionManager, RepathScheduler);
                         break;
 
@@ -246,7 +231,7 @@ namespace BikeWars.Content.screens
                 GameObjectManager.AddCharacter(enemy);
             }
         }
-        
+
         // spawn the circle
         private void SpawnRaveCircle(int count, float startRadius)
         {
@@ -256,10 +241,10 @@ namespace BikeWars.Content.screens
             var group = RaveGroup.SpawnAroundPlayer(
                 count: count,
                 startRadius: startRadius,
-                raverSize: new Point(32, 32),
+                raverSize: 17,
                 audioService: AudioService,
                 gameObjectManager: GameObjectManager,
-                collisionManager: CollisionManager,   
+                collisionManager: CollisionManager,
                 shrinkSpeed: 25f,
                 minRadius: 70f
             );
@@ -270,20 +255,17 @@ namespace BikeWars.Content.screens
 
 
         // draws the buttons
-        public override void Draw(GameTime gameTime)
+        public override void Draw(GameTime gameTime, SpriteBatch sb)
         {
-            base.Draw(gameTime);
-
-            var spriteBatch = Game1.Instance.SpriteBatch;
-
-            spriteBatch.Begin();
-            _spawnHoboBtn.Draw(spriteBatch);
-            _spawnBikeBtn.Draw(spriteBatch);
-            _spawnDogBtn.Draw(spriteBatch);
-            _spawnKamikazeBtn.Draw(spriteBatch);
-            _spawnTramBtn.Draw(spriteBatch);
-            _spawnEnemyCircleBtn.Draw(spriteBatch);
-            spriteBatch.End();
+            base.Draw(gameTime, sb);
+            sb.Begin();
+            _spawnHoboBtn.Draw(sb);
+            _spawnBikeBtn.Draw(sb);
+            _spawnDogBtn.Draw(sb);
+            _spawnKamikazeBtn.Draw(sb);
+            _spawnTramBtn.Draw(sb);
+            _spawnEnemyCircleBtn.Draw(sb);
+            sb.End();
         }
     }
 }
