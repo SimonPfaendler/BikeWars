@@ -30,6 +30,7 @@ namespace BikeWars.Entities.Characters
         public Bike CurrentBike => movement?.CrtBike;
         private IPlayerInput _input;
         private CooldownWithDuration sprint { get; }
+        public Vector2 GazeDirection { get; private set; }
         public int XpCounter { get; private set; } = 0;
         public int XpLevelUp = 10;
         public int CurrentLevel { get; private set; } = 1;
@@ -190,13 +191,20 @@ namespace BikeWars.Entities.Characters
                     return true;
                 case WeaponType.BeerThrow:
                     if (!_isThrowTargetInRange) return false;
-                    Attributes.AttackCooldown = 0.1f;
-                    ThrowBeer?.Invoke(_mouseWorldPos);
-                    _audio.Sounds.Play(AudioAssets.WoodCrack);
-                    Inventory.RemoveAt(_inventoryIndexBeer);
-                    _beerThrowSelected = false;
-                    CurrentWeapon = _weaponBefore;
-                    return true;
+                    if (_beerThrowSelected)
+                    {
+                        Attributes.AttackCooldown = 0.1f;
+                        ThrowBeer?.Invoke(_mouseWorldPos);
+                        _audio.Sounds.Play(AudioAssets.WoodCrack);
+                        Inventory.RemoveAt(_inventoryIndexBeer);
+                        _beerThrowSelected = false;
+                        CurrentWeapon = _weaponBefore;
+                        return true;
+                    }
+
+                    return false;
+                    
+                    
             }
 
             return false;
@@ -348,6 +356,8 @@ namespace BikeWars.Entities.Characters
             HandleGhostTrail(gameTime);
             HandleSwitchMovement();
             UpdateHitFlash(gameTime);
+            UpdateCollider();
+            Beer.UpdateCooldown(gameTime);
         }
 
         public override bool IsCharacterMoving()

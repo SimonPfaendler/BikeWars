@@ -133,7 +133,7 @@ namespace BikeWars.Content.screens
 
 
         }
-        public virtual void LoadContent(ContentManager content, GraphicsDevice gd)
+               public virtual void LoadContent(ContentManager content, GraphicsDevice gd)
         {
             // _contentManager = content; // We need this to add it later to spawning entities. (Maybe there is another possible implementation)
             // Content = content;
@@ -186,11 +186,6 @@ namespace BikeWars.Content.screens
 
             // Tiled Map
             _collisionManager.LoadContent(content);
-
-            _collisionManager.OnBeerLanded += pos =>
-            {
-                _gameObjectManager.SpawnLandedBeer(pos);
-            };
 
             // pathfinding object
             _pathFinding = new PathFinding(_collisionManager.PathGrid);
@@ -763,7 +758,7 @@ namespace BikeWars.Content.screens
             DrawTimer(sb, gameTime);
 
             var player = _gameObjectManager.Player1;
-            bool showSelection = (InputSettings.Player1Control== ControlType.Controller);
+            bool showSelection = true;
             player.Inventory.Draw(sb, RenderPrimitives.Pixel, player.SelectedInventoryIndex, showSelection);
             _hud.Draw(sb, _gameObjectManager.Player1);
 
