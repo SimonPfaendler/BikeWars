@@ -22,8 +22,8 @@ public class AudioService
 
     public void LoadContent()
     {
-        // Sounds.Load(content, AudioAssets.SoundEffectPaths);
-        // Music.Load(content, AudioAssets.SongPaths);
+        Sounds.Load(AudioAssets.SoundEffectPaths);
+        Music.Load(AudioAssets.SongPaths);
     }
 
     public void PlaySound(string soundName)
