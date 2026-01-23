@@ -33,16 +33,18 @@ public class Dozent: CharacterBase, IWorldAudioAware
             _collisionManager = collisionManager;
             _repathScheduler = repathScheduler;
 
-            Attributes = new CharacterAttributes(this, 200, 0, 40, 2f, false);
+            Attributes = new CharacterAttributes(this, 300, 0, 80, 2f, false);
             Transform = new Transform(start, size);
+            LastTransform = new Transform(start, size);
+            RenderTransform = new Transform(start, new Point(32, 32));
             Speed = 130f;
             Movement = new EnemyMovement(canMove: true, isMoving: false, pathFinding: _pathFinding,
                 gridMapper: _collisionManager, repathScheduler: _repathScheduler);
-            _idleAnimation = SpriteManager.GetAnimation("Hobo_Idle");
-            _walkLeftAnimation = SpriteManager.GetAnimation("Hobo_WalkLeft");
-            _walkRightAnimation = SpriteManager.GetAnimation("Hobo_WalkRight");
-            _walkDownAnimation = SpriteManager.GetAnimation("Hobo_WalkDown");
-            _walkUpAnimation = SpriteManager.GetAnimation("Hobo_WalkUp");
+            _idleAnimation = SpriteManager.GetAnimation("Dozent_Idle");
+            _walkLeftAnimation = SpriteManager.GetAnimation("Dozent_WalkLeft");
+            _walkRightAnimation = SpriteManager.GetAnimation("Dozent_WalkRight");
+            _walkDownAnimation = SpriteManager.GetAnimation("Dozent_WalkDown");
+            _walkUpAnimation = SpriteManager.GetAnimation("Dozent_WalkUp");
             _currentAnimation = _idleAnimation;
             UpdateCollider();
         }
@@ -61,6 +63,7 @@ public class Dozent: CharacterBase, IWorldAudioAware
             }
             Movement.HandleMovement(gameTime);
             HandleSound(Movement.IsMoving);
+            LastTransform = new Transform(Transform.Position, Transform.Size);
 
             Vector2 direction = Movement.Direction;
             if (Movement.IsMoving)
@@ -105,7 +108,7 @@ public class Dozent: CharacterBase, IWorldAudioAware
                 return;
 
             Color drawColor = (_hitFlashTimer > 0f) ? _hitColor : Color.White;
-            _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, 0f, _renderScale, drawColor);
+            _currentAnimation.Draw(spriteBatch, RenderTransform.Position, RenderTransform.Size, 0f, _renderScale, drawColor);
         }
 
         public void SetWorldAudioManager(WorldAudioManager manager)
