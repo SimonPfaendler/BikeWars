@@ -6,6 +6,7 @@ using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.managers;
 using BikeWars.Content.entities.special_attacks;
+using System;
 
 namespace BikeWars.Entities.Characters
 {
@@ -70,7 +71,6 @@ namespace BikeWars.Entities.Characters
             HandleSound(Movement.IsMoving);
 
             Vector2 direction = Movement.Direction;
-            // LastTransform = new Transform(new Vector2(Transform.Position.X - direction.X, Transform.Position.Y - direction.Y), Transform.Size);
 
             if (Movement.IsMoving)
             {
@@ -78,7 +78,7 @@ namespace BikeWars.Entities.Characters
                 direction.Normalize();
                 Transform.Position += direction * Speed * delta;
 
-                if (System.Math.Abs(direction.X) > System.Math.Abs(direction.Y))
+                if (Math.Abs(direction.X) > Math.Abs(direction.Y))
                 {
                     _currentAnimation = (direction.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
                 }
@@ -152,7 +152,7 @@ namespace BikeWars.Entities.Characters
             if (_currentAnimation == null) return;
 
             Color drawColor = (_hitFlashTimer > 0f) ? _hitColor : Color.White;
-            _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, 0f, _renderScale, drawColor);
+            _currentAnimation.Draw(spriteBatch, RenderTransform.Position, RenderTransform.Size, 0f, _renderScale, drawColor);
         }
 
         public void SetWorldAudioManager(WorldAudioManager manager)
