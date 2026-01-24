@@ -21,6 +21,8 @@ public class Dozent: CharacterBase, IWorldAudioAware
         private readonly PathFinding _pathFinding;
         private readonly CollisionManager _collisionManager;
         private readonly RepathScheduler _repathScheduler;
+        private float _attackAnimationTimer = 0f;
+        private const float AttackAnimationDuration = 2f;
 
         protected override string WalkingSound => AudioAssets.Walking;
 
@@ -76,28 +78,35 @@ public class Dozent: CharacterBase, IWorldAudioAware
                     Transform.Position += direction * Speed * delta;
                 }
 
-                if (System.Math.Abs(direction.X) > System.Math.Abs(direction.Y))
+                if (_attackAnimationTimer > 0f)
                 {
+                    _attackAnimationTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-                    _currentAnimation = (direction.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
+                    _currentAnimation = _idleAnimation;
                 }
                 else
                 {
 
-                    _currentAnimation = (direction.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
+                    if (System.Math.Abs(direction.X) > System.Math.Abs(direction.Y))
+                    {
+
+                        _currentAnimation = (direction.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
+                    }
+                    else
+                    {
+
+                        _currentAnimation = (direction.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
+                    }
                 }
-            }
-            else
-            {
-                _currentAnimation = _idleAnimation;
-            }
 
-            if (_currentAnimation != null)
-            {
-                _currentAnimation.Update(gameTime, Movement.IsMoving);
-            }
 
-            UpdateCollider();
+                if (_currentAnimation != null)
+                {
+                    _currentAnimation.Update(gameTime, Movement.IsMoving);
+                }
+
+                UpdateCollider();
+            }
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -125,5 +134,7 @@ public class Dozent: CharacterBase, IWorldAudioAware
             if (!CanAttack()) return;
             base.Attack(target);
             _audio.Sounds.Play(AudioAssets.Punch);
+            _attackAnimationTimer = AttackAnimationDuration;
+            _currentAnimation = _idleAnimation;
         }
 }

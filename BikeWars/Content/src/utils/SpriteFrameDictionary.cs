@@ -173,7 +173,7 @@ namespace BikeWars.Content.utils
              AnimationFrames["KamikazeOpa_Death"] = GetFramesFromAtlas("e4_kamikazeopa_death_animation.png", 9, 1);
              
              // Dozent
-             AnimationFrames["Dozent_Idle"] = GetFramesFromAtlas("e5_dozent_down2.png", 1, 1);
+             AnimationFrames["Dozent_Idle"] = GetFramesFromAtlas("e5_dozent_attack.png", 1, 1);
              var dozentLeft = GetFramesFromAtlas("e5_dozent_left1.png", 1, 1);
              dozentLeft.AddRange(GetFramesFromAtlas("e5_dozent_left2.png", 1, 1));
              dozentLeft.AddRange(GetFramesFromAtlas("e5_dozent_left3.png", 1, 1));
