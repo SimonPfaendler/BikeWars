@@ -13,6 +13,7 @@ using BikeWars.Content.entities.MapObjects;
 using BikeWars.Content.managers;
 using BikeWars.Entities.Characters.MapObjects;
 using BikeWars.Utilities;
+using BikeWars.Content.components;
 
 // ============================================================
 // Player.cs
