@@ -5,6 +5,7 @@ using BikeWars.Content.engine.Audio;
 using BikeWars.Content.entities.items;
 using BikeWars.Utilities;
 using Microsoft.Xna.Framework;
+using BikeWars.Entities;
 
 namespace BikeWars.Content.managers;
 
@@ -42,6 +43,11 @@ public class CombatManager
             return;
         }
         if (target == projectile.Owner) return;
+
+        // Friendly Fire Protection: Towers should not damage Players
+        if (projectile.Owner is TowerAlly && target is Player) return;
+        if (projectile.Owner is Tower && target is Player) return; // General check for base Tower class
+
 
         // Crit Logic
         int damage = projectile.Damage;

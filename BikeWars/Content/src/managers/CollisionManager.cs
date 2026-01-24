@@ -24,8 +24,8 @@ public class CollisionManager
 {
     // Events that can be followed by other classes
     public event Action<Player, ItemBase> OnItemPickup;
-    public event Action<Player, TowerAlly> OnTowerInteraction; // Should be used that the tower will interact // TODOJL I think Player is not necessary here
-    public event Action<Player, ObjectBase> OnObjectInteraction; // Will be used for the bikeshop too
+    public event Action<Player, TowerAlly> OnTowerInteraction;
+    public event Action<Player, ObjectBase> OnObjectInteraction;
     public event Action<CharacterBase, ProjectileBase> OnProjectileHit;
     public event Action<CharacterBase, CharacterBase> OnCharacterCollision;
     
@@ -766,6 +766,8 @@ public class CollisionManager
 
         // Ignore self-hit
         if (c.Owner == p.Owner) return;
+        
+        if (p.Owner is Tower && c.Owner is Player) return;
 
         // Event for a character or player gets hit by projectile
         OnProjectileHit?.Invoke((CharacterBase)c.Owner, (ProjectileBase)d.Owner);
@@ -793,6 +795,10 @@ public class CollisionManager
         ProjectileBase p = (ProjectileBase)projCol.Owner;
 
         if (p.HasHit)
+            return;
+        
+        // Don't let projectiles hit the tower that fired them
+        if (p.Owner == tower)
             return;
 
         tower.TakeDamage(p.Damage);
@@ -1014,7 +1020,7 @@ public class CollisionManager
     // makes the hitboxes visible for when in the tech demo
     public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
         Player player, List<CharacterBase> characters,
-        List<ItemBase> items, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks, List<Tram> trams, List<ObjectBase> objects)
+        List<ItemBase> items, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks, List<Tram> trams, List<ObjectBase> objects, List<Tower> towers)
     {
         foreach (var cell in StaticHash._cells)
         {
@@ -1111,6 +1117,26 @@ public class CollisionManager
             {
                 var tramRect = GetColliderRectangle(collider);
                 DrawRectOutline(spriteBatch, pixel, tramRect, Color.Red * 0.7f);
+            }
+        }
+
+        foreach (var tower in towers)
+        {
+            if (tower?.Collider != null)
+            {
+                var interactRect = GetColliderRectangle(tower.Collider);
+                DrawRectOutline(spriteBatch, pixel, interactRect, Color.Red * 0.7f);
+            }
+
+            // Draw collision hitbox if TowerAlly
+            if (tower is TowerAlly towerAlly && towerAlly.CollisionCollider != null)
+            {
+                var collisionRect = GetColliderRectangle(towerAlly.CollisionCollider);
+                DrawRectOutline(spriteBatch, pixel, collisionRect, Color.Red * 0.7f);
+                
+                // Draw attack range circle
+                Vector2 center = towerAlly.Transform.Bounds.Center.ToVector2();
+                DrawCircleOutline(spriteBatch, pixel, center, towerAlly.Attributes.AttackRange, Color.Orange * 0.5f);
             }
         }
     }
