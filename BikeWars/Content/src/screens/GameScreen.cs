@@ -88,7 +88,7 @@ namespace BikeWars.Content.screens
         private bool _showStaticHitboxes = true;
 
         private GameTimer _gameTimer;
-        private const float GAME_TIME_LIMIT = 30f;
+        private const float GAME_TIME_LIMIT = 300f;
         private SpriteFont _timerFont;
         private Vector2 _timerPosition;
         private readonly GameMode _gameMode;
