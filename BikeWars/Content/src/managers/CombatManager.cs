@@ -138,7 +138,7 @@ public class CombatManager
         if (target.IsGodMode) return;
 
         target.TakeDamage(1);
-        // TODO: Add sound
+        _audio.Sounds.Play(AudioAssets.BaechleSplash);
 
         if (target.Attributes.Health <= 0)
         {
