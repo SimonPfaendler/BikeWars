@@ -41,8 +41,8 @@ public class Dozent: CharacterBase, IWorldAudioAware
             Movement = new EnemyMovement(canMove: true, isMoving: false, pathFinding: _pathFinding,
                 gridMapper: _collisionManager, repathScheduler: _repathScheduler);
             _idleAnimation = SpriteManager.GetAnimation("Dozent_Idle");
-            _walkLeftAnimation = SpriteManager.GetAnimation("Dozent_WalkLeft");
-            _walkRightAnimation = SpriteManager.GetAnimation("Dozent_WalkRight");
+            _walkLeftAnimation = SpriteManager.GetAnimation("Dozent_WalkRight");
+            _walkRightAnimation = SpriteManager.GetAnimation("Dozent_WalkLeft");
             _walkDownAnimation = SpriteManager.GetAnimation("Dozent_WalkDown");
             _walkUpAnimation = SpriteManager.GetAnimation("Dozent_WalkUp");
             _currentAnimation = _idleAnimation;
