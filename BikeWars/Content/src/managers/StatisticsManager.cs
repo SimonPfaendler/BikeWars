@@ -29,7 +29,9 @@ public class StatisticsManager
         if (c is not Player)
         {
             Statistic.AddKill();
+            return;
         }
+        Statistic.AddDeathCount();
     }
 
     public void HandleLevel(int xp, int level)

@@ -83,6 +83,19 @@ public class Statistic
         }
     }
 
+    private int _deathCount { get; set; } // Can be useful especially in multiplayer, because we don't have for one player multiple lives or so
+    public int DeathCount {
+        get => _deathCount;
+        set
+        {
+            if (value <= 0) {
+                _deathCount = 0;
+                return;
+            }
+            _deathCount = value;
+        }
+    }
+
     public string TimeToMinuteDisplay()
     {
         TimeSpan time = TimeSpan.FromSeconds(_time);
@@ -92,6 +105,11 @@ public class Statistic
     public void AddKill()
     {
         Kills += 1;
+    }
+
+    public void AddDeathCount()
+    {
+        DeathCount += 1;
     }
 
     public void AddDamage(CharacterBase c, int amount)
@@ -128,9 +146,10 @@ public class Statistic
         XP = 0;
         Level = 0;
         Time = 0f;
+        DeathCount = 0;
     }
 
-    public Statistic(int kills, int dealtDamage, int tookDamage, int xp, int level, float time)
+    public Statistic(int kills, int dealtDamage, int tookDamage, int xp, int level, float time, int deathCount)
     {
         Kills = kills;
         DealtDamage = dealtDamage;
@@ -138,5 +157,6 @@ public class Statistic
         XP = xp;
         Level = level;
         Time = time;
+        DeathCount = deathCount;
     }
 }

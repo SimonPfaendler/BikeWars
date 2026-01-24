@@ -161,7 +161,6 @@ namespace BikeWars.Content.screens
             _gameTimer = new GameTimer(GAME_TIME_LIMIT);
 
             _gameObjectManager.OnCharacterDied += _statisticsManager.HandleCharacterDied;
-            _gameObjectManager.OnCharacterDied += OnCharacterDied;
             _gameObjectManager.OnTookDamage += _statisticsManager.HandleTookDamage;
             _gameObjectManager.Player1.OnTookDamage += _statisticsManager.HandleTookDamage;
             _gameObjectManager.Player1.OnLevelUp += _statisticsManager.HandleLevel;
@@ -647,7 +646,7 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.AddObject(new DogBowl(pos, size, full: o.IsFull ?? false));
                 }
             }
-            _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level, state.Statistic.Time);
+            _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level, state.Statistic.Time, state.Statistic.DeathCount);
             Console.WriteLine("Game loaded.");
         }
         private void HandleSaveLoadInput()
@@ -1057,11 +1056,6 @@ namespace BikeWars.Content.screens
             );
             spriteBatch.Draw(icon, destRect, Color.White);
         }
-        public void OnCharacterDied(CharacterBase c)
-        {
-            _statisticsManager.HandleTime(_gameTimer.TimePassed());
-        }
-
         public void OnActivated()
         {
             // throw new NotImplementedException();

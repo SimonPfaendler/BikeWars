@@ -27,6 +27,7 @@ public class GameObjectManager
     public event Action<Tower>? OnTowerDied;
     public event Action<CharacterBase, int>? OnTookDamage;
     public event Action<Tower, int>? OnTowerTookDamage;
+
     private Player? _player1 {get; set;}
     public Player? Player1{get => _player1; set => _player1 = value;}
     private Player? _player2 {get; set;}
@@ -86,6 +87,7 @@ public class GameObjectManager
             Player1.ThrowBottle += target => OnPlayerThrowBottle(Player1, target);
             Player1.ThrowBeer += target => OnPlayerThrowBeer(Player1, target);
             Player1.OnTookDamage += HandleTookDamage;
+            Player1.Attributes.OnDied += HandlePlayerDied;
         }
 
         if (Player2 != null)
@@ -100,6 +102,7 @@ public class GameObjectManager
             Player2.ThrowBottle += target => OnPlayerThrowBottle(Player2, target);
             Player2.ThrowBeer += target => OnPlayerThrowBeer(Player2, target);
             Player2.OnTookDamage += HandleTookDamage;
+            Player2.Attributes.OnDied += HandlePlayerDied;
         }
     }
     public void AddTower(Tower tower)
@@ -166,6 +169,10 @@ public class GameObjectManager
         {
              OnScreenShakeRequested?.Invoke(5.5f, 0.2f);
         }
+    }
+    private void HandlePlayerDied(CharacterBase ch)
+    {
+        OnCharacterDied?.Invoke(ch);
     }
     private void HandleTowerTookDamage(Tower t, int amount)
     {
