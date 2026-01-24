@@ -94,6 +94,15 @@ namespace BikeWars.Content.managers
                 count = 1;
         
             Vector2 circleCenter = gameObjectManager.Player1.Transform.Position;
+            
+            // 4 raver variants
+            (string Left, string Right)[] variants =
+            {
+                ("Raver03_LeftUp", "Raver03_RightUp"),
+                ("Raver02_LeftUp", "Raver02_RightUp"),
+                ("Raver04_LeftUp", "Raver04_RightUp"),
+                ("Raver06_LeftUp", "Raver06_RightUp"),
+            };
 
             var ravers =  new List<Raver>(count);
             
@@ -107,8 +116,11 @@ namespace BikeWars.Content.managers
                 
                 // builds the world position for a raver
                 Vector2 pos = circleCenter + new Vector2(cos, sin) * startRadius;
+                
+                var variant = variants[i % variants.Length];
 
-                var r = new Raver(pos, raverSize, audioService);
+                var r = new Raver(pos, raverSize, audioService, variant.Left,
+                    variant.Right);
                 
                 // even-indexed ravers start facing left, odd facing right
                 bool startLeft = (i % 2 == 0);
@@ -156,7 +168,7 @@ namespace BikeWars.Content.managers
             //shrink the circle
             _radius = Math.Max(_minRadius,  _radius - _shrinkSpeed * dt);
             
-            // the raver animation shouldnt change every frame
+            // the raver animation shouldn't change every frame
             UpdateBeat(dt);
 
             // Keep ravers arranged around the player

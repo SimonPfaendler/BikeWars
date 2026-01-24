@@ -128,7 +128,7 @@ namespace BikeWars.Content.managers
             // Spawn 10-15 Hobos
             int count = RandomUtil.NextInt(10, 16);
 
-            float speedMultiplier = 1.2f;
+            float speedMultiplier = 1.5f + (0.5f * (float)progress); // Start fast, get faster
             float difficultyMultiplier = 1.0f + (2.0f * (float)progress);
 
             // Spawn them in a cluster
@@ -248,7 +248,7 @@ namespace BikeWars.Content.managers
 
             // pick a size you want for ravers
             Point raverSize = new Point(32, 32);
-            
+
             // optional: prevent multiple rave groups at once
             if (_raveGroups.Any(g => g.IsActive))
                 return;
@@ -273,9 +273,9 @@ namespace BikeWars.Content.managers
         private void SpawnRCircle(double progress)
         {
             int count = 12 + (int)(progress * 10); // 12 to 22 enemies
-            float radius = 100f;
+            float radius = 300f;
             float angleStep = (float)(Math.PI * 2 / count);
-            float difficultyMultiplier = 1.0f + (1.5f * (float)progress);
+            float difficultyMultiplier = 1.0f + (2.0f * (float)progress);
             float speedMultiplier = 1.0f + (0.5f * (float)progress);
 
             if (_gameObjectManager.Player1 == null) return;

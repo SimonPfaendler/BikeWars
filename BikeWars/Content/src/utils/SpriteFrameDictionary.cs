@@ -194,6 +194,19 @@ namespace BikeWars.Content.utils
              var dozentDown = GetFramesFromAtlas("e5_dozent_down1.png", 1, 1);
              dozentDown.AddRange(GetFramesFromAtlas("e5_dozent_down2.png", 1, 1));
              AnimationFrames["Dozent_WalkDown"] = dozentDown;
+             
+             // ravers
+             AnimationFrames["Raver02_LeftUp"]  = GetFramesFromAtlas("raver02_left_up.png", 1, 1);
+             AnimationFrames["Raver02_RightUp"] = GetFramesFromAtlas("raver02_right_up.png", 1, 1);
+
+             AnimationFrames["Raver03_LeftUp"]  = GetFramesFromAtlas("raver03_left_up.png", 1, 1);
+             AnimationFrames["Raver03_RightUp"] = GetFramesFromAtlas("raver03_right_up.png", 1, 1);
+
+             AnimationFrames["Raver04_LeftUp"]  = GetFramesFromAtlas("raver04_left_up.png", 1, 1);
+             AnimationFrames["Raver04_RightUp"] = GetFramesFromAtlas("raver04_right_up.png", 1, 1);
+
+             AnimationFrames["Raver06_LeftUp"]  = GetFramesFromAtlas("raver06_left_up.png", 1, 1);
+             AnimationFrames["Raver06_RightUp"] = GetFramesFromAtlas("raver06_right_up.png", 1, 1);
         }
 
         public static List<Rectangle> GetFrames(string key)

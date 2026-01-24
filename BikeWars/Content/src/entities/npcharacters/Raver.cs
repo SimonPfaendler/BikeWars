@@ -18,7 +18,8 @@ namespace BikeWars.Entities.Characters
         private SpriteAnimation _currentAnimation;
         
         //constructor
-        public Raver(Vector2 start, float size, AudioService audio)
+        public Raver(Vector2 start, float size, AudioService audio, string leftAnimKey,
+            string rightAnimKey)
         {
             _audio = audio;
             Attributes = new CharacterAttributes(this, maxHealth: 35, health: 35, attackDamage: 2, attackCoolDown: 0f, canAutoAttack: false);
@@ -31,8 +32,8 @@ namespace BikeWars.Entities.Characters
 
             Movement = null;
 
-            _walkLeftAnimation = SpriteManager.GetAnimation("Hobo_WalkLeft");
-            _walkRightAnimation =  SpriteManager.GetAnimation("Hobo_WalkRight");
+            _walkLeftAnimation  = SpriteManager.GetAnimation(leftAnimKey);
+            _walkRightAnimation = SpriteManager.GetAnimation(rightAnimKey);
             
             _currentAnimation = _walkLeftAnimation;
             

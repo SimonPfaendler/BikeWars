@@ -476,7 +476,79 @@
 		"spriteSourceSize": {"x":0,"y":0,"w":175,"h":109},
 		"sourceSize": {"w":175,"h":109},
 		"pivot": {"x":0.5,"y":0.5}
-	}],
+	},
+    {
+      "filename": "raver02_left_up.png",
+      "frame": { "x": 675, "y": 1560, "w": 78, "h": 123 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 78, "h": 123 },
+      "sourceSize": { "w": 78, "h": 123 },
+      "pivot": { "x": 0.5, "y": 0.5 }
+    },
+    {
+      "filename": "raver02_right_up.png",
+      "frame": { "x": 795, "y": 1564, "w": 80, "h": 125 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 80, "h": 125 },
+      "sourceSize": { "w": 80, "h": 125 },
+      "pivot": { "x": 0.5, "y": 0.5 }
+    },
+    {
+      "filename": "raver03_left_up.png",
+      "frame": { "x": 16, "y": 1749, "w": 88, "h": 118 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 88, "h": 118 },
+      "sourceSize": { "w": 88, "h": 118 },
+      "pivot": { "x": 0.5, "y": 0.5 }
+    },
+    {
+      "filename": "raver03_right_up.png",
+      "frame": { "x": 142, "y": 1752, "w": 89, "h": 116 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 89, "h": 116 },
+      "sourceSize": { "w": 89, "h": 116 },
+      "pivot": { "x": 0.5, "y": 0.5 }
+    },
+    {
+      "filename": "raver04_left_up.png",
+      "frame": { "x": 260, "y": 1751, "w": 89, "h": 121 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 89, "h": 121 },
+      "sourceSize": { "w": 89, "h": 121 },
+      "pivot": { "x": 0.5, "y": 0.5 }
+    },
+    {
+      "filename": "raver04_right_up.png",
+      "frame": { "x": 389, "y": 1750, "w": 94, "h": 121 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 94, "h": 121 },
+      "sourceSize": { "w": 94, "h": 121 },
+      "pivot": { "x": 0.5, "y": 0.5 }
+    },
+    {
+      "filename": "raver06_left_up.png",
+      "frame": { "x": 514, "y": 1748, "w": 91, "h": 121 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 91, "h": 121 },
+      "sourceSize": { "w": 91, "h": 121 },
+      "pivot": { "x": 0.5, "y": 0.5 }
+    },
+    {
+      "filename": "raver06_right_up.png",
+      "frame": { "x": 631, "y": 1746, "w": 90, "h": 124 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 90, "h": 124 },
+      "sourceSize": { "w": 90, "h": 124 },
+      "pivot": { "x": 0.5, "y": 0.5 }
+    }],
 	"meta": {
 		"app": "https://www.codeandweb.com/texturepacker",
 		"version": "1.0",

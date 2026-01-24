@@ -165,6 +165,16 @@ namespace BikeWars.Content.managers
             "Dozent_WalkRight",
             "Dozent_WalkDown",
             "Dozent_WalkUp",
+            
+            // RAVERS
+            "Raver02_LeftUp",
+            "Raver02_RightUp",
+            "Raver03_LeftUp",
+            "Raver03_RightUp",
+            "Raver04_LeftUp",
+            "Raver04_RightUp",
+            "Raver06_LeftUp",
+            "Raver06_RightUp",
         };
 
         private static float GetAnimationSpeed(string key)
