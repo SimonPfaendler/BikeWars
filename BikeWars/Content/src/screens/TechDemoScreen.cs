@@ -142,6 +142,7 @@ namespace BikeWars.Content.screens
             _spawnKamikazeBtn.Update(mouse, gameTime);
             _spawnTramBtn.Update(mouse, gameTime);
             _spawnEnemyCircleBtn.Update(mouse, gameTime);
+            _spawnDozentBtn.Update(mouse, gameTime);
 
             if(_spawnHoboBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Hobo, 100);
@@ -163,6 +164,9 @@ namespace BikeWars.Content.screens
 
             if (_spawnEnemyCircleBtn.IsClicked(mouse, _prevMouse))
                 SpawnRaveCircle(count: 16, startRadius: 200f);
+            
+            if (_spawnDozentBtn.IsClicked(mouse, _prevMouse))
+                SpawnEnemies(EnemyType.Dozent, 10);
 
             _prevMouse = mouse;
         }
@@ -221,7 +225,7 @@ namespace BikeWars.Content.screens
                             CollisionManager, GameObjectManager, RepathScheduler);
                         break;
                     case EnemyType.Dozent:
-                        enemy = new Dozent(spawnPos, 17, AudioService, PathFinding,
+                        enemy = new Dozent(spawnPos, 25, AudioService, PathFinding,
                             CollisionManager, RepathScheduler);
                         break;
 
@@ -266,6 +270,7 @@ namespace BikeWars.Content.screens
             _spawnKamikazeBtn.Draw(sb);
             _spawnTramBtn.Draw(sb);
             _spawnEnemyCircleBtn.Draw(sb);
+            _spawnDozentBtn.Draw(sb);
             sb.End();
         }
     }

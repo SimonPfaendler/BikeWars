@@ -18,6 +18,7 @@ namespace BikeWars.Content.engine.Audio
         public const string CarHorn = "car_horn";
         public const string TrainHorn = "train_horn";
         public const string TrainHit = "TrainHitSlime";
+        public const string BaechleSplash = "Baechle_Splash";
         public const string ShortPain = "short_pain";
         public const string Slurp = "slurp";
         public const string Relief = "relief";
@@ -34,6 +35,7 @@ namespace BikeWars.Content.engine.Audio
         public const string WoodCrack = "wood_crack";
         public const string WoodDestroy = "wood_destroy";
         public const string RaverSound = "raver_audio";
+        public const string ThrowObject = "throw_object";
         
 
         // Mapping ID -> Content-Path
@@ -52,6 +54,7 @@ namespace BikeWars.Content.engine.Audio
             { CarHorn, "assets/sounds/CarHorn"},
             { TrainHorn, "assets/sounds/train-horn"},
             { TrainHit, "assets/sounds/TrainHitSlime" },
+            { BaechleSplash, "assets/sounds/Baechle_Splash" },
             { ShortPain, "assets/sounds/short_pain"},
             { Slurp, "assets/sounds/Slurp"},
             { Relief, "assets/sounds/Relief"},
@@ -67,7 +70,8 @@ namespace BikeWars.Content.engine.Audio
             { WoodCrack, "assets/sounds/wood_crack"},
             { WoodDestroy, "assets/sounds/wood_destroy"},
             { Miau, "assets/sounds/Dogs/Miau"},
-            { RaverSound, "assets/sounds/raver_audio" }
+            { RaverSound, "assets/sounds/raver_audio" },
+            { ThrowObject, "assets/sounds/throw_object" }
             
         };
 

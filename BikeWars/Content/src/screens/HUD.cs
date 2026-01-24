@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Entities.Characters;
 using Autofac.Util;
 using System;
-
+using BikeWars.Content.components;
 namespace BikeWars.Content.screens
 {
     public class HUD: IDisposable

@@ -333,6 +333,141 @@
 		"sourceSize": {"w":576,"h":49},
 		"pivot": {"x":0.5,"y":0.5}
 	},
+    {
+      "filename": "e5_dozent_right1.png",
+      "frame": {"x":2,"y":1327,"w":90,"h":200},
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {"x":1,"y":126,"w":90,"h":200},
+      "sourceSize": {"w":90,"h":200},
+      "pivot": {"x":0.5,"y":0.5}
+    },
+    {
+      "filename": "e5_dozent_right2.png",
+      "frame": {"x":111,"y":1323,"w":93,"h":210},
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {"x":111,"y":1323,"w":93,"h":210},
+      "sourceSize": {"w":90,"h":200},
+      "pivot": {"x":0.5,"y":0.5}
+    },
+    {
+      "filename": "e5_dozent_right3.png",
+      "frame": {"x":219,"y":1325,"w":90,"h":202},
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {"x":219,"y":1325,"w":90,"h":202},
+      "sourceSize": {"w":90,"h":200},
+      "pivot": {"x":0.5,"y":0.5}
+    },
+    {
+      "filename": "e5_dozent_right4.png",
+      "frame": {"x":330,"y":1326,"w":104,"h":200},
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {"x":330,"y":1326,"w":104,"h":200},
+      "sourceSize": {"w":90,"h":200},
+      "pivot": {"x":0.5,"y":0.5}
+    },
+    {
+      "filename": "e5_dozent_right5.png",
+      "frame": {"x":439,"y":1327,"w":105,"h":200},
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {"x":438,"y":1327,"w":105,"h":200},
+      "sourceSize": {"w":90,"h":200},
+      "pivot": {"x":0.5,"y":0.5}
+    },
+  {
+    "filename": "e5_dozent_left1.png",
+    "frame": {"x":3,"y":1535,"w":90,"h":200},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x":3,"y":1535,"w":90,"h":200},
+    "sourceSize": {"w":90,"h":200},
+    "pivot": {"x":0.5,"y":0.5}
+  },
+  {
+    "filename": "e5_dozent_left2.png",
+    "frame": {"x":99,"y":1537,"w":90,"h":200},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x":99,"y":1537,"w":90,"h":200},
+    "sourceSize": {"w":90,"h":200},
+    "pivot": {"x":0.5,"y":0.5}
+  },
+  {
+    "filename": "e5_dozent_left3.png",
+    "frame": {"x":197,"y":1532,"w":90,"h":200},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x":197,"y":1532,"w":90,"h":200},
+    "sourceSize": {"w":90,"h":200},
+    "pivot": {"x":0.5,"y":0.5}
+  },
+  {
+    "filename": "e5_dozent_left4.png",
+    "frame": {"x":301,"y":1533,"w":105,"h":200},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x":301,"y":1533,"w":105,"h":200},
+    "sourceSize": {"w":90,"h":200},
+    "pivot": {"x":0.5,"y":0.5}
+  },
+  {
+    "filename": "e5_dozent_left5.png",
+    "frame": {"x":412,"y":1531,"w":90,"h":200},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x":412,"y":1328,"w":90,"h":200},
+    "sourceSize": {"w":90,"h":200},
+    "pivot": {"x":0.5,"y":0.5}
+  },
+  {
+    "filename": "e5_dozent_attack.png",
+    "frame": {"x":559,"y":1532,"w":90,"h":200},
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": {"x":559,"y":1532,"w":90,"h":200},
+    "sourceSize": {"w":90,"h":200},
+    "pivot": {"x":0.5,"y":0.5}
+  },
+    {
+      "filename": "e5_dozent_down1.png",
+      "frame": {"x":548,"y":1323,"w":90,"h":200},
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {"x":548,"y":1323,"w":90,"h":200},
+      "sourceSize": {"w":90,"h":200},
+      "pivot": {"x":0.5,"y":0.5}
+    },
+    {
+      "filename": "e5_dozent_down2.png",
+      "frame": {"x":645,"y":1323,"w":90,"h":200},
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {"x":645,"y":1323,"w":90,"h":200},
+      "sourceSize": {"w":90,"h":200},
+      "pivot": {"x":0.5,"y":0.5}
+    },
+    {
+      "filename": "e5_dozent_up1.png",
+      "frame": {"x":741,"y":1323,"w":90,"h":200},
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {"x":741,"y":1322,"w":90,"h":200},
+      "sourceSize": {"w":90,"h":200},
+      "pivot": {"x":0.5,"y":0.5}
+    },
+    {
+      "filename": "e5_dozent_up2.png",
+      "frame": {"x":832,"y":1323,"w":90,"h":200},
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {"x":828,"y":1323,"w":90,"h":200},
+      "sourceSize": {"w":90,"h":200},
+      "pivot": {"x":0.5,"y":0.5}
+    },
 	{
 		"filename": "raver_spritesheet.png",
 		"frame": {"x":667,"y":256,"w":175,"h":109},

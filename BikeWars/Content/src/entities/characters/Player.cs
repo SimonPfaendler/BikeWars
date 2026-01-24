@@ -13,6 +13,7 @@ using BikeWars.Content.entities.MapObjects;
 using BikeWars.Content.managers;
 using BikeWars.Entities.Characters.MapObjects;
 using BikeWars.Utilities;
+using BikeWars.Content.components;
 
 // ============================================================
 // Player.cs
@@ -173,21 +174,21 @@ namespace BikeWars.Entities.Characters
                     if (!_isThrowTargetInRange) return false;
                     Attributes.AttackCooldown = 1.0f;
                     ThrowBook?.Invoke(_mouseWorldPos);
-                    _audio.Sounds.Play(AudioAssets.WoodCrack);
+                    _audio.Sounds.Play(AudioAssets.ThrowObject);
                     return true;
 
                 case WeaponType.BananaThrow:
                     if (!_isThrowTargetInRange) return false;
                     Attributes.AttackCooldown = 1.0f;
                     ThrowBanana?.Invoke(_mouseWorldPos);
-                    _audio.Sounds.Play(AudioAssets.WoodCrack);
+                    _audio.Sounds.Play(AudioAssets.ThrowObject);
                     return true;
 
                 case WeaponType.BottleThrow:
                     if (!_isThrowTargetInRange) return false;
                     Attributes.AttackCooldown = 1.0f;
                     ThrowBottle?.Invoke(_mouseWorldPos);
-                    _audio.Sounds.Play(AudioAssets.WoodCrack);
+                    _audio.Sounds.Play(AudioAssets.ThrowObject);
                     return true;
                 case WeaponType.BeerThrow:
                     if (!_isThrowTargetInRange) return false;
@@ -195,7 +196,7 @@ namespace BikeWars.Entities.Characters
                     {
                         Attributes.AttackCooldown = 0.1f;
                         ThrowBeer?.Invoke(_mouseWorldPos);
-                        _audio.Sounds.Play(AudioAssets.WoodCrack);
+                        _audio.Sounds.Play(AudioAssets.ThrowObject);
                         Inventory.RemoveAt(_inventoryIndexBeer);
                         _beerThrowSelected = false;
                         CurrentWeapon = _weaponBefore;
@@ -290,6 +291,15 @@ namespace BikeWars.Entities.Characters
                 }
                 return;
             }
+        }
+
+        public void OnInteractTower(Player player, TowerAlly tower)
+        {
+            if (player != this) return;
+            // Only activate if the Interact key (e.g. 'Q') is pressed
+            if (!_input.IsPressed(GameAction.INTERACT)) return;
+            
+            tower.Activate();
         }
 
         // public Player(Vector2 start, Point size, Point renderSize, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")
