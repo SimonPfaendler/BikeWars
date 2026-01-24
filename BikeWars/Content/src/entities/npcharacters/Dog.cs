@@ -56,7 +56,7 @@ namespace BikeWars.Entities.Characters
             Attributes = new CharacterAttributes(this, 25, 0, 3, 2f, false);
             Transform = new Transform(start, size);
             RenderTransform = new Transform(start, new Point(32, 32));
-            Speed = 155f;
+            Speed = 135f;
             Movement = new EnemyMovement(canMove: true, isMoving: false, pathFinding: _pathFinding,
                 gridMapper: _collisionManager, repathScheduler: _repathScheduler);
             _idleAnimation = SpriteManager.GetAnimation("Dog_Idle");

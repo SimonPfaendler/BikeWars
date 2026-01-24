@@ -4,6 +4,7 @@ using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
 using System.Collections.Generic;
 using BikeWars.Content.entities.interfaces;
+using BikeWars.Content.components;
 using System;
 // ============================================================
 // Debugger.cs

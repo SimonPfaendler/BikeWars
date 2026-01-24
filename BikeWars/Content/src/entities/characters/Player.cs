@@ -13,6 +13,7 @@ using BikeWars.Content.entities.MapObjects;
 using BikeWars.Content.managers;
 using BikeWars.Entities.Characters.MapObjects;
 using BikeWars.Utilities;
+using BikeWars.Content.components;
 
 // ============================================================
 // Player.cs
@@ -30,6 +31,7 @@ namespace BikeWars.Entities.Characters
         public Bike CurrentBike => movement?.CrtBike;
         private IPlayerInput _input;
         private CooldownWithDuration sprint { get; }
+        public Vector2 GazeDirection { get; private set; }
         public int XpCounter { get; private set; } = 0;
         public int XpLevelUp = 10;
         public int CurrentLevel { get; private set; } = 1;
@@ -177,31 +179,38 @@ namespace BikeWars.Entities.Characters
                     if (!_isThrowTargetInRange) return false;
                     Attributes.AttackCooldown = 1.0f;
                     ThrowBook?.Invoke(_mouseWorldPos);
-                    _audio.Sounds.Play(AudioAssets.WoodCrack);
+                    _audio.Sounds.Play(AudioAssets.ThrowObject);
                     return true;
 
                 case WeaponType.BananaThrow:
                     if (!_isThrowTargetInRange) return false;
                     Attributes.AttackCooldown = 1.0f;
                     ThrowBanana?.Invoke(_mouseWorldPos);
-                    _audio.Sounds.Play(AudioAssets.WoodCrack);
+                    _audio.Sounds.Play(AudioAssets.ThrowObject);
                     return true;
 
                 case WeaponType.BottleThrow:
                     if (!_isThrowTargetInRange) return false;
                     Attributes.AttackCooldown = 1.0f;
                     ThrowBottle?.Invoke(_mouseWorldPos);
-                    _audio.Sounds.Play(AudioAssets.WoodCrack);
+                    _audio.Sounds.Play(AudioAssets.ThrowObject);
                     return true;
                 case WeaponType.BeerThrow:
                     if (!_isThrowTargetInRange) return false;
-                    Attributes.AttackCooldown = 0.1f;
-                    ThrowBeer?.Invoke(_mouseWorldPos);
-                    _audio.Sounds.Play(AudioAssets.WoodCrack);
-                    Inventory.RemoveAt(_inventoryIndexBeer);
-                    _beerThrowSelected = false;
-                    CurrentWeapon = _weaponBefore;
-                    return true;
+                    if (_beerThrowSelected)
+                    {
+                        Attributes.AttackCooldown = 0.1f;
+                        ThrowBeer?.Invoke(_mouseWorldPos);
+                        _audio.Sounds.Play(AudioAssets.ThrowObject);
+                        Inventory.RemoveAt(_inventoryIndexBeer);
+                        _beerThrowSelected = false;
+                        CurrentWeapon = _weaponBefore;
+                        return true;
+                    }
+
+                    return false;
+                    
+                    
             }
 
             return false;
@@ -289,6 +298,15 @@ namespace BikeWars.Entities.Characters
             }
         }
 
+        public void OnInteractTower(Player player, TowerAlly tower)
+        {
+            if (player != this) return;
+            // Only activate if the Interact key (e.g. 'Q') is pressed
+            if (!_input.IsPressed(GameAction.INTERACT)) return;
+            
+            tower.Activate();
+        }
+
         // public Player(Vector2 start, Point size, Point renderSize, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")
         public Player(Vector2 start, float radius, Point renderSize, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")
         {
@@ -331,6 +349,18 @@ namespace BikeWars.Entities.Characters
         public void Update(GameTime gameTime, Vector2 mousePos)
         {
             _mouseWorldPos = mousePos;
+
+            // Simple virtual cursor for controller: aim in front of the player
+                        if (_input.IsAnalog)
+                        {
+                            var dir = GazeDirection != Vector2.Zero ? Vector2.Normalize(GazeDirection) : _facingDirection;
+                            if (dir == Vector2.Zero)
+                            {
+                                dir = Vector2.UnitX;
+                            }
+                            _mouseWorldPos = Transform.Position + dir * 100f;
+                        }
+
             var throwOrigin = Transform.Bounds.Center.ToVector2();
             _isThrowTargetInRange = Vector2.Distance(throwOrigin, _mouseWorldPos) <= ThrowRange;
             UpdateAttackCooldown(gameTime);
@@ -349,10 +379,12 @@ namespace BikeWars.Entities.Characters
             HandleItemUsage(gameTime);
             HandleMovementSound();
             HandleAnimation(gameTime);
-            UpdateGazeDirection(mousePos);
+            UpdateGazeDirection(_mouseWorldPos);
             HandleGhostTrail(gameTime);
             HandleSwitchMovement();
             UpdateHitFlash(gameTime);
+            UpdateCollider();
+            Beer.UpdateCooldown(gameTime);
         }
 
         public override bool IsCharacterMoving()

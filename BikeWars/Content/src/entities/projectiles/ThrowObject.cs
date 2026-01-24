@@ -16,7 +16,7 @@ namespace BikeWars.Content.entities.projectiles
     public class ThrowObject : ProjectileBase
     {
         private readonly Vector2 _start;
-        private readonly Vector2 _target;
+        public Vector2 _target;
         private readonly float _duration;
         private float _elapsed;
 
@@ -26,6 +26,12 @@ namespace BikeWars.Content.entities.projectiles
         private bool _landed;
         private float _lingerTimer;
 
+        private float _rotation;
+        private readonly float _spinSpeed = 8f; // rad/s
+        private float _currentScale = 1f;
+        private Vector2 _drawCenter;
+        private readonly Vector2 _origin;
+
         private readonly Point _baseSize;
         private readonly BoxCollider _collider;
 
@@ -33,7 +39,7 @@ namespace BikeWars.Content.entities.projectiles
 
         public override ICollider Collider => _collider;
 
-        public ThrowObject(Vector2 start, Vector2 target, object owner, string textureKey, int damage, float speed = 500f, float arcScale = 1.2f, float lingerDuration = 0.25f)
+        public ThrowObject(Vector2 start, Vector2 target, object owner, string textureKey, int damage, float speed = 100f, float arcScale = 1.2f, float lingerDuration = 0.25f)
         {
             Owner = owner;
             Damage = damage;
@@ -41,6 +47,9 @@ namespace BikeWars.Content.entities.projectiles
 
             TexRight = SpriteManager.GetTexture(textureKey);
             CurrentTex = TexRight;
+
+            _origin = new Vector2(CurrentTex.Width / 2f, CurrentTex.Height / 2f);
+            _drawCenter = start;
 
             _start = start;
             _target = target;
@@ -68,12 +77,14 @@ namespace BikeWars.Content.entities.projectiles
             float t = MathF.Min(1f, _elapsed / _duration);
 
             Vector2 center = Vector2.Lerp(_start, _target, t);
+            _drawCenter = center;
 
             if (!_landed)
             {
                 // Sinusoidal bump to fake a parabolic arc by scaling up mid-flight
                 float heightFactor = MathF.Sin(MathF.PI * t);
                 float scale = 1f + heightFactor * _arcScale;
+                _currentScale = scale;
 
                 int width = Math.Max(6, (int)(_baseSize.X * scale));
                 int height = Math.Max(6, (int)(_baseSize.Y * scale));
@@ -85,6 +96,10 @@ namespace BikeWars.Content.entities.projectiles
                 _collider.Position = topLeft;
                 _collider.SetSize(width, height);
                 _collider.Layer = CollisionLayer.NONE; // no hits while in the air
+
+                // spin while airborne
+                _rotation += _spinSpeed * delta;
+                if (_rotation > MathHelper.TwoPi) _rotation -= MathHelper.TwoPi;
 
                 if (t >= 1f)
                 {
@@ -112,11 +127,24 @@ namespace BikeWars.Content.entities.projectiles
             _collider.Position = Transform.Position;
             _collider.SetSize(_baseSize.X, _baseSize.Y);
             _collider.Layer = CollisionLayer.PROJECTILE;
+
+            _currentScale = 1f;
+            _drawCenter = _target;
         }
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(CurrentTex, destinationRectangle: Transform.Bounds, color: Color.White);
+            spriteBatch.Draw(
+                CurrentTex,
+                position: _drawCenter,
+                sourceRectangle: null,
+                color: Color.White,
+                rotation: _rotation,
+                origin: _origin,
+                scale: _currentScale,
+                effects: SpriteEffects.None,
+                layerDepth: 0f
+            );
         }
 
         public override bool Intersects(ICollider other)

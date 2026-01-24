@@ -125,7 +125,7 @@ namespace BikeWars.Content.screens
             _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
             _gameMode = gameMode;
         }
-        public virtual void LoadContent(ContentManager content, GraphicsDevice gd)
+               public virtual void LoadContent(ContentManager content, GraphicsDevice gd)
         {
             // Font and Debugger
             _playerManager = new PlayerManager(ViewPort, _gameMode, worldBounds, _audioService, _isTechDemo);
@@ -195,10 +195,6 @@ namespace BikeWars.Content.screens
 
             // Tiled Map
             _collisionManager.LoadContent(content);
-            _collisionManager.OnBeerLanded += pos =>
-            {
-                _gameObjectManager.SpawnLandedBeer(pos);
-            };
 
             // pathfinding object
             _pathFinding = new PathFinding(_collisionManager.PathGrid);
@@ -218,7 +214,7 @@ namespace BikeWars.Content.screens
             _collisionManager.OnAOEHit += _combatManager.HandleAOEHit;
             _collisionManager.OnCharacterCollision += _combatManager.HandleCharacterCollision;
             _collisionManager.OnItemPickup += _gameObjectManager.Player1.OnPickUpItem;
-            _collisionManager.OnTowerInteraction += _gameObjectManager.OnActivateTower;
+            _collisionManager.OnTowerInteraction += _gameObjectManager.Player1.OnInteractTower;
             _collisionManager.OnObjectInteraction += _gameObjectManager.Player1.OnInteractObject;
             _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
             _collisionManager.OnTramHit += _combatManager.HandleTramHit;
@@ -755,7 +751,8 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.Projectiles,
                     _gameObjectManager.AOEAttacks,
                     new List<Tram>(_gameObjectManager.Trams),
-                    _gameObjectManager.Objects
+                    _gameObjectManager.Objects,
+                    _gameObjectManager.Towers
                 );
             }
 
@@ -772,7 +769,7 @@ namespace BikeWars.Content.screens
             DrawTimer(sb, gameTime);
 
             var player = _gameObjectManager.Player1;
-            bool showSelection = (InputSettings.Player1Control== ControlType.Controller);
+            bool showSelection = true;
             player.Inventory.Draw(sb, RenderPrimitives.Pixel, player.SelectedInventoryIndex, showSelection);
             _hud.Draw(sb, _gameObjectManager.Player1);
 

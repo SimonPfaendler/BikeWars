@@ -32,7 +32,7 @@ namespace BikeWars.Entities.Characters
             Attributes = new CharacterAttributes(this, 40, 0, 5, 2f, false);
             Transform = new Transform(start, size);
             RenderTransform = new Transform(start, new Point(32, 32));
-            Speed = 145f;
+            Speed = 125f;
             Movement = new EnemyMovement(canMove: true, isMoving: false, pathFinding: _pathFinding,
                 gridMapper: _collisionManager, repathScheduler: _repathScheduler);
             _idleAnimation = SpriteManager.GetAnimation("BikeThief_Idle");

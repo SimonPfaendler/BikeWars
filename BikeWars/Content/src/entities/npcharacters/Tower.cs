@@ -113,7 +113,7 @@ public abstract class Tower: IWorldAudioAware
 
     protected abstract void UpdateAttack(GameTime gameTime, List<CharacterBase> enemies);
 
-    public void Draw(SpriteBatch spriteBatch)
+    public virtual void Draw(SpriteBatch spriteBatch)
     {
         float spriteOrientationOffset = -MathF.PI / 2f;
         spriteBatch.Draw(

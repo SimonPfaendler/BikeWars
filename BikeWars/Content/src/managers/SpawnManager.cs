@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.components;
+using BikeWars.Content.entities.npcharacters;
 using BikeWars.Utilities;
 
 namespace BikeWars.Content.managers
@@ -23,22 +24,22 @@ namespace BikeWars.Content.managers
         private double _timeSinceLastSpawn;
         private double _timeSinceLastSwarm;
         private double _timeSinceLastCircle;
-        private const double SWARM_INTERVAL = 65.0;
-        private const double CIRCLE_SPAWN_INTERVAL = 40.0;
+        private const double SWARM_INTERVAL = 75.0;
+        private const double CIRCLE_SPAWN_INTERVAL = 60.0;
 
         private readonly List<ICollider> _spawnQueryBuffer = new(32);
 
-        private const double GAME_DURATION = 15 * 60; // 15 minutes in seconds
-        private const double START_SPAWN_INTERVAL = 4; // Start with 4 seconds
-        private const double END_SPAWN_INTERVAL = 0.5;   // End with 0.5 seconds
+        private const double GAME_DURATION = 5 * 60; // 15 minutes in seconds
+        private const double START_SPAWN_INTERVAL = 5; // Start with 4 seconds
+        private const double END_SPAWN_INTERVAL = 2;   // End with 0.5 seconds
         private double _spawnInterval;
         private const float MIN_SPAWN_RADIUS = 300f;
-        private const float MAX_SPAWN_RADIUS = 700f;
+        private const float MAX_SPAWN_RADIUS = 900f;
         private readonly WorldAudioManager _worldAudioManager;
 
         // Tram Logic
         private double _timeSinceLastTram;
-        private const double TRAM_SPAWN_INTERVAL = 15.0; // Every 15 seconds
+        private const double TRAM_SPAWN_INTERVAL = 30.0; // Every 15 seconds
 
         // raver logic
         private List<RaveGroup> _raveGroups = new List<RaveGroup>();
@@ -127,7 +128,7 @@ namespace BikeWars.Content.managers
             // Spawn 10-15 Hobos
             int count = RandomUtil.NextInt(10, 16);
 
-            float speedMultiplier = 1.5f + (0.5f * (float)progress); // Start fast, get faster
+            float speedMultiplier = 1.2f;
             float difficultyMultiplier = 1.0f + (2.0f * (float)progress);
 
             // Spawn them in a cluster
@@ -164,9 +165,9 @@ namespace BikeWars.Content.managers
 
             // Difficulty scaling
             // Health and Damage multiplier: 1.0 to 3.0 over 15 mins
-            float difficultyMultiplier = 1.0f + (2.0f * (float)progress);
+            float difficultyMultiplier = 1.0f + (1.2f * (float)progress);
             // Speed scaling: 1.0 to 1.5 over 15 mins
-            float speedMultiplier = 1.0f + (0.5f * (float)progress);
+            float speedMultiplier = 1.0f + (0.2f * (float)progress);
 
             if (spawnHobo)
             {
@@ -189,9 +190,15 @@ namespace BikeWars.Content.managers
                     dog.SetWorldAudioManager(_worldAudioManager);
                     _gameObjectManager.AddCharacter(dog);
                 }
-                else if (val < 0.8)
+                else if (val < 0.6)
                 {
                     var thief = new BikeThief(spawnPos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler);
+                    ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
+                    _gameObjectManager.AddCharacter(thief);
+                }
+                else if (val < 0.8)
+                {
+                    var thief = new Dozent(spawnPos, 25, _audioService, _pathFinding, _collisionManager, _repathScheduler);
                     ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
                     _gameObjectManager.AddCharacter(thief);
                 }
@@ -237,7 +244,7 @@ namespace BikeWars.Content.managers
             if (_gameObjectManager.Player1 == null) return;
 
             int count = 12 + (int)(progress * 10); // 12..22
-            float startRadius = 300f;
+            float startRadius = 100f;
 
             // pick a size you want for ravers
             Point raverSize = new Point(32, 32);
@@ -265,9 +272,9 @@ namespace BikeWars.Content.managers
         private void SpawnRCircle(double progress)
         {
             int count = 12 + (int)(progress * 10); // 12 to 22 enemies
-            float radius = 300f;
+            float radius = 100f;
             float angleStep = (float)(Math.PI * 2 / count);
-            float difficultyMultiplier = 1.0f + (2.0f * (float)progress);
+            float difficultyMultiplier = 1.0f + (1.5f * (float)progress);
             float speedMultiplier = 1.0f + (0.5f * (float)progress);
 
             if (_gameObjectManager.Player1 == null) return;

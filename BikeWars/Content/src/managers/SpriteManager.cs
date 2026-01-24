@@ -71,6 +71,7 @@ namespace BikeWars.Content.managers
             { "Frelo", "assets/images/Frelo" },
             { "RacingBike", "assets/images/RacingBike" },
             { "Beer", "assets/images/beer_texture" },
+            { "Beer_throw", "assets/sprites/projectiles/beer_throw"},
             { "Beer_destroyed", "assets/images/beer_destroyed"},
             { "XP_Money", "assets/sprites/XP/xp_money_texture" },
             { "EnergyGel", "assets/images/EnergyGel" },
@@ -157,6 +158,13 @@ namespace BikeWars.Content.managers
             "KamikazeOpa_BikeRight",
             "KamikazeOpa_BikeUp",
             "KamikazeOpa_Death",
+            
+            // Dozent
+            "Dozent_Idle",
+            "Dozent_WalkLeft",
+            "Dozent_WalkRight",
+            "Dozent_WalkDown",
+            "Dozent_WalkUp",
         };
 
         private static float GetAnimationSpeed(string key)

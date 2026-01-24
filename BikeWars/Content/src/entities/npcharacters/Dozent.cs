@@ -21,6 +21,8 @@ public class Dozent: CharacterBase, IWorldAudioAware
         private readonly PathFinding _pathFinding;
         private readonly CollisionManager _collisionManager;
         private readonly RepathScheduler _repathScheduler;
+        private float _attackAnimationTimer = 0f;
+        private const float AttackAnimationDuration = 2f;
 
         protected override string WalkingSound => AudioAssets.Walking;
 
@@ -33,16 +35,18 @@ public class Dozent: CharacterBase, IWorldAudioAware
             _collisionManager = collisionManager;
             _repathScheduler = repathScheduler;
 
-            Attributes = new CharacterAttributes(this, 200, 0, 40, 2f, false);
+            Attributes = new CharacterAttributes(this, 300, 0, 80, 2f, false);
             Transform = new Transform(start, size);
+            LastTransform = new Transform(start, size);
+            RenderTransform = new Transform(start, new Point(32, 32));
             Speed = 130f;
             Movement = new EnemyMovement(canMove: true, isMoving: false, pathFinding: _pathFinding,
                 gridMapper: _collisionManager, repathScheduler: _repathScheduler);
-            _idleAnimation = SpriteManager.GetAnimation("Hobo_Idle");
-            _walkLeftAnimation = SpriteManager.GetAnimation("Hobo_WalkLeft");
-            _walkRightAnimation = SpriteManager.GetAnimation("Hobo_WalkRight");
-            _walkDownAnimation = SpriteManager.GetAnimation("Hobo_WalkDown");
-            _walkUpAnimation = SpriteManager.GetAnimation("Hobo_WalkUp");
+            _idleAnimation = SpriteManager.GetAnimation("Dozent_Idle");
+            _walkLeftAnimation = SpriteManager.GetAnimation("Dozent_WalkRight");
+            _walkRightAnimation = SpriteManager.GetAnimation("Dozent_WalkLeft");
+            _walkDownAnimation = SpriteManager.GetAnimation("Dozent_WalkDown");
+            _walkUpAnimation = SpriteManager.GetAnimation("Dozent_WalkUp");
             _currentAnimation = _idleAnimation;
             UpdateCollider();
         }
@@ -61,6 +65,7 @@ public class Dozent: CharacterBase, IWorldAudioAware
             }
             Movement.HandleMovement(gameTime);
             HandleSound(Movement.IsMoving);
+            LastTransform = new Transform(Transform.Position, Transform.Size);
 
             Vector2 direction = Movement.Direction;
             if (Movement.IsMoving)
@@ -73,28 +78,35 @@ public class Dozent: CharacterBase, IWorldAudioAware
                     Transform.Position += direction * Speed * delta;
                 }
 
-                if (System.Math.Abs(direction.X) > System.Math.Abs(direction.Y))
+                if (_attackAnimationTimer > 0f)
                 {
+                    _attackAnimationTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-                    _currentAnimation = (direction.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
+                    _currentAnimation = _idleAnimation;
                 }
                 else
                 {
 
-                    _currentAnimation = (direction.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
+                    if (System.Math.Abs(direction.X) > System.Math.Abs(direction.Y))
+                    {
+
+                        _currentAnimation = (direction.X > 0) ? _walkRightAnimation : _walkLeftAnimation;
+                    }
+                    else
+                    {
+
+                        _currentAnimation = (direction.Y > 0) ? _walkDownAnimation : _walkUpAnimation;
+                    }
                 }
-            }
-            else
-            {
-                _currentAnimation = _idleAnimation;
-            }
 
-            if (_currentAnimation != null)
-            {
-                _currentAnimation.Update(gameTime, Movement.IsMoving);
-            }
 
-            UpdateCollider();
+                if (_currentAnimation != null)
+                {
+                    _currentAnimation.Update(gameTime, Movement.IsMoving);
+                }
+
+                UpdateCollider();
+            }
         }
 
         public override void Draw(SpriteBatch spriteBatch)
@@ -105,7 +117,7 @@ public class Dozent: CharacterBase, IWorldAudioAware
                 return;
 
             Color drawColor = (_hitFlashTimer > 0f) ? _hitColor : Color.White;
-            _currentAnimation.Draw(spriteBatch, Transform.Position, Transform.Size, 0f, _renderScale, drawColor);
+            _currentAnimation.Draw(spriteBatch, RenderTransform.Position, RenderTransform.Size, 0f, _renderScale, drawColor);
         }
 
         public void SetWorldAudioManager(WorldAudioManager manager)
@@ -122,5 +134,7 @@ public class Dozent: CharacterBase, IWorldAudioAware
             if (!CanAttack()) return;
             base.Attack(target);
             _audio.Sounds.Play(AudioAssets.Punch);
+            _attackAnimationTimer = AttackAnimationDuration;
+            _currentAnimation = _idleAnimation;
         }
 }

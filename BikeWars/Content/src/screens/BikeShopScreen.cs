@@ -7,7 +7,7 @@ using BikeWars.Entities.Characters.MapObjects;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-
+using BikeWars.Content.components;
 namespace BikeWars.Content.screens;
 
 public class BikeShopScreen : IScreen
