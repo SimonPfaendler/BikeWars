@@ -92,8 +92,6 @@ namespace BikeWars.Content.engine
 
         public float TimePassed()
         {
-            Console.WriteLine(TotalTime);
-            Console.WriteLine(CurrentTime);
             return TotalTime - CurrentTime;
         }
         public void SetFromSave(float currentTime, bool isRunning, bool isPaused)

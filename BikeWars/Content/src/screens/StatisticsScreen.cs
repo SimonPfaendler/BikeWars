@@ -15,7 +15,7 @@ public class StatisticsScreen : MenuScreenBase
     public string DesiredMusic => AudioAssets.MenuMusic;
     public float MusicVolume => 1f;
 
-    private static int HEIGHT_OF_COMPONENT = 10 + 10*20;
+    private static int HEIGHT_OF_COMPONENT = 10 + 11*20;
 
     public List<Statistic> Statistics;
 

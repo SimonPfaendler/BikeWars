@@ -6,7 +6,7 @@ namespace BikeWars.Content.screens;
 public class StatisticsComponent
 {
 
-    private static int HEIGHT_OF_COMPONENT = 10 * 20; // Check this in StatisticsSCreen. Not optimla but works now
+    private static int HEIGHT_OF_COMPONENT = 11 * 20; // Check this in StatisticsSCreen. Not optimla but works now
     public Statistic statistic {get; set;}
     public StatisticsComponent(Statistic s)
     {
@@ -27,5 +27,6 @@ public class StatisticsComponent
         sb.DrawString(font, $"Gefallene Schuesse: {statistic.ShotsFired}", new Vector2(box.X, box.Y + 140), Color.White);
         sb.DrawString(font, $"Zielsicherheit: {statistic.Accuracy():0.00}%", new Vector2(box.X, box.Y + 160), Color.White);
         sb.DrawString(font, $"Fahrradreperaturen: {statistic.Repairs}", new Vector2(box.X, box.Y + 180), Color.White);
+        sb.DrawString(font, $"Zeit um erstes Fahrrad zu finden: {statistic.TimeToFindBikeMinuteDisplay()}", new Vector2(box.X, box.Y + 200), Color.White);
     }
 }

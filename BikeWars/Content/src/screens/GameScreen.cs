@@ -168,6 +168,7 @@ namespace BikeWars.Content.screens
             _gameObjectManager.Player1.ThrowBanana += _statisticsManager.HandleThrowing;
             _gameObjectManager.Player1.ThrowBook += _statisticsManager.HandleThrowing;
             _gameObjectManager.Player1.ThrowBottle += _statisticsManager.HandleThrowing;
+            _gameObjectManager.Player1.FoundBike += () => _statisticsManager.HandleFoundBike(_gameTimer.TimePassed());
 
             if (_gameObjectManager.Player2 != null)
             {
@@ -179,6 +180,7 @@ namespace BikeWars.Content.screens
                 _gameObjectManager.Player2.ThrowBanana += _statisticsManager.HandleThrowing;
                 _gameObjectManager.Player2.ThrowBook += _statisticsManager.HandleThrowing;
                 _gameObjectManager.Player2.ThrowBottle += _statisticsManager.HandleThrowing;
+                _gameObjectManager.Player1.FoundBike += () => _statisticsManager.HandleFoundBike(_gameTimer.TimePassed());
             }
 
             _collisionManager = new CollisionManager(CELL_SIZE, worldBounds.Height, _gameObjectManager, _audioService);
@@ -661,7 +663,7 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.AddObject(new DogBowl(pos, size, full: o.IsFull ?? false));
                 }
             }
-            _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level, state.Statistic.Time, state.Statistic.DeathCount, state.Statistic.ShotsFired, state.Statistic.OpponentsHit, state.Statistic.Repairs);
+            _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level, state.Statistic.Time, state.Statistic.DeathCount, state.Statistic.ShotsFired, state.Statistic.OpponentsHit, state.Statistic.Repairs, state.Statistic.PhaseFindBike);
             Console.WriteLine("Game loaded.");
         }
         private void HandleSaveLoadInput()

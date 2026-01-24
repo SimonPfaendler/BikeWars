@@ -73,7 +73,10 @@ public class StatisticsManager
     {
         Statistic.AddRepair();
     }
-
+    public void HandleFoundBike(float time)
+    {
+        Statistic.CurrentPhaseFindBike(time);
+    }
     public void SaveStatistic()
     {
         if (Statistics == null)

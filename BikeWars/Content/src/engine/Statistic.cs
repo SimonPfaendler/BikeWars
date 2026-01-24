@@ -134,9 +134,28 @@ public class Statistic
         }
     }
 
+    private float _phaseFindBike { get; set; } // ADD MORE PHASES. Like this now with the bike and other phases too
+    public float PhaseFindBike {
+        get => _phaseFindBike;
+        set
+        {
+            if (value <= 0) {
+                _phaseFindBike = 0;
+                return;
+            }
+            _phaseFindBike = value;
+        }
+    }
+
     public string TimeToMinuteDisplay()
     {
         TimeSpan time = TimeSpan.FromSeconds(_time);
+        return $"{time.Minutes:00}:{time.Seconds:00}";
+    }
+
+    public string TimeToFindBikeMinuteDisplay()
+    {
+        TimeSpan time = TimeSpan.FromSeconds(_phaseFindBike);
         return $"{time.Minutes:00}:{time.Seconds:00}";
     }
 
@@ -186,6 +205,11 @@ public class Statistic
         Time = time;
     }
 
+    public void CurrentPhaseFindBike(float time)
+    {
+        PhaseFindBike = time;
+    }
+
     public void AddShotFired()
     {
         ShotsFired += 1;
@@ -200,6 +224,12 @@ public class Statistic
         return (float)Math.Round(accuracy, 2);
     }
 
+    // Phase to find Bike
+    public void TimeToFindBike(float time)
+    {
+        PhaseFindBike = time;
+    }
+
     public Statistic()
     {
         Kills = 0;
@@ -212,9 +242,10 @@ public class Statistic
         ShotsFired = 0;
         OpponentsHit = 0;
         Repairs = 0;
+        PhaseFindBike = 0f;
     }
 
-    public Statistic(int kills, int dealtDamage, int tookDamage, int xp, int level, float time, int deathCount, int shotsFired, int opponentsHit, int repairs)
+    public Statistic(int kills, int dealtDamage, int tookDamage, int xp, int level, float time, int deathCount, int shotsFired, int opponentsHit, int repairs, float phaseFindBike)
     {
         Kills = kills;
         DealtDamage = dealtDamage;
@@ -226,5 +257,6 @@ public class Statistic
         ShotsFired = shotsFired;
         OpponentsHit = opponentsHit;
         Repairs = repairs;
+        PhaseFindBike = phaseFindBike;
     }
 }
