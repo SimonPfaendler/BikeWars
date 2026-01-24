@@ -241,11 +241,11 @@ namespace BikeWars.Content.screens
             var group = RaveGroup.SpawnAroundPlayer(
                 count: count,
                 startRadius: startRadius,
-                raverSize: 17,
+                raverSize: 40,
                 audioService: AudioService,
                 gameObjectManager: GameObjectManager,
                 collisionManager: CollisionManager,
-                shrinkSpeed: 25f,
+                shrinkSpeed: 30f,
                 minRadius: 55f,
                 beatInterval: 0.2f
             );

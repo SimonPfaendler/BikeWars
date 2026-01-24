@@ -236,12 +236,9 @@ namespace BikeWars.Content.managers
         {
             if (_gameObjectManager.Player1 == null) return;
 
-            int count = 12 + (int)(progress * 10); // 12..22
-            float startRadius = 300f;
-
-            // pick a size you want for ravers
-            Point raverSize = new Point(32, 32);
-
+            int count = 16;
+            float startRadius = 200f;
+            
             // optional: prevent multiple rave groups at once
             if (_raveGroups.Any(g => g.IsActive))
                 return;
@@ -250,11 +247,11 @@ namespace BikeWars.Content.managers
             var group = RaveGroup.SpawnAroundPlayer(
                 count: count,
                 startRadius: startRadius,
-                raverSize: 17,
+                raverSize: 20,
                 audioService: _audioService,
                 gameObjectManager: _gameObjectManager,
                 collisionManager: _collisionManager,
-                shrinkSpeed: 25f,
+                shrinkSpeed: 30f,
                 minRadius: 55f,
                 beatInterval: 0.2f
             );

@@ -22,6 +22,7 @@ namespace BikeWars.Content.managers
         // circle behaviour
         private float _radius;
         private readonly Vector2 _circleCenter;
+        
         // minimum radius the circle can shrink to
         private readonly float _minRadius;
         private readonly float _shrinkSpeed;
@@ -40,7 +41,8 @@ namespace BikeWars.Content.managers
         private readonly float _musicExitRadius;
         
         public bool IsActive => !_isDispersed && _ravers.Any(r => !r.IsDead);
-
+        
+        // constructor rave group
         public RaveGroup(List<Raver> ravers,
             AudioService audioService,
             GameObjectManager gameObjectManager,
@@ -82,13 +84,15 @@ namespace BikeWars.Content.managers
         {
             if (gameObjectManager.Player1 == null)
                 return null;
-
+            
+            // pause the game music and play the rave music
             audioService.Music.Pause();
             audioService.Sounds.PlayLoop(AudioAssets.RaverSound);
-
+            
+            // ensure at least one raver so circle math never divides by zero
             if (count < 1)
                 count = 1;
-
+        
             Vector2 circleCenter = gameObjectManager.Player1.Transform.Position;
 
             var ravers =  new List<Raver>(count);
@@ -100,7 +104,8 @@ namespace BikeWars.Content.managers
 
                 float cos = (float)Math.Cos(angle);
                 float sin = (float)Math.Sin(angle);
-
+                
+                // builds the world position for a raver
                 Vector2 pos = circleCenter + new Vector2(cos, sin) * startRadius;
 
                 var r = new Raver(pos, raverSize, audioService);
@@ -127,6 +132,7 @@ namespace BikeWars.Content.managers
                 beatInterval
             );
             
+            // there should be rave music when the ravers spawn
             group._raveMusicActive = true;
 
             return group;
@@ -140,21 +146,23 @@ namespace BikeWars.Content.managers
 
             if (_gameObjectManager.Player1 == null)
                 return;
-
+            
+            // the circle shouldnt shrink every frame
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
             Vector2 playerPos = _gameObjectManager.Player1.Transform.Position;
-
             
             UpdateMusicProximity(playerPos);
 
             //shrink the circle
             _radius = Math.Max(_minRadius,  _radius - _shrinkSpeed * dt);
             
+            // the raver animation shouldnt change every frame
             UpdateBeat(dt);
 
             // Keep ravers arranged around the player
             UpdateRaverPositions();
-
+            
+            // check if 3 adjacent ravers are dead 
             if (CheckBreakCondition())
                 Disperse();
         }
@@ -169,7 +177,7 @@ namespace BikeWars.Content.managers
             else if (!_raveMusicActive && dist < _musicEnterRadius)
                 StartRaveMusic();
         }
-
+        
         private void StartRaveMusic()
         {
             if (_raveMusicActive)
@@ -212,16 +220,19 @@ namespace BikeWars.Content.managers
             int n = _ravers.Count;
             if (n == 0)
                 return;
-
+            
+            // distance in angle between each raver on the circle
             float step = MathHelper.TwoPi / n;
 
             for (int i = 0; i < n; i++)
             {
                 var r = _ravers[i];
                 if (r == null) continue;
-                if (r.IsDead)
-                    continue; // dead ones don't need to be repositioned
                 
+                if (r.IsDead)
+                    continue; 
+                
+                // checks whether raver is even or not 
                 bool even = (i % 2 == 0);
                 bool lookLeft;
 
@@ -230,59 +241,64 @@ namespace BikeWars.Content.managers
                 else
                     lookLeft = even;
                 
+                // flips the raver
                 r.SetFacingLeft(lookLeft);
-
+                
+                // computes the angle on the circle for raver
                 float angle = i * step;
 
                 float cos = (float)Math.Cos(angle);
                 float sin = (float)Math.Sin(angle);
 
-                // The positions on the circle
+                // Calculates where the raver should be
                 Vector2 desired = _circleCenter + new Vector2(cos, sin) * _radius;
                 
-                // Try to keep it walkable: if blocked, push outward along radial direction
-                if (TryResolveWalkableRadially(desired, _circleCenter, out Vector2 resolved))
+                // Try to keep it walkable, if blocked, push outward along radial direction
+                if (TryFindWalkablePos(desired, _circleCenter, out Vector2 resolved))
                 {
-                    // r.LastTransform = new Transform(r.Transform.Position, r.Transform.Size);
                     r.Transform.Position = resolved;
                     r.UpdateCollider();
                 }
                 else
                 {
                     // If no walkable tile was found nearby, keep current position
-                    // (so we never teleport into a wall/tree and never jitter randomly)
                     r.UpdateCollider();
                 }
             }
         }
-
-        private bool TryResolveWalkableRadially(Vector2 desired, Vector2 center, out Vector2 resolved)
+        
+        // tries to find a place where a raver is allowed to stand
+        private bool TryFindWalkablePos(Vector2 desired, Vector2 center, out Vector2 resolved)
         {
             resolved = desired;
 
-            // If desired is already walkable -> done
+            // If desired is already walkable, done
             Point g = _collisionManager.WorldToGrid(desired);
 
             int gridW = _collisionManager.PathGrid.GetLength(0);
             int gridH = _collisionManager.PathGrid.GetLength(1);
-
+            
+            // Check if the grid cell inside the map and if the cell is walkable
             if (g.X >= 0 && g.X < gridW && g.Y >= 0 && g.Y < gridH &&
                 _collisionManager.PathGrid[g.X, g.Y].Walkable)
             {
                 return true;
             }
 
-            // Otherwise: push outward along the radius direction to find the nearest walkable tile
+            // Otherwise, push outward along the radius direction to find the nearest walkable tile
             Vector2 dir = desired - center;
+            
+            // If the direction is too small pick a default dir
             if (dir.LengthSquared() < 0.0001f)
                 dir = new Vector2(1, 0);
             else
                 dir.Normalize();
 
             const float step = 16f;
-            const int maxSteps = 10;
-
-            for (int i = 1; i <= maxSteps; i++)
+            const int maxNrOfSteps = 10;
+            
+            // step outward from the blocked position until we find a walkable tile
+            for (int i = 1; i <= maxNrOfSteps; i++)
             {
                 Vector2 candidate = desired + dir * (step * i);
                 Point cg = _collisionManager.WorldToGrid(candidate);

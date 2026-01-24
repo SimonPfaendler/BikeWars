@@ -17,12 +17,16 @@ namespace BikeWars.Entities.Characters
 
         private SpriteAnimation _currentAnimation;
         
+        //constructor
         public Raver(Vector2 start, float size, AudioService audio)
         {
             _audio = audio;
             Attributes = new CharacterAttributes(this, maxHealth: 35, health: 35, attackDamage: 2, attackCoolDown: 0f, canAutoAttack: false);
-
+            
+            //get the position of the raver
             Transform = new Transform(start, size);
+            
+            // used to draw the sprite
             RenderTransform = new Transform(start, new Point(32, 32));
 
             Movement = null;
