@@ -5,6 +5,8 @@ using Microsoft.Xna.Framework.Graphics;
 namespace BikeWars.Content.screens;
 public class StatisticsComponent
 {
+
+    private static int HEIGHT_OF_COMPONENT = 10 * 20; // Check this in StatisticsSCreen. Not optimla but works now
     public Statistic statistic {get; set;}
     public StatisticsComponent(Statistic s)
     {
@@ -12,7 +14,7 @@ public class StatisticsComponent
     }
     public void Draw(SpriteBatch sb, Texture2D basicTexture, Color overlayColor, Vector2 drawPos, SpriteFont font)
     {
-        Rectangle box = new Rectangle((int)drawPos.X, (int)drawPos.Y, 500, 7 * 20);
+        Rectangle box = new Rectangle((int)drawPos.X, (int)drawPos.Y, 500, HEIGHT_OF_COMPONENT);
         sb.Draw(basicTexture, box, overlayColor);
 
         sb.DrawString(font, $"Kills: {statistic.Kills}", new Vector2(box.X, box.Y), Color.White);
@@ -22,5 +24,6 @@ public class StatisticsComponent
         sb.DrawString(font, $"Level: {statistic.Level}", new Vector2(box.X, box.Y + 80), Color.White);
         sb.DrawString(font, $"Gespielte Zeit: {statistic.TimeToMinuteDisplay()}", new Vector2(box.X, box.Y + 100), Color.White);
         sb.DrawString(font, $"Spieler gestorben: {statistic.DeathCount}", new Vector2(box.X, box.Y + 120), Color.White);
+        sb.DrawString(font, $"Gefallene Schuesse: {statistic.ShotsFired}", new Vector2(box.X, box.Y + 140), Color.White);
     }
 }

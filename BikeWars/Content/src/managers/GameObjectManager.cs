@@ -27,7 +27,6 @@ public class GameObjectManager
     public event Action<Tower>? OnTowerDied;
     public event Action<CharacterBase, int>? OnTookDamage;
     public event Action<Tower, int>? OnTowerTookDamage;
-
     private Player? _player1 {get; set;}
     public Player? Player1{get => _player1; set => _player1 = value;}
     private Player? _player2 {get; set;}

@@ -15,6 +15,8 @@ public class StatisticsScreen : MenuScreenBase
     public string DesiredMusic => AudioAssets.MenuMusic;
     public float MusicVolume => 1f;
 
+    private static int HEIGHT_OF_COMPONENT = 10 + 10*20;
+
     public List<Statistic> Statistics;
 
     private List<StatisticsComponent> _components;
@@ -50,7 +52,7 @@ public class StatisticsScreen : MenuScreenBase
 
     private float GetStatisticsHeight()
     {
-        return _components.Count * (10 + 7*20); // Content of every entry right now.
+        return _components.Count * HEIGHT_OF_COMPONENT; // Content of every entry right now.
     }
 
     protected sealed override void InitializeButtons()
@@ -81,7 +83,7 @@ public class StatisticsScreen : MenuScreenBase
         foreach (var comp in _components)
         {
             comp.Draw(sb, RenderPrimitives.Pixel, new Color(50, 50, 50, 200), startPos, _font);
-            startPos.Y += 10 + 7*20;
+            startPos.Y += HEIGHT_OF_COMPONENT;
         }
     }
     public override void Draw(GameTime gameTime, SpriteBatch sb)

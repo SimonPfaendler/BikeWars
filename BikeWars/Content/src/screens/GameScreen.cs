@@ -165,6 +165,23 @@ namespace BikeWars.Content.screens
             _gameObjectManager.Player1.OnTookDamage += _statisticsManager.HandleTookDamage;
             _gameObjectManager.Player1.OnLevelUp += _statisticsManager.HandleLevel;
             _gameObjectManager.Player1.OnMoreXP += _statisticsManager.HandleExperience;
+            _gameObjectManager.Player1.ShotBullet += _statisticsManager.HandleShotFired;
+            _gameObjectManager.Player1.ThrowBeer += _statisticsManager.HandleThrowing;
+            _gameObjectManager.Player1.ThrowBanana += _statisticsManager.HandleThrowing;
+            _gameObjectManager.Player1.ThrowBook += _statisticsManager.HandleThrowing;
+            _gameObjectManager.Player1.ThrowBottle += _statisticsManager.HandleThrowing;
+
+            if (_gameObjectManager.Player2 != null)
+            {
+                _gameObjectManager.Player2.OnTookDamage += _statisticsManager.HandleTookDamage;
+                _gameObjectManager.Player2.OnLevelUp += _statisticsManager.HandleLevel;
+                _gameObjectManager.Player2.OnMoreXP += _statisticsManager.HandleExperience;
+                _gameObjectManager.Player2.ShotBullet += _statisticsManager.HandleShotFired;
+                _gameObjectManager.Player2.ThrowBeer += _statisticsManager.HandleThrowing;
+                _gameObjectManager.Player2.ThrowBanana += _statisticsManager.HandleThrowing;
+                _gameObjectManager.Player2.ThrowBook += _statisticsManager.HandleThrowing;
+                _gameObjectManager.Player2.ThrowBottle += _statisticsManager.HandleThrowing;
+            }
 
             _collisionManager = new CollisionManager(CELL_SIZE, worldBounds.Height, _gameObjectManager, _audioService);
             var players = new HashSet<Player>();
@@ -646,7 +663,7 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.AddObject(new DogBowl(pos, size, full: o.IsFull ?? false));
                 }
             }
-            _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level, state.Statistic.Time, state.Statistic.DeathCount);
+            _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level, state.Statistic.Time, state.Statistic.DeathCount, state.Statistic.ShotsFired);
             Console.WriteLine("Game loaded.");
         }
         private void HandleSaveLoadInput()

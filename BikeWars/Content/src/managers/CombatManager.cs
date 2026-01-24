@@ -22,7 +22,6 @@ public class CombatManager
     {
         _audio = audio ?? throw new ArgumentNullException(nameof(audio));
         _gameObjects = gameObjects ?? throw new ArgumentNullException(nameof(gameObjects));
-
     }
 
     public void HandleDeath(CharacterBase target)
@@ -88,8 +87,7 @@ public class CombatManager
 
         // Apply Damage
         target.TakeDamage(aoe.Damage, shouldSquash: false);
-        // _gameObjects.SpawnDamageNumber(target.Transform.Position, aoe.Damage); // HANDLED BY GameObjectManager AGGREGATION
-
+        _gameObjects.SpawnDamageNumber(target.Transform.Position, aoe.Damage); // HANDLED BY GameObjectManager AGGREGATION
 
         if (aoe is IceTrail)
         {

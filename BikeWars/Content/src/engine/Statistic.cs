@@ -96,6 +96,19 @@ public class Statistic
         }
     }
 
+    private int _shotsFired { get; set; } // How often a shot was fired especially for projectiles like bullets
+    public int ShotsFired {
+        get => _shotsFired;
+        set
+        {
+            if (value <= 0) {
+                _shotsFired = 0;
+                return;
+            }
+            _shotsFired = value;
+        }
+    }
+
     public string TimeToMinuteDisplay()
     {
         TimeSpan time = TimeSpan.FromSeconds(_time);
@@ -138,6 +151,11 @@ public class Statistic
         Time = time;
     }
 
+    public void AddShotFired()
+    {
+        ShotsFired += 1;
+    }
+
     public Statistic()
     {
         Kills = 0;
@@ -147,9 +165,10 @@ public class Statistic
         Level = 0;
         Time = 0f;
         DeathCount = 0;
+        ShotsFired = 0;
     }
 
-    public Statistic(int kills, int dealtDamage, int tookDamage, int xp, int level, float time, int deathCount)
+    public Statistic(int kills, int dealtDamage, int tookDamage, int xp, int level, float time, int deathCount, int shotsFired)
     {
         Kills = kills;
         DealtDamage = dealtDamage;
@@ -158,5 +177,6 @@ public class Statistic
         Level = level;
         Time = time;
         DeathCount = deathCount;
+        ShotsFired = shotsFired;
     }
 }

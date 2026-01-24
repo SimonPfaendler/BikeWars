@@ -2,6 +2,7 @@ using BikeWars.Content.entities.interfaces;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 
 namespace BikeWars.Content.managers;
 public class StatisticsManager
@@ -52,6 +53,16 @@ public class StatisticsManager
     public void HandleTime(float time)
     {
         Statistic.CurrentTime(time);
+    }
+
+    public void HandleShotFired()
+    {
+        Statistic.AddShotFired();
+    }
+
+    public void HandleThrowing(Vector2 direction)
+    {
+        Statistic.AddShotFired();
     }
 
     public void SaveStatistic()
