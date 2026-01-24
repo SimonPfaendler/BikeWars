@@ -1,3 +1,4 @@
+using System;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Entities.Characters;
 
@@ -69,6 +70,25 @@ public class Statistic
         }
     }
 
+    private float _time { get; set; } // now in seconds
+    public float Time {
+        get => _time;
+        set
+        {
+            if (value <= 0) {
+                _time = 0;
+                return;
+            }
+            _time = value;
+        }
+    }
+
+    public string TimeToMinuteDisplay()
+    {
+        TimeSpan time = TimeSpan.FromSeconds(_time);
+        return $"{time.Minutes:00}:{time.Seconds:00}";
+    }
+
     public void AddKill()
     {
         Kills += 1;
@@ -95,6 +115,11 @@ public class Statistic
         Level = level;
     }
 
+    public void CurrentTime(float time)
+    {
+        Time = time;
+    }
+
     public Statistic()
     {
         Kills = 0;
@@ -102,14 +127,16 @@ public class Statistic
         TookDamage = 0;
         XP = 0;
         Level = 0;
+        Time = 0f;
     }
 
-    public Statistic(int kills, int dealtDamage, int tookDamage, int xp, int level)
+    public Statistic(int kills, int dealtDamage, int tookDamage, int xp, int level, float time)
     {
         Kills = kills;
         DealtDamage = dealtDamage;
         TookDamage = tookDamage;
         XP = xp;
         Level = level;
+        Time = time;
     }
 }

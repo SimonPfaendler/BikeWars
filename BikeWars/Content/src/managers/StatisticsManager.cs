@@ -46,6 +46,12 @@ public class StatisticsManager
     {
         Statistic.AddDamage(c, amount);
     }
+
+    public void HandleTime(float time)
+    {
+        Statistic.CurrentTime(time);
+    }
+
     public void SaveStatistic()
     {
         if (Statistics == null)

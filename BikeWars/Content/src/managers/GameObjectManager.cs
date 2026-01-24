@@ -24,6 +24,7 @@ namespace BikeWars.Content.managers;
 public class GameObjectManager
 {
     public event Action<CharacterBase>? OnCharacterDied;
+    public event Action<float>? OnFinishTime;
     public event Action<Tower>? OnTowerDied;
     public event Action<CharacterBase, int>? OnTookDamage;
     public event Action<Tower, int>? OnTowerTookDamage;
@@ -52,9 +53,7 @@ public class GameObjectManager
 
     private List<AreaOfEffectBase> _aoeAttacks = new();
 
-
     public List<AreaOfEffectBase> AOEAttacks => _aoeAttacks;
-
     private HashSet<DamageNumber> _damageNumbers = new HashSet<DamageNumber>();
     private SpriteFont? _damageFont;
 

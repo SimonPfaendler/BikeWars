@@ -25,8 +25,6 @@ namespace BikeWars.Content.screens
 {
     public class GameScreen : IScreen
     {
-
-        public static int AliveGameScreens = 0;
         private LevelUpScreen _levelUpScreen;
         private BikeShopScreen _bikeShopScreen;
         private Camera2D camera;
@@ -35,11 +33,9 @@ namespace BikeWars.Content.screens
         private TiledMapRenderer _tiledMapRenderer;
         private Debugger _debugger;
         private bool _isAlive = true; // If the Screen is still alive. Necessary for the switch
-
         private Action<float, float> _onScreenShake;
         private Action<int, int> _onPlayerLevelUp;
         private Action _onBikeShopClose;
-
         private Action<BikeShop> _onBikeShopOpen;
         public Viewport ViewPort {get; set;}
         public event Action<int, IScreen> BtnClicked;
@@ -122,16 +118,12 @@ namespace BikeWars.Content.screens
 
         public GameScreen(AudioService audioService, GameMode gameMode, bool isTechDemo = false)
         {
-            AliveGameScreens++;
-            Console.WriteLine("GameScreen created: " + AliveGameScreens);
             _isTechDemo = isTechDemo;
 
             worldBounds = new Rectangle(0, 0, 11200, 11200);
 
             _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
             _gameMode = gameMode;
-
-
         }
         public virtual void LoadContent(ContentManager content, GraphicsDevice gd)
         {
@@ -169,6 +161,7 @@ namespace BikeWars.Content.screens
             _gameTimer = new GameTimer(GAME_TIME_LIMIT);
 
             _gameObjectManager.OnCharacterDied += _statisticsManager.HandleCharacterDied;
+            _gameObjectManager.OnCharacterDied += OnCharacterDied;
             _gameObjectManager.OnTookDamage += _statisticsManager.HandleTookDamage;
             _gameObjectManager.Player1.OnTookDamage += _statisticsManager.HandleTookDamage;
             _gameObjectManager.Player1.OnLevelUp += _statisticsManager.HandleLevel;
@@ -186,7 +179,6 @@ namespace BikeWars.Content.screens
 
             // Tiled Map
             _collisionManager.LoadContent(content);
-
             _collisionManager.OnBeerLanded += pos =>
             {
                 _gameObjectManager.SpawnLandedBeer(pos);
@@ -654,7 +646,7 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.AddObject(new DogBowl(pos, size, full: o.IsFull ?? false));
                 }
             }
-            _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level);
+            _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level, state.Statistic.Time);
             Console.WriteLine("Game loaded.");
         }
         private void HandleSaveLoadInput()
@@ -796,7 +788,6 @@ namespace BikeWars.Content.screens
             Unload();
             _tiledMapRenderer?.Dispose();
             _isAlive = false;
-            // hudTexture?.Dispose();
 
             _hud = null;
             _hudP2 = null;
@@ -836,6 +827,7 @@ namespace BikeWars.Content.screens
             _overlay.SetPaused(true, Game1.CurrentGameTime);
             _audioService.Sounds.Play(AudioAssets.CarHorn);
             GameWon?.Invoke(_statisticsManager.Statistic);
+            _statisticsManager.HandleTime(_gameTimer.TimePassed());
             _statisticsManager.SaveStatistic();
             SaveLoad.SaveNonGame(_statisticsManager);
         }
@@ -901,12 +893,9 @@ namespace BikeWars.Content.screens
 
         public void Unload()
         {
-            AliveGameScreens--;
-            Console.WriteLine("GameScreen unloaded: " + AliveGameScreens);
-            // 🔴 STATIC EVENTS
             GameEvents.OnResumeTimer -= ResumeTimer;
 
-            // 🔴 Player Events
+            // Player Events
             if (_gameObjectManager?.Player1 != null)
             {
                 _gameObjectManager.OnCharacterDied -= _statisticsManager.HandleCharacterDied;
@@ -916,7 +905,7 @@ namespace BikeWars.Content.screens
                 _gameObjectManager.Player1.OnMoreXP -= _statisticsManager.HandleExperience;
             }
 
-            // 🔴 Collision / Combat
+            // Collision / Combat
             if (_collisionManager != null)
             {
                 _collisionManager.OnProjectileHit -= _combatManager.HandleProjectileHit;
@@ -945,11 +934,11 @@ namespace BikeWars.Content.screens
             _hudP2?.Dispose();
             _hudP2 = null;
 
-            // 🔴 Overlay / Screens
+            // Overlay / Screens
             _levelUpScreen?.Unload();
             _bikeShopScreen?.Unload();
 
-            // 🔴 Manager cleanup
+            // Manager cleanup
             _spawnManager?.Dispose();
             _worldAudioManager?.Dispose();
 
@@ -1065,8 +1054,11 @@ namespace BikeWars.Content.screens
                 targetSize,
                 targetSize
             );
-
             spriteBatch.Draw(icon, destRect, Color.White);
+        }
+        public void OnCharacterDied(CharacterBase c)
+        {
+            _statisticsManager.HandleTime(_gameTimer.TimePassed());
         }
 
         public void OnActivated()
