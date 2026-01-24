@@ -246,7 +246,8 @@ namespace BikeWars.Content.screens
                 gameObjectManager: GameObjectManager,
                 collisionManager: CollisionManager,
                 shrinkSpeed: 25f,
-                minRadius: 70f
+                minRadius: 55f,
+                beatInterval: 0.2f
             );
 
             if (group != null)

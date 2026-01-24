@@ -12,8 +12,11 @@ namespace BikeWars.Entities.Characters
         // the player should get damage when it touches a raver
         public const int ContactDamageCharacter = 2;
         public const int ContactDamageBike = 2;
-        private readonly SpriteAnimation _idleAnimation;
+        private readonly SpriteAnimation _walkLeftAnimation;
+        private readonly SpriteAnimation _walkRightAnimation;
 
+        private SpriteAnimation _currentAnimation;
+        
         public Raver(Vector2 start, float size, AudioService audio)
         {
             _audio = audio;
@@ -22,13 +25,24 @@ namespace BikeWars.Entities.Characters
             Transform = new Transform(start, size);
             RenderTransform = new Transform(start, new Point(32, 32));
 
-            Speed = 0.5f;
-            CurrentSpeed = Speed;
-
             Movement = null;
 
-            _idleAnimation = SpriteManager.GetAnimation("Hobo_Idle");
+            _walkLeftAnimation = SpriteManager.GetAnimation("Hobo_WalkLeft");
+            _walkRightAnimation =  SpriteManager.GetAnimation("Hobo_WalkRight");
+            
+            _currentAnimation = _walkLeftAnimation;
+            
             UpdateCollider();
+        }
+        
+        // Sets the direction the raver is facing by selecting
+        // the appropriate walking animation
+        public void SetFacingLeft(bool startLeft)
+        {
+            if (startLeft)
+                _currentAnimation = _walkLeftAnimation;
+            else
+                _currentAnimation = _walkRightAnimation;
         }
 
         public override void Update(GameTime gameTime)
@@ -37,7 +51,8 @@ namespace BikeWars.Entities.Characters
             UpdateKnockback(gameTime);
             UpdateHitFlash(gameTime);
 
-            _idleAnimation?.Update(gameTime, false);
+            if (_currentAnimation != null)
+                _currentAnimation.Update(gameTime, false);
 
             UpdateCollider();
         }
@@ -47,15 +62,12 @@ namespace BikeWars.Entities.Characters
             if (IsDead)
                 return;
 
-            // TODO: your animation/sprite here.
-            // If you want a placeholder like Hobo.pixel, you can draw a rectangle.
-
-            if (_idleAnimation == null)
+            if (_currentAnimation == null)
                 return;
 
             Color drawColor = (_hitFlashTimer > 0f) ? _hitColor : Color.White;
 
-            _idleAnimation.Draw(
+            _currentAnimation.Draw(
                 spriteBatch,
                 RenderTransform.Position,
                 RenderTransform.Size,

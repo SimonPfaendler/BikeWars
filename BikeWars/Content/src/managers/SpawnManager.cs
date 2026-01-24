@@ -254,8 +254,9 @@ namespace BikeWars.Content.managers
                 audioService: _audioService,
                 gameObjectManager: _gameObjectManager,
                 collisionManager: _collisionManager,
-                shrinkSpeed: 15f,
-                minRadius: 70f
+                shrinkSpeed: 25f,
+                minRadius: 55f,
+                beatInterval: 0.2f
             );
 
             if (group != null)

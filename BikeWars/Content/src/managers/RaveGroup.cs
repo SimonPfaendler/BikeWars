@@ -22,10 +22,23 @@ namespace BikeWars.Content.managers
         // circle behaviour
         private float _radius;
         private readonly Vector2 _circleCenter;
+        // minimum radius the circle can shrink to
         private readonly float _minRadius;
         private readonly float _shrinkSpeed;
+        
+        // alternating and flipping behaviour
+        private float _beatTimer = 0f;
+        private readonly float _beatInterval;
+        private bool _beatFlip = false;
+        
+        // music proximity behaviour
+        private bool _raveMusicActive = false;
 
-
+        // radius at which music starts when the player enters
+        private readonly float _musicEnterRadius;
+        // radius at which music stops when the player leaves
+        private readonly float _musicExitRadius;
+        
         public bool IsActive => !_isDispersed && _ravers.Any(r => !r.IsDead);
 
         public RaveGroup(List<Raver> ravers,
@@ -35,7 +48,8 @@ namespace BikeWars.Content.managers
             float startRadius,
             Vector2 circleCenter,
             float shrinkSpeed,
-            float minRadius
+            float minRadius,
+            float beatInterval
             )
         {
             _ravers = ravers;
@@ -47,8 +61,10 @@ namespace BikeWars.Content.managers
             _circleCenter = circleCenter;
             _shrinkSpeed = shrinkSpeed;
             _minRadius = minRadius;
-
-
+            _beatInterval = beatInterval;
+            
+            _musicEnterRadius = startRadius + 150f;
+            _musicExitRadius  = startRadius + 180f;
         }
 
         // Spawns a rave circle around Player1
@@ -59,8 +75,9 @@ namespace BikeWars.Content.managers
             AudioService audioService,
             GameObjectManager gameObjectManager,
             CollisionManager collisionManager,
-            float shrinkSpeed = 10f,
-            float minRadius = 60f
+            float shrinkSpeed,
+            float minRadius,
+            float beatInterval
         )
         {
             if (gameObjectManager.Player1 == null)
@@ -69,16 +86,14 @@ namespace BikeWars.Content.managers
             audioService.Music.Pause();
             audioService.Sounds.PlayLoop(AudioAssets.RaverSound);
 
-
             if (count < 1)
                 count = 1;
-
-
 
             Vector2 circleCenter = gameObjectManager.Player1.Transform.Position;
 
             var ravers =  new List<Raver>(count);
-
+            
+            // spawn ravers evenly spaced around the circle
             for (int i = 0; i < count; i++)
             {
                 float angle = MathHelper.TwoPi * (i / (float)count);
@@ -89,13 +104,18 @@ namespace BikeWars.Content.managers
                 Vector2 pos = circleCenter + new Vector2(cos, sin) * startRadius;
 
                 var r = new Raver(pos, raverSize, audioService);
+                
+                // even-indexed ravers start facing left, odd facing right
+                bool startLeft = (i % 2 == 0);
+                r.SetFacingLeft(startLeft);
+                
                 ravers.Add(r);
 
                 // Register in world so Update/Draw/Collision includes them
                 gameObjectManager.AddCharacter(r);
             }
 
-            return new RaveGroup(
+            var group = new RaveGroup(
                 ravers,
                 audioService,
                 gameObjectManager,
@@ -103,8 +123,13 @@ namespace BikeWars.Content.managers
                 startRadius,
                 circleCenter,
                 shrinkSpeed,
-                minRadius
+                minRadius,
+                beatInterval
             );
+            
+            group._raveMusicActive = true;
+
+            return group;
         }
 
 
@@ -117,23 +142,73 @@ namespace BikeWars.Content.managers
                 return;
 
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            Vector2 playerPos = _gameObjectManager.Player1.Transform.Position;
+
+            
+            UpdateMusicProximity(playerPos);
 
             //shrink the circle
             _radius = Math.Max(_minRadius,  _radius - _shrinkSpeed * dt);
+            
+            UpdateBeat(dt);
 
             // Keep ravers arranged around the player
             UpdateRaverPositions();
 
             if (CheckBreakCondition())
-            {
                 Disperse();
+        }
+
+        // starts or stops rave music depending on player distance
+        private void UpdateMusicProximity(Vector2 playerPos)
+        {
+            float dist = Vector2.Distance(playerPos, _circleCenter);
+
+            if (_raveMusicActive && dist > _musicExitRadius)
+                StopRaveMusic();
+            else if (!_raveMusicActive && dist < _musicEnterRadius)
+                StartRaveMusic();
+        }
+
+        private void StartRaveMusic()
+        {
+            if (_raveMusicActive)
+                return;
+            
+            _audioService.Music.Pause();
+            _audioService.Sounds.PlayLoop(AudioAssets.RaverSound);
+            _raveMusicActive = true;
+        }
+
+        private void StopRaveMusic()
+        {
+            if (!_raveMusicActive)
+                return;
+
+            _audioService.Sounds.StopLoop(AudioAssets.RaverSound);
+            _audioService.Music.Resume();
+            _raveMusicActive = false;
+        }
+        
+        // updates the beat timer and flips animation direction on each beat
+        private void UpdateBeat(float dt)
+        {
+            if (_beatInterval <= 0f)
+                return;
+            
+            _beatTimer += dt;
+
+            while (_beatTimer >= _beatInterval)
+            {
+                _beatTimer -= _beatInterval;
+                _beatFlip = !_beatFlip;
             }
         }
 
         private void UpdateRaverPositions()
         {
 
-            // IMPORTANT: Use the fixed list count for angles so adjacency is stable.
+            // Use the fixed list count for angles so adjacency is stable.
             int n = _ravers.Count;
             if (n == 0)
                 return;
@@ -146,6 +221,16 @@ namespace BikeWars.Content.managers
                 if (r == null) continue;
                 if (r.IsDead)
                     continue; // dead ones don't need to be repositioned
+                
+                bool even = (i % 2 == 0);
+                bool lookLeft;
+
+                if (_beatFlip)
+                    lookLeft = !even;
+                else
+                    lookLeft = even;
+                
+                r.SetFacingLeft(lookLeft);
 
                 float angle = i * step;
 
@@ -154,8 +239,7 @@ namespace BikeWars.Content.managers
 
                 // The positions on the circle
                 Vector2 desired = _circleCenter + new Vector2(cos, sin) * _radius;
-
-
+                
                 // Try to keep it walkable: if blocked, push outward along radial direction
                 if (TryResolveWalkableRadially(desired, _circleCenter, out Vector2 resolved))
                 {
@@ -216,10 +300,10 @@ namespace BikeWars.Content.managers
             // No valid spot found -> keep them where they are
             return false;
         }
-
+        
+        // check if 3 adjacent ravers are dead
         private bool CheckBreakCondition()
         {
-            // check if 3 adjacent ravers are dead
             int n =  _ravers.Count;
 
             if (n < 3)
@@ -256,8 +340,7 @@ namespace BikeWars.Content.managers
                 // Remove from the world collection (GameObjectManager exposes Characters)
                 _gameObjectManager.Characters.Remove(r);
             }
-            _audioService.Sounds.StopLoop(AudioAssets.RaverSound);
-            _audioService.Music.Resume();
+            StopRaveMusic();
 
             _ravers.Clear();
         }
