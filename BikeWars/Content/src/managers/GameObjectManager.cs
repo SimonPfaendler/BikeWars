@@ -52,9 +52,7 @@ public class GameObjectManager
 
     private List<AreaOfEffectBase> _aoeAttacks = new();
 
-
     public List<AreaOfEffectBase> AOEAttacks => _aoeAttacks;
-
     private HashSet<DamageNumber> _damageNumbers = new HashSet<DamageNumber>();
     private SpriteFont? _damageFont;
 
@@ -88,6 +86,7 @@ public class GameObjectManager
             Player1.ThrowBottle += target => OnPlayerThrowBottle(Player1, target);
             Player1.ThrowBeer += target => OnPlayerThrowBeer(Player1, target);
             Player1.OnTookDamage += HandleTookDamage;
+            Player1.Attributes.OnDied += HandlePlayerDied;
         }
 
         if (Player2 != null)
@@ -102,6 +101,7 @@ public class GameObjectManager
             Player2.ThrowBottle += target => OnPlayerThrowBottle(Player2, target);
             Player2.ThrowBeer += target => OnPlayerThrowBeer(Player2, target);
             Player2.OnTookDamage += HandleTookDamage;
+            Player2.Attributes.OnDied += HandlePlayerDied;
         }
     }
     public void AddTower(Tower tower)
@@ -168,6 +168,10 @@ public class GameObjectManager
         {
              OnScreenShakeRequested?.Invoke(5.5f, 0.2f);
         }
+    }
+    private void HandlePlayerDied(CharacterBase ch)
+    {
+        OnCharacterDied?.Invoke(ch);
     }
     private void HandleTowerTookDamage(Tower t, int amount)
     {
@@ -304,7 +308,7 @@ public class GameObjectManager
         {
             o.Update(gameTime);
         }
-        
+
         foreach (ProjectileBase p in Projectiles)
         {
             p.Update(gameTime);
@@ -382,9 +386,9 @@ public class GameObjectManager
     {
         Vector2 spawnPos = tower.Transform.Bounds.Center.ToVector2();
         Bullet b = new Bullet(spawnPos, new Point(10, 10), tower);
-        
+
         // Bullet direction is the tower's gaze direction.
-        b.Movement.Direction = tower.GazeDirection; 
+        b.Movement.Direction = tower.GazeDirection;
         b.Movement.IsMoving = true;
         b.Movement.Speed = 250f;
 
@@ -511,7 +515,7 @@ public class GameObjectManager
         {
             SpawnLandedBeer(pos);
         };
-        
+
         AddProjectile(beer);
     }
 

@@ -59,7 +59,6 @@ public class ScrollBox
     public ScrollBox(Texture2D basicTexture, SpriteFont font, Rectangle area, Action<SpriteBatch, Vector2> drawContent, Func<float> getContentHeight)
     {
         _basicTexture = basicTexture;
-        // _backgroundTexture = basicTexture;
         _font = font;
         ScrollArea = area;
 
@@ -68,9 +67,6 @@ public class ScrollBox
         ScissorRaster.ScissorTestEnable = true;
         _drawContent = drawContent;
         _getContentHeight = getContentHeight;
-
-        // _borderTexture = basicTexture; // I think we can still change that later if we need a different background.
-        // _bgScroll = basicTexture; // Here the same
     }
 
     public void Update()

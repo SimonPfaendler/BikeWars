@@ -25,8 +25,6 @@ namespace BikeWars.Content.screens
 {
     public class GameScreen : IScreen
     {
-
-        public static int AliveGameScreens = 0;
         private LevelUpScreen _levelUpScreen;
         private BikeShopScreen _bikeShopScreen;
         private Camera2D camera;
@@ -35,11 +33,9 @@ namespace BikeWars.Content.screens
         private TiledMapRenderer _tiledMapRenderer;
         private Debugger _debugger;
         private bool _isAlive = true; // If the Screen is still alive. Necessary for the switch
-
         private Action<float, float> _onScreenShake;
         private Action<int, int> _onPlayerLevelUp;
         private Action _onBikeShopClose;
-
         private Action<BikeShop> _onBikeShopOpen;
         public Viewport ViewPort {get; set;}
         public event Action<int, IScreen> BtnClicked;
@@ -122,21 +118,15 @@ namespace BikeWars.Content.screens
 
         public GameScreen(AudioService audioService, GameMode gameMode, bool isTechDemo = false)
         {
-            AliveGameScreens++;
-            Console.WriteLine("GameScreen created: " + AliveGameScreens);
             _isTechDemo = isTechDemo;
 
             worldBounds = new Rectangle(0, 0, 11200, 11200);
 
             _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
             _gameMode = gameMode;
-
-
         }
                public virtual void LoadContent(ContentManager content, GraphicsDevice gd)
         {
-            // _contentManager = content; // We need this to add it later to spawning entities. (Maybe there is another possible implementation)
-            // Content = content;
             // Font and Debugger
             _playerManager = new PlayerManager(ViewPort, _gameMode, worldBounds, _audioService, _isTechDemo);
             camera = _playerManager.Camera;
@@ -173,6 +163,25 @@ namespace BikeWars.Content.screens
             _gameObjectManager.Player1.OnTookDamage += _statisticsManager.HandleTookDamage;
             _gameObjectManager.Player1.OnLevelUp += _statisticsManager.HandleLevel;
             _gameObjectManager.Player1.OnMoreXP += _statisticsManager.HandleExperience;
+            _gameObjectManager.Player1.ShotBullet += _statisticsManager.HandleShotFired;
+            _gameObjectManager.Player1.ThrowBeer += _statisticsManager.HandleThrowing;
+            _gameObjectManager.Player1.ThrowBanana += _statisticsManager.HandleThrowing;
+            _gameObjectManager.Player1.ThrowBook += _statisticsManager.HandleThrowing;
+            _gameObjectManager.Player1.ThrowBottle += _statisticsManager.HandleThrowing;
+            _gameObjectManager.Player1.FoundBike += () => _statisticsManager.HandleFoundBike(_gameTimer.TimePassed());
+
+            if (_gameObjectManager.Player2 != null)
+            {
+                _gameObjectManager.Player2.OnTookDamage += _statisticsManager.HandleTookDamage;
+                _gameObjectManager.Player2.OnLevelUp += _statisticsManager.HandleLevel;
+                _gameObjectManager.Player2.OnMoreXP += _statisticsManager.HandleExperience;
+                _gameObjectManager.Player2.ShotBullet += _statisticsManager.HandleShotFired;
+                _gameObjectManager.Player2.ThrowBeer += _statisticsManager.HandleThrowing;
+                _gameObjectManager.Player2.ThrowBanana += _statisticsManager.HandleThrowing;
+                _gameObjectManager.Player2.ThrowBook += _statisticsManager.HandleThrowing;
+                _gameObjectManager.Player2.ThrowBottle += _statisticsManager.HandleThrowing;
+                _gameObjectManager.Player1.FoundBike += () => _statisticsManager.HandleFoundBike(_gameTimer.TimePassed());
+            }
 
             _collisionManager = new CollisionManager(CELL_SIZE, worldBounds.Height, _gameObjectManager, _audioService);
             var players = new HashSet<Player>();
@@ -279,10 +288,10 @@ namespace BikeWars.Content.screens
                 _bikeShopScreen.Open(_gameObjectManager.Player1, shop);
             };
 
+            _bikeShopScreen.Repair += OnHandleRepair;
             _gameObjectManager.Player1.OnBikeShopOpen += _onBikeShopOpen;
             _gameObjectManager.Player1.Dismounted += _gameObjectManager.AddItem;
             _gameObjectManager.Player1.ChestItemSpawn += _gameObjectManager.AddItem;
-
 
             // the Option selected gets upgraded
             _levelUpScreen.OnOptionSelected += skillId =>
@@ -387,6 +396,7 @@ namespace BikeWars.Content.screens
                 _audioService.Music.Stop();
                 _overlay.SetPaused(true, gameTime);
                 _audioService.Sounds.Play(AudioAssets.CarCrash);
+                _statisticsManager.HandleTime(_gameTimer.TimePassed());
                 GameOver?.Invoke(_statisticsManager.Statistic);
                 _statisticsManager.SaveStatistic();
                 SaveLoad.SaveNonGame(_statisticsManager);
@@ -649,7 +659,7 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.AddObject(new DogBowl(pos, size, full: o.IsFull ?? false));
                 }
             }
-            _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level);
+            _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level, state.Statistic.Time, state.Statistic.DeathCount, state.Statistic.ShotsFired, state.Statistic.OpponentsHit, state.Statistic.Repairs, state.Statistic.PhaseFindBike);
             Console.WriteLine("Game loaded.");
         }
         private void HandleSaveLoadInput()
@@ -792,7 +802,6 @@ namespace BikeWars.Content.screens
             Unload();
             _tiledMapRenderer?.Dispose();
             _isAlive = false;
-            // hudTexture?.Dispose();
 
             _hud = null;
             _hudP2 = null;
@@ -831,6 +840,7 @@ namespace BikeWars.Content.screens
             _audioService.Music.Stop();
             _overlay.SetPaused(true, Game1.CurrentGameTime);
             _audioService.Sounds.Play(AudioAssets.CarHorn);
+            _statisticsManager.HandleTime(_gameTimer.TimePassed());
             GameWon?.Invoke(_statisticsManager.Statistic);
             _statisticsManager.SaveStatistic();
             SaveLoad.SaveNonGame(_statisticsManager);
@@ -897,12 +907,9 @@ namespace BikeWars.Content.screens
 
         public void Unload()
         {
-            AliveGameScreens--;
-            Console.WriteLine("GameScreen unloaded: " + AliveGameScreens);
-            // 🔴 STATIC EVENTS
             GameEvents.OnResumeTimer -= ResumeTimer;
 
-            // 🔴 Player Events
+            // Player Events
             if (_gameObjectManager?.Player1 != null)
             {
                 _gameObjectManager.OnCharacterDied -= _statisticsManager.HandleCharacterDied;
@@ -912,7 +919,7 @@ namespace BikeWars.Content.screens
                 _gameObjectManager.Player1.OnMoreXP -= _statisticsManager.HandleExperience;
             }
 
-            // 🔴 Collision / Combat
+            // Collision / Combat
             if (_collisionManager != null)
             {
                 _collisionManager.OnProjectileHit -= _combatManager.HandleProjectileHit;
@@ -941,11 +948,11 @@ namespace BikeWars.Content.screens
             _hudP2?.Dispose();
             _hudP2 = null;
 
-            // 🔴 Overlay / Screens
+            // Overlay / Screens
             _levelUpScreen?.Unload();
             _bikeShopScreen?.Unload();
 
-            // 🔴 Manager cleanup
+            // Manager cleanup
             _spawnManager?.Dispose();
             _worldAudioManager?.Dispose();
 
@@ -1061,13 +1068,16 @@ namespace BikeWars.Content.screens
                 targetSize,
                 targetSize
             );
-
             spriteBatch.Draw(icon, destRect, Color.White);
         }
-
         public void OnActivated()
         {
             // throw new NotImplementedException();
+        }
+
+        public void OnHandleRepair()
+        {
+            _statisticsManager.HandleRepair();
         }
 
         private void OnPauseMenuClicked(int id, IScreen screen)

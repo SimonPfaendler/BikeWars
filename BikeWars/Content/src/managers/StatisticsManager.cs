@@ -2,6 +2,7 @@ using BikeWars.Content.entities.interfaces;
 using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 
 namespace BikeWars.Content.managers;
 public class StatisticsManager
@@ -29,7 +30,9 @@ public class StatisticsManager
         if (c is not Player)
         {
             Statistic.AddKill();
+            return;
         }
+        Statistic.AddDeathCount();
     }
 
     public void HandleLevel(int xp, int level)
@@ -45,6 +48,34 @@ public class StatisticsManager
     public void HandleTookDamage(CharacterBase c, int amount)
     {
         Statistic.AddDamage(c, amount);
+        if (c is Player)
+        {
+            return;
+        }
+        Statistic.AddOpponentHit();
+    }
+
+    public void HandleTime(float time)
+    {
+        Statistic.CurrentTime(time);
+    }
+
+    public void HandleShotFired()
+    {
+        Statistic.AddShotFired();
+    }
+
+    public void HandleThrowing(Vector2 direction)
+    {
+        Statistic.AddShotFired();
+    }
+    public void HandleRepair()
+    {
+        Statistic.AddRepair();
+    }
+    public void HandleFoundBike(float time)
+    {
+        Statistic.CurrentPhaseFindBike(time);
     }
     public void SaveStatistic()
     {

@@ -89,7 +89,11 @@ namespace BikeWars.Content.engine
             int seconds = (int)(_currentTime % 60);
             return $"{minutes:00}:{seconds:00}";
         }
-        
+
+        public float TimePassed()
+        {
+            return TotalTime - CurrentTime;
+        }
         public void SetFromSave(float currentTime, bool isRunning, bool isPaused)
         {
             _currentTime = currentTime;

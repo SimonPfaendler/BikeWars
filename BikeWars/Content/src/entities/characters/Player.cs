@@ -98,6 +98,11 @@ namespace BikeWars.Entities.Characters
         private bool _beerThrowSelected = false;
         private int _inventoryIndexBeer = -1;
 
+        // For achievements and statistics
+
+        public bool phaseFoundBike;
+        public event Action FoundBike;
+
         private struct GhostFrame
         {
             public Texture2D Texture;
@@ -332,7 +337,7 @@ namespace BikeWars.Entities.Characters
             {
                 _currentAnimation = _idleAnimation;
             }
-
+            phaseFoundBike = false;
             UpdateCollider();
         }
 
@@ -660,6 +665,11 @@ namespace BikeWars.Entities.Characters
         // Mount a Bike
         private void Mount(Bike b)
         {
+            if (!phaseFoundBike)
+            {
+                phaseFoundBike = true;
+                FoundBike?.Invoke();
+            }
             _bikeMountTime = BikeMountTime;
             movement.CurrentMovement = new BicycleMovement(movement.CurrentMovement.CanMove, movement.CurrentMovement.IsMoving, 0, b.Attributes.MaxSpeed, b.Attributes.SpeedAcceleration, b.Attributes.SprintAcceleration, b.Attributes.RotationAcceleration);
             switch (b)
