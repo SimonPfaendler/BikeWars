@@ -26,5 +26,6 @@ public class StatisticsComponent
         sb.DrawString(font, $"Spieler gestorben: {statistic.DeathCount}", new Vector2(box.X, box.Y + 120), Color.White);
         sb.DrawString(font, $"Gefallene Schuesse: {statistic.ShotsFired}", new Vector2(box.X, box.Y + 140), Color.White);
         sb.DrawString(font, $"Zielsicherheit: {statistic.Accuracy():0.00}%", new Vector2(box.X, box.Y + 160), Color.White);
+        sb.DrawString(font, $"Fahrradreperaturen: {statistic.Repairs}", new Vector2(box.X, box.Y + 180), Color.White);
     }
 }

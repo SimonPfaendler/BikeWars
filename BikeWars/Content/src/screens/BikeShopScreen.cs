@@ -27,6 +27,7 @@ public class BikeShopScreen : IScreen
 
     public Viewport ViewPort {get;set;}
     public event Action<int, IScreen> BtnClicked;
+    public event Action Repair;
 
     private int _selectedOption = 0;
 
@@ -98,11 +99,8 @@ public class BikeShopScreen : IScreen
                 break;
 
             case ShopOption.RepairBike:
-                if (_player.CurrentBike != null)
-                {
-                    //TODO add logic
-                }
-
+                if (_player.CurrentBike == null) return;
+                Repair?.Invoke();
                 break;
 
             case ShopOption.Close:

@@ -121,6 +121,19 @@ public class Statistic
         }
     }
 
+    private int _repairs { get; set; } // The amount of repairs at the bikeshop
+    public int Repairs {
+        get => _repairs;
+        set
+        {
+            if (value <= 0) {
+                _repairs = 0;
+                return;
+            }
+            _repairs = value;
+        }
+    }
+
     public string TimeToMinuteDisplay()
     {
         TimeSpan time = TimeSpan.FromSeconds(_time);
@@ -140,6 +153,11 @@ public class Statistic
     public void AddOpponentHit()
     {
         OpponentsHit += 1;
+    }
+
+    public void AddRepair()
+    {
+        Repairs += 1;
     }
 
     public void AddDamage(CharacterBase c, int amount)
@@ -193,9 +211,10 @@ public class Statistic
         DeathCount = 0;
         ShotsFired = 0;
         OpponentsHit = 0;
+        Repairs = 0;
     }
 
-    public Statistic(int kills, int dealtDamage, int tookDamage, int xp, int level, float time, int deathCount, int shotsFired, int opponentsHit)
+    public Statistic(int kills, int dealtDamage, int tookDamage, int xp, int level, float time, int deathCount, int shotsFired, int opponentsHit, int repairs)
     {
         Kills = kills;
         DealtDamage = dealtDamage;
@@ -206,5 +225,6 @@ public class Statistic
         DeathCount = deathCount;
         ShotsFired = shotsFired;
         OpponentsHit = opponentsHit;
+        Repairs = repairs;
     }
 }

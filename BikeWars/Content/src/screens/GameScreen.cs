@@ -127,8 +127,6 @@ namespace BikeWars.Content.screens
         }
         public virtual void LoadContent(ContentManager content, GraphicsDevice gd)
         {
-            // _contentManager = content; // We need this to add it later to spawning entities. (Maybe there is another possible implementation)
-            // Content = content;
             // Font and Debugger
             _playerManager = new PlayerManager(ViewPort, _gameMode, worldBounds, _audioService, _isTechDemo);
             camera = _playerManager.Camera;
@@ -292,10 +290,10 @@ namespace BikeWars.Content.screens
                 _bikeShopScreen.Open(_gameObjectManager.Player1, shop);
             };
 
+            _bikeShopScreen.Repair += OnHandleRepair;
             _gameObjectManager.Player1.OnBikeShopOpen += _onBikeShopOpen;
             _gameObjectManager.Player1.Dismounted += _gameObjectManager.AddItem;
             _gameObjectManager.Player1.ChestItemSpawn += _gameObjectManager.AddItem;
-
 
             // the Option selected gets upgraded
             _levelUpScreen.OnOptionSelected += skillId =>
@@ -663,7 +661,7 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.AddObject(new DogBowl(pos, size, full: o.IsFull ?? false));
                 }
             }
-            _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level, state.Statistic.Time, state.Statistic.DeathCount, state.Statistic.ShotsFired, state.Statistic.OpponentsHit);
+            _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level, state.Statistic.Time, state.Statistic.DeathCount, state.Statistic.ShotsFired, state.Statistic.OpponentsHit, state.Statistic.Repairs);
             Console.WriteLine("Game loaded.");
         }
         private void HandleSaveLoadInput()
@@ -1076,6 +1074,11 @@ namespace BikeWars.Content.screens
         public void OnActivated()
         {
             // throw new NotImplementedException();
+        }
+
+        public void OnHandleRepair()
+        {
+            _statisticsManager.HandleRepair();
         }
 
         private void OnPauseMenuClicked(int id, IScreen screen)

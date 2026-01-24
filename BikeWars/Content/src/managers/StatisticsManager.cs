@@ -69,6 +69,10 @@ public class StatisticsManager
     {
         Statistic.AddShotFired();
     }
+    public void HandleRepair()
+    {
+        Statistic.AddRepair();
+    }
 
     public void SaveStatistic()
     {
