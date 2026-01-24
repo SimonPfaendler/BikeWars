@@ -544,6 +544,12 @@
 /processorParam:Quality=Best
 /build:assets/sounds/SoftClick.mp3
 
+#begin assets/sounds/throw_object.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/throw_object.wav
+
 #begin assets/sounds/train-horn.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor

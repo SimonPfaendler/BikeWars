@@ -174,8 +174,11 @@ namespace BikeWars.Content.utils
              
              // Dozent
              AnimationFrames["Dozent_Idle"] = GetFramesFromAtlas("e5_dozent_down2.png", 1, 1);
-             var dozentLeft = GetFramesFromAtlas("e5_dozent_down2.png", 1, 1);
-             // dogLeft.AddRange(GetFramesFromAtlas("e3_dog_walking_left_2.png", 1, 1));
+             var dozentLeft = GetFramesFromAtlas("e5_dozent_left1.png", 1, 1);
+             dozentLeft.AddRange(GetFramesFromAtlas("e5_dozent_left2.png", 1, 1));
+             dozentLeft.AddRange(GetFramesFromAtlas("e5_dozent_left3.png", 1, 1));
+             dozentLeft.AddRange(GetFramesFromAtlas("e5_dozent_left4.png", 1, 1));
+             dozentLeft.AddRange(GetFramesFromAtlas("e5_dozent_left5.png", 1, 1));
              AnimationFrames["Dozent_WalkLeft"] = dozentLeft;
              var dozentRight = GetFramesFromAtlas("e5_dozent_right1.png", 1, 1);
              dozentRight.AddRange(GetFramesFromAtlas("e5_dozent_right2.png", 1, 1));
