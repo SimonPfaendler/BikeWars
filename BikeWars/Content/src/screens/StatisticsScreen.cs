@@ -50,7 +50,7 @@ public class StatisticsScreen : MenuScreenBase
 
     private float GetStatisticsHeight()
     {
-        return _components.Count * 110f; // Content of every entry right now.
+        return _components.Count * (10 + 6*20); // Content of every entry right now.
     }
 
     protected sealed override void InitializeButtons()
@@ -81,7 +81,7 @@ public class StatisticsScreen : MenuScreenBase
         foreach (var comp in _components)
         {
             comp.Draw(sb, RenderPrimitives.Pixel, new Color(50, 50, 50, 200), startPos, _font);
-            startPos.Y += 110;
+            startPos.Y += 10 + 6*20;
         }
 }
 
@@ -95,7 +95,6 @@ public class StatisticsScreen : MenuScreenBase
         {
             button.Draw(sb);
         }
-
         sb.End();
         _statistics.Draw(sb);
     }

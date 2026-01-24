@@ -384,6 +384,7 @@ namespace BikeWars.Content.screens
                 _audioService.Music.Stop();
                 _overlay.SetPaused(true, gameTime);
                 _audioService.Sounds.Play(AudioAssets.CarCrash);
+                _statisticsManager.HandleTime(_gameTimer.TimePassed());
                 GameOver?.Invoke(_statisticsManager.Statistic);
                 _statisticsManager.SaveStatistic();
                 SaveLoad.SaveNonGame(_statisticsManager);
@@ -826,8 +827,8 @@ namespace BikeWars.Content.screens
             _audioService.Music.Stop();
             _overlay.SetPaused(true, Game1.CurrentGameTime);
             _audioService.Sounds.Play(AudioAssets.CarHorn);
-            GameWon?.Invoke(_statisticsManager.Statistic);
             _statisticsManager.HandleTime(_gameTimer.TimePassed());
+            GameWon?.Invoke(_statisticsManager.Statistic);
             _statisticsManager.SaveStatistic();
             SaveLoad.SaveNonGame(_statisticsManager);
         }
