@@ -108,6 +108,18 @@ public class Statistic
             _shotsFired = value;
         }
     }
+    private int _opponentsHit { get; set; } // We can use this for the ratio on how often we actually hit the opponent
+    public int OpponentsHit {
+        get => _opponentsHit;
+        set
+        {
+            if (value <= 0) {
+                _opponentsHit = 0;
+                return;
+            }
+            _opponentsHit = value;
+        }
+    }
 
     public string TimeToMinuteDisplay()
     {
@@ -123,6 +135,11 @@ public class Statistic
     public void AddDeathCount()
     {
         DeathCount += 1;
+    }
+
+    public void AddOpponentHit()
+    {
+        OpponentsHit += 1;
     }
 
     public void AddDamage(CharacterBase c, int amount)
@@ -156,6 +173,15 @@ public class Statistic
         ShotsFired += 1;
     }
 
+    public float Accuracy()
+    {
+        if (ShotsFired <= 0)
+            return 0f;
+
+        float accuracy = (float)OpponentsHit / ShotsFired * 100f;
+        return (float)Math.Round(accuracy, 2);
+    }
+
     public Statistic()
     {
         Kills = 0;
@@ -166,9 +192,10 @@ public class Statistic
         Time = 0f;
         DeathCount = 0;
         ShotsFired = 0;
+        OpponentsHit = 0;
     }
 
-    public Statistic(int kills, int dealtDamage, int tookDamage, int xp, int level, float time, int deathCount, int shotsFired)
+    public Statistic(int kills, int dealtDamage, int tookDamage, int xp, int level, float time, int deathCount, int shotsFired, int opponentsHit)
     {
         Kills = kills;
         DealtDamage = dealtDamage;
@@ -178,5 +205,6 @@ public class Statistic
         Time = time;
         DeathCount = deathCount;
         ShotsFired = shotsFired;
+        OpponentsHit = opponentsHit;
     }
 }

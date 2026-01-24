@@ -48,6 +48,11 @@ public class StatisticsManager
     public void HandleTookDamage(CharacterBase c, int amount)
     {
         Statistic.AddDamage(c, amount);
+        if (c is Player)
+        {
+            return;
+        }
+        Statistic.AddOpponentHit();
     }
 
     public void HandleTime(float time)
