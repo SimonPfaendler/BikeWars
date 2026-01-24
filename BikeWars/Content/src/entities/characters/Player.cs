@@ -284,6 +284,15 @@ namespace BikeWars.Entities.Characters
             }
         }
 
+        public void OnInteractTower(Player player, TowerAlly tower)
+        {
+            if (player != this) return;
+            // Only activate if the Interact key (e.g. 'Q') is pressed
+            if (!_input.IsPressed(GameAction.INTERACT)) return;
+            
+            tower.Activate();
+        }
+
         // public Player(Vector2 start, Point size, Point renderSize, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")
         public Player(Vector2 start, float radius, Point renderSize, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")
         {

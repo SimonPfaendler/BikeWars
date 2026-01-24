@@ -210,7 +210,7 @@ namespace BikeWars.Content.screens
             _collisionManager.OnAOEHit += _combatManager.HandleAOEHit;
             _collisionManager.OnCharacterCollision += _combatManager.HandleCharacterCollision;
             _collisionManager.OnItemPickup += _gameObjectManager.Player1.OnPickUpItem;
-            _collisionManager.OnTowerInteraction += _gameObjectManager.OnActivateTower;
+            _collisionManager.OnTowerInteraction += _gameObjectManager.Player1.OnInteractTower;
             _collisionManager.OnObjectInteraction += _gameObjectManager.Player1.OnInteractObject;
             _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
             _collisionManager.OnTramHit += _combatManager.HandleTramHit;
@@ -746,7 +746,8 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.Projectiles,
                     _gameObjectManager.AOEAttacks,
                     new List<Tram>(_gameObjectManager.Trams),
-                    _gameObjectManager.Objects
+                    _gameObjectManager.Objects,
+                    _gameObjectManager.Towers
                 );
             }
 

@@ -304,6 +304,7 @@ public class GameObjectManager
         {
             o.Update(gameTime);
         }
+        
         foreach (ProjectileBase p in Projectiles)
         {
             p.Update(gameTime);
@@ -379,14 +380,13 @@ public class GameObjectManager
 
     private void OnTowerShotBullet(Tower tower)
     {
-        Vector2 cannonOffset = new Vector2(-100, 0);
-        Vector2 rotatedOffset = RotateVector(cannonOffset, tower.Rotation);
-
-        Vector2 spawnPos = tower.Transform.Bounds.Center.ToVector2() + rotatedOffset;
+        Vector2 spawnPos = tower.Transform.Bounds.Center.ToVector2();
         Bullet b = new Bullet(spawnPos, new Point(10, 10), tower);
-        b.Movement.Direction = -tower.GazeDirection;
+        
+        // Bullet direction is the tower's gaze direction.
+        b.Movement.Direction = tower.GazeDirection; 
         b.Movement.IsMoving = true;
-        b.Movement.Speed = 500f;
+        b.Movement.Speed = 250f;
 
         AddProjectile(b);
 
@@ -403,10 +403,7 @@ public class GameObjectManager
         );
 }
 
-    public void OnActivateTower(Player player, TowerAlly tower)
-    {
-        tower.Activate();
-    }
+
 
     private void OnPlayerFlamethrower(Player player)
     {
