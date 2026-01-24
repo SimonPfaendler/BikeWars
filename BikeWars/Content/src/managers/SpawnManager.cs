@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.components;
+using BikeWars.Content.entities.npcharacters;
 using BikeWars.Utilities;
 
 namespace BikeWars.Content.managers
@@ -189,9 +190,15 @@ namespace BikeWars.Content.managers
                     dog.SetWorldAudioManager(_worldAudioManager);
                     _gameObjectManager.AddCharacter(dog);
                 }
-                else if (val < 0.8)
+                else if (val < 0.6)
                 {
                     var thief = new BikeThief(spawnPos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler);
+                    ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
+                    _gameObjectManager.AddCharacter(thief);
+                }
+                else if (val < 0.8)
+                {
+                    var thief = new Dozent(spawnPos, 25, _audioService, _pathFinding, _collisionManager, _repathScheduler);
                     ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
                     _gameObjectManager.AddCharacter(thief);
                 }
