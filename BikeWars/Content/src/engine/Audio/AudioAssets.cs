@@ -35,6 +35,7 @@ namespace BikeWars.Content.engine.Audio
         public const string WoodCrack = "wood_crack";
         public const string WoodDestroy = "wood_destroy";
         public const string RaverSound = "raver_audio";
+        public const string ThrowObject = "throw_object";
         
 
         // Mapping ID -> Content-Path
@@ -69,7 +70,8 @@ namespace BikeWars.Content.engine.Audio
             { WoodCrack, "assets/sounds/wood_crack"},
             { WoodDestroy, "assets/sounds/wood_destroy"},
             { Miau, "assets/sounds/Dogs/Miau"},
-            { RaverSound, "assets/sounds/raver_audio" }
+            { RaverSound, "assets/sounds/raver_audio" },
+            { ThrowObject, "assets/sounds/throw_object" }
             
         };
 

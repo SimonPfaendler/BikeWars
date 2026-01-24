@@ -173,21 +173,21 @@ namespace BikeWars.Entities.Characters
                     if (!_isThrowTargetInRange) return false;
                     Attributes.AttackCooldown = 1.0f;
                     ThrowBook?.Invoke(_mouseWorldPos);
-                    _audio.Sounds.Play(AudioAssets.WoodCrack);
+                    _audio.Sounds.Play(AudioAssets.ThrowObject);
                     return true;
 
                 case WeaponType.BananaThrow:
                     if (!_isThrowTargetInRange) return false;
                     Attributes.AttackCooldown = 1.0f;
                     ThrowBanana?.Invoke(_mouseWorldPos);
-                    _audio.Sounds.Play(AudioAssets.WoodCrack);
+                    _audio.Sounds.Play(AudioAssets.ThrowObject);
                     return true;
 
                 case WeaponType.BottleThrow:
                     if (!_isThrowTargetInRange) return false;
                     Attributes.AttackCooldown = 1.0f;
                     ThrowBottle?.Invoke(_mouseWorldPos);
-                    _audio.Sounds.Play(AudioAssets.WoodCrack);
+                    _audio.Sounds.Play(AudioAssets.ThrowObject);
                     return true;
                 case WeaponType.BeerThrow:
                     if (!_isThrowTargetInRange) return false;
@@ -195,7 +195,7 @@ namespace BikeWars.Entities.Characters
                     {
                         Attributes.AttackCooldown = 0.1f;
                         ThrowBeer?.Invoke(_mouseWorldPos);
-                        _audio.Sounds.Play(AudioAssets.WoodCrack);
+                        _audio.Sounds.Play(AudioAssets.ThrowObject);
                         Inventory.RemoveAt(_inventoryIndexBeer);
                         _beerThrowSelected = false;
                         CurrentWeapon = _weaponBefore;
