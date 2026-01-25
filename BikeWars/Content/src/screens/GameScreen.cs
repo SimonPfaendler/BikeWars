@@ -349,6 +349,9 @@ namespace BikeWars.Content.screens
             }
 
             _overlay.SetPaused(false, gameTime);
+            
+            _gameObjectManager.Player1?.Inventory?.Update(gameTime);
+            _gameObjectManager.Player2?.Inventory?.Update(gameTime);
 
             // Hit Stop Logic
             if (_hitStopTimer > 0f)

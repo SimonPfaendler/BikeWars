@@ -648,6 +648,10 @@ namespace BikeWars.Entities.Characters
                         CurrentWeapon = WeaponType.BeerThrow;
                         _inventoryIndexBeer = _currentItemIndex;
                     }
+                    else
+                    {
+                        Inventory.RedSlot(_currentItemIndex);
+                    }
                 }
 
                 if (item is not Beer)
