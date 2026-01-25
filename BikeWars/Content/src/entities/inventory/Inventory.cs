@@ -12,6 +12,8 @@ public class Inventory
     private const int MaxSlots = 5;
     private readonly ItemBase[] _items = new ItemBase[MaxSlots];
     public IReadOnlyList<ItemBase> Items => _items;
+    private int _invalidSlotIndex = -1;
+    private float _invalidSlotTimer = 0f;
 
     public bool AddItem(ItemBase item)
     {
@@ -78,8 +80,23 @@ public class Inventory
             {
                 spriteBatch.Draw(pixel, slotRect, Color.Green * 0.4f);
             }
+            if (i == _invalidSlotIndex)
+            {
+                spriteBatch.Draw(pixel, slotRect, Color.Red * 0.7f);
+            }
         }
 
+    }
+    public void Update(GameTime gameTime)
+    {
+        if (_invalidSlotIndex == -1) return;
+
+        _invalidSlotTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+        if (_invalidSlotTimer <= 0f)
+        {
+            _invalidSlotIndex = -1;
+            _invalidSlotTimer = 0f;
+        }
     }
     
     public void RemoveItem(ItemBase item)
@@ -100,6 +117,12 @@ public class Inventory
             return;
             
         _items[index] = null;
+    }
+
+    public void RedSlot(int slotindex)
+    {
+        _invalidSlotIndex = slotindex;
+        _invalidSlotTimer = 0.5f;
     }
 }
 
