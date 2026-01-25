@@ -158,8 +158,7 @@ namespace BikeWars.Content.managers
         {
             // Determine type of enemy
             // As time progresses, higher chance for stronger enemies (BikeThief vs Hobo)
-
-            bool spawnHobo = RandomUtil.NextDouble() > (0.2 + 0.3 * progress); // Chance of BikeThief/ Dog increases from 20% to 50%
+            
 
             Vector2 spawnPos = GetRandomSpawnPosition();
 
@@ -168,46 +167,54 @@ namespace BikeWars.Content.managers
             float difficultyMultiplier = 1.0f + (1.2f * (float)progress);
             // Speed scaling: 1.0 to 1.5 over 15 mins
             float speedMultiplier = 1.0f + (0.2f * (float)progress);
+            // chances of each type can be changed here
+            // hobo starts at 0.4 and after ends at 0.3
+            // progress starts at 0.0 and is 1.0 at the end of Gametime
+            // start and end percentages must be 100 in total 
+            double pHobo = 0.4 - 0.2 * progress; //40% -> 20%
+            double pDog = 0.4 - 0.15 * progress; // 40 -> 25
+            double pThief    = 0.13 + 0.02 * progress;  // 13 15
+            double pDozent   = 0.02 + 0.23 * progress;  // 2  25
+            double pKamikaze = 0.05 + 0.1 * progress;  // 5 15
+            
+            double val = RandomUtil.NextDouble();
+            
+            double spawnHobo = pHobo;
+            double spawnDog = spawnHobo + pDog;
+            double spawnThief = spawnDog + pThief;
+            double spawnDozent = spawnThief + pDozent;
+            // theoretisch spawnKamikaze, aber faellt unter letzdem else
 
-            if (spawnHobo)
+            if (val < spawnHobo)
             {
-                var hobo = new Hobo(spawnPos, 12, _audioService, _pathFinding, _collisionManager,  _repathScheduler);
+                var hobo = new Hobo(spawnPos, 12, _audioService, _pathFinding, _collisionManager, _repathScheduler);
                 ApplyScaling(hobo, difficultyMultiplier, speedMultiplier);
                 _gameObjectManager.AddCharacter(hobo);
             }
+            else if (val < spawnDog)
+            {
+                var dog = new Dog(spawnPos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler);
+                ApplyScaling(dog, difficultyMultiplier, speedMultiplier);
+                dog.SetWorldAudioManager(_worldAudioManager);
+                _gameObjectManager.AddCharacter(dog);
+            }
+            else if (val < spawnThief)
+            {
+                var thief = new BikeThief(spawnPos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler);
+                ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
+                _gameObjectManager.AddCharacter(thief);
+            }
+            else if (val < spawnDozent)
+            {
+                var thief = new Dozent(spawnPos, 25, _audioService, _pathFinding, _collisionManager, _repathScheduler);
+                ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
+                _gameObjectManager.AddCharacter(thief);
+            }
             else
             {
-                // Remaining probability split between Dog, Thief, and Kamikaze
-                double val = RandomUtil.NextDouble();
-                // Dog: 40% of remaining
-                // Thief: 40% of remaining
-                // Kamikaze: 20% of remaining
-
-                if (val < 0.4)
-                {
-                    var dog = new Dog(spawnPos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler);
-                    ApplyScaling(dog, difficultyMultiplier, speedMultiplier);
-                    dog.SetWorldAudioManager(_worldAudioManager);
-                    _gameObjectManager.AddCharacter(dog);
-                }
-                else if (val < 0.6)
-                {
-                    var thief = new BikeThief(spawnPos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler);
-                    ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
-                    _gameObjectManager.AddCharacter(thief);
-                }
-                else if (val < 0.8)
-                {
-                    var thief = new Dozent(spawnPos, 25, _audioService, _pathFinding, _collisionManager, _repathScheduler);
-                    ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
-                    _gameObjectManager.AddCharacter(thief);
-                }
-                else
-                {
-                    var kamikaze = new KamikazeOpa(spawnPos, 15, _audioService, _pathFinding, _collisionManager, _gameObjectManager, _repathScheduler);
-                    ApplyScaling(kamikaze, difficultyMultiplier, speedMultiplier);
-                    _gameObjectManager.AddCharacter(kamikaze);
-                }
+                var kamikaze = new KamikazeOpa(spawnPos, 15, _audioService, _pathFinding, _collisionManager, _gameObjectManager, _repathScheduler);
+                ApplyScaling(kamikaze, difficultyMultiplier, speedMultiplier);
+                _gameObjectManager.AddCharacter(kamikaze);
             }
         }
 
