@@ -33,9 +33,11 @@ public class CollisionManager
     public event Action<CharacterBase> OnTramHit;
     public event Action<CharacterBase> OnBaechleHit;
 
+    public event Action <DestructibleObject, ProjectileBase> OnProjectileHitDestructible;
+    public event Action <DestructibleObject, AreaOfEffectBase> OnAOEHitDestructible;
+
     public List<TiledObjectInfo> ObjectSpawns { get; } = new();
     private readonly GameObjectManager _gameObjectManager;
-    private readonly AudioService _audioService;
     public GameObjectManager GameObjectManager => _gameObjectManager;
 
     private const string MAP = "assets/Map/Bike_Wars_Map";
@@ -89,7 +91,7 @@ public class CollisionManager
     // base (unpadded) walkability snapshot to support cheap local updates
     private bool[,] _baseWalkableGrid;
 
-    public CollisionManager(int cellSize, int worldBounds, GameObjectManager gameObjectManager, AudioService audioService)
+    public CollisionManager(int cellSize, int worldBounds, GameObjectManager gameObjectManager)
     {
         _cellSize = cellSize;
         DynamicHash = new SpatialHash(cellSize, worldBounds);
@@ -98,7 +100,6 @@ public class CollisionManager
         _toRemoveStaticColliders = new HashSet<ICollider>();
         _toUpdateWalkableRects = new List<Rectangle>();
         _gameObjectManager = gameObjectManager;
-        _audioService = audioService;
     }
 
     public bool isColliding(ICollider collisionBox1, ICollider collisionBox2)
@@ -583,10 +584,7 @@ public class CollisionManager
             // If the wall belongs to a destructible map object, apply damage
             if (b.Owner is DestructibleObject destructible)
             {
-                p.HasHit = true;
-                destructible.TakeDamage(p.Damage);
-                _audioService.Sounds.Play(destructible.Health > 0 ? AudioAssets.WoodCrack : AudioAssets.WoodDestroy);
-                _gameObjectManager.SpawnDamageNumber(GetObjectCenter(destructible), p.Damage);
+                OnProjectileHitDestructible?.Invoke((DestructibleObject)b.Owner, p);
                 _toRemoveColliders.Add(p.Collider);
 
                 // if destroyed: defer static collider removal and defer path grid update
@@ -640,9 +638,7 @@ public class CollisionManager
             return;
         }
 
-        destructible.TakeDamage(aoe.Damage);
-        _audioService.Sounds.Play(destructible.Health > 0 ? AudioAssets.WoodCrack : AudioAssets.WoodDestroy);
-        _gameObjectManager.SpawnDamageNumber(GetObjectCenter(destructible), aoe.Damage);
+        OnAOEHitDestructible?.Invoke((DestructibleObject)b.Owner, aoe);
 
         if (destructible.Health <= 0)
         {
@@ -696,11 +692,6 @@ public class CollisionManager
         }
     }
 
-    private static Vector2 GetObjectCenter(DestructibleObject destructible)
-    {
-        var bounds = destructible.Transform.Bounds;
-        return new Vector2(bounds.Center.X, bounds.Center.Y);
-    }
 
     private void HandleTramCollision(ICollider c, ICollider d)
     {

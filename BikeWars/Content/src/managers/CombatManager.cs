@@ -6,6 +6,8 @@ using BikeWars.Content.entities.items;
 using BikeWars.Utilities;
 using Microsoft.Xna.Framework;
 using BikeWars.Entities;
+using System.Diagnostics.Contracts;
+using BikeWars.Entities.Characters.MapObjects;
 
 namespace BikeWars.Content.managers;
 
@@ -93,7 +95,6 @@ public class CombatManager
 
         // Apply Damage
         target.TakeDamage(aoe.Damage, shouldSquash: false);
-        _gameObjects.SpawnDamageNumber(target.Transform.Position, aoe.Damage); // HANDLED BY GameObjectManager AGGREGATION
 
         if (aoe is IceTrail)
         {
@@ -106,6 +107,22 @@ public class CombatManager
             HandleDeath(target);
         }
     }
+
+    public void HandleprojecticleHitDestructible(DestructibleObject destructible, ProjectileBase projectile)
+    {
+        projectile.HasHit = true;
+        destructible.TakeDamage(projectile.Damage);
+        _audio.Sounds.Play(destructible.Health > 0 ? AudioAssets.WoodCrack : AudioAssets.WoodDestroy);
+        _gameObjects.SpawnDamageNumber(GetObjectCenter(destructible), projectile.Damage);
+    }
+
+    public void HandleAOEHitDestructible(DestructibleObject destructible, AreaOfEffectBase aoe)
+    {
+        destructible.TakeDamage(aoe.Damage);
+        _audio.Sounds.Play(destructible.Health > 0 ? AudioAssets.WoodCrack : AudioAssets.WoodDestroy);
+        _gameObjects.SpawnDamageNumber(GetObjectCenter(destructible), aoe.Damage);
+    }
+
 
     // Two Characters collide (Close combat / Melee attack)
     public void HandleCharacterCollision(CharacterBase a, CharacterBase b)
@@ -149,4 +166,10 @@ public class CombatManager
             HandleDeath(target);
         }
     }
+    private static Vector2 GetObjectCenter(DestructibleObject destructible)
+    {
+        var bounds = destructible.Transform.Bounds;
+        return new Vector2(bounds.Center.X, bounds.Center.Y);
+    }
 }
+

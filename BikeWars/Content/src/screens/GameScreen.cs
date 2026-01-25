@@ -183,7 +183,7 @@ namespace BikeWars.Content.screens
                 _gameObjectManager.Player1.FoundBike += () => _statisticsManager.HandleFoundBike(_gameTimer.TimePassed());
             }
 
-            _collisionManager = new CollisionManager(CELL_SIZE, worldBounds.Height, _gameObjectManager, _audioService);
+            _collisionManager = new CollisionManager(CELL_SIZE, worldBounds.Height, _gameObjectManager);
             var players = new HashSet<Player>();
             if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);
             if (_gameObjectManager.Player2 != null) players.Add(_gameObjectManager.Player2);
@@ -219,6 +219,8 @@ namespace BikeWars.Content.screens
             _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
             _collisionManager.OnTramHit += _combatManager.HandleTramHit;
             _collisionManager.OnBaechleHit += _combatManager.HandleBaechleHit;
+            _collisionManager.OnProjectileHitDestructible += _combatManager.HandleprojecticleHitDestructible;
+            _collisionManager.OnAOEHitDestructible += _combatManager.HandleAOEHitDestructible;
 
             _combatManager.OnHitStopRequested += TriggerHitStop;
             _onScreenShake = (intensity, duration) => camera.Shake(intensity, duration);
