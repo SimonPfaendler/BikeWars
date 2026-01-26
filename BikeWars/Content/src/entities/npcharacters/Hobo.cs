@@ -117,10 +117,32 @@ namespace BikeWars.Entities.Characters
             }
             HandleSound(Movement.IsMoving);
 
-            var player = _collisionManager?.GameObjectManager?.Player1;
-            if (player != null && !player.IsDead)
+            var gom = _collisionManager?.GameObjectManager;
+            if (gom != null)
             {
-                ThrowAttack(player);
+                Player? p1 = gom.Player1;
+                Player? p2 = gom.Player2;
+                bool p1Valid = p1 != null && !p1.IsDead;
+                bool p2Valid = p2 != null && !p2.IsDead;
+
+                Player? target = null;
+                if (p1Valid && p2Valid)
+                {
+                    target = Random.Shared.Next(2) == 0 ? p1 : p2;
+                }
+                else if (p1Valid)
+                {
+                    target = p1;
+                }
+                else if (p2Valid)
+                {
+                    target = p2;
+                }
+
+                if (target != null)
+                {
+                    ThrowAttack(target);
+                }
             }
 
             UpdateCollider();
