@@ -196,6 +196,7 @@ namespace BikeWars.Entities.Characters
             }
 
             _collisionManager.GameObjectManager.OnEnemyThrowBottle(this, player.Transform.Position);
+            _audio.Sounds.Play(AudioAssets.ThrowObject);
             _throwAnimTimer = SpriteManager.GetAnimationSpeed("Hobo_Throw") * 6; // 6 frames
             _currentAnimation = _throwAnimation;
             ResetAttackCooldown();

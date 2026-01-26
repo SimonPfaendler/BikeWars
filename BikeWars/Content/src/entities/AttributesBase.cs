@@ -91,7 +91,7 @@ namespace BikeWars.Entities
             CanAutoAttack = canAutoAttack;
         }
 
-        public float ThrowAttackChance { get; set; } = 0.001f; // 0.1% chance
+        public float ThrowAttackChance { get; set; } = 0.005f; // 0.1% chance
         public float ThrowRange { get; set; } = 400f;
     }
 }
