@@ -510,8 +510,8 @@ public class GameObjectManager
                 ? spawnPos + Vector2.Normalize(toTarget) * Player.ThrowRange
                 : spawnPos;
         }
-        var bottle = new ThrowBottle(spawnPos, target, enemy);
-        AddProjectile(bottle);
+        var beer = new ThrowBeer(spawnPos, target, enemy, emitLandingEvent: false);
+        AddProjectile(beer);
     }
 
 
