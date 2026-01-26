@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
@@ -100,6 +101,13 @@ namespace BikeWars.Entities.Characters
                 _currentAnimation.Update(gameTime, Movement.IsMoving);
             }
             HandleSound(Movement.IsMoving);
+
+            var player = _collisionManager?.GameObjectManager?.Player1;
+            if (player != null && !player.IsDead)
+            {
+                ThrowAttack(player);
+            }
+
             UpdateCollider();
         }
 
@@ -128,6 +136,24 @@ namespace BikeWars.Entities.Characters
             if (!CanAttack()) return;
             base.Attack(target);
             _audio.Sounds.Play(AudioAssets.Punch);
+        }
+
+        public override void ThrowAttack(ICombat target)
+        {
+            if (!CanAttack()) return;
+            if (_collisionManager?.GameObjectManager == null) return;
+            if (target is not Player player) return;
+
+            float maxRange = Attributes.ThrowRange;
+            float minRange = Attributes.ThrowRange * 0.5f;
+            float distSq = Vector2.DistanceSquared(Transform.Position, player.Transform.Position);
+            if (distSq > maxRange * maxRange || distSq < minRange * minRange) return;
+
+            // 10% chance per check
+            if (Random.Shared.NextDouble() > Attributes.ThrowAttackChance) return;
+
+            _collisionManager.GameObjectManager.OnEnemyThrowBottle(this, player.Transform.Position);
+            ResetAttackCooldown();
         }
     }
 }

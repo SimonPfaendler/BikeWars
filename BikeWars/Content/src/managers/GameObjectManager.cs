@@ -499,6 +499,22 @@ public class GameObjectManager
         AddProjectile(bottle);
     }
 
+    public void OnEnemyThrowBottle(CharacterBase enemy, Vector2 target)
+    {
+        Vector2 spawnPos = enemy.Transform.Bounds.Center.ToVector2();
+        Vector2 toTarget = target - spawnPos;
+        float distance = toTarget.Length();
+        if (distance > Player.ThrowRange)
+        {
+            target = distance > 0.001f
+                ? spawnPos + Vector2.Normalize(toTarget) * Player.ThrowRange
+                : spawnPos;
+        }
+        var bottle = new ThrowBottle(spawnPos, target, enemy);
+        AddProjectile(bottle);
+    }
+
+
     private void OnPlayerThrowBeer(Player player, Vector2 target)
     {
         Vector2 spawnPos = player.Transform.Bounds.Center.ToVector2();
