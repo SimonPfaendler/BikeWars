@@ -182,12 +182,12 @@ namespace BikeWars.Entities.Characters
             if (_collisionManager?.GameObjectManager == null) return;
             if (target is not Player player) return;
 
+            if (Random.Shared.NextDouble() > Attributes.ThrowAttackChance) return;
+
             float maxRange = Attributes.ThrowRange;
             float minRange = Attributes.ThrowRange * 0.5f;
             float distSq = Vector2.DistanceSquared(Transform.Position, player.Transform.Position);
             if (distSq > maxRange * maxRange || distSq < minRange * minRange) return;
-
-            if (Random.Shared.NextDouble() > Attributes.ThrowAttackChance) return;
 
             float dx = player.Transform.Position.X - Transform.Position.X;
             if (Math.Abs(dx) > 0.05f)
