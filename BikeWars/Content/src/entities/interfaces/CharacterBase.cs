@@ -181,6 +181,8 @@ public abstract class CharacterBase : ICharacter, ICombat
         _attackCooldownTimer = Attributes.AttackCooldown;
     }
 
+    public virtual void ThrowAttack(ICombat target) { }
+
     public void UpdateCollider()
     {
         Vector2 colliderPosition = new Vector2(

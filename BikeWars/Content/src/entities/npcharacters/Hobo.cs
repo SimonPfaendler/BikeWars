@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
@@ -16,11 +17,15 @@ namespace BikeWars.Entities.Characters
         private readonly SpriteAnimation _walkRightAnimation;
         private readonly SpriteAnimation _walkUpAnimation;
         private readonly SpriteAnimation _walkDownAnimation;
+        private readonly SpriteAnimation _throwAnimation;
         private SpriteAnimation _currentAnimation;
+        private SpriteEffects _spriteEffects = SpriteEffects.None;
 
         private readonly PathFinding _pathFinding;
         private readonly CollisionManager _collisionManager;
         private readonly RepathScheduler _repathScheduler;
+
+        private float _throwAnimTimer;
 
         protected override string WalkingSound => AudioAssets.Walking;
 
@@ -46,6 +51,7 @@ namespace BikeWars.Entities.Characters
             _walkRightAnimation = SpriteManager.GetAnimation("Hobo_WalkRight");
             _walkDownAnimation = SpriteManager.GetAnimation("Hobo_WalkDown");
             _walkUpAnimation = SpriteManager.GetAnimation("Hobo_WalkUp");
+            _throwAnimation = SpriteManager.GetAnimation("Hobo_Throw");
             _currentAnimation = _idleAnimation;
             UpdateCollider();
         }
@@ -55,6 +61,7 @@ namespace BikeWars.Entities.Characters
             UpdateAttackCooldown(gameTime);
             UpdateKnockback(gameTime);
             UpdateHitFlash(gameTime);
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
             // Sound- and Movement-Control
             if (Movement is EnemyMovement em)
             {
@@ -71,12 +78,10 @@ namespace BikeWars.Entities.Characters
             LastTransform = new Transform(Transform.Position, Transform.Size);
             if (Movement.IsMoving)
             {
-                float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
                 if (direction.LengthSquared() > 0.0001f)
                 {
                     direction.Normalize();
-                    Transform.Position += direction * Speed * delta;
+                    Transform.Position += direction * Speed * dt;
                 }
 
                 if (System.Math.Abs(direction.X) > System.Math.Abs(direction.Y))
@@ -95,11 +100,51 @@ namespace BikeWars.Entities.Characters
                 _currentAnimation = _idleAnimation;
             }
 
+            if (_throwAnimTimer > 0f)
+            {
+                _throwAnimTimer -= dt;
+                _currentAnimation = _throwAnimation;
+            }
+            else
+            {
+                _spriteEffects = SpriteEffects.None; // default for non-throw animations
+            }
+
             if (_currentAnimation != null)
             {
-                _currentAnimation.Update(gameTime, Movement.IsMoving);
+                bool animating = _throwAnimTimer > 0f || Movement.IsMoving;
+                _currentAnimation.Update(gameTime, animating);
             }
             HandleSound(Movement.IsMoving);
+
+            var gom = _collisionManager?.GameObjectManager;
+            if (gom != null)
+            {
+                Player? p1 = gom.Player1;
+                Player? p2 = gom.Player2;
+                bool p1Valid = p1 != null && !p1.IsDead;
+                bool p2Valid = p2 != null && !p2.IsDead;
+
+                Player? target = null;
+                if (p1Valid && p2Valid)
+                {
+                    target = Random.Shared.Next(2) == 0 ? p1 : p2;
+                }
+                else if (p1Valid)
+                {
+                    target = p1;
+                }
+                else if (p2Valid)
+                {
+                    target = p2;
+                }
+
+                if (target != null)
+                {
+                    ThrowAttack(target);
+                }
+            }
+
             UpdateCollider();
         }
 
@@ -111,7 +156,8 @@ namespace BikeWars.Entities.Characters
                 return;
 
             Color drawColor = (_hitFlashTimer > 0f) ? _hitColor : Color.White;
-            _currentAnimation.Draw(spriteBatch, RenderTransform.Position, RenderTransform.Size, 0f, _renderScale, drawColor);
+            SpriteEffects effects = _throwAnimTimer > 0f ? _spriteEffects : SpriteEffects.None;
+            _currentAnimation.Draw(spriteBatch, RenderTransform.Position, RenderTransform.Size, 0f, _renderScale, drawColor, effects);
         }
 
         public void SetWorldAudioManager(WorldAudioManager manager)
@@ -128,6 +174,31 @@ namespace BikeWars.Entities.Characters
             if (!CanAttack()) return;
             base.Attack(target);
             _audio.Sounds.Play(AudioAssets.Punch);
+        }
+
+        public override void ThrowAttack(ICombat target)
+        {
+            if (!CanAttack()) return;
+            if (_collisionManager?.GameObjectManager == null) return;
+            if (target is not Player player) return;
+
+            float maxRange = Attributes.ThrowRange;
+            float minRange = Attributes.ThrowRange * 0.5f;
+            float distSq = Vector2.DistanceSquared(Transform.Position, player.Transform.Position);
+            if (distSq > maxRange * maxRange || distSq < minRange * minRange) return;
+
+            if (Random.Shared.NextDouble() > Attributes.ThrowAttackChance) return;
+
+            float dx = player.Transform.Position.X - Transform.Position.X;
+            if (Math.Abs(dx) > 0.05f)
+            {
+                _spriteEffects = dx < 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
+            }
+
+            _collisionManager.GameObjectManager.OnEnemyThrowBottle(this, player.Transform.Position);
+            _throwAnimTimer = SpriteManager.GetAnimationSpeed("Hobo_Throw") * 6; // 6 frames
+            _currentAnimation = _throwAnimation;
+            ResetAttackCooldown();
         }
     }
 }
