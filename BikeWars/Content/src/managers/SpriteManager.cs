@@ -31,7 +31,8 @@ namespace BikeWars.Content.managers
         {
             { "Hobo_Idle", 0.4f },
             { "Dog_Idle", 0.5f },
-            { "KamikazeOpa_Death", 0.1f }
+            { "KamikazeOpa_Death", 0.1f },
+            { "Hobo_Throw", 0.2f}
         };
 
         private const float DefaultSpeed = 0.15f;
@@ -139,6 +140,7 @@ namespace BikeWars.Content.managers
             "Hobo_WalkRight",
             "Hobo_WalkDown",
             "Hobo_WalkUp",
+            "Hobo_Throw",
 
             // BIKE THIEF
             "BikeThief_Idle",
@@ -177,7 +179,7 @@ namespace BikeWars.Content.managers
             "Raver06_RightUp",
         };
 
-        private static float GetAnimationSpeed(string key)
+        public static float GetAnimationSpeed(string key)
         {
             if (AnimationSpeeds.TryGetValue(key, out float speed))
             {

@@ -48,12 +48,12 @@ namespace BikeWars.Content.engine
             return _frames[_frameIndex];
         }
 
-        public void Draw(SpriteBatch spriteBatch, Vector2 position, Point size, float rotation, Color? color = null)
+        public void Draw(SpriteBatch spriteBatch, Vector2 position, Point size, float rotation, Color? color = null, SpriteEffects effects = SpriteEffects.None)
         {
-            Draw(spriteBatch, position, size, rotation, Vector2.One, color);
+            Draw(spriteBatch, position, size, rotation, Vector2.One, color, effects);
         }
 
-        public void Draw(SpriteBatch spriteBatch, Vector2 position, Point size, float rotation, Vector2 scale, Color? color = null)
+        public void Draw(SpriteBatch spriteBatch, Vector2 position, Point size, float rotation, Vector2 scale, Color? color = null, SpriteEffects effects = SpriteEffects.None)
         {
             Rectangle source = _frames[_frameIndex];
             
@@ -71,7 +71,7 @@ namespace BikeWars.Content.engine
             // Adjust origin to center for proper scaling
             Vector2 origin = new Vector2(source.Width / 2f, source.Height / 2f);
             
-            spriteBatch.Draw(_sheet, dest, source, color ?? Color.White, rotation: rotation, origin, SpriteEffects.None, layerDepth:0f);
+            spriteBatch.Draw(_sheet, dest, source, color ?? Color.White, rotation: rotation, origin, effects, layerDepth:0f);
         }
 
         public SpriteAnimation Clone()

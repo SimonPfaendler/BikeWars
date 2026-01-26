@@ -119,6 +119,7 @@ namespace BikeWars.Content.utils
             AnimationFrames["Hobo_WalkRight"] = GetFramesFromAtlas("e1_drunkdude_walking_right.png", 2, 2).Take(3).ToList();
             AnimationFrames["Hobo_WalkDown"] = GetFramesFromAtlas("e1_drunkdude_walking_down.png", 3, 2);
             AnimationFrames["Hobo_WalkUp"] = GetFramesFromAtlas("e1_drunkdude_walking_up.png", 2, 2).Take(3).ToList();
+            AnimationFrames["Hobo_Throw"] = GetFramesFromAtlas("e1_drunkdude_longrange_attack.png", 6, 1);
             
             //e2
             var btWalkRight = GetFramesFromAtlas("e2_bikethief_walking_right.png", 2, 3);
