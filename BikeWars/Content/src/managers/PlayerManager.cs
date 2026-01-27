@@ -29,7 +29,7 @@ namespace BikeWars.Content.managers
 
             // Player 1 - Keyboard
             var inputP1 = new KeyboardPlayerInput(Camera);
-            Player1 = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), 15, new Point(32,32), audioService, inputP1);
+            Player1 = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), 15, new Point(32,32), audioService, inputP1, isTechDemo);
 
             if (isTechDemo)
             {
@@ -43,7 +43,7 @@ namespace BikeWars.Content.managers
             }
             // Assign Player 2 to the second controller. Player 1 starts on Keyboard but can switch to Pad 1.
             var inputP2 = new GamepadPlayerInput(PlayerIndex.Two);
-            Player2 = new Player(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2), 12, new Point(32, 32), audioService, inputP2, "Character2");
+            Player2 = new Player(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2), 12, new Point(32, 32), audioService, inputP2, isTechDemo, "Character2");
 
             if (isTechDemo)
             {

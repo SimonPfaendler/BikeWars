@@ -31,7 +31,7 @@ namespace BikeWars.Entities.Characters
         public Bike CurrentBike => movement?.CrtBike;
         private IPlayerInput _input;
         private CooldownWithDuration sprint { get; }
-        public Vector2 GazeDirection { get; private set; }
+        public new Vector2 GazeDirection { get; private set; }
         public int XpCounter { get; private set; } = 0;
         public int XpLevelUp = 10;
         public int CurrentLevel { get; private set; } = 1;
@@ -131,7 +131,8 @@ namespace BikeWars.Entities.Characters
             BeerThrow
         }
 
-        public WeaponType CurrentWeapon { get; private set; } = WeaponType.Gun;
+        public WeaponType CurrentWeapon { get; private set; } = WeaponType.BookThrow;
+        private readonly HashSet<WeaponType> _unlockedWeapons = new HashSet<WeaponType>();
 
         private float _dopingTimer = 0f;
         public bool IsDoped => _dopingTimer > 0f;
@@ -256,6 +257,16 @@ namespace BikeWars.Entities.Characters
                 }
                 return;
             }
+            if (item is WeaponItem weapon)
+            {
+                if (_input.IsPressed(GameAction.INTERACT))
+                {
+                    _unlockedWeapons.Add(weapon.Type);
+                    item.IsPickedUp = true;
+                    ItemPickedUp?.Invoke(item);
+                }
+                return;
+            }
             item.IsPickedUp = true;
             ItemPickedUp?.Invoke(item);
         }
@@ -308,7 +319,7 @@ namespace BikeWars.Entities.Characters
         }
 
         // public Player(Vector2 start, Point size, Point renderSize, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")
-        public Player(Vector2 start, float radius, Point renderSize, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")
+        public Player(Vector2 start, float radius, Point renderSize, AudioService audio, IPlayerInput input, bool isTechDemo = false, string characterPrefix = "Character1")
         {
             Attributes = new CharacterAttributes(this, 300, 0, 10, 2f, false);
             Transform = new Transform(start, radius);
@@ -338,6 +349,22 @@ namespace BikeWars.Entities.Characters
                 _currentAnimation = _idleAnimation;
             }
             phaseFoundBike = false;
+            
+            // start weapon
+            if (isTechDemo)
+            {
+                foreach (WeaponType type in Enum.GetValues(typeof(WeaponType)))
+                {
+                    if (type != WeaponType.BeerThrow)
+                        _unlockedWeapons.Add(type);
+                }
+            }
+            else
+            {
+                _unlockedWeapons.Add(WeaponType.BookThrow);
+            }
+            CurrentWeapon = WeaponType.BookThrow;
+
             UpdateCollider();
         }
 
@@ -583,6 +610,18 @@ namespace BikeWars.Entities.Characters
             {
                 Attributes.CanAutoAttack = true;
             }
+            else if (skill is SkillTree.SkillId.WeaponGun)
+            {
+                _unlockedWeapons.Add(WeaponType.Gun);
+            }
+            else if (skill is SkillTree.SkillId.WeaponBanana)
+            {
+                _unlockedWeapons.Add(WeaponType.BananaThrow);
+            }
+            else if (skill is SkillTree.SkillId.WeaponBottle)
+            {
+                _unlockedWeapons.Add(WeaponType.BottleThrow);
+            }
         }
 
         // When you dismount of the bike
@@ -742,23 +781,22 @@ namespace BikeWars.Entities.Characters
             if (!_input.IsPressed(GameAction.SWITCH_WEAPON))
                 return;
 
-            // Cycle through all weapons
-            if (CurrentWeapon == WeaponType.Gun)
-                CurrentWeapon = WeaponType.Flamethrower;
-            else if (CurrentWeapon == WeaponType.Flamethrower)
-                CurrentWeapon = WeaponType.IceTrail;
-            else if (CurrentWeapon == WeaponType.IceTrail)
-                CurrentWeapon = WeaponType.FireTrail;
-            else if (CurrentWeapon == WeaponType.FireTrail)
-                CurrentWeapon = WeaponType.DamageCircle;
-            else if (CurrentWeapon == WeaponType.DamageCircle)
-                CurrentWeapon = WeaponType.BookThrow;
-            else if (CurrentWeapon == WeaponType.BookThrow)
-                CurrentWeapon = WeaponType.BananaThrow;
-            else if (CurrentWeapon == WeaponType.BananaThrow)
-                CurrentWeapon = WeaponType.BottleThrow;
-            else
-                CurrentWeapon = WeaponType.Gun;
+            var types = (WeaponType[])Enum.GetValues(typeof(WeaponType));
+            int currentIndex = Array.IndexOf(types, CurrentWeapon);
+            
+            for (int i = 1; i < types.Length; i++)
+            {
+                int nextIndex = (currentIndex + i) % types.Length;
+                WeaponType nextType = types[nextIndex];
+                
+                if (nextType == WeaponType.BeerThrow) continue;
+                
+                if (_unlockedWeapons.Contains(nextType))
+                {
+                    CurrentWeapon = nextType;
+                    return;
+                }
+            }
         }
 
         private void HandleItemUsage(GameTime gameTime)

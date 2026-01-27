@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.engine.interfaces;
+using BikeWars.Entities.Characters;
 
 namespace BikeWars.Content.entities.items;
 public class Chest: ObjectBase
@@ -13,7 +14,7 @@ public class Chest: ObjectBase
     private BoxCollider _collisionCollider {get;set;}
     private Texture2D _texClosed;
     private Texture2D _texOpen;
-    public BoxCollider CollisionCollider {get => _collisionCollider; set => _collisionCollider = value; }
+    public new BoxCollider CollisionCollider {get => _collisionCollider; set => _collisionCollider = value; }
     private int PADDING_INTERACTION_AREA = 40;
 
     public Chest(Vector2 start, Point size, string item, bool open = false)
@@ -54,14 +55,42 @@ public class Chest: ObjectBase
         // Item wird knapp ueber der Truhe gespawnt
         Vector2 dropPos = Transform.Position + new Vector2(0, - Transform.Size.Y);
 
-        return Item switch
+        // random loot logic
+        double roll = Utilities.RandomUtil.NextDouble();
+
+        if (roll < 0.20) // 20% Weapons
         {
-            "Energygel"  => new EnergyGel(dropPos, new Point(32, 32)),
-            "Frelo"      => new Frelo(dropPos, new Point(32, 32)),
-            "Racingbike" => new RacingBike(dropPos, new Point(32, 32)),
-            "DogFood" => new DogFood(dropPos, new Point(32, 32)),
-            "DopingSpritze" => new DopingSpritze(dropPos, new Point(32, 32)),
-            "Beer" => new Beer(dropPos, new Point(32, 32)),
-        };
+            double weaponRoll = Utilities.RandomUtil.NextDouble();
+            Player.WeaponType weaponType;
+            if (weaponRoll < 0.25) weaponType = Player.WeaponType.Flamethrower;
+            else if (weaponRoll < 0.50) weaponType = Player.WeaponType.IceTrail;
+            else if (weaponRoll < 0.75) weaponType = Player.WeaponType.FireTrail;
+            else weaponType = Player.WeaponType.DamageCircle;
+            
+            return new WeaponItem(dropPos, new Point(32, 32), weaponType);
+        }
+        else if (roll < 0.50) // 30% EnergyGel
+        {
+            return new EnergyGel(dropPos, new Point(32, 32));
+        }
+        else if (roll < 0.70) // 20% Beer
+        {
+            return new Beer(dropPos, new Point(32, 32));
+        }
+        else if (roll < 0.85) // 15% DopingSpritze
+        {
+            return new DopingSpritze(dropPos, new Point(32, 32));
+        }
+        else if (roll < 0.95) // 10% DogFood
+        {
+            return new DogFood(dropPos, new Point(32, 32));
+        }
+        else // 5% Bikes
+        {
+            if (Utilities.RandomUtil.NextDouble() < 0.5)
+                return new Frelo(dropPos, new Point(32, 32));
+            else
+                return new RacingBike(dropPos, new Point(32, 32));
+        }
     }
 }
