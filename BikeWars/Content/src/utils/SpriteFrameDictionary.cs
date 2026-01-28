@@ -208,6 +208,47 @@ namespace BikeWars.Content.utils
 
              AnimationFrames["Raver06_LeftUp"]  = GetFramesFromAtlas("raver06_left_up.png", 1, 1);
              AnimationFrames["Raver06_RightUp"] = GetFramesFromAtlas("raver06_right_up.png", 1, 1);
+             
+             // policeman
+             var policeWalkRight = new List<Rectangle>();
+             policeWalkRight.AddRange(GetFramesFromAtlas("policeman_walking_right_1.png", 1, 1));
+             policeWalkRight.AddRange(GetFramesFromAtlas("policeman_walking_right_2.png", 1, 1));
+             policeWalkRight.AddRange(GetFramesFromAtlas("policeman_walking_right_3.png", 1, 1));
+             AnimationFrames["policeman_walking_right"] = policeWalkRight;
+             
+             var policeWalkLeft = new List<Rectangle>();
+             policeWalkRight.AddRange(GetFramesFromAtlas("policeman_walking_left_1.png", 1, 1));
+             policeWalkRight.AddRange(GetFramesFromAtlas("policeman_walking_left_2.png", 1, 1));
+             policeWalkRight.AddRange(GetFramesFromAtlas("policeman_walking_left_3.png", 1, 1));
+             AnimationFrames["policeman_walking_left"] = policeWalkLeft;
+             
+             var policeWalkDown = new List<Rectangle>();
+             policeWalkRight.AddRange(GetFramesFromAtlas("policeman_walking_down_1.png", 1, 1));
+             policeWalkRight.AddRange(GetFramesFromAtlas("policeman_walking_down_2.png", 1, 1));
+             policeWalkRight.AddRange(GetFramesFromAtlas("policeman_walking_down_3.png", 1, 1));
+             AnimationFrames["policeman_walking_down"] = policeWalkDown;
+             
+             var policeWalkUp = new List<Rectangle>();
+             policeWalkRight.AddRange(GetFramesFromAtlas("policeman_walking_up_1.png", 1, 1));
+             policeWalkRight.AddRange(GetFramesFromAtlas("policeman_walking_up_2.png", 1, 1));
+             policeWalkRight.AddRange(GetFramesFromAtlas("policeman_walking_up_3.png", 1, 1));
+             AnimationFrames["policeman_walking_up"] = policeWalkUp;
+             
+             var policeAttackRight = new List<Rectangle>();
+             policeAttackRight.AddRange(GetFramesFromAtlas("policeman_attack_right_1.png", 1, 1));
+             policeAttackRight.AddRange(GetFramesFromAtlas("policeman_attack_right_2.png", 1, 1));
+             policeAttackRight.AddRange(GetFramesFromAtlas("policeman_attack_right_3.png", 1, 1));
+             policeAttackRight.AddRange(GetFramesFromAtlas("policeman_attack_right_4.png", 1, 1));
+             policeAttackRight.AddRange(GetFramesFromAtlas("policeman_attack_right_5.png", 1, 1));
+             AnimationFrames["policeman_attack_right"] = policeAttackRight;
+             
+             var policeAttackLeft = new List<Rectangle>();
+             policeAttackRight.AddRange(GetFramesFromAtlas("policeman_attack_left_1.png", 1, 1));
+             policeAttackRight.AddRange(GetFramesFromAtlas("policeman_attack_left_2.png", 1, 1));
+             policeAttackRight.AddRange(GetFramesFromAtlas("policeman_attack_left_3.png", 1, 1));
+             policeAttackRight.AddRange(GetFramesFromAtlas("policeman_attack_left_4.png", 1, 1));
+             policeAttackRight.AddRange(GetFramesFromAtlas("policeman_attack_left_5.png", 1, 1));
+             AnimationFrames["policeman_attack_left"] = policeAttackLeft;
         }
 
         public static List<Rectangle> GetFrames(string key)
