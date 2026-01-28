@@ -50,7 +50,7 @@ public class Chest: ObjectBase
 
     public ItemBase SpawnRandomItem(Vector2 dropPos)
     {
-        double roll = Utilities.RandomUtil.NextDouble();
+        double roll = RandomUtil.NextDouble();
 
         if (roll < 0.25) // 25% Weapons
         {
@@ -111,6 +111,16 @@ public class Chest: ObjectBase
                 "DogFood" => new DogFood(dropPos, new Point(32, 32)),
                 "DopingSpritze" => new DopingSpritze(dropPos, new Point(32, 32)),
                 "Beer" => new Beer(dropPos, new Point(32, 32)),
+                "Flame" =>  new WeaponItem(
+                    dropPos,
+                    new Point(32, 32),
+                    Player.WeaponType.Flamethrower
+                ),
+                "Ice" => new WeaponItem(
+                    dropPos,
+                    new Point(32, 32),
+                    Player.WeaponType.IceTrail
+                    ),
             };
         }
     }
