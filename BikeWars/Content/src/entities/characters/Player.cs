@@ -305,6 +305,7 @@ namespace BikeWars.Entities.Characters
             if (!_input.IsPressed(GameAction.INTERACT)) return;
             
             tower.Activate();
+            _audio.Sounds.Play(AudioAssets.HandgunClick);
         }
 
         // public Player(Vector2 start, Point size, Point renderSize, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")

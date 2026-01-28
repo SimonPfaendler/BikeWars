@@ -35,8 +35,8 @@ public class TowerAlly : Tower
     private readonly Color _inactiveColor = Color.Gray;
     private readonly Color _cooldownColor = new Color(255, 100, 100); // Red-ish
 
-    public TowerAlly(Vector2 pos, Point size, AudioService audio)
-        : base(pos, size, audio)
+    public TowerAlly(Vector2 pos, Point size)
+        : base(pos, size)
     {
         _texture = SpriteManager.GetTexture("TowerAlly");
         Attributes = new TowerAttributes(this, 300, 0, 5, 0.5f, false);
@@ -54,7 +54,6 @@ public class TowerAlly : Tower
         {
             State = TowerState.Active;
             _activeTimer = ACTIVE_DURATION;
-            _audio.Sounds.Play(AudioAssets.HandgunClick);
         }
     }
 

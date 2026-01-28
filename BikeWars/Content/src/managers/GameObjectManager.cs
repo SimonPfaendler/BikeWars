@@ -655,6 +655,12 @@ public class GameObjectManager
     {
         foreach (var spawn in spawns)
         {
+            var tower = CreateTowerFromTiled(spawn);
+            if (tower != null)
+            {
+                AddTower(tower);
+                continue;
+            }
             var created = CreateFromTiled(spawn);
             if (created == null)
             {
@@ -665,19 +671,25 @@ public class GameObjectManager
                 case BikeShop bs: // It works but Bikeshop shouldn't be a item.
                     AddStatic(bs.CollisionCollider);
                     break;
-                case DogBowl db:
-                    AddStatic(db.CollisionCollider);
-                    break;
                 case DestructibleObject:
                     AddStatic(created.Collider);
-                    break;
-                case Chest chest:
-                    AddStatic(chest.CollisionCollider);
                     break;
             }
         }
     }
+    private Tower? CreateTowerFromTiled(TiledObjectInfo spawn)
+    {
+        var start = new Vector2(spawn.Rect.X, spawn.Rect.Y);
+        var size  = new Point(spawn.Rect.Width, spawn.Rect.Height);
 
+        string type = spawn.Properties["type"];
+
+        return type switch
+        {
+            "tower" => new TowerAlly(start, size),
+            _ => null
+        };
+    }
     // spawn = properties
     private ObjectBase? CreateFromTiled(TiledObjectInfo spawn)
     {
@@ -693,7 +705,7 @@ public class GameObjectManager
             case "Destructible":
                 return new DestructibleObject(start, size, spawn);
             case "chest":
-                string item = spawn.Properties["item"];
+                spawn.Properties.TryGetValue("item", out string? item);
                 return new Chest(start, size, item);
             case "dog-bowl":
                 return new DogBowl(start, size);
