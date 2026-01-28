@@ -664,7 +664,7 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.AddObject(new DogBowl(pos, size, full: o.IsFull ?? false));
                 }
             }
-            _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level, state.Statistic.Time, state.Statistic.DeathCount, state.Statistic.ShotsFired, state.Statistic.OpponentsHit, state.Statistic.Repairs, state.Statistic.PhaseFindBike);
+            _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.RegularKills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level, state.Statistic.Time, state.Statistic.DeathCount, state.Statistic.ShotsFired, state.Statistic.OpponentsHit, state.Statistic.Repairs, state.Statistic.PhaseFindBike);
             Console.WriteLine("Game loaded.");
         }
         private void HandleSaveLoadInput()

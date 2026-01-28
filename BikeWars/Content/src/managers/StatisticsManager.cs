@@ -29,7 +29,7 @@ public class StatisticsManager
     {
         if (c is not Player)
         {
-            Statistic.AddKill();
+            Statistic.AddKill(c is Hobo || c is BikeThief || c is Dog); // Regular Kills
             return;
         }
         Statistic.AddDeathCount();

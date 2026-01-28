@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Entities.Characters;
 
@@ -15,6 +16,19 @@ public class Statistic
                 return;
             }
             _kills = value;
+        }
+    }
+
+    private int _regularKills { get; set; }
+    public int RegularKills {
+        get => _regularKills;
+        set
+        {
+            if (value <= 0) {
+                _regularKills = 0;
+                return;
+            }
+            _regularKills = value;
         }
     }
 
@@ -159,9 +173,13 @@ public class Statistic
         return $"{time.Minutes:00}:{time.Seconds:00}";
     }
 
-    public void AddKill()
+    public void AddKill(bool IsRegularKill)
     {
         Kills += 1;
+        if (IsRegularKill)
+        {
+            RegularKills += 1;
+        }
     }
 
     public void AddDeathCount()
@@ -233,6 +251,7 @@ public class Statistic
     public Statistic()
     {
         Kills = 0;
+        RegularKills = 0;
         DealtDamage = 0;
         TookDamage = 0;
         XP = 0;
@@ -245,9 +264,10 @@ public class Statistic
         PhaseFindBike = 0f;
     }
 
-    public Statistic(int kills, int dealtDamage, int tookDamage, int xp, int level, float time, int deathCount, int shotsFired, int opponentsHit, int repairs, float phaseFindBike)
+    public Statistic(int kills, int regularKills, int dealtDamage, int tookDamage, int xp, int level, float time, int deathCount, int shotsFired, int opponentsHit, int repairs, float phaseFindBike)
     {
         Kills = kills;
+        RegularKills = regularKills;
         DealtDamage = dealtDamage;
         TookDamage = tookDamage;
         XP = xp;

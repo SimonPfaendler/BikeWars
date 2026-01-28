@@ -18,15 +18,16 @@ public class StatisticsComponent
         sb.Draw(basicTexture, box, overlayColor);
 
         sb.DrawString(font, $"Kills: {statistic.Kills}", new Vector2(box.X, box.Y), Color.White);
-        sb.DrawString(font, $"Schaden hinzugefuegt: {statistic.DealtDamage}", new Vector2(box.X, box.Y + 20), Color.White);
-        sb.DrawString(font, $"Schaden erhalten: {statistic.TookDamage}", new Vector2(box.X, box.Y + 40), Color.White);
-        sb.DrawString(font, $"XP: {statistic.XP}", new Vector2(box.X, box.Y + 60), Color.White);
-        sb.DrawString(font, $"Level: {statistic.Level}", new Vector2(box.X, box.Y + 80), Color.White);
-        sb.DrawString(font, $"Gespielte Zeit: {statistic.TimeToMinuteDisplay()}", new Vector2(box.X, box.Y + 100), Color.White);
-        sb.DrawString(font, $"Spieler gestorben: {statistic.DeathCount}", new Vector2(box.X, box.Y + 120), Color.White);
-        sb.DrawString(font, $"Gefallene Schuesse: {statistic.ShotsFired}", new Vector2(box.X, box.Y + 140), Color.White);
-        sb.DrawString(font, $"Zielsicherheit: {statistic.Accuracy():0.00}%", new Vector2(box.X, box.Y + 160), Color.White);
-        sb.DrawString(font, $"Fahrradreperaturen: {statistic.Repairs}", new Vector2(box.X, box.Y + 180), Color.White);
-        sb.DrawString(font, $"Zeit um erstes Fahrrad zu finden: {statistic.TimeToFindBikeMinuteDisplay()}", new Vector2(box.X, box.Y + 200), Color.White);
+        sb.DrawString(font, $"Regulaere Kills: {statistic.RegularKills}", new Vector2(box.X, box.Y + 20), Color.White);
+        sb.DrawString(font, $"Schaden hinzugefuegt: {statistic.DealtDamage}", new Vector2(box.X, box.Y + 40), Color.White);
+        sb.DrawString(font, $"Schaden erhalten: {statistic.TookDamage}", new Vector2(box.X, box.Y + 60), Color.White);
+        sb.DrawString(font, $"XP: {statistic.XP}", new Vector2(box.X, box.Y + 80), Color.White);
+        sb.DrawString(font, $"Level: {statistic.Level}", new Vector2(box.X, box.Y + 100), Color.White);
+        sb.DrawString(font, $"Gespielte Zeit: {statistic.TimeToMinuteDisplay()}", new Vector2(box.X, box.Y + 120), Color.White);
+        sb.DrawString(font, $"Spieler gestorben: {statistic.DeathCount}", new Vector2(box.X, box.Y + 140), Color.White);
+        sb.DrawString(font, $"Gefallene Schuesse: {statistic.ShotsFired}", new Vector2(box.X, box.Y + 160), Color.White);
+        sb.DrawString(font, $"Zielsicherheit: {statistic.Accuracy():0.00}%", new Vector2(box.X, box.Y + 180), Color.White);
+        sb.DrawString(font, $"Fahrradreperaturen: {statistic.Repairs}", new Vector2(box.X, box.Y + 200), Color.White);
+        sb.DrawString(font, $"Zeit um erstes Fahrrad zu finden: {statistic.TimeToFindBikeMinuteDisplay()}", new Vector2(box.X, box.Y + 220), Color.White);
     }
 }

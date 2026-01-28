@@ -24,7 +24,6 @@ public class Game1 : Game
     public static Texture2D background;
     public static GameTime CurrentGameTime { get; private set; }
 
-
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
