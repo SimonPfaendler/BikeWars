@@ -52,7 +52,7 @@ public class Chest: ObjectBase
     {
         double roll = Utilities.RandomUtil.NextDouble();
 
-        if (roll < 0.20) // 20% Weapons
+        if (roll < 0.25) // 25% Weapons
         {
             double weaponRoll = Utilities.RandomUtil.NextDouble();
             Player.WeaponType weaponType;
@@ -63,7 +63,7 @@ public class Chest: ObjectBase
             
             return new WeaponItem(dropPos, new Point(32, 32), weaponType);
         }
-        else if (roll < 0.50) // 30% EnergyGel
+        else if (roll < 0.50) // 25% EnergyGel
         {
             return new EnergyGel(dropPos, new Point(32, 32));
         }
