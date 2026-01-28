@@ -153,6 +153,7 @@ namespace BikeWars.Content.screens
             }
 
             _statisticsManager = new StatisticsManager();
+            _achievementsManager = new AchievementsManager();
             _gameTimer = new GameTimer(GAME_TIME_LIMIT);
 
             _gameObjectManager.OnCharacterDied += _statisticsManager.HandleCharacterDied;
@@ -401,7 +402,7 @@ namespace BikeWars.Content.screens
                 _statisticsManager.HandleTime(_gameTimer.TimePassed());
                 GameOver?.Invoke(_statisticsManager.Statistic);
                 _statisticsManager.SaveStatistic();
-                SaveLoad.SaveNonGame(_statisticsManager);
+                SaveLoad.SaveNonGame(_statisticsManager, _achievementsManager);
             }
 
             _debugger?.Update(gameTime, _gameObjectManager.Characters);
@@ -845,7 +846,7 @@ namespace BikeWars.Content.screens
             _statisticsManager.HandleTime(_gameTimer.TimePassed());
             GameWon?.Invoke(_statisticsManager.Statistic);
             _statisticsManager.SaveStatistic();
-            SaveLoad.SaveNonGame(_statisticsManager);
+            SaveLoad.SaveNonGame(_statisticsManager, _achievementsManager);
         }
 
         private void DrawTimer(SpriteBatch spriteBatch, GameTime gameTime)

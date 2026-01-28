@@ -34,7 +34,7 @@ public class AchievementsScreen : MenuScreenBase
             _font,
             new Rectangle(400, 100, 500, 300),
             MakeAchievementList,
-            GetStatisticsHeight
+            GetAchievementsHeight
         );
 
         _components = new List<AchievementsComponent>(Achievements.Count);
@@ -50,7 +50,7 @@ public class AchievementsScreen : MenuScreenBase
         InitializeButtons();
     }
 
-    private float GetStatisticsHeight()
+    private float GetAchievementsHeight()
     {
         return _components.Count * HEIGHT_OF_COMPONENT; // Content of every entry right now.
     }

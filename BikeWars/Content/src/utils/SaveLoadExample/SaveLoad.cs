@@ -235,7 +235,7 @@ public static class SaveLoad
                 Statistics = statisticsManager.Statistics,
                 Statistic = statisticsManager.Statistic,
                 Achievements = achievementsManager.Achievements,
-                Achievement = achievementsManager.Achievement
+                // Achievement = achievementsManager.Achievement
             };
             string json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
 
@@ -258,7 +258,7 @@ public static class SaveLoad
 
     // Use this if you just want to add other data like statistics and you still need the
     // last save in the game to load it again. That's why we need LoadGame here
-    public static void SaveNonGame(StatisticsManager statisticsManager)
+    public static void SaveNonGame(StatisticsManager statisticsManager, AchievementsManager achievementsManager)
     {
         GameState loadState = LoadGame();
         try
@@ -280,7 +280,8 @@ public static class SaveLoad
                 Items = loadState.Items,
                 Objects = loadState.Objects,
                 Statistics = statisticsManager.Statistics,
-                Statistic = statisticsManager.Statistic
+                Statistic = statisticsManager.Statistic,
+                Achievements = achievementsManager.Achievements
             };
             string json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
 

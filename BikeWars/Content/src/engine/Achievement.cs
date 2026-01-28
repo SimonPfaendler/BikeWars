@@ -6,6 +6,31 @@ using BikeWars.Entities.Characters;
 namespace BikeWars.Content.engine;
 public class Achievement
 {
+    private string _name { get; set; }
+    public string Name {
+        get => _name;
+        set
+        {
+            _name = value;
+        }
+    }
+    private string _description { get; set; }
+    public string Description {
+        get => _description;
+        set
+        {
+            _description = value;
+        }
+    }
+
+    private bool _succeeded { get; set;}
+    public bool Succeeded {
+        get => _succeeded;
+        set
+        {
+            _succeeded = value;
+        }
+    }
     private int _kills { get; set; }
     public int Kills {
         get => _kills;
@@ -250,6 +275,9 @@ public class Achievement
 
     public Achievement()
     {
+        Name = "";
+        Description = "";
+
         Kills = 0;
         RegularKills = 0;
         DealtDamage = 0;
@@ -262,6 +290,13 @@ public class Achievement
         OpponentsHit = 0;
         Repairs = 0;
         PhaseFindBike = 0f;
+    }
+
+    public Achievement(string name, string description, bool succeded)
+    {
+        Name = name;
+        Description = description;
+        Succeeded = succeded;
     }
 
     public Achievement(int kills, int regularKills, int dealtDamage, int tookDamage, int xp, int level, float time, int deathCount, int shotsFired, int opponentsHit, int repairs, float phaseFindBike)

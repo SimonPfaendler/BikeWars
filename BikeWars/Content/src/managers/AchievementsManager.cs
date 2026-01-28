@@ -1,8 +1,5 @@
-using BikeWars.Content.entities.interfaces;
-using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
 
 namespace BikeWars.Content.managers;
 public class AchievementsManager
@@ -15,8 +12,8 @@ public class AchievementsManager
 
     public AchievementsManager()
     {
-        Achievements = new List<Achievement>();
-        Achievement = new Achievement();
+        Achievements = createAchievements();
+        Achievement = createAchievement();
     }
 
     public AchievementsManager(Achievement a, List<Achievement> at)
@@ -25,58 +22,55 @@ public class AchievementsManager
         Achievement = a;
     }
 
-    // public void HandleCharacterDied(CharacterBase c)
-    // {
-    //     if (c is not Player)
-    //     {
-    //         Statistic.AddKill(c is Hobo || c is BikeThief || c is Dog); // Regular Kills
-    //         return;
-    //     }
-    //     Statistic.AddDeathCount();
-    // }
+    private List<Achievement> createAchievements()
+    {
+        List<Achievement> achievements = [
+            UniversityNeverForgets(),
+            BachelorHereICome(),
+            Ouch(),
+            Nerd(),
+            UzzUzz(),
+            DieByTram(),
+            Diabetes()
+        ];
+        return achievements;
+    }
+    private Achievement createAchievement()
+    {
+        return new Achievement();
+    }
 
-    // public void HandleLevel(int xp, int level)
-    // {
-    //     Statistic.CurrentLevel(xp, level);
-    // }
+    private Achievement UniversityNeverForgets()
+    {
+        return new Achievement("Die Uni vergisst dich nie!", "Du hast das Spiel gewonnen, da du die maximale Zeit ueberlebt hast!", false);
+    }
 
-    // public void HandleExperience(int xp)
-    // {
-    //     Statistic.CurrentXP(xp);
-    // }
+    private Achievement BachelorHereICome()
+    {
+        return new Achievement("Bachelor, ich komme!", "Gewinne das Spiel und habe dabei die Uni erreicht.", false);
+    }
 
-    // public void HandleTookDamage(CharacterBase c, int amount)
-    // {
-    //     Statistic.AddDamage(c, amount);
-    //     if (c is Player)
-    //     {
-    //         return;
-    //     }
-    //     Statistic.AddOpponentHit();
-    // }
+    private Achievement Ouch()
+    {
+        return new Achievement("Autsch! Das tat weh!", "Stirb im Spiel.", false);
+    }
 
-    // public void HandleTime(float time)
-    // {
-    //     Statistic.CurrentTime(time);
-    // }
-
-    // public void HandleShotFired()
-    // {
-    //     Statistic.AddShotFired();
-    // }
-
-    // public void HandleThrowing(Vector2 direction)
-    // {
-    //     Statistic.AddShotFired();
-    // }
-    // public void HandleRepair()
-    // {
-    //     Statistic.AddRepair();
-    // }
-    // public void HandleFoundBike(float time)
-    // {
-    //     Statistic.CurrentPhaseFindBike(time);
-    // }
+    private Achievement Nerd()
+    {
+        return new Achievement("Streeeeeber!", "Erhalte alle Achievements die es gibt.", false);
+    }
+    private Achievement UzzUzz()
+    {
+        return new Achievement("Uzz! Uzz! Uzz!", "Besiege die Rave-Horde.", false);
+    }
+    private Achievement DieByTram()
+    {
+        return new Achievement("Die letzte verpasst? Die nächste kommt!", "Stirb wegen der Straßenbahn.", false);
+    }
+    private Achievement Diabetes()
+    {
+        return new Achievement("Diabetes", "Esse 20 Riegel in einem Spiel.", false);
+    }
     public void SaveStatistic()
     {
         if (Achievements == null)

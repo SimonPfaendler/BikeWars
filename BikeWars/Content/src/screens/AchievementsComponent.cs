@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 namespace BikeWars.Content.screens;
 public class AchievementsComponent
 {
-    private static int HEIGHT_OF_COMPONENT = 11 * 20; // Check this in StatisticsSCreen. Not optimla but works now
+    private static int HEIGHT_OF_COMPONENT = 11 * 20; // Check this in AchievementsScreen. Not optimla but works now
     public Achievement achievement {get; set;}
     public AchievementsComponent(Achievement a)
     {
@@ -16,7 +16,7 @@ public class AchievementsComponent
         Rectangle box = new Rectangle((int)drawPos.X, (int)drawPos.Y, 500, HEIGHT_OF_COMPONENT);
         sb.Draw(basicTexture, box, overlayColor);
 
-        // sb.DrawString(font, $"Kills: {statistic.Kills}", new Vector2(box.X, box.Y), Color.White);
+        sb.DrawString(font, $"Name: {achievement.Name}, Beschreibung: {achievement.Description}", new Vector2(box.X, box.Y), Color.White);
         // sb.DrawString(font, $"Regulaere Kills: {statistic.RegularKills}", new Vector2(box.X, box.Y + 20), Color.White);
         // sb.DrawString(font, $"Schaden hinzugefuegt: {statistic.DealtDamage}", new Vector2(box.X, box.Y + 40), Color.White);
         // sb.DrawString(font, $"Schaden erhalten: {statistic.TookDamage}", new Vector2(box.X, box.Y + 60), Color.White);
