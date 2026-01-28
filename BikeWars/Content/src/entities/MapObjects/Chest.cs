@@ -4,6 +4,7 @@ using BikeWars.Content.engine;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Utilities;
+using BikeWars.Entities.Characters;
 
 namespace BikeWars.Content.entities.items;
 public class Chest: ObjectBase
@@ -49,51 +50,42 @@ public class Chest: ObjectBase
 
     public ItemBase SpawnRandomItem(Vector2 dropPos)
     {
-        double pGel = 0.25;
-        double pDoping = 0.25;
-        double pDog = 0.1;
-        double pBeer = 0.1;
-        double pFrelo = 0.1;
-        double pRacing = 0.2;
-        double pIce = 0.00;
-            
-            
-            
-            double val = RandomUtil.NextDouble();
-            
-            double spawnGel = pGel;
-            double spawnDoping = spawnGel + pDoping;
-            double spawnBeer = spawnDoping + pBeer;
-            double spawnFrelo = spawnBeer + pFrelo;
-            double spawnRacing = spawnFrelo + pRacing;
-            
+        double roll = Utilities.RandomUtil.NextDouble();
 
-
-            if (val < spawnGel)
-            {
-                return new EnergyGel(dropPos, new Point(32, 32));
-            }
-            else if (val < spawnDoping)
-            {
-                return new DopingSpritze(dropPos, new Point(32, 32));
-            }
-            else if (val < spawnBeer)
-            {
-               return new Beer(dropPos, new Point(32, 32));
-            }
-            else if (val < spawnFrelo)
-            {
-                return new Frelo(dropPos, new Point(32, 32));
-
-            }
-            else if (val < spawnRacing)
-            {
-               return new RacingBike(dropPos, new Point(32, 32));
-            }
-            else
-            {
-               return new RacingBike(dropPos, new Point(32, 32));
-            }
+        if (roll < 0.20) // 20% Weapons
+        {
+            double weaponRoll = Utilities.RandomUtil.NextDouble();
+            Player.WeaponType weaponType;
+            if (weaponRoll < 0.25) weaponType = Player.WeaponType.Flamethrower;
+            else if (weaponRoll < 0.50) weaponType = Player.WeaponType.IceTrail;
+            else if (weaponRoll < 0.75) weaponType = Player.WeaponType.FireTrail;
+            else weaponType = Player.WeaponType.DamageCircle;
+            
+            return new WeaponItem(dropPos, new Point(32, 32), weaponType);
+        }
+        else if (roll < 0.50) // 30% EnergyGel
+        {
+            return new EnergyGel(dropPos, new Point(32, 32));
+        }
+        else if (roll < 0.65) // 20% Beer
+        {
+            return new Beer(dropPos, new Point(32, 32));
+        }
+        else if (roll < 0.80) // 15% DopingSpritze
+        {
+            return new DopingSpritze(dropPos, new Point(32, 32));
+        }
+        else if (roll < 0.90) // 10% DogFood
+        {
+            return new DogFood(dropPos, new Point(32, 32));
+        }
+         // 10% Bikes
+        else if (roll < 0.95)
+        {
+            return new Frelo(dropPos, new Point(32, 32));
+        }
+        else 
+        {return new RacingBike(dropPos, new Point(32, 32));}
     }
     public ItemBase OpenChest()
     {
@@ -103,6 +95,8 @@ public class Chest: ObjectBase
         CurrentTex = managers.SpriteManager.GetTexture("Chest_open");
         // Item wird knapp ueber der Truhe gespawnt
         Vector2 dropPos = Transform.Position + new Vector2(0, - Transform.Size.Y);
+
+        // random loot logic
         if (Item == null)
         {
             return SpawnRandomItem(dropPos);

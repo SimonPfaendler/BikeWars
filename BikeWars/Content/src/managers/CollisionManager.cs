@@ -28,7 +28,7 @@ public class CollisionManager
     public event Action<Player, ObjectBase> OnObjectInteraction;
     public event Action<CharacterBase, ProjectileBase> OnProjectileHit;
     public event Action<CharacterBase, CharacterBase> OnCharacterCollision;
-    
+
     public event Action<CharacterBase, AreaOfEffectBase> OnAOEHit;
     public event Action<CharacterBase> OnTramHit;
     public event Action<CharacterBase> OnBaechleHit;
@@ -760,7 +760,7 @@ public class CollisionManager
 
         // Ignore self-hit
         if (c.Owner == p.Owner) return;
-        
+
         if (p.Owner is Tower && c.Owner is Player) return;
 
         // Event for a character or player gets hit by projectile
@@ -790,12 +790,12 @@ public class CollisionManager
 
         if (p.HasHit)
             return;
-        
+
         // Don't let projectiles hit the tower that fired them
         if (p.Owner == tower)
             return;
 
-        tower.TakeDamage(p.Damage);
+        tower.TakeDamage(p.weaponAttributes.Damage);
         p.HasHit = true;
 
         _toRemoveColliders.Add(p.Collider);
@@ -961,7 +961,7 @@ public class CollisionManager
         foreach (ProjectileBase p in _removeProjectiles)
         {
             if (_toRemoveColliders.Contains(p.Collider))
-            { 
+            {
                 projectiles.Remove(p);
             }
         }
@@ -1127,7 +1127,7 @@ public class CollisionManager
             {
                 var collisionRect = GetColliderRectangle(towerAlly.CollisionCollider);
                 DrawRectOutline(spriteBatch, pixel, collisionRect, Color.Red * 0.7f);
-                
+
                 // Draw attack range circle
                 Vector2 center = towerAlly.Transform.Bounds.Center.ToVector2();
                 DrawCircleOutline(spriteBatch, pixel, center, towerAlly.Attributes.AttackRange, Color.Orange * 0.5f);

@@ -51,7 +51,7 @@ public class CombatManager
 
 
         // Crit Logic
-        int damage = projectile.Damage;
+        int damage = projectile.weaponAttributes.Damage;
 
         if (projectile.Owner is CharacterBase owner)
         {
@@ -111,9 +111,9 @@ public class CombatManager
     public void HandleprojecticleHitDestructible(DestructibleObject destructible, ProjectileBase projectile)
     {
         projectile.HasHit = true;
-        destructible.TakeDamage(projectile.Damage);
+        destructible.TakeDamage(projectile.weaponAttributes.Damage);
         _audio.Sounds.Play(destructible.Health > 0 ? AudioAssets.WoodCrack : AudioAssets.WoodDestroy);
-        _gameObjects.SpawnDamageNumber(GetObjectCenter(destructible), projectile.Damage);
+        _gameObjects.SpawnDamageNumber(GetObjectCenter(destructible), projectile.weaponAttributes.Damage);
     }
 
     public void HandleAOEHitDestructible(DestructibleObject destructible, AreaOfEffectBase aoe)

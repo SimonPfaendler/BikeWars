@@ -28,7 +28,7 @@ public class LevelUpScreen : MenuScreenBase, IScreen
     public event Action<SkillTree.SkillId> OnOptionSelected;
     public event Action Closed;
 
-    public event Action<int, IScreen> BtnClicked;
+    public new event Action<int, IScreen> BtnClicked;
 
     public LevelUpScreen(SpriteFont font, string message, AudioService audioService, Viewport vp): base(null, font, vp)
     {
@@ -48,15 +48,27 @@ public class LevelUpScreen : MenuScreenBase, IScreen
         IsOpen = true;
         _selectedOption = 0;
         // here different options can be listed, for example depending on which level it is or which where chosen before
-        _option1 = SkillTree.SkillId.MoreHp;
-        if (player.Attributes.CanAutoAttack)
+        
+        if (player.CurrentLevel == 2)
         {
-            _option2 = SkillTree.SkillId.MoreDamage;
-        } else
-        {
-            _option2 = SkillTree.SkillId.AutomaticFire;
+            _option1 = SkillTree.SkillId.WeaponGun;
+            _option2 = SkillTree.SkillId.WeaponBanana;
+            _option3 = SkillTree.SkillId.WeaponBottle;
         }
-        _option3 = SkillTree.SkillId.LongerSprintDuration;
+        else
+        {
+            _option1 = SkillTree.SkillId.MoreHp;
+            if (player.Attributes.CanAutoAttack)
+            {
+                _option2 = SkillTree.SkillId.MoreDamage;
+            }
+            else
+            {
+                _option2 = SkillTree.SkillId.AutomaticFire;
+            }
+
+            _option3 = SkillTree.SkillId.LongerSprintDuration;
+        }
     }
     public void Close()  // Game runs again and LevelUpScreen is closed
     {
@@ -65,7 +77,7 @@ public class LevelUpScreen : MenuScreenBase, IScreen
     }
 
 
-    public void Update(GameTime gameTime)
+    public override void Update(GameTime gameTime)
     {
         if (!IsOpen) return;
         // three different Options
@@ -95,7 +107,7 @@ public class LevelUpScreen : MenuScreenBase, IScreen
 
         }
 
-    public void Draw(GameTime gameTime, SpriteBatch sb)
+    public override void Draw(GameTime gameTime, SpriteBatch sb)
     {
         if (!IsOpen) return;
 
@@ -146,25 +158,25 @@ public class LevelUpScreen : MenuScreenBase, IScreen
         get => null;
         set { }
     }
-    public bool DrawLower  => false;
-    public bool UpdateLower => false;
+    public override bool DrawLower  => false;
+    public override bool UpdateLower => false;
 
     public void OnEnter() { }
     public void OnExit()  { }
     public void Draw(GameTime gameTime)
     {
     }
-    public void Dispose()
+    public override void Dispose()
     {
         throw new NotImplementedException();
     }
 
-    public void Unload()
+    public new void Unload()
     {
 
     }
 
-    public void OnActivated()
+    public override void OnActivated()
     {
         throw new NotImplementedException();
     }

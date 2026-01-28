@@ -31,7 +31,7 @@ namespace BikeWars.Entities.Characters
         public Bike CurrentBike => movement?.CrtBike;
         private IPlayerInput _input;
         private CooldownWithDuration sprint { get; }
-        public Vector2 GazeDirection { get; private set; }
+        public new Vector2 GazeDirection { get; private set; }
         public int XpCounter { get; private set; } = 0;
         public int XpLevelUp = 10;
         public int CurrentLevel { get; private set; } = 1;
@@ -131,7 +131,8 @@ namespace BikeWars.Entities.Characters
             BeerThrow
         }
 
-        public WeaponType CurrentWeapon { get; private set; } = WeaponType.Gun;
+        public WeaponType CurrentWeapon { get; private set; } = WeaponType.BookThrow;
+        private Dictionary<WeaponType, WeaponAttributes> _unlockedWeapons = new Dictionary<WeaponType, WeaponAttributes>();
 
         private float _dopingTimer = 0f;
         public bool IsDoped => _dopingTimer > 0f;
@@ -207,12 +208,8 @@ namespace BikeWars.Entities.Characters
                         CurrentWeapon = _weaponBefore;
                         return true;
                     }
-
                     return false;
-                    
-                    
             }
-
             return false;
         }
 
@@ -256,8 +253,39 @@ namespace BikeWars.Entities.Characters
                 }
                 return;
             }
+            if (item is WeaponItem weapon)
+            {
+                if (_input.IsPressed(GameAction.INTERACT))
+                {
+                    if (_unlockedWeapons.TryGetValue(weapon.Type, out var attributes))
+                    {
+                        upgradeWeapon(attributes);
+                    } else {
+                        // switch (weapon.Type)
+                        // {
+                        //     case GunStatics:
+
+                        //     break;
+                        //     default:
+
+                        //     break;
+                        // }
+
+                        WeaponAttributes wp = new WeaponAttributes();
+                        _unlockedWeapons.Add(weapon.Type, wp);
+                    }
+                    item.IsPickedUp = true;
+                    ItemPickedUp?.Invoke(item);
+                }
+                return;
+            }
             item.IsPickedUp = true;
             ItemPickedUp?.Invoke(item);
+        }
+
+        private void upgradeWeapon(WeaponAttributes wa)
+        {
+            // _unlockedWeapons.TryGetValue(wt, out var attributues)
         }
 
         public void OnInteractObject(Player player, ObjectBase obj)
@@ -303,13 +331,13 @@ namespace BikeWars.Entities.Characters
             if (player != this) return;
             // Only activate if the Interact key (e.g. 'Q') is pressed
             if (!_input.IsPressed(GameAction.INTERACT)) return;
-            
+
             tower.Activate();
             _audio.Sounds.Play(AudioAssets.HandgunClick);
         }
 
         // public Player(Vector2 start, Point size, Point renderSize, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")
-        public Player(Vector2 start, float radius, Point renderSize, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")
+        public Player(Vector2 start, float radius, Point renderSize, AudioService audio, IPlayerInput input, bool isTechDemo = false, string characterPrefix = "Character1")
         {
             Attributes = new CharacterAttributes(this, 300, 0, 10, 2f, false);
             Transform = new Transform(start, radius);
@@ -339,6 +367,29 @@ namespace BikeWars.Entities.Characters
                 _currentAnimation = _idleAnimation;
             }
             phaseFoundBike = false;
+
+            // start weapon
+            if (isTechDemo)
+            {
+                foreach (WeaponType type in Enum.GetValues(typeof(WeaponType)))
+                {
+                    if (type != WeaponType.BeerThrow)
+                        switch(type)
+                        {
+                            case WeaponType.Gun:
+                                _unlockedWeapons.Add(type, new GunStatics(1, this));
+                            break;
+                            default:
+                                _unlockedWeapons.Add(type, new WeaponAttributes());
+                            break;
+                        }
+                }
+            }
+            else
+            {
+                _unlockedWeapons.Add(WeaponType.BookThrow, new WeaponAttributes());
+            }
+            CurrentWeapon = WeaponType.BookThrow;
             UpdateCollider();
         }
 
@@ -352,15 +403,15 @@ namespace BikeWars.Entities.Characters
             _mouseWorldPos = mousePos;
 
             // Simple virtual cursor for controller: aim in front of the player
-                        if (_input.IsAnalog)
-                        {
-                            var dir = GazeDirection != Vector2.Zero ? Vector2.Normalize(GazeDirection) : _facingDirection;
-                            if (dir == Vector2.Zero)
-                            {
-                                dir = Vector2.UnitX;
-                            }
-                            _mouseWorldPos = Transform.Position + dir * 100f;
-                        }
+            if (_input.IsAnalog)
+            {
+                var dir = GazeDirection != Vector2.Zero ? Vector2.Normalize(GazeDirection) : _facingDirection;
+                if (dir == Vector2.Zero)
+                {
+                    dir = Vector2.UnitX;
+                }
+                _mouseWorldPos = Transform.Position + dir * 100f;
+            }
 
             var throwOrigin = Transform.Bounds.Center.ToVector2();
             _isThrowTargetInRange = Vector2.Distance(throwOrigin, _mouseWorldPos) <= ThrowRange;
@@ -584,6 +635,24 @@ namespace BikeWars.Entities.Characters
             {
                 Attributes.CanAutoAttack = true;
             }
+            else if (skill is SkillTree.SkillId.WeaponGun)
+            {
+                _unlockedWeapons.Add(WeaponType.Gun, new GunStatics(2, this));
+            }
+            else if (skill is SkillTree.SkillId.WeaponBanana)
+            {
+                WeaponAttributes wp = new WeaponAttributes();
+                wp.Level = 1;
+                wp.Owner = this;
+                _unlockedWeapons.Add(WeaponType.BananaThrow, wp);
+            }
+            else if (skill is SkillTree.SkillId.WeaponBottle)
+            {
+                WeaponAttributes wp = new WeaponAttributes();
+                wp.Level = 1;
+                wp.Owner = this;
+                _unlockedWeapons.Add(WeaponType.BottleThrow, wp);
+            }
         }
 
         // When you dismount of the bike
@@ -743,23 +812,23 @@ namespace BikeWars.Entities.Characters
             if (!_input.IsPressed(GameAction.SWITCH_WEAPON))
                 return;
 
-            // Cycle through all weapons
-            if (CurrentWeapon == WeaponType.Gun)
-                CurrentWeapon = WeaponType.Flamethrower;
-            else if (CurrentWeapon == WeaponType.Flamethrower)
-                CurrentWeapon = WeaponType.IceTrail;
-            else if (CurrentWeapon == WeaponType.IceTrail)
-                CurrentWeapon = WeaponType.FireTrail;
-            else if (CurrentWeapon == WeaponType.FireTrail)
-                CurrentWeapon = WeaponType.DamageCircle;
-            else if (CurrentWeapon == WeaponType.DamageCircle)
-                CurrentWeapon = WeaponType.BookThrow;
-            else if (CurrentWeapon == WeaponType.BookThrow)
-                CurrentWeapon = WeaponType.BananaThrow;
-            else if (CurrentWeapon == WeaponType.BananaThrow)
-                CurrentWeapon = WeaponType.BottleThrow;
-            else
-                CurrentWeapon = WeaponType.Gun;
+            var types = (WeaponType[])Enum.GetValues(typeof(WeaponType));
+            int currentIndex = Array.IndexOf(types, CurrentWeapon);
+
+            for (int i = 1; i < types.Length; i++)
+            {
+                int nextIndex = (currentIndex + i) % types.Length;
+                WeaponType nextType = types[nextIndex];
+
+                if (nextType == WeaponType.BeerThrow) continue;
+
+                if (_unlockedWeapons.TryGetValue(nextType, out var weaponAttributes))
+                {
+
+                    CurrentWeapon = nextType;
+                    return;
+                }
+            }
         }
 
         private void HandleItemUsage(GameTime gameTime)
@@ -955,6 +1024,14 @@ namespace BikeWars.Entities.Characters
                  }
             }
         }
+
+        public WeaponAttributes AttributesOfCurrentWeapon()
+        {
+            if (_unlockedWeapons.TryGetValue(CurrentWeapon, out var attributes)) {
+                return attributes;
+            }
+            return new WeaponAttributes();
+        }
         public void SetInput(IPlayerInput input)
         {
             _input = input;
@@ -981,8 +1058,5 @@ namespace BikeWars.Entities.Characters
         {
             return _input.IsPressed(GameAction.INTERACT);
         }
-
-
-
     }
 }

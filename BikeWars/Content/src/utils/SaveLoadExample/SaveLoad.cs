@@ -12,6 +12,7 @@ using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
 using BikeWars.Content.entities.MapObjects;
 using BikeWars.Entities.Characters.MapObjects;
+using BikeWars.Entities;
 
 namespace BikeWars.Content.src.utils.SaveLoadExample;
 
@@ -81,7 +82,7 @@ public static class SaveLoad
         public BasicSaveModel Basic {get;set;} = new();
         public ProjectileSaveModel() {}
 
-        public int Damage {get; set;}
+        public WeaponAttributes WeaponAttributes {get; set;}
         public bool HasHit {get; set;}
 
         public Vector2Save Direction {get; set;} = new();
@@ -89,10 +90,12 @@ public static class SaveLoad
         public bool CanMove {get; set;}
         public float Rotation {get; set;}
 
-        public ProjectileSaveModel(BasicSaveModel b, int damage, bool hasHit, Vector2 direction, bool isMoving, bool canMove, float rotation)
+        // public ProjectileSaveModel(BasicSaveModel b, int damage, bool hasHit, Vector2 direction, bool isMoving, bool canMove, float rotation, WeaponAttributes weaponAttributes)
+        public ProjectileSaveModel(BasicSaveModel b, bool hasHit, Vector2 direction, bool isMoving, bool canMove, float rotation, WeaponAttributes weaponAttributes)
         {
             Basic = b;
-            Damage = damage;
+            WeaponAttributes = weaponAttributes;
+            // WeaponAttributes.Damage = damage;
             HasHit = hasHit;
             Direction = new Vector2Save(direction);
             IsMoving = isMoving;
@@ -322,7 +325,8 @@ public static class SaveLoad
     {
         return projectile switch
         {
-            Bullet b => new ProjectileSaveModel(new BasicSaveModel(TYPES.BULLET, projectile.Transform.Position, projectile.Transform.Size), b.Damage, b.HasHit, b.Movement.Direction, b.Movement.IsMoving, b.Movement.CanMove, b.Movement.Rotation),
+            // Bullet b => new ProjectileSaveModel(new BasicSaveModel(TYPES.BULLET, projectile.Transform.Position, projectile.Transform.Size), b.weaponAttributes.Damage, b.HasHit, b.Movement.Direction, b.Movement.IsMoving, b.Movement.CanMove, b.Movement.Rotation),
+            Bullet b => new ProjectileSaveModel(new BasicSaveModel(TYPES.BULLET, projectile.Transform.Position, projectile.Transform.Size), b.HasHit, b.Movement.Direction, b.Movement.IsMoving, b.Movement.CanMove, b.Movement.Rotation, b.weaponAttributes),
             _ => throw new NotSupportedException($"Projectile type {projectile.GetType().Name} is not supported for saving.")
         };
     }

@@ -1,13 +1,10 @@
-using System;
-using BikeWars.Content.entities.interfaces;
-
 namespace BikeWars.Entities
 {
     public abstract class AttributesBase
     {
         public object Owner { get; protected set; }
         protected virtual void Die() { }
-        
+
         private int _health { get; set; }
         public int Health
         {
@@ -73,7 +70,7 @@ namespace BikeWars.Entities
         public bool CanAutoAttack { get; set; }
         public float CritChance { get; set; } = 0.1f; // 10% chance
         public float CritMultiplier { get; set; } = 2.0f; // 2x damage
-        
+
         protected AttributesBase(object owner, int maxHealth, int health, int attackDamage, float attackCooldown, bool canAutoAttack)
         {
             Owner = owner;

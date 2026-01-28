@@ -10,8 +10,11 @@ public class SkillTree
         MoreDamage,
         LongerSprintDuration,
 
-        AutomaticFire
+        AutomaticFire,
         // other option for example spacial skills can be added here
+        WeaponGun,
+        WeaponBanana,
+        WeaponBottle
     }
 
     // Dictionary: Welcher Skill hat welche Beschreibung?
@@ -24,5 +27,11 @@ public class SkillTree
         { SkillId.LongerSprintDuration, ("Laengere Sprintdauer: +0,5s Sprint dauer") },
 
         { SkillId.AutomaticFire, ("Dauerfeuer: Halte den Angriffsknopf gedrueckt!") },
+
+        { SkillId.WeaponGun, ("Handfeuerwaffe: Bum Bum KAPOWWW") },
+
+        { SkillId.WeaponBanana, ("Bananenschale: Achtung rutschig!") },
+
+        { SkillId.WeaponBottle, ("Pfandflasche: RECYCLINNGGG!") },
     };
 }

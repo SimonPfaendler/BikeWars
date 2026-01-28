@@ -4,13 +4,12 @@ using BikeWars.Content.engine;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework.Content;
+using BikeWars.Entities;
 
 namespace BikeWars.Content.entities.items;
 public class Bullet: ProjectileBase
 {
-
     private BoxCollider _collider { get; set; }
-    public float Speed = 600f;
     public override BoxCollider Collider
     {
         get { return _collider; }
@@ -22,9 +21,9 @@ public class Bullet: ProjectileBase
         get { return _movement; }
         set { _movement = value;}
     }
-    public Bullet(Vector2 start, Point size, object owner)
+    public Bullet(Vector2 start, Point size, object owner, WeaponAttributes wa)
     {
-        Damage = 10;
+        weaponAttributes = wa;
         Transform = new Transform(start, size);
         _collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.PROJECTILE, this);
         Movement = new BulletMovement(true, true);
@@ -47,18 +46,11 @@ public class Bullet: ProjectileBase
         {
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
             // Movement.Direction is already normalized when set
-            Transform.Position += Movement.Direction * Speed * delta;
+            Transform.Position += Movement.Direction * weaponAttributes.Speed * delta;
             _collider.Position = Transform.Position;
         }
     }
 
-    // wird ab sofort über SpriteManager.cs erledigt
-    //
-    // public override void LoadContent(ContentManager content)
-    //
-    //     TexRight = content.Load<Texture2D>(TEXTURE_PATH);
-    //     CurrentTex = TexRight;
-    // }
     public override bool Intersects(ICollider collider)
     {
         return _collider.Intersects(collider);
@@ -67,5 +59,10 @@ public class Bullet: ProjectileBase
     public override void LoadContent(ContentManager content)
     {
         // Platzhalter damit abstrakte Anforderung der Basisklasse korrekt ist, sollte irgendwann entfernt werden
+    }
+
+    public override void LevelUp()
+    {
+        return;
     }
 }
