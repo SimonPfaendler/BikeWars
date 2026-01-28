@@ -171,18 +171,20 @@ namespace BikeWars.Content.managers
             // hobo starts at 0.4 and after ends at 0.3
             // progress starts at 0.0 and is 1.0 at the end of Gametime
             // start and end percentages must be 100 in total 
-            double pHobo = 0.4 - 0.2 * progress; //40% -> 20%
-            double pDog = 0.4 - 0.15 * progress; // 40 -> 25
+            double pHobo = 0.35 - 0.15 * progress; //35% -> 20%
+            double pDog = 0.35 - 0.15 * progress; // 35 -> 20
             double pThief    = 0.13 + 0.02 * progress;  // 13 15
-            double pDozent   = 0.02 + 0.23 * progress;  // 2  25
+            double pDozent   = 0.02 + 0.13 * progress;  // 2  15
             double pKamikaze = 0.05 + 0.1 * progress;  // 5 15
+            double pPolice = 0.1 + 0.05 * progress;  // 10 -> 15
             
             double val = RandomUtil.NextDouble();
             
             double spawnHobo = pHobo;
             double spawnDog = spawnHobo + pDog;
             double spawnThief = spawnDog + pThief;
-            double spawnDozent = spawnThief + pDozent;
+            double spawnPolice = spawnThief + pPolice;
+            double spawnDozent = spawnPolice + pDozent;
             // theoretisch spawnKamikaze, aber faellt unter letzdem else
 
             if (val < spawnHobo)
@@ -203,6 +205,12 @@ namespace BikeWars.Content.managers
                 var thief = new BikeThief(spawnPos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler);
                 ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
                 _gameObjectManager.AddCharacter(thief);
+            }
+            else if (val < spawnPolice)
+            {
+                var police = new PoliceMan(spawnPos, 20, _audioService, _pathFinding, _collisionManager, _repathScheduler);
+                ApplyScaling(police, difficultyMultiplier, speedMultiplier);
+                _gameObjectManager.AddCharacter(police);
             }
             else if (val < spawnDozent)
             {
