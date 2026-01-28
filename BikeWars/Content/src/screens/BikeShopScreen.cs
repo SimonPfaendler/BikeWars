@@ -18,12 +18,16 @@ public class BikeShopScreen : IScreen
     {
         HealFull,
         RepairBike,
+        BuyFrelo,
+        BuyRacingBike,
         Close
     }
 
     private readonly ShopOption _option1 = ShopOption.HealFull;
     private readonly ShopOption _option2 = ShopOption.RepairBike;
-    private readonly ShopOption _option3 = ShopOption.Close;
+    private readonly ShopOption _option3 = ShopOption.BuyFrelo;
+    private readonly ShopOption _option4 = ShopOption.BuyRacingBike;
+    private readonly ShopOption _option5 = ShopOption.Close;
 
     public Viewport ViewPort {get;set;}
     public event Action<int, IScreen> BtnClicked;

@@ -84,8 +84,12 @@ public class Chest: ObjectBase
         {
             return new Frelo(dropPos, new Point(32, 32));
         }
-        else 
+        else if (roll < 0.97)
         {return new RacingBike(dropPos, new Point(32, 32));}
+        else
+        {
+            return new Xp_Money(dropPos, new Point(32, 32), 300);
+        }
     }
     public ItemBase OpenChest()
     {
