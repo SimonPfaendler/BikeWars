@@ -55,6 +55,9 @@ public static class SaveLoad
         public List<ObjectSaveModel> Objects { get; set; } = new();
         public List<Statistic> Statistics{get; set;} = new();
         public Statistic Statistic{get; set;} = new();
+
+        public List<Achievement> Achievements{get; set;} = new();
+        public Achievement Achievement{get; set;} = new();
         public int GameMode { get; set; } = 0;
     }
 
@@ -201,7 +204,7 @@ public static class SaveLoad
 
     // save the counter in a JSON file
     // public static void SaveGame(int counter, Transform playerPosition, List<ProjectileBase> projectiles)
-    public static void SaveGame(GameTimer gameTimer, GameObjectManager gameObjectManager, StatisticsManager statisticsManager, GameMode gameMode)
+    public static void SaveGame(GameTimer gameTimer, GameObjectManager gameObjectManager, StatisticsManager statisticsManager, AchievementsManager achievementsManager, GameMode gameMode)
     {
         try
         {
@@ -230,7 +233,9 @@ public static class SaveLoad
                 Items = MakeItemSaveList(gameObjectManager.Items),
                 Objects = MakeObjectSaveList(gameObjectManager.Objects),
                 Statistics = statisticsManager.Statistics,
-                Statistic = statisticsManager.Statistic
+                Statistic = statisticsManager.Statistic,
+                Achievements = achievementsManager.Achievements,
+                Achievement = achievementsManager.Achievement
             };
             string json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
 

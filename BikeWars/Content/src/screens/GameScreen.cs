@@ -48,6 +48,9 @@ namespace BikeWars.Content.screens
 
         private StatisticsManager _statisticsManager {get; set;}
         public StatisticsManager StatisticsManager => _statisticsManager;
+
+        private AchievementsManager _achievementsManager {get; set;}
+        public AchievementsManager AchievementsManager => _achievementsManager;
         private readonly AudioService _audioService;
         public AudioService AudioService => _audioService;
 
@@ -670,7 +673,7 @@ namespace BikeWars.Content.screens
         private void HandleSaveLoadInput()
         {
             if (InputHandler.IsPressed(GameAction.SAVE))
-                SaveLoad.SaveGame(_gameTimer, _gameObjectManager, _statisticsManager, _gameMode);
+                SaveLoad.SaveGame(_gameTimer, _gameObjectManager, _statisticsManager, _achievementsManager, _gameMode);
 
             if (InputHandler.IsPressed(GameAction.LOAD))
             {

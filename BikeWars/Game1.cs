@@ -173,6 +173,13 @@ public class Game1 : Game
                         ScreenManager.AddScreen(ss);
                         break;
 
+                    case ButtonAction.Achievements:
+                        AchievementsScreen avs = new AchievementsScreen(background, UIAssets.DefaultFont, _audioService, GraphicsDevice.Viewport);
+                        avs.LoadContent(Content, GraphicsDevice);
+                        avs.BtnClicked += OnBtnClicked;
+                        ScreenManager.AddScreen(avs);
+                        break;
+
                     case ButtonAction.TechDemo:
                         TechDemoScreen tds = new TechDemoScreen(_audioService);
                         tds.ViewPort = GraphicsDevice.Viewport;
@@ -288,6 +295,14 @@ public class Game1 : Game
                 }
                 break;
             case StatisticsScreen:
+                switch ((ButtonAction)id)
+                {
+                    case ButtonAction.Back:
+                        ScreenManager.RemoveScreen(screen);
+                        break;
+                }
+                break;
+            case AchievementsScreen:
                 switch ((ButtonAction)id)
                 {
                     case ButtonAction.Back:

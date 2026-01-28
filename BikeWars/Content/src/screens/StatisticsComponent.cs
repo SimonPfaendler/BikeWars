@@ -5,8 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 namespace BikeWars.Content.screens;
 public class StatisticsComponent
 {
-
-    private static int HEIGHT_OF_COMPONENT = 11 * 20; // Check this in StatisticsSCreen. Not optimla but works now
+    private static int HEIGHT_OF_COMPONENT = 12 * 20; // Check this in StatisticsSCreen. Not optimla but works now
     public Statistic statistic {get; set;}
     public StatisticsComponent(Statistic s)
     {

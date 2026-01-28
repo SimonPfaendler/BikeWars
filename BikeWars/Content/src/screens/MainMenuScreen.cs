@@ -44,94 +44,74 @@ namespace BikeWars.Content.screens
             // _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
 
             // Buttons on the left side
-            MenuButton mb = new MenuButton(
+            AddButton(new MenuButton(
                 id: (int)ButtonAction.NewGame,
                 texture: RenderPrimitives.Pixel,
-                // texture: _buttonTexture,
                 bounds: new Rectangle(horizontalSpacing, leftStartY, buttonWidth, buttonHeight),
                 text: "Neues Spiel",
                 font: _font,
                 audioService: _audioService
-            );
-            mb.Clicked += RaiseBtnClicked;
-            _buttons.Add(mb);
+            ));
 
-            mb = new MenuButton(
+            AddButton(new MenuButton(
                 id: (int)ButtonAction.LoadGame,
                 texture: RenderPrimitives.Pixel,
-                // texture: _buttonTexture,
                 bounds: new Rectangle(horizontalSpacing, leftStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
                 text: "Spiel laden",
                 font: _font,
                 audioService: _audioService
-            );
-            mb.Clicked += RaiseBtnClicked;
-            _buttons.Add(mb);
-
-            mb = new MenuButton(
+            ));
+            AddButton(new MenuButton(
                 id: (int)ButtonAction.Statistics,
                 texture: RenderPrimitives.Pixel,
-                // texture: _buttonTexture,
                 bounds: new Rectangle(horizontalSpacing, leftStartY + 2 * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
                 text: "Statistiken",
                 font: _font,
                 audioService: _audioService
-            );
-            mb.Clicked += RaiseBtnClicked;
-            _buttons.Add(mb);
+            ));
 
-            mb = new MenuButton(
+            AddButton(new MenuButton(
+                id: (int)ButtonAction.Achievements,
+                texture: RenderPrimitives.Pixel,
+                bounds: new Rectangle(horizontalSpacing, leftStartY + 3 * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
+                text: "Achievements",
+                font: _font,
+                audioService: _audioService
+            ));
+
+            AddButton(new MenuButton(
                 id: (int)ButtonAction.TechDemo,
                 texture: RenderPrimitives.Pixel,
-                // texture: _buttonTexture,
-                bounds: new Rectangle(horizontalSpacing, leftStartY + 3 * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
+                bounds: new Rectangle(horizontalSpacing, leftStartY + 4 * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
                 text: "Tech Demo",
                 font: _font,
                 audioService: _audioService
-            );
-
-            mb.Clicked += RaiseBtnClicked;
-            _buttons.Add(mb);
-
-            mb = new MenuButton(
+            ));
+            AddButton(new MenuButton(
                 id: (int)ButtonAction.Profile,
                 texture: RenderPrimitives.Pixel,
-                // texture: _buttonTexture,
                 bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY, buttonWidth, buttonHeight),
                 text: "Profil",
                 font: _font,
                 audioService: _audioService
-            );
+            ));
 
-            mb.Clicked += RaiseBtnClicked;
-
-            // Buttons on the right side
-            _buttons.Add(mb);
-
-            mb = new MenuButton(
+            AddButton(new MenuButton(
                 id: (int)ButtonAction.Options,
                 texture: RenderPrimitives.Pixel,
-                // texture: _buttonTexture,
                 bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY + (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
                 text: "Optionen",
                 font: _font,
                 audioService: _audioService
-            );
-            mb.Clicked += RaiseBtnClicked;
-            _buttons.Add(mb);
-
-            mb = new MenuButton(
+            ));
+            AddButton(new MenuButton(
                 id: (int)ButtonAction.Exit,
                 texture: RenderPrimitives.Pixel,
-                // texture: _buttonTexture,
                 bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY + 2 * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
                 text: "Beenden",
                 font: _font,
                 audioService: _audioService
-            );
-            mb.Clicked += RaiseBtnClicked;
-            _buttons.Add(mb);
-
+            ));
             UpdateSelection(0);
         }
 
