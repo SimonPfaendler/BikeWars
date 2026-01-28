@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using BikeWars.Content.entities.interfaces;
 
 namespace BikeWars.Entities;
-public abstract class Tower: IWorldAudioAware
+public abstract class Tower
 {
     //private readonly SpriteAnimation _idleAnimation;
     //private readonly SpriteAnimation _walkLeftAnimation;
@@ -39,9 +39,8 @@ public abstract class Tower: IWorldAudioAware
     // 1x1 Texture to represent the enemy
     public static Texture2D pixel;
 
-    public Tower(Vector2 start, Point size, AudioService audio)
+    public Tower(Vector2 start, Point size)
     {
-        _audio = audio;
         // _pathFinding = pathFinding;
         // _collisionManager = collisionManager;
         GazeDirection = new Vector2(0, -1);
@@ -128,11 +127,7 @@ public abstract class Tower: IWorldAudioAware
             0f
         );
     }
-
-    public void SetWorldAudioManager(WorldAudioManager manager)
-    {
-    }
-
+    
     public void Immobalize(bool value)
     {
     }

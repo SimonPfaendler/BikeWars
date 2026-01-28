@@ -139,12 +139,6 @@ namespace BikeWars.Content.screens
 
             _gameObjectManager.AddItem(new Frelo(new Vector2(5700, 5700), new Point(32, 32)));
             _gameObjectManager.AddItem(new RacingBike(new Vector2(5800, 5800), new Point(32, 32)));
-            string energy = "Energygel";
-            _gameObjectManager.AddObject(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 50), new Point(32, 32), energy));
-            string doping = "DopingSpritze";
-            _gameObjectManager.AddObject(new Chest(new Vector2(worldBounds.Width / 2 - 50, worldBounds.Height / 2 + 90), new Point(32, 32), doping));
-
-            _gameObjectManager.AddTower(new TowerAlly(new Vector2(5600, 5750), new Point(128, 128), _audioService));
             _freelook = false;
             // camera.Position is set by Update usually, but let's init it
             if (player2 == null)
