@@ -637,10 +637,18 @@ namespace BikeWars.Entities.Characters
             }
             else if (skill is SkillTree.SkillId.WeaponGun)
             {
+                if (_unlockedWeapons.TryGetValue(WeaponType.Gun, out var weaponAttributes))
+                {
+                    return;
+                }
                 _unlockedWeapons.Add(WeaponType.Gun, new GunStatics(2, this));
             }
             else if (skill is SkillTree.SkillId.WeaponBanana)
             {
+                if (_unlockedWeapons.TryGetValue(WeaponType.BananaThrow, out var weaponAttributes))
+                {
+                    return;
+                }
                 WeaponAttributes wp = new WeaponAttributes();
                 wp.Level = 1;
                 wp.Owner = this;
@@ -648,6 +656,10 @@ namespace BikeWars.Entities.Characters
             }
             else if (skill is SkillTree.SkillId.WeaponBottle)
             {
+                if (_unlockedWeapons.TryGetValue(WeaponType.BottleThrow, out var weaponAttributes))
+                {
+                    return;
+                }
                 WeaponAttributes wp = new WeaponAttributes();
                 wp.Level = 1;
                 wp.Owner = this;
