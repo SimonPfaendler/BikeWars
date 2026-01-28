@@ -148,14 +148,17 @@ public class CollisionManager
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
         // Also load destructible objects from a dedicated Tiled object layer
         LoadObjectLayer("Destructibles");
-        // spawn shops/objects
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
+        // spawn shops/objects
+
 
         LoadObjectLayer("Chests");
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
         LoadObjectLayer("Dog-Bowl");
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
         LoadObjectLayer("Musicians");
+        _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
+        LoadObjectLayer("Tower");
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
 
         // Load world border collision (non-destructible static colliders)

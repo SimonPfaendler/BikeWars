@@ -24,7 +24,8 @@ namespace BikeWars.Content.screens
         BikeThief,
         Dog,
         Kamikaze,
-        Dozent
+        Dozent,
+        Police
     }
 
     public class TechDemoScreen : GameScreen
@@ -38,6 +39,7 @@ namespace BikeWars.Content.screens
         private MenuButton _spawnTramBtn;
         private MenuButton _spawnEnemyCircleBtn;
         private MenuButton _spawnDozentBtn;
+        private MenuButton _spawnPoliceBtn;
         private readonly List<RaveGroup> _raveGroups = new List<RaveGroup>();
         private MouseState _prevMouse;
 
@@ -115,6 +117,15 @@ namespace BikeWars.Content.screens
                 font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
+            
+            _spawnPoliceBtn = new MenuButton(
+                id: 7,
+                texture: RenderPrimitives.Pixel,
+                bounds: new Rectangle(30, 640, 200, 60),
+                text: "Spawn 5 Policemen",
+                font: UIAssets.DefaultFont,
+                audioService: AudioService
+            );
 
         }
 
@@ -143,6 +154,7 @@ namespace BikeWars.Content.screens
             _spawnTramBtn.Update(mouse, gameTime);
             _spawnEnemyCircleBtn.Update(mouse, gameTime);
             _spawnDozentBtn.Update(mouse, gameTime);
+            _spawnPoliceBtn.Update(mouse, gameTime);
 
             if(_spawnHoboBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Hobo, 100);
@@ -167,6 +179,9 @@ namespace BikeWars.Content.screens
             
             if (_spawnDozentBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Dozent, 10);
+            
+            if (_spawnPoliceBtn.IsClicked(mouse, _prevMouse))
+                SpawnEnemies(EnemyType.Police, 5);
 
             _prevMouse = mouse;
         }
@@ -228,6 +243,10 @@ namespace BikeWars.Content.screens
                         enemy = new Dozent(spawnPos, 25, AudioService, PathFinding,
                             CollisionManager, RepathScheduler);
                         break;
+                    case EnemyType.Police:
+                        enemy = new PoliceMan(spawnPos, 20, AudioService, PathFinding,
+                            CollisionManager, RepathScheduler);
+                        break;
 
                     default:
                         return;
@@ -271,6 +290,7 @@ namespace BikeWars.Content.screens
             _spawnTramBtn.Draw(sb);
             _spawnEnemyCircleBtn.Draw(sb);
             _spawnDozentBtn.Draw(sb);
+            _spawnPoliceBtn.Draw(sb);
             sb.End();
         }
     }

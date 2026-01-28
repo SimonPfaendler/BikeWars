@@ -177,6 +177,14 @@ namespace BikeWars.Content.managers
             "Raver04_RightUp",
             "Raver06_LeftUp",
             "Raver06_RightUp",
+            
+            // Policeman
+            "policeman_walking_right",
+            "policeman_walking_left",
+            "policeman_walking_up",
+            "policeman_walking_down",
+            "policeman_attack_right",
+            "policeman_attack_left"
         };
 
         public static float GetAnimationSpeed(string key)
