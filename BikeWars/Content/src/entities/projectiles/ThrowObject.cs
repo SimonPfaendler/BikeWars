@@ -3,6 +3,7 @@ using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.managers;
+using BikeWars.Entities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -42,7 +43,7 @@ namespace BikeWars.Content.entities.projectiles
         public ThrowObject(Vector2 start, Vector2 target, object owner, string textureKey, int damage, float speed = 100f, float arcScale = 1.2f, float lingerDuration = 0.25f)
         {
             Owner = owner;
-            Damage = damage;
+            weaponAttributes = new WeaponAttributes(owner, 1, 5, damage, speed, arcScale, lingerDuration);
             HasHit = false;
 
             TexRight = SpriteManager.GetTexture(textureKey);
@@ -155,6 +156,11 @@ namespace BikeWars.Content.entities.projectiles
         public override void LoadContent(ContentManager contentManager)
         {
             // Textures are fetched from SpriteManager in constructor.
+        }
+
+        public override void LevelUp()
+        {
+            return;
         }
     }
 }

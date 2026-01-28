@@ -375,7 +375,7 @@ public class GameObjectManager
         Vector2 spawnPos = player.Transform.Position;
         Vector2 direction = player.GazeDirection;
 
-        Bullet b = new Bullet(spawnPos, new Point(10, 10), player);
+        Bullet b = new Bullet(spawnPos, new Point(10, 10), player, player.AttributesOfCurrentWeapon());
         b.Movement.Direction = direction; // Set the movement direction
         AddProjectile(b);
 
@@ -385,7 +385,10 @@ public class GameObjectManager
     private void OnTowerShotBullet(Tower tower)
     {
         Vector2 spawnPos = tower.Transform.Bounds.Center.ToVector2();
-        Bullet b = new Bullet(spawnPos, new Point(10, 10), tower);
+        WeaponAttributes wa = new WeaponAttributes();
+        wa.Damage = 10;
+        wa.Speed = 100f;
+        Bullet b = new Bullet(spawnPos, new Point(10, 10), tower, wa);
 
         // Bullet direction is the tower's gaze direction.
         b.Movement.Direction = tower.GazeDirection;

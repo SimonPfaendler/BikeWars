@@ -351,7 +351,7 @@ namespace BikeWars.Content.screens
             }
 
             _overlay.SetPaused(false, gameTime);
-            
+
             _gameObjectManager.Player1?.Inventory?.Update(gameTime);
             _gameObjectManager.Player2?.Inventory?.Update(gameTime);
 
@@ -588,7 +588,7 @@ namespace BikeWars.Content.screens
             {
                 if (p.Basic.Type == SaveLoad.TYPES.BULLET)
                 {
-                    Bullet b = new Bullet(p.Basic.Position.ToVector2(), p.Basic.Size.ToPoint(), _gameObjectManager.Player1); // TODO player doesn't make sense here
+                    Bullet b = new Bullet(p.Basic.Position.ToVector2(), p.Basic.Size.ToPoint(), _gameObjectManager.Player1, p.WeaponAttributes); // TODO player doesn't make sense here
                     b.HasHit = p.HasHit;
                     b.Movement.IsMoving = p.IsMoving;
                     b.Movement.CanMove = p.CanMove;

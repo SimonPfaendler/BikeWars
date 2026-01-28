@@ -3,15 +3,17 @@ using BikeWars.Content.engine;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using BikeWars.Entities;
 
 namespace BikeWars.Content.entities.interfaces;
 
 // These should be used for basic projectiles, like bullet, fireballs or something like that
 // Like everything that will fly and should do damage.
-public abstract class ProjectileBase : IProjectile
+public abstract class ProjectileBase : IProjectile, IWeapon
 {
     public object Owner {get; set;} // TODO Should be optimized. This is now only that we know that the projectiles is firedBy
-    public int Damage { get; set; }
+
+    public WeaponAttributes weaponAttributes {get; set;}
     public bool HasHit {get; set;} // Should be used for the collision. Or it will render it too often.
     private Transform _transform { get; set; }
     public Transform Transform { get => _transform;  set => _transform = value; }
@@ -34,4 +36,10 @@ public abstract class ProjectileBase : IProjectile
     public abstract void Draw(SpriteBatch spriteBatch);
     public abstract bool Intersects(ICollider other);
     public abstract void LoadContent(ContentManager contentManager);
+
+    public abstract void LevelUp();
+    public WeaponAttributes WeaponAttributes()
+    {
+        return weaponAttributes;
+    }
 }

@@ -25,7 +25,7 @@ public class TowerAlly : Tower
     private BoxCollider _collisionCollider {get;set;}
     public BoxCollider CollisionCollider {get => _collisionCollider; set => _collisionCollider = value; } // Now this collider is for collision
     public event Action<TowerAlly> OnShoot;
-    
+
     public TowerState State { get; private set; } = TowerState.Inactive;
     private float _activeTimer;
     private float _cooldownTimer;
@@ -43,8 +43,8 @@ public class TowerAlly : Tower
         Collider = new BoxCollider(new Vector2(Transform.Position.X - PADDING_INTERACTION_AREA / 2, Transform.Position.Y - PADDING_INTERACTION_AREA / 2), Transform.Size.X + PADDING_INTERACTION_AREA, Transform.Size.Y + PADDING_INTERACTION_AREA, CollisionLayer.INTERACT, this);
         CollisionCollider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.TOWER, this);
         Speed = 0f; // Tower shouldn't move
-        
-        // Ensure origin is centered for rotation. 
+
+        // Ensure origin is centered for rotation.
         // Note: The base Draw method uses _texture.Width/2, _texture.Height/2 as origin.
         // We just need to make sure our Transform is handled correctly.
     }
@@ -90,9 +90,9 @@ public class TowerAlly : Tower
         if (State != TowerState.Active) return;
 
         _attackCooldownTimer -= deltaTime;
-        
+
         var target = FindNearestEnemy(enemies);
-        
+
         // If we have a target, rotate towards it
         if (target != null)
         {
@@ -101,12 +101,12 @@ public class TowerAlly : Tower
             Vector2 diff = targetCenter - myCenter;
 
             // Calculate target angle
-            float targetAngle = MathF.Atan2(diff.Y, diff.X) + MathF.PI / 2f; 
+            float targetAngle = MathF.Atan2(diff.Y, diff.X) + MathF.PI / 2f;
 
-            Rotation = MathHelper.Lerp(Rotation, targetAngle, 0.1f); 
+            Rotation = MathHelper.Lerp(Rotation, targetAngle, 0.1f);
             GazeDirection = new Vector2(MathF.Cos(Rotation - MathF.PI / 2f), MathF.Sin(Rotation - MathF.PI / 2f));
         }
-        
+
         if (_attackCooldownTimer <= 0f)
         {
             ShootAt(target);
@@ -123,10 +123,10 @@ public class TowerAlly : Tower
             TowerState.Cooldown => _cooldownColor,
             _ => _inactiveColor
         };
-        
+
         // Using the base draw logic but with our tint
         float spriteOrientationOffset = 0f; // We handled offset in Rotation calculation
-        
+
          spriteBatch.Draw(
             _texture,
             Transform.Bounds.Center.ToVector2(),
