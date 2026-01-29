@@ -478,11 +478,23 @@
 /processorParam:Quality=Best
 /build:assets/sounds/Game_music.mp3
 
+#begin assets/sounds/Geisterfahrer.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/Geisterfahrer.mp3
+
 #begin assets/sounds/gun_shot.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:assets/sounds/gun_shot.wav
+
+#begin assets/sounds/HaltStop.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/HaltStop.mp3
 
 #begin assets/sounds/HandgunClick.mp3
 /importer:Mp3Importer

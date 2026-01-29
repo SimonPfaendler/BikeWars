@@ -36,6 +36,8 @@ namespace BikeWars.Content.engine.Audio
         public const string WoodDestroy = "wood_destroy";
         public const string RaverSound = "raver_audio";
         public const string ThrowObject = "throw_object";
+        public const string Geisterfahrer = "geisterfahrer";
+        public const string HaltStop = "halt_stop";
         
 
         // Mapping ID -> Content-Path
@@ -71,7 +73,9 @@ namespace BikeWars.Content.engine.Audio
             { WoodDestroy, "assets/sounds/wood_destroy"},
             { Miau, "assets/sounds/Dogs/Miau"},
             { RaverSound, "assets/sounds/raver_audio" },
-            { ThrowObject, "assets/sounds/throw_object" }
+            { ThrowObject, "assets/sounds/throw_object" },
+            { Geisterfahrer, "assets/sounds/Geisterfahrer" },
+            {  HaltStop, "assets/sounds/HaltStop" },
             
         };
 
