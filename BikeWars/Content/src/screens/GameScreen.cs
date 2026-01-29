@@ -285,6 +285,8 @@ namespace BikeWars.Content.screens
             };
 
             _bikeShopScreen.Repair += OnHandleRepair;
+            _bikeShopScreen.SpawnFrelo += OnSpawnFrelo;
+            _bikeShopScreen.SpawnRacingBike += OnSpawnRacingBike;
             _gameObjectManager.Player1.OnBikeShopOpen += _onBikeShopOpen;
             _gameObjectManager.Player1.Dismounted += _gameObjectManager.AddItem;
             _gameObjectManager.Player1.ChestItemSpawn += _gameObjectManager.AddItem;
@@ -1073,10 +1075,21 @@ namespace BikeWars.Content.screens
         {
             // throw new NotImplementedException();
         }
-
-        public void OnHandleRepair()
+        
+        public void OnHandleRepair(Bike bike)
         {
+            bike.Repair();
             _statisticsManager.HandleRepair();
+        }
+
+        public void OnSpawnFrelo(Vector2 dropPos)
+        {
+            _gameObjectManager.AddItem(new Frelo(dropPos, new Point(32, 32)));
+        }
+
+        public void OnSpawnRacingBike(Vector2 dropPos)
+        {
+            _gameObjectManager.AddItem(new RacingBike(dropPos, new Point(32, 32)));
         }
 
         private void OnPauseMenuClicked(int id, IScreen screen)

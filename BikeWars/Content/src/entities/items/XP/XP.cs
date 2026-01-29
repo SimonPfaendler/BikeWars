@@ -10,6 +10,7 @@ namespace BikeWars.Content.entities.items;
 public abstract class Xp: ItemBase, IPickable
 {
     private BoxCollider _collider { get; set; }
+    public virtual bool CanBePickedUp => true;
     public override BoxCollider Collider
     {
         get { return _collider; }

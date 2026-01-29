@@ -88,7 +88,7 @@ public class Chest: ObjectBase
         {return new RacingBike(dropPos, new Point(32, 32));}
         else
         {
-            return new Xp_Money(dropPos, new Point(32, 32), 300);
+            return new Xp_Money(dropPos, new Point(32, 32), 30);
         }
     }
     public ItemBase OpenChest()
