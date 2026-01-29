@@ -60,7 +60,7 @@ public class Chest: ObjectBase
             else if (weaponRoll < 0.50) weaponType = Player.WeaponType.IceTrail;
             else if (weaponRoll < 0.75) weaponType = Player.WeaponType.FireTrail;
             else weaponType = Player.WeaponType.DamageCircle;
-            
+
             return new WeaponItem(dropPos, new Point(32, 32), weaponType);
         }
         else if (roll < 0.50) // 25% EnergyGel

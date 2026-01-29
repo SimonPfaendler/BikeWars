@@ -35,6 +35,15 @@ public class CooldownWithDuration
 
     public float RemainingCooldown => _cooldownTimer;
 
+    public void DecreaseCoolDownTimer(float amount)
+    {
+        if (_cooldownTimer - amount < 0f) {
+            _cooldownTimer = 0f;
+            return;
+        }
+        _cooldownTimer -= amount;
+    }
+
     public void Update(GameTime gameTime)
     {
         float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;

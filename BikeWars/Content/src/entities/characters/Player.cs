@@ -233,7 +233,11 @@ namespace BikeWars.Entities.Characters
                 }
             }
 
-
+            if (item is EnergyBar eb)
+            {
+                Attributes.Health += eb.HealAmount;
+                sprint.DecreaseCoolDownTimer(eb.DecreaseSprintCoolDown);
+            }
             if (item.InventoryItem)
             {
                 if (_input.IsPressed(GameAction.INTERACT) && Inventory.AddItem(item))
@@ -715,8 +719,6 @@ namespace BikeWars.Entities.Characters
                 if (item is EnergyGel gel)
                 {
                     Attributes.Health += gel.HealAmount;
-                    if (Attributes.Health > Attributes.MaxHealth)
-                        Attributes.Health = Attributes.MaxHealth;
                 }
                 else if (item is DopingSpritze doping)
                 {

@@ -4,7 +4,6 @@ namespace BikeWars.Entities
     {
         public object Owner { get; protected set; }
         protected virtual void Die() { }
-
         private int _health { get; set; }
         public int Health
         {
@@ -20,6 +19,7 @@ namespace BikeWars.Entities
                 if (value > MaxHealth)
                 {
                     _health = MaxHealth;
+                    return;
                 }
                 _health = value;
             }
@@ -34,6 +34,7 @@ namespace BikeWars.Entities
                 if (value < 0)
                 {
                     _maxHealth = 0;
+                    return;
                 }
                 _maxHealth = value;
             }
@@ -48,6 +49,7 @@ namespace BikeWars.Entities
                 if (value < 0)
                 {
                     _attackDamage = 0;
+                    return;
                 }
                 _attackDamage = value;
             }
@@ -62,6 +64,7 @@ namespace BikeWars.Entities
                 if (value < 0)
                 {
                     _attackCooldown = 0;
+                    return;
                 }
                 _attackCooldown = value;
             }

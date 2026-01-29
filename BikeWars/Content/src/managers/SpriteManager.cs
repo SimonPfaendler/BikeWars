@@ -76,6 +76,7 @@ namespace BikeWars.Content.managers
             { "Beer_destroyed", "assets/images/beer_destroyed"},
             { "XP_Money", "assets/sprites/XP/xp_money_texture" },
             { "EnergyGel", "assets/images/EnergyGel" },
+            { "EnergyBar", "assets/images/energy_bar" },
             { "DopingSpritze", "assets/images/DopingSpritze" },
             { "DogFood", "assets/images/DogFood" },
             // TRAM
@@ -88,7 +89,7 @@ namespace BikeWars.Content.managers
 
             // Tower
             { "TowerAlly", "assets/images/tower_ally"},
-            
+
             // Attack icons
             { "Eisreifen", "assets/images/Eisreifen_new"},
             { "Feuerreifen", "assets/images/Feuerreifen"},
@@ -99,7 +100,7 @@ namespace BikeWars.Content.managers
             { "klingel", "assets/images/klingel"},
             { "pfand_icon", "assets/images/pfand_icon"},
             { "Revolver", "assets/images/Revolver"},
-            
+
         };
 
         // No single-image map sprites here; map sprites are loaded from atlas JSON.
@@ -160,14 +161,14 @@ namespace BikeWars.Content.managers
             "KamikazeOpa_BikeRight",
             "KamikazeOpa_BikeUp",
             "KamikazeOpa_Death",
-            
+
             // Dozent
             "Dozent_Idle",
             "Dozent_WalkLeft",
             "Dozent_WalkRight",
             "Dozent_WalkDown",
             "Dozent_WalkUp",
-            
+
             // RAVERS
             "Raver02_LeftUp",
             "Raver02_RightUp",
@@ -177,7 +178,7 @@ namespace BikeWars.Content.managers
             "Raver04_RightUp",
             "Raver06_LeftUp",
             "Raver06_RightUp",
-            
+
             // Policeman
             "policeman_walking_right",
             "policeman_walking_left",

@@ -602,6 +602,12 @@ public class GameObjectManager
         xp = new Xp_Money(pos, new Point(16, 16));
         AddItem(xp);
 
+        if (RandomUtil.NextDouble() <= 0.15) // 15% find a energybar
+        {
+            EnergyBar energyBar = new EnergyBar(pos, new Point(16, 16));
+            AddItem(energyBar);
+        }
+
         if (RandomUtil.NextDouble() <= 0.05) // 5% chance to drop an energy gel
         {
             EnergyGel energyGel = new EnergyGel(pos, new Point(32, 32));
