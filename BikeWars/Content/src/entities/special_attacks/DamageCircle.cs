@@ -15,7 +15,7 @@ namespace BikeWars.Content.entities.items
     {
         private const string SPRITE_KEY = "DamageCircle";
 
-        private Texture2D _spriteSheet;
+        private Texture2D? _spriteSheet;
 
         private int _frameWidth;
         private int _frameHeight;
@@ -118,6 +118,9 @@ namespace BikeWars.Content.entities.items
 
         public override void Draw(SpriteBatch spriteBatch)
         {
+            if (_spriteSheet == null)
+                return;
+            
             Rectangle src = new Rectangle(
                 _currentFrame * _frameWidth,
                 0,
