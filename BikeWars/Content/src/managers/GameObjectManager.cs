@@ -104,7 +104,10 @@ public class GameObjectManager
             Player2.ThrowBottle += target => OnPlayerThrowBottle(Player2, target);
             Player2.ThrowBeer += target => OnPlayerThrowBeer(Player2, target);
             Player2.OnTookDamage += HandleTookDamage;
-            Player1.CanRevive = true;
+            if (Player1 != null)
+            {
+                Player1.CanRevive = true;
+            }
             Player2.Attributes.OnDied += HandlePlayerDied;
         }
     }
