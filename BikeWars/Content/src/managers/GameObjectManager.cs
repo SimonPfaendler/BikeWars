@@ -61,6 +61,9 @@ public class GameObjectManager
 
     public ContentManager _contentManager {get; set;} // TODO do we need this one?
 
+    private float _reviveCooldownTimer = 0f;
+    private const float REVIVE_COOLDOWN = 60f;
+
     private WorldAudioManager? _worldAudioManager;
     public GameObjectManager(ContentManager content, Player? player1, Player? player2)
     {
@@ -101,7 +104,24 @@ public class GameObjectManager
             Player2.ThrowBottle += target => OnPlayerThrowBottle(Player2, target);
             Player2.ThrowBeer += target => OnPlayerThrowBeer(Player2, target);
             Player2.OnTookDamage += HandleTookDamage;
+            Player1.CanRevive = true;
             Player2.Attributes.OnDied += HandlePlayerDied;
+        }
+    }
+
+    private void HandleRevival()
+    {
+        if (Player1 != null && Player2 != null)
+        {
+            float reviveDistance = 100f;
+            if (Player1.IsDying && Player2.IsActionPressed(GameAction.REVIVE))
+            {
+                if (_reviveCooldownTimer <= 0f && Vector2.Distance(Player2.Transform.Position, Player1.Transform.Position) < reviveDistance)
+                {
+                    Player1.Revive();
+                    _reviveCooldownTimer = REVIVE_COOLDOWN;
+                }
+            }
         }
     }
     public void AddTower(Tower tower)
@@ -225,8 +245,8 @@ public class GameObjectManager
     public void Draw(SpriteBatch spriteBatch)
     {
 
-        if (Player1 != null) Player1.Draw(spriteBatch);
-        if (Player2 != null) Player2.Draw(spriteBatch);
+        if (Player1 != null && !Player1.IsDead) Player1.Draw(spriteBatch);
+        if (Player2 != null && !Player2.IsDead) Player2.Draw(spriteBatch);
         foreach (CharacterBase c in Characters)
         {
             c.Draw(spriteBatch);
@@ -270,8 +290,8 @@ public class GameObjectManager
 
     public void Update(GameTime gameTime, Vector2 mouseWorldPos)
     {
-        if (Player1 != null) Player1.Update(gameTime, mouseWorldPos);
-        if (Player2 != null) Player2.Update(gameTime, mouseWorldPos);
+        if (Player1 != null && !Player1.IsDead) Player1.Update(gameTime, mouseWorldPos);
+        if (Player2 != null && !Player2.IsDead) Player2.Update(gameTime, mouseWorldPos);
         foreach (CharacterBase c in Characters)
         {
             if (c.Movement != null && Player1 != null)
@@ -367,7 +387,13 @@ public class GameObjectManager
             _damageAggregationTimer = AggregationInterval;
         }
 
+        if (_reviveCooldownTimer > 0f)
+        {
+            _reviveCooldownTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+        }
+
         DogBowl.UpdateBowl(gameTime);
+        HandleRevival();
     }
 
     private void OnPlayerShotBullet(Player player)

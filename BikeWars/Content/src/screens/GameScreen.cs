@@ -402,7 +402,11 @@ namespace BikeWars.Content.screens
                 _showStaticHitboxes = !_showStaticHitboxes;
             }
 
-            if ((_gameObjectManager.Player1 != null && _gameObjectManager.Player1.IsDead) || (_gameObjectManager.Player2 != null && _gameObjectManager.Player2.IsDead))
+            bool p1Dead = _gameObjectManager.Player1 != null && _gameObjectManager.Player1.IsDead;
+            bool p2Dead = _gameObjectManager.Player2 != null && _gameObjectManager.Player2.IsDead;
+            bool isMultiplayer = _gameObjectManager.Player2 != null;
+
+            if ((!isMultiplayer && p1Dead) || (isMultiplayer && p1Dead && p2Dead))
             {
                 _audioService.Sounds.PauseAll();
                 _audioService.Music.Stop();
