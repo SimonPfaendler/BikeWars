@@ -110,6 +110,9 @@ namespace BikeWars.Content.screens
         private Musicians _activeMusicianOverride = null;
         private float _musicOverrideDelayTimer = 0f;
         private bool _waitingForMetal = false;
+        private const float MUSICIAN_COOLDOWN_SECONDS = 30f;
+        private float _musicianCooldownTimer = 0f;
+        private bool _musiciansOnCooldown = false;
 
         private const float METAL_DELAY_SECONDS = 2f;
 
@@ -467,6 +470,18 @@ namespace BikeWars.Content.screens
                 _gameTimer.Update(gameTime);
 
             // check if Musicians are nearby and change Music if it's the case
+            
+            if (_musiciansOnCooldown)
+            {
+                _musicianCooldownTimer -= dt;
+
+                if (_musicianCooldownTimer <= 0f)
+                {
+                    _musiciansOnCooldown = false;
+                    _musicianCooldownTimer = 0f;
+                }
+            }
+
 
             bool playerNearMusicians = false;
 
@@ -484,7 +499,7 @@ namespace BikeWars.Content.screens
             }
 
             // logic for interaction with musicians (music change and attack)
-            if (!_musicOverrideActive)
+            if (!_musicOverrideActive && !_musiciansOnCooldown)
             {
                 foreach (var obj in _gameObjectManager.Objects)
                 {
@@ -565,12 +580,15 @@ namespace BikeWars.Content.screens
                 if (!_audioService.Music.IsPlaying)
                 {
                     _musicOverrideActive = false;
+                    _musiciansOnCooldown = true;
+                    _musicianCooldownTimer = MUSICIAN_COOLDOWN_SECONDS;
 
                     if (_activeMusicianOverride != null)
                     {
                         _activeMusicianOverride.ResetOverride();
                         _activeMusicianOverride = null;
                     }
+                    _activeMusiciansForAOE = null;
                 }
 
                 return;
@@ -685,7 +703,10 @@ namespace BikeWars.Content.screens
 
                 if (o.Type == SaveLoad.TYPES.CHEST)
                 {
-                    _gameObjectManager.AddObject(new Chest(pos, size, o.Item, o.IsOpen ?? false));
+                    var item = ParseChestItem(o.Item);
+                    _gameObjectManager.AddObject(
+                        new Chest(pos, size, item, o.IsOpen ?? false)
+                    );
                 }
                 else if (o.Type == SaveLoad.TYPES.BIKESHOP)
                 { _gameObjectManager.AddObject(new BikeShop(pos, size));}
@@ -1157,5 +1178,21 @@ namespace BikeWars.Content.screens
         {
 
         }
+        private Chest.ChestItemType? ParseChestItem(string? value)
+        {
+            return value switch
+            {
+                "Energygel" => Chest.ChestItemType.Energygel,
+                "Frelo" => Chest.ChestItemType.Frelo,
+                "Racingbike" => Chest.ChestItemType.Racingbike,
+                "DogFood" => Chest.ChestItemType.DogFood,
+                "DopingSpritze" => Chest.ChestItemType.DopingSpritze,
+                "Beer" => Chest.ChestItemType.Beer,
+                "Flame" => Chest.ChestItemType.Flame,
+                "Ice" => Chest.ChestItemType.Ice,
+                _ => null
+            };
+        }
+
     }
 }

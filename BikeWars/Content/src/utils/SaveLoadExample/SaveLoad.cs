@@ -85,7 +85,7 @@ public static class SaveLoad
         public BasicSaveModel Basic {get;set;} = new();
         public ProjectileSaveModel() {}
 
-        public WeaponAttributes WeaponAttributes {get; set;}
+        public WeaponAttributes? WeaponAttributes {get; set;}
         public bool HasHit {get; set;}
 
         public Vector2Save Direction {get; set;} = new();
