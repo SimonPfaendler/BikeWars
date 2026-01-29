@@ -435,9 +435,21 @@ namespace BikeWars.Content.screens
             if (_gameObjectManager.Player2 == null)
             {
                 camera?.Update(gameTime, _gameObjectManager.Player1.Transform.Position, null, _freelook);
-            } else
+            }
+            else
             {
-                camera?.Update(gameTime, _gameObjectManager.Player1.Transform.Position, _gameObjectManager.Player2.Transform.Position, _freelook);
+                if (_gameObjectManager.Player1.IsDead)
+                {
+                    camera?.Update(gameTime, _gameObjectManager.Player2.Transform.Position, null, _freelook);
+                }
+                else if (_gameObjectManager.Player2.IsDead)
+                {
+                    camera?.Update(gameTime, _gameObjectManager.Player1.Transform.Position, null, _freelook);
+                }
+                else
+                {
+                    camera?.Update(gameTime, _gameObjectManager.Player1.Transform.Position, _gameObjectManager.Player2.Transform.Position, _freelook);
+                }
             }
 
             _tiledMapRenderer?.Update(gameTime);
