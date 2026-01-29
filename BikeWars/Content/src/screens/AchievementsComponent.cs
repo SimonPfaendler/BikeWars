@@ -16,7 +16,7 @@ public class AchievementsComponent
         Rectangle box = new Rectangle((int)drawPos.X, (int)drawPos.Y, 500, HEIGHT_OF_COMPONENT);
         sb.Draw(basicTexture, box, overlayColor);
 
-        sb.DrawString(font, $"Name: {achievement.Name}, Beschreibung: {achievement.Description}", new Vector2(box.X, box.Y), Color.White);
+        sb.DrawString(font, $"Name: {achievement.Name}, {achievement.Succeeded} Beschreibung: {achievement.Description},", new Vector2(box.X, box.Y), Color.White);
         // sb.DrawString(font, $"Regulaere Kills: {statistic.RegularKills}", new Vector2(box.X, box.Y + 20), Color.White);
         // sb.DrawString(font, $"Schaden hinzugefuegt: {statistic.DealtDamage}", new Vector2(box.X, box.Y + 40), Color.White);
         // sb.DrawString(font, $"Schaden erhalten: {statistic.TookDamage}", new Vector2(box.X, box.Y + 60), Color.White);

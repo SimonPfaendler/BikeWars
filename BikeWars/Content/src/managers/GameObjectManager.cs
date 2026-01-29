@@ -185,7 +185,6 @@ public class GameObjectManager
     public void AddObject(ObjectBase obj)
     {
         _objects.Add(obj);
-
         if (obj.CollisionCollider != null)
             Statics.Add(obj.CollisionCollider);
     }
@@ -685,8 +684,11 @@ public class GameObjectManager
         var start = new Vector2(spawn.Rect.X, spawn.Rect.Y);
         var size  = new Point(spawn.Rect.Width, spawn.Rect.Height);
 
+        if (!spawn.Properties.ContainsKey("type"))
+        {
+            return null;
+        }
         string type = spawn.Properties["type"];
-
         return type switch
         {
             "tower" => new TowerAlly(start, size),
@@ -699,14 +701,19 @@ public class GameObjectManager
         var start = new Vector2(spawn.Rect.X, spawn.Rect.Y);
         var size  = new Point(spawn.Rect.Width, spawn.Rect.Height);
 
+        if (!spawn.Properties.ContainsKey("type"))
+        {
+            return null;
+        }
         string type = spawn.Properties["type"];
-
         switch (type)
         {
             case "Bike_Shop":
                 return new BikeShop(start, size);
             case "Destructible":
                 return new DestructibleObject(start, size, spawn);
+            case "AchievementTrigger":
+                return new AchievementTrigger(spawn.Name, start, size, spawn); // Name or something like that
             case "chest":
                 spawn.Properties.TryGetValue("item", out string? item);
                 return new Chest(start, size, item);

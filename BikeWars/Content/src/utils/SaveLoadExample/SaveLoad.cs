@@ -13,6 +13,7 @@ using BikeWars.Content.engine;
 using BikeWars.Content.entities.MapObjects;
 using BikeWars.Entities.Characters.MapObjects;
 using BikeWars.Entities;
+using System.Linq;
 
 namespace BikeWars.Content.src.utils.SaveLoadExample;
 
@@ -55,7 +56,6 @@ public static class SaveLoad
         public List<ObjectSaveModel> Objects { get; set; } = new();
         public List<Statistic> Statistics{get; set;} = new();
         public Statistic Statistic{get; set;} = new();
-
         public List<Achievement> Achievements{get; set;} = new();
         public Achievement Achievement{get; set;} = new();
         public int GameMode { get; set; } = 0;
@@ -93,12 +93,10 @@ public static class SaveLoad
         public bool CanMove {get; set;}
         public float Rotation {get; set;}
 
-        // public ProjectileSaveModel(BasicSaveModel b, int damage, bool hasHit, Vector2 direction, bool isMoving, bool canMove, float rotation, WeaponAttributes weaponAttributes)
         public ProjectileSaveModel(BasicSaveModel b, bool hasHit, Vector2 direction, bool isMoving, bool canMove, float rotation, WeaponAttributes weaponAttributes)
         {
             Basic = b;
             WeaponAttributes = weaponAttributes;
-            // WeaponAttributes.Damage = damage;
             HasHit = hasHit;
             Direction = new Vector2Save(direction);
             IsMoving = isMoving;
@@ -234,7 +232,7 @@ public static class SaveLoad
                 Objects = MakeObjectSaveList(gameObjectManager.Objects),
                 Statistics = statisticsManager.Statistics,
                 Statistic = statisticsManager.Statistic,
-                Achievements = achievementsManager.Achievements,
+                Achievements = achievementsManager.Achievements.Values.ToList(),
                 // Achievement = achievementsManager.Achievement
             };
             string json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
@@ -281,7 +279,7 @@ public static class SaveLoad
                 Objects = loadState.Objects,
                 Statistics = statisticsManager.Statistics,
                 Statistic = statisticsManager.Statistic,
-                Achievements = achievementsManager.Achievements
+                Achievements = achievementsManager.Achievements.Values.ToList(),
             };
             string json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
 

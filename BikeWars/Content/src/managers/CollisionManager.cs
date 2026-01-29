@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using BikeWars.Content.engine;
-using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.entities.MapObjects;
 using BikeWars.Entities.Characters;
 using BikeWars.Entities.Characters.MapObjects;
 using BikeWars.Content.components;
-using BikeWars.Content.entities.projectiles;
 using Microsoft.Xna.Framework.Content;
 using MonoGame.Extended.Tiled;
 using Microsoft.Xna.Framework;
@@ -148,6 +146,8 @@ public class CollisionManager
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
         // Also load destructible objects from a dedicated Tiled object layer
         LoadObjectLayer("Destructibles");
+        _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
+        LoadTriggerLayer("AchievementsTrigger");
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
         // spawn shops/objects
 
@@ -688,13 +688,13 @@ public class CollisionManager
         {
             PickingUpItem(c, d);
             HandleInteractions(c, d);
+            HandleTrigger(c, d);
             HandleInteractionsTower(c, d);
             HandleCharacters(c, d);
             HandleTowers(c, d);
             HandleTramCollision(c, d);
         }
     }
-
 
     private void HandleTramCollision(ICollider c, ICollider d)
     {
@@ -900,6 +900,18 @@ public class CollisionManager
     private void HandleInteractions(ICollider c, ICollider d)
     {
         if (c.Layer == CollisionLayer.PLAYER && d.Layer == CollisionLayer.INTERACT && c.Intersects(d))
+        {
+            if (c.Owner is Player p && d.Owner is ObjectBase i)
+            {
+                OnObjectInteraction?.Invoke(p, i);
+            }
+        }
+    }
+
+    // Use this if you need to handle a new Achievement or something similar. Like walking on something
+    private void HandleTrigger(ICollider c, ICollider d)
+    {
+        if (c.Layer == CollisionLayer.PLAYER && d.Layer == CollisionLayer.TRIGGER && c.Intersects(d))
         {
             if (c.Owner is Player p && d.Owner is ObjectBase i)
             {
@@ -1280,6 +1292,25 @@ public class CollisionManager
         }
     }
 
+    private void LoadTriggerLayer(string layerName)
+    {
+        ObjectSpawns.Clear();
+        var layer = TiledMap.GetLayer<TiledMapObjectLayer>(layerName);
+        if (layer == null)
+            return;
+
+        foreach (var obj in layer.Objects)
+        {
+            var rect = new Rectangle(
+                (int)obj.Position.X,
+                (int)obj.Position.Y,
+                (int)obj.Size.Width,
+                (int)obj.Size.Height
+            );
+            ObjectSpawns.Add(new TiledObjectInfo(obj.Name, rect, obj.Properties));
+        }
+    }
+
     private void LoadObjectLayer(string layerName)
     {
         ObjectSpawns.Clear();
@@ -1295,7 +1326,7 @@ public class CollisionManager
                 (int)obj.Size.Height
             );
 
-            ObjectSpawns.Add(new TiledObjectInfo(rect, obj.Properties));
+            ObjectSpawns.Add(new TiledObjectInfo(obj.Name, rect, obj.Properties));
         }
     }
     public void Unload()

@@ -51,6 +51,7 @@ namespace BikeWars.Content.screens
 
         private AchievementsManager _achievementsManager {get; set;}
         public AchievementsManager AchievementsManager => _achievementsManager;
+
         private readonly AudioService _audioService;
         public AudioService AudioService => _audioService;
 
@@ -128,7 +129,7 @@ namespace BikeWars.Content.screens
             _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
             _gameMode = gameMode;
         }
-               public virtual void LoadContent(ContentManager content, GraphicsDevice gd)
+        public virtual void LoadContent(ContentManager content, GraphicsDevice gd)
         {
             // Font and Debugger
             _playerManager = new PlayerManager(ViewPort, _gameMode, worldBounds, _audioService, _isTechDemo);
@@ -214,6 +215,7 @@ namespace BikeWars.Content.screens
             _collisionManager.OnItemPickup += _gameObjectManager.Player1.OnPickUpItem;
             _collisionManager.OnTowerInteraction += _gameObjectManager.Player1.OnInteractTower;
             _collisionManager.OnObjectInteraction += _gameObjectManager.Player1.OnInteractObject;
+            _collisionManager.OnObjectInteraction += OnObjectInteraction;
             _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
             _collisionManager.OnTramHit += _combatManager.HandleTramHit;
             _collisionManager.OnBaechleHit += _combatManager.HandleBaechleHit;
@@ -402,6 +404,7 @@ namespace BikeWars.Content.screens
                 _statisticsManager.HandleTime(_gameTimer.TimePassed());
                 GameOver?.Invoke(_statisticsManager.Statistic);
                 _statisticsManager.SaveStatistic();
+                _achievementsManager.SaveAchievement();
                 SaveLoad.SaveNonGame(_statisticsManager, _achievementsManager);
             }
 
@@ -845,7 +848,10 @@ namespace BikeWars.Content.screens
             _audioService.Sounds.Play(AudioAssets.CarHorn);
             _statisticsManager.HandleTime(_gameTimer.TimePassed());
             GameWon?.Invoke(_statisticsManager.Statistic);
+            _achievementsManager.HandleAchievement(AchievementIds.UNIVERSITY_NEVER_FORGETS, Triggers.WON_GAME);
+            _achievementsManager.HandleAchievement(AchievementIds.BACHELOR_HERE_I_COME, Triggers.WON_GAME);
             _statisticsManager.SaveStatistic();
+            _achievementsManager.SaveAchievement();
             SaveLoad.SaveNonGame(_statisticsManager, _achievementsManager);
         }
 
@@ -1078,11 +1084,17 @@ namespace BikeWars.Content.screens
             // throw new NotImplementedException();
         }
 
+        private void OnObjectInteraction(Player player, ObjectBase obj)
+        {
+            if (player == null) return;
+            if (obj is not AchievementTrigger at) return;
+            _achievementsManager.HandleAchievement(at.Id, Triggers.REACHED_AREA);
+        }
+
         public void OnHandleRepair()
         {
             _statisticsManager.HandleRepair();
         }
-
         private void OnPauseMenuClicked(int id, IScreen screen)
         {
 
