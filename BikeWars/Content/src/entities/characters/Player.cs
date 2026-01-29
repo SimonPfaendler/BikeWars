@@ -606,11 +606,14 @@ namespace BikeWars.Entities.Characters
 
         private void LevelUp()
         {
-            XpCounter = XpCounter - XpLevelUp;
-            XpLevelUp = XpLevelUp * 2;
-            CurrentLevel++;
-            // level up screen is triggered:
-            OnLevelUp?.Invoke(XpLevelUp, CurrentLevel);
+            while (XpCounter >= XpLevelUp)
+            {
+                XpCounter = XpCounter - XpLevelUp;
+                CurrentLevel++;
+                XpLevelUp = 7 + (CurrentLevel * CurrentLevel * 3);
+                // level up screen is triggered:
+                OnLevelUp?.Invoke(XpLevelUp, CurrentLevel);
+            }
         }
 
         // the Upgrades from LevelUpScreen are applied here
