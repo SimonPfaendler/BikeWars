@@ -12,7 +12,7 @@ public class Musicians : ObjectBase
 {
     private const int PADDING_INTERACTION_AREA = 100;
     private BoxCollider _collisionCollider { get; set; }
-    public BoxCollider CollisionCollider { get => _collisionCollider; set => _collisionCollider = value; }
+    public new BoxCollider CollisionCollider { get => _collisionCollider; set => _collisionCollider = value; }
 
     public Musicians(Vector2 start, Point size)
     {

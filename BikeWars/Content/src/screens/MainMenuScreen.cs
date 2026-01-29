@@ -129,7 +129,7 @@ namespace BikeWars.Content.screens
         {
             Exit?.Invoke();
         }
-        public virtual void Dispose()
+        public override void Dispose()
         {
 
         }

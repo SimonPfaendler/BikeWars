@@ -8,7 +8,7 @@ namespace BikeWars.Entities.Characters.MapObjects;
 public class BikeShop: ObjectBase
 {
     private BoxCollider _collisionCollider {get;set;}
-    public BoxCollider CollisionCollider {get => _collisionCollider; set => _collisionCollider = value; } // Now this collider is for collision
+    public new BoxCollider CollisionCollider {get => _collisionCollider; set => _collisionCollider = value; } // Now this collider is for collision
 
     private int PADDING_INTERACTION_AREA = 40;
     public BikeShop(Vector2 start, Point size)
