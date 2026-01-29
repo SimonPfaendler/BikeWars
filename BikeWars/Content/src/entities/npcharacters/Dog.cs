@@ -43,6 +43,7 @@ namespace BikeWars.Entities.Characters
             AudioAssets.BarkSimon2,
             AudioAssets.BarkFritz,
             AudioAssets.Miau,
+            AudioAssets.BarkMadita
         };
         
         public Dog(Vector2 start, float size, AudioService audio, PathFinding pathFinding,

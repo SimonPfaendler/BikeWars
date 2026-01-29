@@ -31,6 +31,7 @@ namespace BikeWars.Content.engine.Audio
         public const string BarkSimon = "bark_simon";
         public const string BarkSimon2 = "bark_simon_2";
         public const string BarkFritz = "bark_fritz";
+        public const string BarkMadita = "bark_madita";
         public const string Miau = "miau";
         public const string WoodCrack = "wood_crack";
         public const string WoodDestroy = "wood_destroy";
@@ -69,13 +70,14 @@ namespace BikeWars.Content.engine.Audio
             { BarkSimon, "assets/sounds/vBark_Simon"},
             { BarkSimon2, "assets/sounds/Dogs/Bark_Simon_2"},
             { BarkFritz, "assets/sounds/Dogs/Bark_Fritz"},
+            { BarkMadita, "assets/sounds/Dogs/Bark_Madita"},
             { WoodCrack, "assets/sounds/wood_crack"},
             { WoodDestroy, "assets/sounds/wood_destroy"},
             { Miau, "assets/sounds/Dogs/Miau"},
             { RaverSound, "assets/sounds/raver_audio" },
             { ThrowObject, "assets/sounds/throw_object" },
             { Geisterfahrer, "assets/sounds/Geisterfahrer" },
-            {  HaltStop, "assets/sounds/HaltStop" },
+            { HaltStop, "assets/sounds/HaltStop" },
             
         };
 
@@ -84,6 +86,7 @@ namespace BikeWars.Content.engine.Audio
         public const string GameMusic = "Game_music";
         public const string LatinMusic = "Latin_music";
         public const string Metal = "Metal";
+        public const string SCHymne = "SCHymne";
         
         public static readonly IReadOnlyDictionary<string, string> SongPaths = new Dictionary<string, string>
         {
@@ -91,6 +94,7 @@ namespace BikeWars.Content.engine.Audio
             { GameMusic, "assets/sounds/Game_music" },
             { LatinMusic, "assets/sounds/LatinMusic"},
             { Metal, "assets/sounds/Metal" },
+            { SCHymne, "assets/sounds/SCHymne" },
         };
     }
 }
