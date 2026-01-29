@@ -36,6 +36,7 @@ namespace BikeWars.Content.components
         ResolutionPortrait1080x1920 = 32,
         ToggleFullscreen = 26,
         Keyboard = 27,
-        Controller = 28
+        Controller = 28,
+        Achievements = 29,
     }
 }

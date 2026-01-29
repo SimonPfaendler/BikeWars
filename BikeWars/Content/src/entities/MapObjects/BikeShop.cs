@@ -1,9 +1,7 @@
 ﻿using BikeWars.Content.engine;
-using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.managers;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace BikeWars.Entities.Characters.MapObjects;
 

@@ -27,7 +27,6 @@ public class StartScreen : MenuScreenBase, IScreen
         InitializeButtons();
     }
 
-
     protected sealed override void InitializeButtons()
     {
         int buttonWidth = 250;
