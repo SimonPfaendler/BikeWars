@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using BikeWars.Content.components;
 using BikeWars.Content.engine;
-using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.managers;
 using Microsoft.Xna.Framework;
@@ -15,7 +14,7 @@ public class BikeShop: ObjectBase
     private CooldownWithDuration _shopCooldown = new CooldownWithDuration(1, 10);
     public bool ShopReady => _shopCooldown.Ready;
     private int _timeleft = 0;
-    public BoxCollider CollisionCollider {get => _collisionCollider; set => _collisionCollider = value; } // Now this collider is for collision
+    public new BoxCollider CollisionCollider {get => _collisionCollider; set => _collisionCollider = value; } // Now this collider is for collision
 
     private int PADDING_INTERACTION_AREA = 40;
     public BikeShop(Vector2 start, Point size)

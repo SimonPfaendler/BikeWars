@@ -1,5 +1,4 @@
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.engine.interfaces;
@@ -15,7 +14,7 @@ namespace BikeWars.Content.entities.items
         public DopingSpritze(Vector2 start, Point size)
         {
             Transform = new Transform(start, size);
-            
+
             InitpickupRange();
 
             TexRight = managers.SpriteManager.GetTexture("DopingSpritze");

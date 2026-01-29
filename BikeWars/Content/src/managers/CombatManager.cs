@@ -144,7 +144,7 @@ public class CombatManager
         if (target.IsDead) return;
         if (target.IsGodMode) return;
 
-        target.TakeDamage(10);
+        target.TakeDamage(12);
         _audio.Sounds.Play(AudioAssets.TrainHit);
 
         if (target.Attributes.Health <= 0)

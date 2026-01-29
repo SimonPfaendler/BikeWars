@@ -48,6 +48,10 @@ namespace BikeWars.Content.screens
 
         private StatisticsManager _statisticsManager {get; set;}
         public StatisticsManager StatisticsManager => _statisticsManager;
+
+        private AchievementsManager _achievementsManager {get; set;}
+        public AchievementsManager AchievementsManager => _achievementsManager;
+
         private readonly AudioService _audioService;
         public AudioService AudioService => _audioService;
 
@@ -83,6 +87,12 @@ namespace BikeWars.Content.screens
         private readonly bool _isTechDemo;
         private bool _showStaticHitboxes = true;
 
+        private readonly Dictionary<CharacterBase, float> _offscreenTimers = new();
+        private const float OFFSCREEN_DESPAWN_SECONDS = 15f;
+        private const float OFFSCREEN_PADDING = 200f;
+        private float _offscreenAccum = 0f;
+        private const float OFFSCREEN_CHECK_INTERVAL = 0.25f;
+
         private GameTimer _gameTimer;
         private const float GAME_TIME_LIMIT = 300f;
         private SpriteFont _timerFont;
@@ -100,6 +110,9 @@ namespace BikeWars.Content.screens
         private Musicians _activeMusicianOverride = null;
         private float _musicOverrideDelayTimer = 0f;
         private bool _waitingForMetal = false;
+        private const float MUSICIAN_COOLDOWN_SECONDS = 30f;
+        private float _musicianCooldownTimer = 0f;
+        private bool _musiciansOnCooldown = false;
 
         private const float METAL_DELAY_SECONDS = 2f;
 
@@ -125,7 +138,7 @@ namespace BikeWars.Content.screens
             _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
             _gameMode = gameMode;
         }
-               public virtual void LoadContent(ContentManager content, GraphicsDevice gd)
+        public virtual void LoadContent(ContentManager content, GraphicsDevice gd)
         {
             // Font and Debugger
             _playerManager = new PlayerManager(ViewPort, _gameMode, worldBounds, _audioService, _isTechDemo);
@@ -150,6 +163,7 @@ namespace BikeWars.Content.screens
             }
 
             _statisticsManager = new StatisticsManager();
+            _achievementsManager = new AchievementsManager();
             _gameTimer = new GameTimer(GAME_TIME_LIMIT);
 
             _gameObjectManager.OnCharacterDied += _statisticsManager.HandleCharacterDied;
@@ -210,6 +224,7 @@ namespace BikeWars.Content.screens
             _collisionManager.OnItemPickup += _gameObjectManager.Player1.OnPickUpItem;
             _collisionManager.OnTowerInteraction += _gameObjectManager.Player1.OnInteractTower;
             _collisionManager.OnObjectInteraction += _gameObjectManager.Player1.OnInteractObject;
+            _collisionManager.OnObjectInteraction += OnObjectInteraction;
             _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
             _collisionManager.OnTramHit += _combatManager.HandleTramHit;
             _collisionManager.OnBaechleHit += _combatManager.HandleBaechleHit;
@@ -319,6 +334,7 @@ namespace BikeWars.Content.screens
             {
                 return;
             }
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
             // Update HUD and Timer alignment for resolution changes
             int viewW = ViewPort.Width;
             int viewH = ViewPort.Height;
@@ -375,6 +391,12 @@ namespace BikeWars.Content.screens
             // Let up to 50 enemies recalc their paths this frame
             _repathScheduler?.Update();
             _gameObjectManager.Update(gameTime, InputHandler.MakeMouseWorldPosByCamera(camera));
+            _offscreenAccum += dt;
+            if (_offscreenAccum >= OFFSCREEN_CHECK_INTERVAL)
+            {
+                DespawnOffscreenEnemies(_offscreenAccum);
+                _offscreenAccum = 0f;
+            }
             _collisionManager.Update(players, _gameObjectManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(_gameObjectManager.Trams), _gameObjectManager.Objects, _gameObjectManager.Towers);
 
             if (InputHandler.IsPressed(GameAction.DEBUG_HEAL))
@@ -391,7 +413,11 @@ namespace BikeWars.Content.screens
                 _showStaticHitboxes = !_showStaticHitboxes;
             }
 
-            if ((_gameObjectManager.Player1 != null && _gameObjectManager.Player1.IsDead) || (_gameObjectManager.Player2 != null && _gameObjectManager.Player2.IsDead))
+            bool p1Dead = _gameObjectManager.Player1 != null && _gameObjectManager.Player1.IsDead;
+            bool p2Dead = _gameObjectManager.Player2 != null && _gameObjectManager.Player2.IsDead;
+            bool isMultiplayer = _gameObjectManager.Player2 != null;
+
+            if ((!isMultiplayer && p1Dead) || (isMultiplayer && p1Dead && p2Dead))
             {
                 _audioService.Sounds.PauseAll();
                 _audioService.Music.Stop();
@@ -400,7 +426,8 @@ namespace BikeWars.Content.screens
                 _statisticsManager.HandleTime(_gameTimer.TimePassed());
                 GameOver?.Invoke(_statisticsManager.Statistic);
                 _statisticsManager.SaveStatistic();
-                SaveLoad.SaveNonGame(_statisticsManager);
+                _achievementsManager.SaveAchievement();
+                SaveLoad.SaveNonGame(_statisticsManager, _achievementsManager);
             }
 
             _debugger?.Update(gameTime, _gameObjectManager.Characters);
@@ -413,9 +440,21 @@ namespace BikeWars.Content.screens
             if (_gameObjectManager.Player2 == null)
             {
                 camera?.Update(gameTime, _gameObjectManager.Player1.Transform.Position, null, _freelook);
-            } else
+            }
+            else
             {
-                camera?.Update(gameTime, _gameObjectManager.Player1.Transform.Position, _gameObjectManager.Player2.Transform.Position, _freelook);
+                if (_gameObjectManager.Player1.IsDead)
+                {
+                    camera?.Update(gameTime, _gameObjectManager.Player2.Transform.Position, null, _freelook);
+                }
+                else if (_gameObjectManager.Player2.IsDead)
+                {
+                    camera?.Update(gameTime, _gameObjectManager.Player1.Transform.Position, null, _freelook);
+                }
+                else
+                {
+                    camera?.Update(gameTime, _gameObjectManager.Player1.Transform.Position, _gameObjectManager.Player2.Transform.Position, _freelook);
+                }
             }
 
             _tiledMapRenderer?.Update(gameTime);
@@ -433,6 +472,18 @@ namespace BikeWars.Content.screens
                 _gameTimer.Update(gameTime);
 
             // check if Musicians are nearby and change Music if it's the case
+            
+            if (_musiciansOnCooldown)
+            {
+                _musicianCooldownTimer -= dt;
+
+                if (_musicianCooldownTimer <= 0f)
+                {
+                    _musiciansOnCooldown = false;
+                    _musicianCooldownTimer = 0f;
+                }
+            }
+
 
             bool playerNearMusicians = false;
 
@@ -450,7 +501,7 @@ namespace BikeWars.Content.screens
             }
 
             // logic for interaction with musicians (music change and attack)
-            if (!_musicOverrideActive)
+            if (!_musicOverrideActive && !_musiciansOnCooldown)
             {
                 foreach (var obj in _gameObjectManager.Objects)
                 {
@@ -512,11 +563,11 @@ namespace BikeWars.Content.screens
 
             if (_musicOverrideActive)
             {
-                float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+                float musicDt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
                 if (_waitingForMetal)
                 {
-                    _musicOverrideDelayTimer -= dt;
+                    _musicOverrideDelayTimer -= musicDt;
 
                     if (_musicOverrideDelayTimer <= 0f)
                     {
@@ -531,12 +582,15 @@ namespace BikeWars.Content.screens
                 if (!_audioService.Music.IsPlaying)
                 {
                     _musicOverrideActive = false;
+                    _musiciansOnCooldown = true;
+                    _musicianCooldownTimer = MUSICIAN_COOLDOWN_SECONDS;
 
                     if (_activeMusicianOverride != null)
                     {
                         _activeMusicianOverride.ResetOverride();
                         _activeMusicianOverride = null;
                     }
+                    _activeMusiciansForAOE = null;
                 }
 
                 return;
@@ -651,7 +705,10 @@ namespace BikeWars.Content.screens
 
                 if (o.Type == SaveLoad.TYPES.CHEST)
                 {
-                    _gameObjectManager.AddObject(new Chest(pos, size, o.Item, o.IsOpen ?? false));
+                    var item = ParseChestItem(o.Item);
+                    _gameObjectManager.AddObject(
+                        new Chest(pos, size, item, o.IsOpen ?? false)
+                    );
                 }
                 else if (o.Type == SaveLoad.TYPES.BIKESHOP)
                 { _gameObjectManager.AddObject(new BikeShop(pos, size));}
@@ -666,7 +723,7 @@ namespace BikeWars.Content.screens
         private void HandleSaveLoadInput()
         {
             if (InputHandler.IsPressed(GameAction.SAVE))
-                SaveLoad.SaveGame(_gameTimer, _gameObjectManager, _statisticsManager, _gameMode);
+                SaveLoad.SaveGame(_gameTimer, _gameObjectManager, _statisticsManager, _achievementsManager, _gameMode);
 
             if (InputHandler.IsPressed(GameAction.LOAD))
             {
@@ -830,6 +887,35 @@ namespace BikeWars.Content.screens
             );
         }
 
+        private void DespawnOffscreenEnemies(float dt)
+        {
+            Rectangle view = GetCameraWorldRect();
+            view.Inflate((int)OFFSCREEN_PADDING, (int)OFFSCREEN_PADDING);
+
+            for (int i = _gameObjectManager.Characters.Count - 1; i >= 0; i--)
+            {
+                var ch = _gameObjectManager.Characters[i];
+                if (ch is Player)
+                    continue;
+
+                Point pos = new Point((int)ch.Transform.Position.X, (int)ch.Transform.Position.Y);
+                if (view.Contains(pos))
+                {
+                    _offscreenTimers[ch] = 0f;
+                    continue;
+                }
+
+                float elapsed = _offscreenTimers.TryGetValue(ch, out float timer) ? timer + dt : dt;
+                _offscreenTimers[ch] = elapsed;
+
+                if (elapsed > OFFSCREEN_DESPAWN_SECONDS)
+                {
+                    _gameObjectManager.Characters.RemoveAt(i);
+                    _offscreenTimers.Remove(ch);
+                }
+            }
+        }
+
         private void InitializeTimer()
         {
             _gameTimer.Restart(); // restart Timer
@@ -843,8 +929,11 @@ namespace BikeWars.Content.screens
             _audioService.Sounds.Play(AudioAssets.CarHorn);
             _statisticsManager.HandleTime(_gameTimer.TimePassed());
             GameWon?.Invoke(_statisticsManager.Statistic);
+            _achievementsManager.HandleAchievement(AchievementIds.UNIVERSITY_NEVER_FORGETS, Triggers.WON_GAME);
+            _achievementsManager.HandleAchievement(AchievementIds.BACHELOR_HERE_I_COME, Triggers.WON_GAME);
             _statisticsManager.SaveStatistic();
-            SaveLoad.SaveNonGame(_statisticsManager);
+            _achievementsManager.SaveAchievement();
+            SaveLoad.SaveNonGame(_statisticsManager, _achievementsManager);
         }
 
         private void DrawTimer(SpriteBatch spriteBatch, GameTime gameTime)
@@ -1075,6 +1164,14 @@ namespace BikeWars.Content.screens
         {
             // throw new NotImplementedException();
         }
+
+        private void OnObjectInteraction(Player player, ObjectBase obj)
+        {
+            if (player == null) return;
+            if (obj is not AchievementTrigger at) return;
+            _achievementsManager.HandleAchievement(at.Id, Triggers.REACHED_AREA);
+        }
+        
         
         public void OnHandleRepair(Bike bike)
         {
@@ -1096,5 +1193,21 @@ namespace BikeWars.Content.screens
         {
 
         }
+        private Chest.ChestItemType? ParseChestItem(string? value)
+        {
+            return value switch
+            {
+                "Energygel" => Chest.ChestItemType.Energygel,
+                "Frelo" => Chest.ChestItemType.Frelo,
+                "Racingbike" => Chest.ChestItemType.Racingbike,
+                "DogFood" => Chest.ChestItemType.DogFood,
+                "DopingSpritze" => Chest.ChestItemType.DopingSpritze,
+                "Beer" => Chest.ChestItemType.Beer,
+                "Flame" => Chest.ChestItemType.Flame,
+                "Ice" => Chest.ChestItemType.Ice,
+                _ => null
+            };
+        }
+
     }
 }

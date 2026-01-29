@@ -11,14 +11,27 @@ public class Chest: ObjectBase
 {
     private bool _open;
     public bool Open => _open;
-    public string? Item { get; private set; }
+    public ChestItemType? Item { get; private set; }
     // private BoxCollider _collisionCollider {get;set;}
     private Texture2D _texClosed;
     private Texture2D _texOpen;
     // public BoxCollider CollisionCollider {get => _collisionCollider; set => _collisionCollider = value; }
     private int PADDING_INTERACTION_AREA = 40;
+    
+    public enum ChestItemType
+    {
+        Energygel,
+        Frelo,
+        Racingbike,
+        DogFood,
+        DopingSpritze,
+        Beer,
+        Flame,
+        Ice
+    }
 
-    public Chest(Vector2 start, Point size, string? item, bool open = false)
+
+    public Chest(Vector2 start, Point size, ChestItemType? item, bool open = false)
     {
         Item = item;
         _open = open;
@@ -105,27 +118,27 @@ public class Chest: ObjectBase
         {
             return SpawnRandomItem(dropPos);
         }
-        else
+        return Item switch
         {
-            return Item switch
-            {
-                "Energygel" => new EnergyGel(dropPos, new Point(32, 32)),
-                "Frelo" => new Frelo(dropPos, new Point(32, 32)),
-                "Racingbike" => new RacingBike(dropPos, new Point(32, 32)),
-                "DogFood" => new DogFood(dropPos, new Point(32, 32)),
-                "DopingSpritze" => new DopingSpritze(dropPos, new Point(32, 32)),
-                "Beer" => new Beer(dropPos, new Point(32, 32)),
-                "Flame" =>  new WeaponItem(
-                    dropPos,
-                    new Point(32, 32),
-                    Player.WeaponType.Flamethrower
-                ),
-                "Ice" => new WeaponItem(
-                    dropPos,
-                    new Point(32, 32),
-                    Player.WeaponType.IceTrail
-                    ),
-            };
-        }
+            ChestItemType.Energygel => new EnergyGel(dropPos, new Point(32, 32)),
+            ChestItemType.Frelo => new Frelo(dropPos, new Point(32, 32)),
+            ChestItemType.Racingbike => new RacingBike(dropPos, new Point(32, 32)),
+            ChestItemType.DogFood => new DogFood(dropPos, new Point(32, 32)),
+            ChestItemType.DopingSpritze => new DopingSpritze(dropPos, new Point(32, 32)),
+            ChestItemType.Beer => new Beer(dropPos, new Point(32, 32)),
+            ChestItemType.Flame => new WeaponItem(
+                dropPos,
+                new Point(32, 32),
+                Player.WeaponType.Flamethrower
+            ),
+            ChestItemType.Ice => new WeaponItem(
+                dropPos,
+                new Point(32, 32),
+                Player.WeaponType.IceTrail
+            ),
+            
+            _ => SpawnRandomItem(dropPos)
+        };
+
     }
 }

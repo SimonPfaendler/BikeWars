@@ -28,7 +28,7 @@ public class LevelUpScreen : MenuScreenBase, IScreen
     public event Action<SkillTree.SkillId> OnOptionSelected;
     public event Action Closed;
 
-    public new event Action<int, IScreen> BtnClicked;
+    // public new event Action<int, IScreen> BtnClicked; reactivate, if needed
 
     public LevelUpScreen(SpriteFont font, string message, AudioService audioService, Viewport vp): base(null, font, vp)
     {

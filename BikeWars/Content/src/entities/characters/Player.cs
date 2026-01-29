@@ -30,6 +30,7 @@ namespace BikeWars.Entities.Characters
         public PlayerMovement movement { get; set; }
         public Bike CurrentBike => movement?.CrtBike;
         private IPlayerInput _input;
+        public bool IsActionPressed(GameAction action) => _input.IsPressed(action);
         private CooldownWithDuration sprint { get; }
         public new Vector2 GazeDirection { get; private set; }
         public int XpCounter { get; private set; } = 0;
@@ -422,6 +423,12 @@ namespace BikeWars.Entities.Characters
             _isThrowTargetInRange = Vector2.Distance(throwOrigin, _mouseWorldPos) <= ThrowRange;
             UpdateAttackCooldown(gameTime);
             UpdateMountTimer(gameTime);
+            if (IsDying)
+            {
+                UpdateDyingState(gameTime);
+                UpdateCollider();
+                return;
+            }
 
             if (_dopingTimer > 0f)
             {
@@ -511,16 +518,26 @@ namespace BikeWars.Entities.Characters
             if (_currentAnimation == null)
                 return;
 
+            // Dying Animation
+            float rotationOffset = IsDying ? MathHelper.PiOver2 : 0f;
+            Color drawColor = Color.White;
+
+            if (IsDying)
+            {
+                float dyingProgress = 1f - (DyingTimer / DyingDuration);
+                drawColor = Color.Lerp(Color.White, Color.Red, dyingProgress);
+            }
+
             if (movement.CurrentMovement.GetType() ==
                 typeof(WalkingMovement)) // TODO THIS IS ONLY INSERTED TO SHOW. BUT NOT GOOD!
             {
                 _currentAnimation.Draw(spriteBatch, RenderTransform.Position, RenderTransform.Size,
-                    movement.CurrentMovement.Rotation, _renderScale);
+                    movement.CurrentMovement.Rotation + rotationOffset, _renderScale, drawColor);
             }
             else
             {
                 _currentAnimation.Draw(spriteBatch, RenderTransform.Position, RenderTransform.Size,
-                    movement.CurrentMovement.Rotation + MathHelper.PiOver2, _renderScale);
+                    movement.CurrentMovement.Rotation + MathHelper.PiOver2 + rotationOffset, _renderScale, drawColor);
             }
 
             // Draw line from eye position only if GazeDirection is valid (non-zero)
@@ -658,10 +675,18 @@ namespace BikeWars.Entities.Characters
             }
             else if (skill is SkillTree.SkillId.WeaponGun)
             {
+                if (_unlockedWeapons.TryGetValue(WeaponType.Gun, out var weaponAttributes))
+                {
+                    return;
+                }
                 _unlockedWeapons.Add(WeaponType.Gun, new GunStatics(2, this));
             }
             else if (skill is SkillTree.SkillId.WeaponBanana)
             {
+                if (_unlockedWeapons.TryGetValue(WeaponType.BananaThrow, out var weaponAttributes))
+                {
+                    return;
+                }
                 WeaponAttributes wp = new WeaponAttributes();
                 wp.Level = 1;
                 wp.Owner = this;
@@ -669,6 +694,10 @@ namespace BikeWars.Entities.Characters
             }
             else if (skill is SkillTree.SkillId.WeaponBottle)
             {
+                if (_unlockedWeapons.TryGetValue(WeaponType.BottleThrow, out var weaponAttributes))
+                {
+                    return;
+                }
                 WeaponAttributes wp = new WeaponAttributes();
                 wp.Level = 1;
                 wp.Owner = this;

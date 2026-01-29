@@ -61,6 +61,9 @@ public class GameObjectManager
 
     public ContentManager _contentManager {get; set;} // TODO do we need this one?
 
+    private float _reviveCooldownTimer = 0f;
+    private const float REVIVE_COOLDOWN = 60f;
+
     private WorldAudioManager? _worldAudioManager;
     public GameObjectManager(ContentManager content, Player? player1, Player? player2)
     {
@@ -101,7 +104,27 @@ public class GameObjectManager
             Player2.ThrowBottle += target => OnPlayerThrowBottle(Player2, target);
             Player2.ThrowBeer += target => OnPlayerThrowBeer(Player2, target);
             Player2.OnTookDamage += HandleTookDamage;
+            if (Player1 != null)
+            {
+                Player1.CanRevive = true;
+            }
             Player2.Attributes.OnDied += HandlePlayerDied;
+        }
+    }
+
+    private void HandleRevival()
+    {
+        if (Player1 != null && Player2 != null)
+        {
+            float reviveDistance = 100f;
+            if (Player1.IsDying && Player2.IsActionPressed(GameAction.REVIVE))
+            {
+                if (_reviveCooldownTimer <= 0f && Vector2.Distance(Player2.Transform.Position, Player1.Transform.Position) < reviveDistance)
+                {
+                    Player1.Revive();
+                    _reviveCooldownTimer = REVIVE_COOLDOWN;
+                }
+            }
         }
     }
     public void AddTower(Tower tower)
@@ -185,7 +208,6 @@ public class GameObjectManager
     public void AddObject(ObjectBase obj)
     {
         _objects.Add(obj);
-
         if (obj.CollisionCollider != null)
             Statics.Add(obj.CollisionCollider);
     }
@@ -225,8 +247,8 @@ public class GameObjectManager
     public void Draw(SpriteBatch spriteBatch)
     {
 
-        if (Player1 != null) Player1.Draw(spriteBatch);
-        if (Player2 != null) Player2.Draw(spriteBatch);
+        if (Player1 != null && !Player1.IsDead) Player1.Draw(spriteBatch);
+        if (Player2 != null && !Player2.IsDead) Player2.Draw(spriteBatch);
         foreach (CharacterBase c in Characters)
         {
             c.Draw(spriteBatch);
@@ -270,8 +292,8 @@ public class GameObjectManager
 
     public void Update(GameTime gameTime, Vector2 mouseWorldPos)
     {
-        if (Player1 != null) Player1.Update(gameTime, mouseWorldPos);
-        if (Player2 != null) Player2.Update(gameTime, mouseWorldPos);
+        if (Player1 != null && !Player1.IsDead) Player1.Update(gameTime, mouseWorldPos);
+        if (Player2 != null && !Player2.IsDead) Player2.Update(gameTime, mouseWorldPos);
         foreach (CharacterBase c in Characters)
         {
             if (c.Movement != null && Player1 != null)
@@ -367,7 +389,13 @@ public class GameObjectManager
             _damageAggregationTimer = AggregationInterval;
         }
 
+        if (_reviveCooldownTimer > 0f)
+        {
+            _reviveCooldownTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+        }
+
         DogBowl.UpdateBowl(gameTime);
+        HandleRevival();
     }
 
     private void OnPlayerShotBullet(Player player)
@@ -685,8 +713,11 @@ public class GameObjectManager
         var start = new Vector2(spawn.Rect.X, spawn.Rect.Y);
         var size  = new Point(spawn.Rect.Width, spawn.Rect.Height);
 
+        if (!spawn.Properties.ContainsKey("type"))
+        {
+            return null;
+        }
         string type = spawn.Properties["type"];
-
         return type switch
         {
             "tower" => new TowerAlly(start, size),
@@ -699,17 +730,38 @@ public class GameObjectManager
         var start = new Vector2(spawn.Rect.X, spawn.Rect.Y);
         var size  = new Point(spawn.Rect.Width, spawn.Rect.Height);
 
+        if (!spawn.Properties.ContainsKey("type"))
+        {
+            return null;
+        }
         string type = spawn.Properties["type"];
-
         switch (type)
         {
             case "Bike_Shop":
                 return new BikeShop(start, size);
             case "Destructible":
                 return new DestructibleObject(start, size, spawn);
+            case "AchievementTrigger":
+                return new AchievementTrigger(spawn.Name, start, size, spawn); // Name or something like that
             case "chest":
-                spawn.Properties.TryGetValue("item", out string? item);
+            {
+                spawn.Properties.TryGetValue("item", out string? itemString);
+
+                Chest.ChestItemType? item = itemString switch
+                {
+                    "Energygel" => Chest.ChestItemType.Energygel,
+                    "Frelo" => Chest.ChestItemType.Frelo,
+                    "Racingbike" => Chest.ChestItemType.Racingbike,
+                    "DogFood" => Chest.ChestItemType.DogFood,
+                    "DopingSpritze" => Chest.ChestItemType.DopingSpritze,
+                    "Beer" => Chest.ChestItemType.Beer,
+                    "Flame" => Chest.ChestItemType.Flame,
+                    "Ice" => Chest.ChestItemType.Ice,
+                    _ => null
+                };
+
                 return new Chest(start, size, item);
+            }
             case "dog-bowl":
                 return new DogBowl(start, size);
             case "musicians":

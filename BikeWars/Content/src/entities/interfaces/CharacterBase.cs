@@ -26,8 +26,13 @@ public abstract class CharacterBase : ICharacter, ICombat
     private CharacterAttributes _attributes {get;set;}
     public CharacterAttributes Attributes {get => _attributes; set => _attributes = value;}
     private float _attackCooldownTimer = 0f;
-    public bool IsDead => Attributes.Health <= 0;
+    public bool IsDead => Attributes.Health <= 0 && !IsDying; // Dead if 0 HP AND not in dying state
     public bool IsGodMode { get; set; } = false;
+    public bool CanRevive { get; set; } = false;
+    public bool IsDying { get; protected set; } = false;
+    public float DyingTimer { get; protected set; } = 0f;
+    protected const float DyingDuration = 5f;
+
 
     public bool _XpDropped { get; set; } = false; // for making sure each enemy only drops XP once
 
@@ -46,7 +51,7 @@ public abstract class CharacterBase : ICharacter, ICombat
 
     public void ApplyKnockback(Vector2 direction, float force)
     {
-        if (IsGodMode || IsDead) return;
+        if (IsGodMode || IsDead || IsDying) return;
         if (direction != Vector2.Zero)
         {
             direction.Normalize();
@@ -137,9 +142,18 @@ public abstract class CharacterBase : ICharacter, ICombat
 
     public virtual void TakeDamage(int amount, bool shouldSquash = true)
     {
-        if (IsGodMode || IsDead) return;
+        if (IsGodMode || IsDead || IsDying) return;
 
         OnTookDamage?.Invoke(this, amount);
+        // Check if deadly damage
+        if (CanRevive && !IsDying && (Attributes.Health - amount <= 0))
+        {
+            IsDying = true;
+            DyingTimer = DyingDuration;
+            Attributes.SuppressDeathEvent = true;
+            Attributes.Health = 0;
+            return;
+        }
         Attributes.Health -= amount;
         _hitFlashTimer = 0.2f;
 
@@ -148,6 +162,30 @@ public abstract class CharacterBase : ICharacter, ICombat
         {
             TriggerSquash(1.5f, 1.2f);
         }
+    }
+    
+    protected void UpdateDyingState(GameTime gameTime)
+    {
+        if (!IsDying) return;
+
+        DyingTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+        if (DyingTimer <= 0f)
+        {
+            IsDying = false;
+            Attributes.ForceDie();
+        }
+    }
+
+    public void Revive()
+    {
+        if (!IsDying) return;
+
+        IsDying = false;
+        Attributes.SuppressDeathEvent = false;
+        
+        int reviveHealth = (int)(Attributes.MaxHealth * 0.5f);
+        Attributes.Health = reviveHealth;
+        DyingTimer = 0f;
     }
 
     // Explicit interface implementation to satisfy ICombat

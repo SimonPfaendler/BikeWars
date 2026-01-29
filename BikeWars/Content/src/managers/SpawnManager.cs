@@ -108,10 +108,16 @@ namespace BikeWars.Content.managers
 
         public void SpawnTram(float spawnRadius = 5000f)
         {
-            if (_gameObjectManager.Player1 == null) return;
+            List<Player> validPlayers = new List<Player>();
+            if (_gameObjectManager.Player1 != null && !_gameObjectManager.Player1.IsDead) validPlayers.Add(_gameObjectManager.Player1);
+            if (_gameObjectManager.Player2 != null && !_gameObjectManager.Player2.IsDead) validPlayers.Add(_gameObjectManager.Player2);
+
+            if (validPlayers.Count == 0) return;
+
+            Player targetPlayer = validPlayers[RandomUtil.NextInt(0, validPlayers.Count)];
 
             // Spawn far outside the screen
-            Vector2 playerPos = _gameObjectManager.Player1.Transform.Position;
+            Vector2 playerPos = targetPlayer.Transform.Position;
             float angle = (float)(RandomUtil.NextDouble() * Math.PI * 2);
             Vector2 startPos = playerPos + new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * spawnRadius;
 
@@ -119,7 +125,7 @@ namespace BikeWars.Content.managers
             Vector2 targetOffset = new Vector2((float)(RandomUtil.NextDouble() - 0.5) * 10, (float)(RandomUtil.NextDouble() - 0.5) * 10);
             Vector2 targetPos = playerPos + targetOffset;
 
-            Tram tram = new Tram(startPos, targetPos,  _audioService, _gameObjectManager.Player1);
+            Tram tram = new Tram(startPos, targetPos,  _audioService, targetPlayer);
             _gameObjectManager.AddTram(tram);
         }
         private void SpawnSwarm(double progress)
