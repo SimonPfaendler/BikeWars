@@ -741,8 +741,24 @@ public class GameObjectManager
             case "AchievementTrigger":
                 return new AchievementTrigger(spawn.Name, start, size, spawn); // Name or something like that
             case "chest":
-                spawn.Properties.TryGetValue("item", out string? item);
+            {
+                spawn.Properties.TryGetValue("item", out string? itemString);
+
+                Chest.ChestItemType? item = itemString switch
+                {
+                    "Energygel" => Chest.ChestItemType.Energygel,
+                    "Frelo" => Chest.ChestItemType.Frelo,
+                    "Racingbike" => Chest.ChestItemType.Racingbike,
+                    "DogFood" => Chest.ChestItemType.DogFood,
+                    "DopingSpritze" => Chest.ChestItemType.DopingSpritze,
+                    "Beer" => Chest.ChestItemType.Beer,
+                    "Flame" => Chest.ChestItemType.Flame,
+                    "Ice" => Chest.ChestItemType.Ice,
+                    _ => null
+                };
+
                 return new Chest(start, size, item);
+            }
             case "dog-bowl":
                 return new DogBowl(start, size);
             case "musicians":

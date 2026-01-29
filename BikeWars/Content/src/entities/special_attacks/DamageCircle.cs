@@ -24,9 +24,8 @@ namespace BikeWars.Content.entities.items
 
         private float _frameTime = 0.18f; // How fast the animation runs
         private float _frameTimer = 0f;
-
-        private Player _player;
-        private float _rotation;
+        
+        private const float Rotation = 0f;
         private Vector2 _spritePos;
         
         private readonly Transform _sourceTransform;
@@ -133,7 +132,7 @@ namespace BikeWars.Content.entities.items
                 _spritePos - origin,
                 src,
                 Color.White,
-                _rotation,
+                Rotation,
                 Vector2.Zero, // origin was not defined in original, so keep zero
                 1f,
                 SpriteEffects.None,

@@ -673,7 +673,10 @@ namespace BikeWars.Content.screens
 
                 if (o.Type == SaveLoad.TYPES.CHEST)
                 {
-                    _gameObjectManager.AddObject(new Chest(pos, size, o.Item, o.IsOpen ?? false));
+                    var item = ParseChestItem(o.Item);
+                    _gameObjectManager.AddObject(
+                        new Chest(pos, size, item, o.IsOpen ?? false)
+                    );
                 }
                 else if (o.Type == SaveLoad.TYPES.BIKESHOP)
                 { _gameObjectManager.AddObject(new BikeShop(pos, size));}
@@ -1145,5 +1148,21 @@ namespace BikeWars.Content.screens
         {
 
         }
+        private Chest.ChestItemType? ParseChestItem(string? value)
+        {
+            return value switch
+            {
+                "Energygel" => Chest.ChestItemType.Energygel,
+                "Frelo" => Chest.ChestItemType.Frelo,
+                "Racingbike" => Chest.ChestItemType.Racingbike,
+                "DogFood" => Chest.ChestItemType.DogFood,
+                "DopingSpritze" => Chest.ChestItemType.DopingSpritze,
+                "Beer" => Chest.ChestItemType.Beer,
+                "Flame" => Chest.ChestItemType.Flame,
+                "Ice" => Chest.ChestItemType.Ice,
+                _ => null
+            };
+        }
+
     }
 }
