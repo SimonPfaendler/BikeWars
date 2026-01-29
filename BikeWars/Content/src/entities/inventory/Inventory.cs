@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
+using BikeWars.Content.components;
 using BikeWars.Content.engine;
 using BikeWars.Content.entities.interfaces;
+using BikeWars.Content.entities.items;
+using BikeWars.Content.entities.MapObjects;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -19,6 +22,13 @@ public class Inventory
     {
         if (!item.InventoryItem)
             return false;
+        if (item is Beer beer)
+        {
+            if (beer._isDestroyed)
+            {
+                return false;
+            }
+        }
         for (int i = 0; i < MaxSlots; i++)
         {
             if (_items[i] == null)
@@ -76,6 +86,16 @@ public class Inventory
                 Rectangle iconRect = new Rectangle(x + 4, y + 4, slotSize - 8, slotSize - 8);
                 spriteBatch.Draw(item.CurrentTex, iconRect, Color.White);
             }
+            if (item is Beer && !Beer.Ready)
+            {
+                int timeLeft = Beer.RemainingTotalSeconds;
+                DrawTimer(spriteBatch, timeLeft, slotRect);
+            }
+            if (item is DogFood && !DogBowl.Ready)
+            {
+                int timeLeft = DogBowl.RemainingTotalSeconds;
+                DrawTimer(spriteBatch, timeLeft, slotRect);
+            }
             if (showSelection && i == selectedInventoryIndex)
             {
                 spriteBatch.Draw(pixel, slotRect, Color.Green * 0.4f);
@@ -123,6 +143,18 @@ public class Inventory
     {
         _invalidSlotIndex = slotindex;
         _invalidSlotTimer = 0.5f;
+    }
+    private void DrawTimer(SpriteBatch spriteBatch, int timeLeft, Rectangle slotRect)
+    {
+        string text = $"{timeLeft}";
+        Vector2 size = UIAssets.DefaultFont.MeasureString(text);
+
+        Vector2 pos = new Vector2(
+            slotRect.Center.X - size.X / 2f,
+            slotRect.Top - size.Y - 2f - 6
+        );
+
+        spriteBatch.DrawString(UIAssets.DefaultFont, text, pos, Color.Red);
     }
 }
 

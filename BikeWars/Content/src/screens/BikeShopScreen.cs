@@ -8,6 +8,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using BikeWars.Content.components;
+using BikeWars.Content.engine.Audio;
+using BikeWars.Content.entities.interfaces;
+
 namespace BikeWars.Content.screens;
 
 public class BikeShopScreen : IScreen
@@ -31,7 +34,11 @@ public class BikeShopScreen : IScreen
 
     public Viewport ViewPort {get;set;}
     public event Action<int, IScreen> BtnClicked;
-    public event Action Repair;
+    public event Action<Bike> Repair;
+    public event Action<Vector2> SpawnFrelo;
+    
+    private BikeShop _shop;
+    public event Action<Vector2> SpawnRacingBike;
 
     private int _selectedOption = 0;
 
@@ -48,7 +55,7 @@ public class BikeShopScreen : IScreen
     {
         IsOpen = true;
         _selectedOption = 0;
-
+        _shop = shop;
         _player = player;
     }
 
@@ -67,49 +74,106 @@ public class BikeShopScreen : IScreen
             Close();
             return;
         }
-
-
+        if (InputHandler.IsPressed(GameAction.UI_UP))
+            _selectedOption = (_selectedOption + 4) % 5; // wie -1
+        else if (InputHandler.IsPressed(GameAction.UI_DOWN))
+            _selectedOption = (_selectedOption + 1) % 5;
+        
         if (ks.IsKeyDown(Keys.D1) || ks.IsKeyDown(Keys.NumPad1))
         {
-            ApplyOption(_option1);
-            Close();
+            if (ApplyOption(_option1))
+            {Close();}
             return;
         }
 
-        if (ks.IsKeyDown(Keys.D2) || ks.IsKeyDown(Keys.NumPad2))
+       else if (ks.IsKeyDown(Keys.D2) || ks.IsKeyDown(Keys.NumPad2))
         {
-            ApplyOption(_option2);
-            Close();
+            if (ApplyOption(_option2))
+            {Close();}
             return;
         }
 
-        if (ks.IsKeyDown(Keys.D3) || ks.IsKeyDown(Keys.NumPad3))
+        else if (ks.IsKeyDown(Keys.D3) || ks.IsKeyDown(Keys.NumPad3))
         {
-            ApplyOption(_option3);
-            Close();
+            if (ApplyOption(_option3))
+            {Close();}
+
+            return;
         }
+        else if (ks.IsKeyDown(Keys.D4) || ks.IsKeyDown(Keys.NumPad4))
+        {
+            if (ApplyOption(_option4))
+            {Close();}
+
+            return;
+        }
+        else if (ks.IsKeyDown(Keys.D5) || ks.IsKeyDown(Keys.NumPad5))
+        {
+            ApplyOption(_option5);
+            Close();
+            return;
+        }
+        if (InputHandler.IsPressed(GameAction.UI_CONFIRM))
+        {
+            ShopOption selected = _selectedOption switch
+            {
+                0 => _option1,
+                1 => _option2,
+                2 => _option3,
+                3 => _option4,
+                _ => _option5
+            };
+
+            if (ApplyOption(selected))
+                Close();
+        };
     }
 
 
-    private void ApplyOption(ShopOption option)
+    private bool ApplyOption(ShopOption option)
     {
-        if (_player == null) return;
+        if (_player == null) return false;
 
         switch (option)
         {
-            //TODO Option don't change anything
             case ShopOption.HealFull:
                 _player.Attributes.Health = _player.Attributes.MaxHealth;
-                break;
+                _shop.SetCooldown(120);
+                return true;
 
             case ShopOption.RepairBike:
-                if (_player.CurrentBike == null) return;
-                Repair?.Invoke();
-                break;
+                if (_player.CurrentBike == null)
+                    return false;
+                if (_player.TrySpendXp(25))
+                {
+                    Bike bike = _player.CurrentBike;
 
+                    Repair?.Invoke(bike);
+                    _shop.SetCooldown(15);
+                    return true;
+                }
+                return false;
+        case ShopOption.BuyFrelo:
+                if (_player.TrySpendXp(25))
+                {
+                    var dropPos = _shop.Transform.Position + new Vector2(50, -50);
+                    SpawnFrelo?.Invoke(dropPos);
+                    _shop.SetCooldown(20);
+                    return true;
+                }
+                return false;
+            case ShopOption.BuyRacingBike:
+                if (_player.TrySpendXp(30))
+                {
+                    var dropPos1 = _shop.Transform.Position + new Vector2(50, -50);
+                    SpawnRacingBike?.Invoke(dropPos1);
+                    _shop.SetCooldown(20);
+                    return true;
+                }
+                return false;
             case ShopOption.Close:
             default:
-                break;
+                return true;
         }
     }
 
@@ -124,7 +188,7 @@ public class BikeShopScreen : IScreen
         sb.Draw(RenderPrimitives.Pixel, new Rectangle(0, 0, screenW, screenH), Color.Black * 0.4f);
 
         int boxW = 400;
-        int boxH = 250;
+        int boxH = 350;
         int boxX = (screenW - boxW) / 2;
         int boxY = (screenH - boxH) / 2;
 
@@ -147,17 +211,23 @@ public class BikeShopScreen : IScreen
         DrawOption(sb, _option1, new Vector2(textX, startOptionY), _selectedOption == 0);
         DrawOption(sb, _option2, new Vector2(textX, startOptionY + optionSpacing), _selectedOption == 1);
         DrawOption(sb, _option3, new Vector2(textX, startOptionY + optionSpacing * 2), _selectedOption == 2);
+        DrawOption(sb, _option4, new Vector2(textX, startOptionY + optionSpacing * 3), _selectedOption == 3);
+        DrawOption(sb, _option5, new Vector2(textX, startOptionY + optionSpacing * 4), _selectedOption == 4);
     }
 
     private void DrawOption(SpriteBatch sb, ShopOption option, Vector2 position, bool selected)
     {
         Color color = selected ? Color.Gold : Color.White;
+        int xp = _player.XpCounter;
 
         string message = option switch
         {
-            ShopOption.HealFull => "Druecke 1: Leben auf Max",
-            ShopOption.RepairBike => "Druecke 2: Fahrrad Leben auf Max",
-            ShopOption.Close => "Druecke 3: Close",
+            ShopOption.HealFull => "Leben auf Max | 120s Cooldown",
+            ShopOption.RepairBike => $"Fahrrad Leben auf Max {xp}Xp/15Xp | 20s Cooldown",
+            ShopOption.BuyFrelo => $"Kaufe ein Rennrad {xp}Xp/25Xp | 20s Cooldown",
+            ShopOption.BuyRacingBike  => $"Kaufe ein Frelo {xp}Xp/30Xp | 20s Cooldown",
+            ShopOption.Close => "Close",
+            
             _ => option.ToString()
         };
 
@@ -172,20 +242,11 @@ public class BikeShopScreen : IScreen
     }
     public bool DrawLower => false;
     public bool UpdateLower => false;
-
-    public void OnEnter()
-    {
-    }
-
-    public void OnExit()
-    {
-    }
-
+    
     public virtual void Dispose()
     {
 
     }
-
     public void OnActivated()
     {
         throw new NotImplementedException();

@@ -295,7 +295,12 @@ namespace BikeWars.Entities.Characters
             if (!_input.IsPressed(GameAction.INTERACT)) return;
             if (obj is BikeShop shop)
             {
-                OnBikeShopOpen?.Invoke(shop);
+                if (shop.ShopReady)
+                {OnBikeShopOpen?.Invoke(shop);}
+                else
+                {
+                    _audio.Sounds.Play(AudioAssets.ShortPain);
+                }
                 return;
             }
 
@@ -429,7 +434,7 @@ namespace BikeWars.Entities.Characters
             {
                 _dopingTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
             }
-
+            Beer.UpdateCooldown(gameTime);
             HandleWeaponSwitch();
             HandleShooting();
             UpdateMovement(gameTime);
@@ -443,7 +448,6 @@ namespace BikeWars.Entities.Characters
             HandleSwitchMovement();
             UpdateHitFlash(gameTime);
             UpdateCollider();
-            Beer.UpdateCooldown(gameTime);
         }
 
         public override bool IsCharacterMoving()
@@ -618,6 +622,20 @@ namespace BikeWars.Entities.Characters
             if (XpCounter >= XpLevelUp)
             {
                 LevelUp();
+            }
+        }
+
+        public bool TrySpendXp(int cost)
+        {
+            if (XpCounter < cost)
+            {
+                _audio.Sounds.Play(AudioAssets.ShortPain);
+                return false;
+            }
+            else
+            {
+                XpCounter -= cost;
+                return true;
             }
         }
 
