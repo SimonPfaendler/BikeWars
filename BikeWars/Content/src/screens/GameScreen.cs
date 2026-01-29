@@ -188,6 +188,8 @@ namespace BikeWars.Content.screens
                 _gameObjectManager.Player1.FoundBike += () => _statisticsManager.HandleFoundBike(_gameTimer.TimePassed());
             }
 
+            _gameObjectManager.OnEneryBarPickedUp += _achievementsManager.OnEnergyBarPickedUp;
+
             _collisionManager = new CollisionManager(CELL_SIZE, worldBounds.Height, _gameObjectManager);
             var players = new HashSet<Player>();
             if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);

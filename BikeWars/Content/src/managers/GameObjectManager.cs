@@ -27,6 +27,7 @@ public class GameObjectManager
     public event Action<Tower>? OnTowerDied;
     public event Action<CharacterBase, int>? OnTookDamage;
     public event Action<Tower, int>? OnTowerTookDamage;
+    public event Action OnEneryBarPickedUp;
     private Player? _player1 {get; set;}
     public Player? Player1{get => _player1; set => _player1 = value;}
     private Player? _player2 {get; set;}
@@ -606,6 +607,7 @@ public class GameObjectManager
         {
             EnergyBar energyBar = new EnergyBar(pos, new Point(16, 16));
             AddItem(energyBar);
+            OnEneryBarPickedUp?.Invoke();
         }
 
         if (RandomUtil.NextDouble() <= 0.05) // 5% chance to drop an energy gel

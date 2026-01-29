@@ -65,6 +65,8 @@ public class AchievementsManager
 
     public int CrtSnackCount = 0;
 
+    private const int SNACK_COUNT = 20;
+
     // For DIABETES
     private bool ate_snacks = false;
     private Dictionary<AchievementIds, Achievement> _achievements;
@@ -167,6 +169,7 @@ public class AchievementsManager
             break;
             case Triggers.ATE_SNACKS:
             ate_snacks = true;
+            CrtSnackCount += 1;
             break;
         }
 
@@ -214,12 +217,16 @@ public class AchievementsManager
             }
             break;
             case AchievementIds.DIABETES:
-            if (ate_snacks)
+            if (ate_snacks && CrtSnackCount >= SNACK_COUNT)
             {
                 SuccededAchievement(id);
             }
             break;
         }
+    }
+    public void OnEnergyBarPickedUp()
+    {
+        HandleAchievement(AchievementIds.DIABETES, Triggers.ATE_SNACKS);
     }
     public void SaveAchievement()
     {
