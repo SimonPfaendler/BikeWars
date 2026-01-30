@@ -659,6 +659,10 @@ namespace BikeWars.Content.screens
                     _audioService.Music.PlayWithFade(AudioAssets.SCHymne, true);
                 }
             }
+            else if (_audioService.Music.CurrentSong == AudioAssets.SCHymne)
+            {
+                _audioService.Music.PlayWithFade(AudioAssets.GameMusic, true);
+            }
         }
 
         // Load here stuff like statistics or options that is not related to the
