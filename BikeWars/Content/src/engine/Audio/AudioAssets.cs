@@ -47,6 +47,10 @@ namespace BikeWars.Content.engine.Audio
         public const string DogHit2 = "dog_hit2";
         public const string OpaShout = "opa_shout";
         public const string Explosion = "explosion";
+        public const string DozentTalk_1 = "dozent_talk_1";
+        public const string DozentTalk_2 = "dozent_talk_2";
+        public const string DozentTalk_3 = "dozent_talk_3";
+        public const string DozentHit = "dozent_hit";
         
         
 
@@ -94,7 +98,11 @@ namespace BikeWars.Content.engine.Audio
             { DogHit1, "assets/sounds/DogHit1" },
             { DogHit2, "assets/sounds/DogHit2" },
             { OpaShout, "assets/sounds/OpaShout" },
-            { Explosion, "assets/sounds/Explosion"}
+            { Explosion, "assets/sounds/Explosion"},
+            { DozentTalk_1, "assets/sounds/DozentTalk_1" },
+            { DozentTalk_2, "assets/sounds/DozentTalk_2" },
+            { DozentTalk_3, "assets/sounds/DozentTalk_3" },
+            { DozentHit, "assets/sounds/DozentHit" },
             
         };
 

@@ -7,6 +7,7 @@ using BikeWars.Utilities;
 using Microsoft.Xna.Framework;
 using BikeWars.Entities;
 using System.Diagnostics.Contracts;
+using BikeWars.Content.entities.npcharacters;
 using BikeWars.Entities.Characters.MapObjects;
 
 namespace BikeWars.Content.managers;
@@ -194,6 +195,11 @@ public class CombatManager
         else if (target is Dog)
         {
             soundArray = DogDeathSounds;
+        }
+        else if (target is Dozent)
+        {
+            _audio.Sounds.Play(AudioAssets.DozentHit);
+            return;
         }
         
         int length = soundArray.Length;
