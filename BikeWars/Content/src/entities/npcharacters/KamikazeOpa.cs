@@ -117,7 +117,7 @@ namespace BikeWars.Entities.Characters
             _explosionSpawned = true;
 
             // 1. Deal Damage to Player
-            var player = _gameObjectManager.Player1;
+            var player = _gameObjectManager.GetTargetPlayer(Transform.Position);
             if (player != null && !player.IsDead)
             {
                 float distSq = Vector2.DistanceSquared(Transform.Position, player.Transform.Position);

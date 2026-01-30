@@ -69,7 +69,13 @@ namespace BikeWars.Entities.Characters
             {
                 em.EnemyPosition = Transform.Position;
                 if (!Beer.BeerIsActive)
-                {em.PlayerPosition = _collisionManager.GameObjectManager.Player1.Transform.Position;}
+                {
+                   Player? target = _collisionManager.GameObjectManager.GetTargetPlayer(Transform.Position);
+                   if (target != null)
+                   {
+                        em.PlayerPosition = target.Transform.Position;
+                   }
+                }
                 else
                 {
                     em.PlayerPosition = Beer.BeerPosition;
@@ -122,24 +128,8 @@ namespace BikeWars.Entities.Characters
             var gom = _collisionManager?.GameObjectManager;
             if (gom != null)
             {
-                Player? p1 = gom.Player1;
-                Player? p2 = gom.Player2;
-                bool p1Valid = p1 != null && !p1.IsDead;
-                bool p2Valid = p2 != null && !p2.IsDead;
-
-                Player? target = null;
-                if (p1Valid && p2Valid)
-                {
-                    target = Random.Shared.Next(2) == 0 ? p1 : p2;
-                }
-                else if (p1Valid)
-                {
-                    target = p1;
-                }
-                else if (p2Valid)
-                {
-                    target = p2;
-                }
+                // Use the new safe helper method
+                Player? target = gom.GetTargetPlayer(Transform.Position);
 
                 if (target != null)
                 {

@@ -87,7 +87,13 @@ namespace BikeWars.Entities.Characters
             {
                 em.EnemyPosition = Transform.Position;
                 if (!DogBowl.BowlIsActive)
-                {em.PlayerPosition = _collisionManager.GameObjectManager.Player1.Transform.Position;}
+                {
+                    Player? target = _collisionManager.GameObjectManager.GetTargetPlayer(Transform.Position);
+                    if (target != null)
+                    {
+                         em.PlayerPosition = target.Transform.Position;
+                    }
+                }
                 else
                 {
                     em.PlayerPosition = DogBowl.BowlPosition;

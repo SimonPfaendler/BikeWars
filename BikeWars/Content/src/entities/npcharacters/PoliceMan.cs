@@ -66,8 +66,11 @@ public class PoliceMan: CharacterBase, IWorldAudioAware
             if (Movement is EnemyMovement em)
             {
                 em.EnemyPosition = Transform.Position;
-                em.PlayerPosition = _collisionManager.GameObjectManager.Player1.Transform.Position;
-
+                Player? target = _collisionManager.GameObjectManager.GetTargetPlayer(Transform.Position);
+                if (target != null)
+                {
+                     em.PlayerPosition = target.Transform.Position;
+                }
             }
             Movement.HandleMovement(gameTime);
             HandleSound(Movement.IsMoving);

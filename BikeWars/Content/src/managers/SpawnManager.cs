@@ -258,11 +258,12 @@ namespace BikeWars.Content.managers
             }
             return false;
         }
-
+        
         // spawn the rave group
         private void SpawnCircle(double progress)
         {
-            if (_gameObjectManager.Player1 == null) return;
+            Player? target = _gameObjectManager.GetTargetPlayer(Vector2.Zero);
+            if (target == null) return;
 
             int count = 12 + (int)(progress * 10); // 12..22
             float startRadius = 100f;
@@ -299,8 +300,9 @@ namespace BikeWars.Content.managers
             float difficultyMultiplier = 1.0f + (2.0f * (float)progress);
             float speedMultiplier = 1.0f + (0.5f * (float)progress);
 
-            if (_gameObjectManager.Player1 == null) return;
-            Vector2 center = _gameObjectManager.Player1.Transform.Position;
+            Player? target = _gameObjectManager.GetTargetPlayer(Vector2.Zero);
+            if (target == null) return;
+            Vector2 center = target.Transform.Position;
 
             for (int i = 0; i < count; i++)
             {
@@ -318,9 +320,10 @@ namespace BikeWars.Content.managers
 
         private Vector2 GetRandomSpawnPosition()
         {
-            if (_gameObjectManager.Player1 == null) return Vector2.Zero;
+            Player? target = _gameObjectManager.GetTargetPlayer(Vector2.Zero);
+            if (target == null) return Vector2.Zero;
 
-            Vector2 playerPos = _gameObjectManager.Player1.Transform.Position;
+            Vector2 playerPos = target.Transform.Position;
 
             for (int i = 0; i < 20; i++) // Try 20 times to find a valid position
             {

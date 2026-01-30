@@ -195,7 +195,28 @@ public class GameObjectManager
     private void HandlePlayerDied(CharacterBase ch)
     {
         OnCharacterDied?.Invoke(ch);
+        if (ch == Player1) Player1 = null;
+        if (ch == Player2) Player2 = null;
     }
+
+    public Player? GetTargetPlayer(Vector2 enemyPosition)
+    {
+        bool p1Alive = Player1 != null && !Player1.IsDead;
+        bool p2Alive = Player2 != null && !Player2.IsDead;
+
+        if (p1Alive && p2Alive)
+        {
+            float d1 = Vector2.DistanceSquared(enemyPosition, Player1!.Transform.Position);
+            float d2 = Vector2.DistanceSquared(enemyPosition, Player2!.Transform.Position);
+            return d1 < d2 ? Player1 : Player2;
+        }
+
+        if (p1Alive) return Player1;
+        if (p2Alive) return Player2;
+
+        return null;
+    }
+
     private void HandleTowerTookDamage(Tower t, int amount)
     {
         OnTowerTookDamage?.Invoke(t, amount);
@@ -296,9 +317,10 @@ public class GameObjectManager
         if (Player2 != null && !Player2.IsDead) Player2.Update(gameTime, mouseWorldPos);
         foreach (CharacterBase c in Characters)
         {
-            if (c.Movement != null && Player1 != null)
+            Player? target = GetTargetPlayer(c.Transform.Position);
+            if (c.Movement != null && target != null)
             {
-                c.Movement.PlayerPosition = Player1.Transform.Position;
+                c.Movement.PlayerPosition = target.Transform.Position;
                 c.Movement.EnemyPosition = c.Transform.Position;
             }
             c.Update(gameTime);
