@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using BikeWars.Content.components;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework;
@@ -20,6 +21,7 @@ using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.entities.MapObjects;
 using BikeWars.Entities.Characters.MapObjects;
 using BikeWars.Entities;
+using MonoGame.Extended.Tiled;
 
 namespace BikeWars.Content.screens
 {
@@ -100,6 +102,7 @@ namespace BikeWars.Content.screens
         private readonly GameMode _gameMode;
         public GameMode GameMode => _gameMode;
         public bool IsMultiplayer => _gameMode == GameMode.MultiPlayer; // might be helpful later
+        private Rectangle _stadiumBounds;
 
         private float _hitStopTimer = 0f;
 
@@ -327,6 +330,19 @@ namespace BikeWars.Content.screens
                 InitializeTimer();
             }
             ApplyInputSettings();
+            // get stadium positions
+            var stadiumObj = _collisionManager.TiledMap.GetLayer<TiledMapObjectLayer>("Destructibles")
+                ?.Objects.FirstOrDefault(o => o.Name == "sc");
+            
+            if (stadiumObj != null)
+            {
+                _stadiumBounds = new Rectangle(
+                    (int)stadiumObj.Position.X, 
+                    (int)stadiumObj.Position.Y, 
+                    (int)stadiumObj.Size.Width, 
+                    (int)stadiumObj.Size.Height
+                );
+            }
         }
         public virtual void Update(GameTime gameTime)
         {
@@ -612,6 +628,43 @@ namespace BikeWars.Content.screens
                 }
             }
             ApplyInputSettings();
+            
+            bool playerNearStadium = false;
+            float stadiumTriggerDistance = 800f;
+
+            if (_gameObjectManager.Player1 != null)
+            {
+                float dist = Vector2.Distance(_gameObjectManager.Player1.Transform.Position, 
+                    new Vector2(_stadiumBounds.Center.X, _stadiumBounds.Center.Y));
+    
+                if (dist < stadiumTriggerDistance)
+                {
+                    playerNearStadium = true;
+                }
+            }
+            if (_gameObjectManager.Player2 != null)
+            {
+                float dist = Vector2.Distance(_gameObjectManager.Player2.Transform.Position, 
+                    new Vector2(_stadiumBounds.Center.X, _stadiumBounds.Center.Y));
+    
+                if (dist < stadiumTriggerDistance)
+                {
+                    playerNearStadium = true;
+                }
+            }
+            
+            // only activate stadium music, if player isn't near musicians
+            if (playerNearStadium && !playerNearMusicians)
+            {
+                if (_audioService.Music.CurrentSong != AudioAssets.SCHymne)
+                {
+                    _audioService.Music.PlayWithFade(AudioAssets.SCHymne, true);
+                }
+            }
+            else if (_audioService.Music.CurrentSong == AudioAssets.SCHymne)
+            {
+                _audioService.Music.PlayWithFade(AudioAssets.GameMusic, true);
+            }
         }
 
         // Load here stuff like statistics or options that is not related to the

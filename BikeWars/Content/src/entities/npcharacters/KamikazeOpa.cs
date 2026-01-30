@@ -28,6 +28,9 @@ namespace BikeWars.Entities.Characters
 
         private readonly GameObjectManager _gameObjectManager;
         private readonly RepathScheduler _repathScheduler;
+        
+        private float _talkTimer = 3f;
+        private const float TALK_INTERVAL = 5f;
 
         protected override string WalkingSound => AudioAssets.Walking;
 
@@ -66,6 +69,15 @@ namespace BikeWars.Entities.Characters
             UpdateAttackCooldown(gameTime);
             UpdateKnockback(gameTime);
             UpdateHitFlash(gameTime);
+            
+            _talkTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            if (_talkTimer >= TALK_INTERVAL)
+            {
+                _talkTimer = 0f;
+
+                PlayTalkWithWorldAudio();
+            }
 
             Movement.HandleMovement(gameTime);
             HandleSound(Movement.IsMoving);
@@ -126,6 +138,7 @@ namespace BikeWars.Entities.Characters
                     player.TakeDamage(ExplosionDamage);
                 }
             }
+            _audio.Sounds.Play(AudioAssets.Explosion);
 
             // 2. Spawn XP / Loot (Prevent double drops)
             if (!_XpDropped)
@@ -163,6 +176,20 @@ namespace BikeWars.Entities.Characters
         private void SubscribeToDeath()
         {
             Attributes.OnDied += (c) => SpawnExplosion();
+        }
+        
+        private void PlayTalkWithWorldAudio()
+        {
+            if (_worldAudioManager == null) {
+                return;
+            }
+
+            float volume = _worldAudioManager.GetVolumeFor(Transform.Position);
+
+            if (volume > 0)
+            {
+                _audio.Sounds.Play(AudioAssets.OpaShout);
+            }
         }
     }
 }
