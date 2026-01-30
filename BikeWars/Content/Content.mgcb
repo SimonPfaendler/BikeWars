@@ -388,6 +388,30 @@
 /processorParam:Quality=Best
 /build:assets/sounds/Bike_Driving.mp3
 
+#begin assets/sounds/BikeThiefHit1.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/BikeThiefHit1.mp3
+
+#begin assets/sounds/BikeThiefHit2.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/BikeThiefHit2.mp3
+
+#begin assets/sounds/BikeThiefLaugh.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/BikeThiefLaugh.mp3
+
+#begin assets/sounds/BikeThiefTalk.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/BikeThiefTalk.mp3
+
 #begin assets/sounds/boxing_punch.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
@@ -417,6 +441,18 @@
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:assets/sounds/damage_circle.wav
+
+#begin assets/sounds/DogHit1.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/DogHit1.mp3
+
+#begin assets/sounds/DogHit2.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/DogHit2.mp3
 
 #begin assets/sounds/Dogs/Bark_Bora.mp3
 /importer:Mp3Importer
@@ -448,6 +484,12 @@
 /processorParam:Quality=Best
 /build:assets/sounds/Dogs/Bark_Giulla.mp3
 
+#begin assets/sounds/Dogs/Bark_Madita.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/Dogs/Bark_Madita.mp3
+
 #begin assets/sounds/Dogs/Bark_Simon_2.mp3
 /importer:Mp3Importer
 /processor:SoundEffectProcessor
@@ -466,6 +508,36 @@
 /processorParam:Quality=Best
 /build:assets/sounds/Dogs/Miau.mp3
 
+#begin assets/sounds/DozentHit.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/DozentHit.mp3
+
+#begin assets/sounds/DozentTalk_1.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/DozentTalk_1.mp3
+
+#begin assets/sounds/DozentTalk_2.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/DozentTalk_2.mp3
+
+#begin assets/sounds/DozentTalk_3.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/DozentTalk_3.mp3
+
+#begin assets/sounds/Explosion.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/Explosion.mp3
+
 #begin assets/sounds/flamethrower.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
@@ -478,11 +550,23 @@
 /processorParam:Quality=Best
 /build:assets/sounds/Game_music.mp3
 
+#begin assets/sounds/Geisterfahrer.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/Geisterfahrer.mp3
+
 #begin assets/sounds/gun_shot.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:assets/sounds/gun_shot.wav
+
+#begin assets/sounds/HaltStop.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/HaltStop.mp3
 
 #begin assets/sounds/HandgunClick.mp3
 /importer:Mp3Importer
@@ -490,11 +574,41 @@
 /processorParam:Quality=Best
 /build:assets/sounds/HandgunClick.mp3
 
+#begin assets/sounds/HoboHit1.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/HoboHit1.mp3
+
+#begin assets/sounds/HoboHit2.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/HoboHit2.mp3
+
+#begin assets/sounds/HoboTalk1.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/HoboTalk1.mp3
+
+#begin assets/sounds/HoboTalk2.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/HoboTalk2.mp3
+
 #begin assets/sounds/ice_trail.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:assets/sounds/ice_trail.wav
+
+#begin assets/sounds/Jaegermeister.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/Jaegermeister.mp3
 
 #begin assets/sounds/LatinMusic.mp3
 /importer:Mp3Importer
@@ -514,6 +628,18 @@
 /processorParam:Quality=Best
 /build:assets/sounds/Metal.mp3
 
+#begin assets/sounds/OpaShout.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/OpaShout.mp3
+
+#begin assets/sounds/PolizistHit.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/PolizistHit.mp3
+
 #begin assets/sounds/raver_audio.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
@@ -525,6 +651,12 @@
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:assets/sounds/Relief.mp3
+
+#begin assets/sounds/SCHymne.mp3
+/importer:Mp3Importer
+/processor:SongProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/SCHymne.mp3
 
 #begin assets/sounds/short_pain.wav
 /importer:WavImporter

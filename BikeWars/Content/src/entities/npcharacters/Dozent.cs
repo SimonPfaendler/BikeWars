@@ -6,6 +6,7 @@ using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.managers;
 using BikeWars.Entities.Characters;
+using BikeWars.Utilities;
 
 namespace BikeWars.Content.entities.npcharacters;
 
@@ -25,6 +26,15 @@ public class Dozent: CharacterBase, IWorldAudioAware
         private const float AttackAnimationDuration = 2f;
 
         protected override string WalkingSound => AudioAssets.Walking;
+        
+        private float _talkTimer = 0f;
+        private const float TALK_INTERVAL = 7.5f;
+        
+        private static readonly string[] TalkSounds = {
+            AudioAssets.DozentTalk_1,
+            AudioAssets.DozentTalk_2,
+            AudioAssets.DozentTalk_3,
+        };
 
 
         public Dozent(Vector2 start, float size, AudioService audio, PathFinding pathFinding,
@@ -67,6 +77,16 @@ public class Dozent: CharacterBase, IWorldAudioAware
                 }
 
             }
+            
+            _talkTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            if (_talkTimer >= TALK_INTERVAL)
+            {
+                _talkTimer = 0f;
+
+                PlayTalkWithWorldAudio();
+            }
+            
             Movement.HandleMovement(gameTime);
             HandleSound(Movement.IsMoving);
             LastTransform = new Transform(Transform.Position, Transform.Size);
@@ -140,5 +160,21 @@ public class Dozent: CharacterBase, IWorldAudioAware
             _audio.Sounds.Play(AudioAssets.Punch);
             _attackAnimationTimer = AttackAnimationDuration;
             _currentAnimation = _idleAnimation;
+        }
+        private void PlayTalkWithWorldAudio()
+        {
+            if (_worldAudioManager == null) {
+                return;
+            }
+
+            float volume = _worldAudioManager.GetVolumeFor(Transform.Position);
+
+            if (volume > 0)
+            {
+                int index = RandomUtil.NextInt(0, TalkSounds.Length);
+                string randomTalk = TalkSounds[index];
+
+                _audio.Sounds.Play(randomTalk);
+            }
         }
 }
