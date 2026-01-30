@@ -201,6 +201,11 @@ public class CombatManager
             _audio.Sounds.Play(AudioAssets.DozentHit);
             return;
         }
+        else if (target is PoliceMan)
+        {
+            _audio.Sounds.Play(AudioAssets.PolizistHit);
+            return;
+        }
         
         int length = soundArray.Length;
         if (length == 0)
