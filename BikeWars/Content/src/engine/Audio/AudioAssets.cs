@@ -53,6 +53,10 @@ namespace BikeWars.Content.engine.Audio
         public const string DozentHit = "dozent_hit";
         public const string PolizistHit = "polizist_hit";
         public const string Jaegermeister = "jaegermeister";
+        public const string HoboTalk1 = "hobo_talk_1";
+        public const string HoboTalk2 = "hobo_talk_2";
+        public const string HoboHit1 = "hobo_hit_1";
+        public const string HoboHit2 = "hobo_hit_2";
         
         
 
@@ -107,6 +111,10 @@ namespace BikeWars.Content.engine.Audio
             { DozentHit, "assets/sounds/DozentHit" },
             { PolizistHit, "assets/sounds/PolizistHit" },
             { Jaegermeister, "assets/sounds/Jaegermeister" },
+            { HoboTalk1, "assets/sounds/HoboTalk1"},
+            { HoboTalk2, "assets/sounds/HoboTalk2"},
+            { HoboHit1, "assets/sounds/HoboHit1"},
+            { HoboHit2, "assets/sounds/HoboHit2"}
             
         };
 

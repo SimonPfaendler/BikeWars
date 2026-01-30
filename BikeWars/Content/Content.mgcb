@@ -574,6 +574,30 @@
 /processorParam:Quality=Best
 /build:assets/sounds/HandgunClick.mp3
 
+#begin assets/sounds/HoboHit1.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/HoboHit1.mp3
+
+#begin assets/sounds/HoboHit2.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/HoboHit2.mp3
+
+#begin assets/sounds/HoboTalk1.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/HoboTalk1.mp3
+
+#begin assets/sounds/HoboTalk2.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/HoboTalk2.mp3
+
 #begin assets/sounds/ice_trail.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor

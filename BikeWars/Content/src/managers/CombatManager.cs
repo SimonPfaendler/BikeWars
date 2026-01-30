@@ -30,6 +30,10 @@ public class CombatManager
         AudioAssets.DogHit1,
         AudioAssets.DogHit2,
     };
+    private static readonly string[] HoboDeathSounds = {
+        AudioAssets.HoboHit1,
+        AudioAssets.HoboHit2,
+    };
 
     public CombatManager(AudioService audio, GameObjectManager gameObjects)
     {
@@ -205,6 +209,10 @@ public class CombatManager
         {
             _audio.Sounds.Play(AudioAssets.PolizistHit);
             return;
+        }
+        else if (target is Hobo)
+        {
+            soundArray = HoboDeathSounds;
         }
         
         int length = soundArray.Length;
