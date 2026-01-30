@@ -5,6 +5,7 @@ using BikeWars.Content.engine.Audio;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.managers;
+using BikeWars.Utilities;
 
 namespace BikeWars.Entities.Characters
 {
@@ -19,6 +20,13 @@ namespace BikeWars.Entities.Characters
         private readonly PathFinding _pathFinding;
         private readonly CollisionManager _collisionManager;
         private readonly RepathScheduler _repathScheduler;
+        private float _talkTimer = 0f;
+        private const float TALK_INTERVAL = 7.5f;
+        
+        private static readonly string[] TalkSounds = {
+            AudioAssets.BikeThiefLaugh,
+            AudioAssets.BikeThiefTalk,
+        };
 
         public BikeThief(Vector2 start, float size, AudioService audio, PathFinding pathFinding,
             CollisionManager collisionManager, RepathScheduler repathScheduler)
@@ -50,6 +58,15 @@ namespace BikeWars.Entities.Characters
                 em.PlayerPosition = _collisionManager.GameObjectManager.Player1.Transform.Position;
             }
             Movement.HandleMovement(gameTime);
+            
+            _talkTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            if (_talkTimer >= TALK_INTERVAL)
+            {
+                _talkTimer = 0f;
+
+                PlayTalkWithWorldAudio();
+            }
 
             UpdateAttackCooldown(gameTime);
             UpdateKnockback(gameTime);
@@ -126,6 +143,23 @@ namespace BikeWars.Entities.Characters
             if (!CanAttack()) return;
             base.Attack(target);
             _audio.Sounds.Play(AudioAssets.Punch);
+        }
+        
+        private void PlayTalkWithWorldAudio()
+        {
+            if (_worldAudioManager == null) {
+                return;
+            }
+
+            float volume = _worldAudioManager.GetVolumeFor(Transform.Position);
+
+            if (volume > 0)
+            {
+                int index = RandomUtil.NextInt(0, TalkSounds.Length);
+                string randomTalk = TalkSounds[index];
+
+                _audio.Sounds.Play(randomTalk);
+            }
         }
     }
 }

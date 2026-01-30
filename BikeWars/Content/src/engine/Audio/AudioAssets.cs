@@ -39,6 +39,11 @@ namespace BikeWars.Content.engine.Audio
         public const string ThrowObject = "throw_object";
         public const string Geisterfahrer = "geisterfahrer";
         public const string HaltStop = "halt_stop";
+        public const string BikeThiefHit1 = "bike_thief_hit1";
+        public const string BikeThiefHit2 = "bike_thief_hit2";
+        public const string BikeThiefTalk =  "bike_thief_talk";
+        public const string BikeThiefLaugh = "bike_thief_laugh";
+        
         
 
         // Mapping ID -> Content-Path
@@ -78,6 +83,10 @@ namespace BikeWars.Content.engine.Audio
             { ThrowObject, "assets/sounds/throw_object" },
             { Geisterfahrer, "assets/sounds/Geisterfahrer" },
             { HaltStop, "assets/sounds/HaltStop" },
+            { BikeThiefHit1, "assets/sounds/BikeThiefHit1" },
+            { BikeThiefHit2, "assets/sounds/BikeThiefHit2" },
+            { BikeThiefTalk, "assets/sounds/BikeThiefTalk" },
+            { BikeThiefLaugh, "assets/sounds/BikeThiefLaugh" },
             
         };
 

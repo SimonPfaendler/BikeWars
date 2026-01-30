@@ -20,6 +20,11 @@ public class CombatManager
     private readonly GameObjectManager _gameObjects; // used for spawning items
     public event Action<float> OnHitStopRequested;
     public event Action<float, float> OnScreenShakeRequested;
+    
+    private static readonly string[] ThiefDeathSounds = {
+        AudioAssets.BikeThiefHit1,
+        AudioAssets.BikeThiefHit2,
+    };
 
     public CombatManager(AudioService audio, GameObjectManager gameObjects)
     {
@@ -31,6 +36,10 @@ public class CombatManager
     {
         if (target._XpDropped)
             return;
+        if (target is BikeThief)
+        {
+            PlayDeathSound(target);
+        }
 
         target._XpDropped = true;
         _gameObjects.SpawnXp(target);
@@ -170,6 +179,26 @@ public class CombatManager
     {
         var bounds = destructible.Transform.Bounds;
         return new Vector2(bounds.Center.X, bounds.Center.Y);
+    }
+
+    private void PlayDeathSound(CharacterBase target)
+    {
+        string[] soundArray = [];
+        if (target is BikeThief)
+        {
+            soundArray = ThiefDeathSounds;
+        }
+        
+        int length = soundArray.Length;
+        if (length == 0)
+        {
+            return;
+        }
+        int index = RandomUtil.NextInt(0, length);
+        string randomTalk = soundArray[index];
+
+        _audio.Sounds.Play(randomTalk);
+        
     }
 }
 

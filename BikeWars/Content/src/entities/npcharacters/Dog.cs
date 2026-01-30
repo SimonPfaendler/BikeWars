@@ -32,7 +32,7 @@ namespace BikeWars.Entities.Characters
         // public static Texture2D Pixel => _pixel;
 
         private float _barkTimer = 0f;
-        private const float BARK_INTERVAL = 2.0f;
+        private const float BARK_INTERVAL = 4.0f;
 
         private static readonly string[] BarkSounds = {
             AudioAssets.BarkBora,

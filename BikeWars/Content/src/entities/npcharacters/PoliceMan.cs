@@ -170,9 +170,9 @@ public class PoliceMan: CharacterBase, IWorldAudioAware
             if (volume > 0)
             {
                 int index = RandomUtil.NextInt(0, TalkSounds.Length);
-                string randomBark = TalkSounds[index];
+                string randomTalk = TalkSounds[index];
 
-                _audio.Sounds.Play(randomBark);
+                _audio.Sounds.Play(randomTalk);
             }
         }
 }
