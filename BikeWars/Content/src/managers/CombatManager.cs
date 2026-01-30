@@ -25,6 +25,10 @@ public class CombatManager
         AudioAssets.BikeThiefHit1,
         AudioAssets.BikeThiefHit2,
     };
+    private static readonly string[] DogDeathSounds = {
+        AudioAssets.DogHit1,
+        AudioAssets.DogHit2,
+    };
 
     public CombatManager(AudioService audio, GameObjectManager gameObjects)
     {
@@ -36,10 +40,9 @@ public class CombatManager
     {
         if (target._XpDropped)
             return;
-        if (target is BikeThief)
-        {
-            PlayDeathSound(target);
-        }
+
+        PlayDeathSound(target);
+
 
         target._XpDropped = true;
         _gameObjects.SpawnXp(target);
@@ -187,6 +190,10 @@ public class CombatManager
         if (target is BikeThief)
         {
             soundArray = ThiefDeathSounds;
+        }
+        else if (target is Dog)
+        {
+            soundArray = DogDeathSounds;
         }
         
         int length = soundArray.Length;

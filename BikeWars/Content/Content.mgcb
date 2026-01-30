@@ -442,6 +442,18 @@
 /processorParam:Quality=Best
 /build:assets/sounds/damage_circle.wav
 
+#begin assets/sounds/DogHit1.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/DogHit1.mp3
+
+#begin assets/sounds/DogHit2.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/DogHit2.mp3
+
 #begin assets/sounds/Dogs/Bark_Bora.mp3
 /importer:Mp3Importer
 /processor:SoundEffectProcessor
@@ -495,6 +507,12 @@
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:assets/sounds/Dogs/Miau.mp3
+
+#begin assets/sounds/Explosion.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/Explosion.mp3
 
 #begin assets/sounds/flamethrower.wav
 /importer:WavImporter
@@ -555,6 +573,12 @@
 /processor:SongProcessor
 /processorParam:Quality=Best
 /build:assets/sounds/Metal.mp3
+
+#begin assets/sounds/OpaShout.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/OpaShout.mp3
 
 #begin assets/sounds/raver_audio.wav
 /importer:WavImporter
