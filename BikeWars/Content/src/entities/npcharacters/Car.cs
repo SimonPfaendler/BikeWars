@@ -28,11 +28,12 @@ namespace BikeWars.Content.entities.npcharacters
         private const float DespawnGrace = 4f;
         private float _offRoadTimer = 0f;
         
+        // prevents the car from choosing a new direction multiple times in the same tile
         private Point _lastDecisionTile = new Point(int.MinValue, int.MinValue);
         
-        // Tighter road detection - only check directly ahead, not full width
+        // forward road check
         private const int CheckSamplesAhead = 3;
-        private float AheadDistancePx => _collision._cellSize * 1.0f; // Reduced from 1.5
+        private float AheadDistancePx => _collision._cellSize * 1.0f;
         
         public Car(Vector2 startWorldCenter, Point startDir, CollisionManager collision, Random rng)
         {
@@ -63,8 +64,7 @@ namespace BikeWars.Content.entities.npcharacters
             
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
             
-            // IMPORTANT: Snap to center BEFORE choosing direction
-            // This ensures we're perfectly aligned before making decisions
+            // snap to center before choosing direction
             SnapToLaneCenter();
             
             ChooseDirectionIfNeeded(dt);
@@ -91,28 +91,29 @@ namespace BikeWars.Content.entities.npcharacters
             }
         }
         
-        // SNAP (not lerp) to exact lane center - instant correction
+        // snap to exact lane center
         private void SnapToLaneCenter()
         {
             Point gridPos = _collision.WorldToGrid(Transform.Position);
             float cz = _collision._cellSize;
             Vector2 center = new Vector2(gridPos.X * cz + cz / 2f, gridPos.Y * cz + cz / 2f);
             
-            // If moving horizontally, lock Y to center
+            // If moving horizontally, lock y to center
             if (_dir.X != 0) 
             {
                 Transform.Position = new Vector2(Transform.Position.X, center.Y);
             }
-            // If moving vertically, lock X to center
+            // If moving vertically, lock x to center
             else if (_dir.Y != 0)
             {
                 Transform.Position = new Vector2(center.X, Transform.Position.Y);
             }
         }
         
+        // chooses when and where the car should turn
         private void ChooseDirectionIfNeeded(float dt)
         {
-            // Only decide when we enter a new tile
+            // only decide when the car enters a new tile
             Point curTile = _collision.WorldToGrid(Transform.Position);
             if (curTile == _lastDecisionTile) return;
             _lastDecisionTile = curTile;
@@ -129,7 +130,7 @@ namespace BikeWars.Content.entities.npcharacters
             bool validLeft  = IsRealIntersection(left);
             bool validRight = IsRealIntersection(right);
             
-            // 1. DEAD END: Must turn
+            // if there is a dead end the car must turn
             if (!validFront)
             {
                 if (validLeft && validRight)
@@ -138,11 +139,10 @@ namespace BikeWars.Content.entities.npcharacters
                     _dir = left;
                 else if (validRight)
                     _dir = right;
-                // else: nowhere to go, will despawn
                 return; 
             }
             
-            // 2. INTERSECTION: Very small chance to turn (1%)
+            // intersection logic
             if ((validLeft || validRight) && _rng.Next(100) < 1)
             {
                 var turns = new System.Collections.Generic.List<Point>();
@@ -152,10 +152,9 @@ namespace BikeWars.Content.entities.npcharacters
                 if (turns.Count > 0)
                     _dir = turns[_rng.Next(turns.Count)];
             }
-            // else: keep going straight
         }
         
-        // Check if road continues straight ahead (narrow check, not full width)
+        // check if road continues straight ahead 
         private bool CanContinueStraight(Point dir)
         {
             if (dir == Point.Zero) return false;
@@ -163,7 +162,7 @@ namespace BikeWars.Content.entities.npcharacters
             Vector2 fwd = new Vector2(dir.X, dir.Y);
             fwd.Normalize();
 
-            // Check just a few points directly ahead in our lane
+            // check just a few points directly ahead in the cars lane
             for (int i = 1; i <= CheckSamplesAhead; i++)
             {
                 Vector2 checkPos = Transform.Position + fwd * (AheadDistancePx * i / CheckSamplesAhead);
@@ -175,7 +174,7 @@ namespace BikeWars.Content.entities.npcharacters
             return true;
         }
         
-        // Check if there's a real perpendicular intersection
+        // check if there's a real perpendicular intersection
         private bool IsRealIntersection(Point sideDir)
         {
             if (sideDir == Point.Zero) return false;
@@ -183,16 +182,15 @@ namespace BikeWars.Content.entities.npcharacters
             Vector2 perpVec = new Vector2(sideDir.X, sideDir.Y);
             perpVec.Normalize();
             
-            // Check if there's road in the perpendicular direction
-            // Check at 1.5 tiles away (beyond current lane)
+            // check if there's road in the perpendicular direction
             float checkDist = _collision._cellSize * 1.5f;
             Vector2 checkPos = Transform.Position + perpVec * checkDist;
             
-            // Must have road at that perpendicular position
+            // must have road at that perpendicular position
             if (!_collision.IsRoadWorld(checkPos))
                 return false;
             
-            // Also check a bit further to confirm it's a real road, not just edge
+            // check a bit further to confirm it's a real road, not just edge
             Vector2 farCheck = Transform.Position + perpVec * (checkDist * 1.5f);
             return _collision.IsRoadWorld(farCheck);
         }

@@ -221,15 +221,17 @@ public class CollisionManager
         return IsRealRoadGid(gid);
     }
     
+    // checks whether a tile id is one of the allowed road tiles
     private bool IsRealRoadGid(int gid)
     {
         if (gid == 0)
             return false;
 
-        // Explicitly allow ONLY asphalt tiles
+        // Explicitly allow only asphalt tiles
         return gid == 2348 || gid == 2350;
     }
     
+    // converts a world position to grid coordinates and returns that tile’s GID
     public int GetTileGidAtWorld(string layerName, Vector2 worldPos)
     {
         var layer = TiledMap.GetLayer<MonoGame.Extended.Tiled.TiledMapTileLayer>(layerName);
@@ -243,7 +245,7 @@ public class CollisionManager
             return 0;
 
         var tile = layer.GetTile((ushort)g.X, (ushort)g.Y);
-        return tile.GlobalIdentifier; // int
+        return tile.GlobalIdentifier;
     }
 
     

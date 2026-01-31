@@ -201,7 +201,7 @@ namespace BikeWars.Content.managers
             _gameObjectManager.AddTram(tram);
         }
         
-        // car stuff
+        // spawn the car
         private void SpawnCar(double progress)
         {
             // Try to find a valid road spawn position
@@ -225,10 +225,10 @@ namespace BikeWars.Content.managers
             if (spawnPos == Vector2.Zero) return;
             
             var dirs = new[] { 
-                new Point(1, 0),   // East
-                new Point(-1, 0),  // West
-                new Point(0, 1),   // South
-                new Point(0, -1)   // North
+                new Point(1, 0),  
+                new Point(-1, 0),  
+                new Point(0, 1),   
+                new Point(0, -1)   
             };
             var validDirs = new System.Collections.Generic.List<Point>();
             
@@ -238,7 +238,7 @@ namespace BikeWars.Content.managers
                 Point neighbor = new Point(spawnTile.X + d.X, spawnTile.Y + d.Y);
                 if (_collisionManager.IsRoadTile(neighbor))
                 {
-                    // Double-check with world position
+                    // double-check with world position
                     Vector2 neighborWorld = new Vector2(
                         neighbor.X * _collisionManager._cellSize + _collisionManager._cellSize / 2f,
                         neighbor.Y * _collisionManager._cellSize + _collisionManager._cellSize / 2f
@@ -253,8 +253,7 @@ namespace BikeWars.Content.managers
 
             if (validDirs.Count == 0) return;
             
-            // IMPORTANT: Pick the FIRST valid direction instead of random
-            // This makes cars more predictable and flow better
+            // pick the first valid direction 
             Point dir = validDirs[0];
 
             var car = new Car(spawnPos, dir, _collisionManager, _rng);
