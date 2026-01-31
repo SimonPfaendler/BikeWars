@@ -7,6 +7,7 @@ using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.managers;
 using BikeWars.Entities.Characters;
+using BikeWars.Utilities;
 
 namespace BikeWars.Content.entities.npcharacters;
 
@@ -27,6 +28,14 @@ public class PoliceMan: CharacterBase, IWorldAudioAware
         private float _attackAnimationTimer = 0f;
         private const float AttackAnimationDuration = 1f;
         private bool IsAttacking => _attackAnimationTimer > 0f;
+        
+        private float _talkTimer = 0f;
+        private const float TALK_INTERVAL = 5.0f;
+        
+        private static readonly string[] TalkSounds = {
+            AudioAssets.HaltStop,
+            AudioAssets.Geisterfahrer,
+        };
 
 
         protected override string WalkingSound => AudioAssets.Walking;
@@ -59,6 +68,15 @@ public class PoliceMan: CharacterBase, IWorldAudioAware
 
         public override void Update(GameTime gameTime)
         {
+            _talkTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            if (_talkTimer >= TALK_INTERVAL)
+            {
+                _talkTimer = 0f;
+
+                PlayTalkWithWorldAudio();
+            }
+            
             UpdateAttackCooldown(gameTime);
             UpdateKnockback(gameTime);
             UpdateHitFlash(gameTime);
@@ -66,8 +84,11 @@ public class PoliceMan: CharacterBase, IWorldAudioAware
             if (Movement is EnemyMovement em)
             {
                 em.EnemyPosition = Transform.Position;
-                em.PlayerPosition = _collisionManager.GameObjectManager.Player1.Transform.Position;
-
+                Player? target = _collisionManager.GameObjectManager.GetTargetPlayer(Transform.Position);
+                if (target != null)
+                {
+                     em.PlayerPosition = target.Transform.Position;
+                }
             }
             Movement.HandleMovement(gameTime);
             HandleSound(Movement.IsMoving);
@@ -139,6 +160,22 @@ public class PoliceMan: CharacterBase, IWorldAudioAware
             else
             {
                 _currentAnimation = _attackLeftAnimation;
+            }
+        }
+        private void PlayTalkWithWorldAudio()
+        {
+            if (_worldAudioManager == null) {
+                return;
+            }
+
+            float volume = _worldAudioManager.GetVolumeFor(Transform.Position);
+
+            if (volume > 0)
+            {
+                int index = RandomUtil.NextInt(0, TalkSounds.Length);
+                string randomTalk = TalkSounds[index];
+
+                _audio.Sounds.Play(randomTalk);
             }
         }
 }

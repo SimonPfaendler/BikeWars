@@ -9,6 +9,7 @@ using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.entities.items;
 using BikeWars.Content.managers;
+using BikeWars.Utilities;
 
 namespace BikeWars.Entities.Characters
 {
@@ -30,6 +31,14 @@ namespace BikeWars.Entities.Characters
         private float _throwAnimTimer;
 
         protected override string WalkingSound => AudioAssets.Walking;
+        
+        private float _talkTimer = 0f;
+        private const float TALK_INTERVAL = 5.0f;
+        
+        private static readonly string[] TalkSounds = {
+            AudioAssets.HoboTalk1,
+            AudioAssets.HoboTalk2,
+        };
 
         // public Hobo(Vector2 start, Point size, AudioService audio, PathFinding pathFinding,
         //     CollisionManager collisionManager, RepathScheduler repathScheduler)
@@ -63,13 +72,28 @@ namespace BikeWars.Entities.Characters
             UpdateAttackCooldown(gameTime);
             UpdateKnockback(gameTime);
             UpdateHitFlash(gameTime);
+            
+            _talkTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            if (_talkTimer >= TALK_INTERVAL)
+            {
+                _talkTimer = 0f;
+
+                PlayTalkWithWorldAudio();
+            }
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
             // Sound- and Movement-Control
             if (Movement is EnemyMovement em)
             {
                 em.EnemyPosition = Transform.Position;
                 if (!Beer.BeerIsActive)
-                {em.PlayerPosition = _collisionManager.GameObjectManager.Player1.Transform.Position;}
+                {
+                   Player? target = _collisionManager.GameObjectManager.GetTargetPlayer(Transform.Position);
+                   if (target != null)
+                   {
+                        em.PlayerPosition = target.Transform.Position;
+                   }
+                }
                 else
                 {
                     em.PlayerPosition = Beer.BeerPosition;
@@ -122,24 +146,8 @@ namespace BikeWars.Entities.Characters
             var gom = _collisionManager?.GameObjectManager;
             if (gom != null)
             {
-                Player? p1 = gom.Player1;
-                Player? p2 = gom.Player2;
-                bool p1Valid = p1 != null && !p1.IsDead;
-                bool p2Valid = p2 != null && !p2.IsDead;
-
-                Player? target = null;
-                if (p1Valid && p2Valid)
-                {
-                    target = Random.Shared.Next(2) == 0 ? p1 : p2;
-                }
-                else if (p1Valid)
-                {
-                    target = p1;
-                }
-                else if (p2Valid)
-                {
-                    target = p2;
-                }
+                // Use the new safe helper method
+                Player? target = gom.GetTargetPlayer(Transform.Position);
 
                 if (target != null)
                 {
@@ -202,6 +210,23 @@ namespace BikeWars.Entities.Characters
             _throwAnimTimer = SpriteManager.GetAnimationSpeed("Hobo_Throw") * 6; // 6 frames
             _currentAnimation = _throwAnimation;
             ResetAttackCooldown();
+        }
+        
+        private void PlayTalkWithWorldAudio()
+        {
+            if (_worldAudioManager == null) {
+                return;
+            }
+
+            float volume = _worldAudioManager.GetVolumeFor(Transform.Position);
+
+            if (volume > 0)
+            {
+                int index = RandomUtil.NextInt(0, TalkSounds.Length);
+                string randomTalk = TalkSounds[index];
+
+                _audio.Sounds.Play(randomTalk);
+            }
         }
     }
 }

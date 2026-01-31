@@ -224,8 +224,8 @@ public class BikeShopScreen : IScreen
         {
             ShopOption.HealFull => "Leben auf Max | 120s Cooldown",
             ShopOption.RepairBike => $"Fahrrad Leben auf Max {xp}Xp/15Xp | 20s Cooldown",
-            ShopOption.BuyFrelo => $"Kaufe ein Rennrad {xp}Xp/25Xp | 20s Cooldown",
-            ShopOption.BuyRacingBike  => $"Kaufe ein Frelo {xp}Xp/30Xp | 20s Cooldown",
+            ShopOption.BuyFrelo => $"Kaufe ein Frelo {xp}Xp/25Xp | 20s Cooldown",
+            ShopOption.BuyRacingBike  => $"Kaufe ein Rennrad {xp}Xp/30Xp | 20s Cooldown",
             ShopOption.Close => "Close",
             
             _ => option.ToString()

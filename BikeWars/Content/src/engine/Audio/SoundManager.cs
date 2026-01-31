@@ -17,8 +17,8 @@ public class SoundManager
     public float MasterVolume { get; set; } = 1f;
     public float SfxVolume { get; set; } = 1f;
 
-    private const int MaxTotalSounds = 15;
-    private const int MaxPerType = 3;
+    private const int MaxTotalSounds = 6;
+    private const int MaxPerType = 2;
 
     private ContentManager _content;
 

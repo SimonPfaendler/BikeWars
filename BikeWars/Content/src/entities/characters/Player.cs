@@ -204,6 +204,7 @@ namespace BikeWars.Entities.Characters
                         Attributes.AttackCooldown = 0.1f;
                         ThrowBeer?.Invoke(_mouseWorldPos);
                         _audio.Sounds.Play(AudioAssets.ThrowObject);
+                        _audio.Sounds.Play(AudioAssets.Jaegermeister);
                         Inventory.RemoveAt(_inventoryIndexBeer);
                         _beerThrowSelected = false;
                         CurrentWeapon = _weaponBefore;
