@@ -27,8 +27,6 @@ public class AchievementsScreen : MenuScreenBase
     {
         _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
 
-        // var state = SaveLoad.LoadGame();
-        // Achievements = state.Achievements ?? new List<Achievement>();
         Achievements = achievementsManager.createAchievements().Values.ToList();
 
         _achievements = new ScrollBox(

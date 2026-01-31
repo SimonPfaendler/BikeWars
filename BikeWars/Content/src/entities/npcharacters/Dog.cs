@@ -28,11 +28,11 @@ namespace BikeWars.Entities.Characters
         protected override string WalkingSound => AudioAssets.Walking;
 
         // 1x1 Texture to represent the enemy
-        private static Texture2D _pixel;
-        public static Texture2D Pixel => _pixel;
+        // private static Texture2D _pixel; seems like its not needed
+        // public static Texture2D Pixel => _pixel;
 
         private float _barkTimer = 0f;
-        private const float BARK_INTERVAL = 2.0f;
+        private const float BARK_INTERVAL = 4.0f;
 
         private static readonly string[] BarkSounds = {
             AudioAssets.BarkBora,
@@ -43,6 +43,7 @@ namespace BikeWars.Entities.Characters
             AudioAssets.BarkSimon2,
             AudioAssets.BarkFritz,
             AudioAssets.Miau,
+            AudioAssets.BarkMadita
         };
         
         public Dog(Vector2 start, float size, AudioService audio, PathFinding pathFinding,
@@ -87,7 +88,13 @@ namespace BikeWars.Entities.Characters
             {
                 em.EnemyPosition = Transform.Position;
                 if (!DogBowl.BowlIsActive)
-                {em.PlayerPosition = _collisionManager.GameObjectManager.Player1.Transform.Position;}
+                {
+                    Player? target = _collisionManager.GameObjectManager.GetTargetPlayer(Transform.Position);
+                    if (target != null)
+                    {
+                         em.PlayerPosition = target.Transform.Position;
+                    }
+                }
                 else
                 {
                     em.PlayerPosition = DogBowl.BowlPosition;

@@ -7,6 +7,7 @@ using BikeWars.Utilities;
 using Microsoft.Xna.Framework;
 using BikeWars.Entities;
 using System.Diagnostics.Contracts;
+using BikeWars.Content.entities.npcharacters;
 using BikeWars.Entities.Characters.MapObjects;
 
 namespace BikeWars.Content.managers;
@@ -21,6 +22,19 @@ public class CombatManager
     public event Action<float> OnHitStopRequested;
     public event Action<float, float> OnScreenShakeRequested;
 
+    private static readonly string[] ThiefDeathSounds = {
+        AudioAssets.BikeThiefHit1,
+        AudioAssets.BikeThiefHit2,
+    };
+    private static readonly string[] DogDeathSounds = {
+        AudioAssets.DogHit1,
+        AudioAssets.DogHit2,
+    };
+    private static readonly string[] HoboDeathSounds = {
+        AudioAssets.HoboHit1,
+        AudioAssets.HoboHit2,
+    };
+
     public CombatManager(AudioService audio, GameObjectManager gameObjects)
     {
         _audio = audio ?? throw new ArgumentNullException(nameof(audio));
@@ -31,6 +45,9 @@ public class CombatManager
     {
         if (target._XpDropped)
             return;
+
+        PlayDeathSound(target);
+
 
         target._XpDropped = true;
         _gameObjects.SpawnXp(target);
@@ -144,7 +161,7 @@ public class CombatManager
         if (target.IsDead) return;
         if (target.IsGodMode) return;
 
-        target.TakeDamage(10, tram);
+        target.TakeDamage(12, tram);
         _audio.Sounds.Play(AudioAssets.TrainHit);
 
         if (target.Attributes.Health <= 0)
@@ -170,6 +187,44 @@ public class CombatManager
     {
         var bounds = destructible.Transform.Bounds;
         return new Vector2(bounds.Center.X, bounds.Center.Y);
+    }
+
+    private void PlayDeathSound(CharacterBase target)
+    {
+        string[] soundArray = [];
+        if (target is BikeThief)
+        {
+            soundArray = ThiefDeathSounds;
+        }
+        else if (target is Dog)
+        {
+            soundArray = DogDeathSounds;
+        }
+        else if (target is Dozent)
+        {
+            _audio.Sounds.Play(AudioAssets.DozentHit);
+            return;
+        }
+        else if (target is PoliceMan)
+        {
+            _audio.Sounds.Play(AudioAssets.PolizistHit);
+            return;
+        }
+        else if (target is Hobo)
+        {
+            soundArray = HoboDeathSounds;
+        }
+
+        int length = soundArray.Length;
+        if (length == 0)
+        {
+            return;
+        }
+        int index = RandomUtil.NextInt(0, length);
+        string randomTalk = soundArray[index];
+
+        _audio.Sounds.Play(randomTalk);
+
     }
 }
 

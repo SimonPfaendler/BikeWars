@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework;
 namespace BikeWars.Content.engine;
 public class CellData
 {
-    public List<ICollider>? Colliders = null;
+    public List<ICollider> Colliders { get; } = new(8);
 }
 
 public class SpatialHash
@@ -53,7 +53,6 @@ public class SpatialHash
             if (!_cells.TryGetValue(key, out var cell))
             {
                 cell = new CellData();
-                cell.Colliders = new List<ICollider>(8);
                 _cells[key] = cell;
             }
             cell.Colliders.Add(c);
@@ -69,7 +68,6 @@ public class SpatialHash
                 if (!_cells.TryGetValue(key, out var cell))
                 {
                     cell = new CellData();
-                    cell.Colliders = new List<ICollider>(8);
                     _cells[key] = cell;
                 }
                 cell.Colliders.Add(c);
@@ -122,7 +120,7 @@ public class SpatialHash
                 if (!_cells.TryGetValue(key, out var cell))
                     continue;
 
-                foreach (var c in cell.Colliders!)
+                foreach (var c in cell.Colliders)
                 {
                     if (_visited.Add(c))
                         results.Add(c);

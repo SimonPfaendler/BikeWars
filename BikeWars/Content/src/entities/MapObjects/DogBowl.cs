@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.entities.interfaces;
@@ -21,6 +22,9 @@ public class DogBowl: ObjectBase
         new CooldownWithDuration(durationSeconds: 20f, cooldownSeconds: 5f);
 
     public static bool BowlIsActive => _bowlCooldown.IsActive;
+    public static int RemainingTotalSeconds =>
+        (int)Math.Ceiling(_bowlCooldown.RemainingCooldown + _bowlCooldown.RemainingDuration);
+    public static bool Ready => _bowlCooldown.Ready;
     public static Vector2 BowlPosition { get; private set; }
 
     public DogBowl(Vector2 start, Point size, bool full = false)

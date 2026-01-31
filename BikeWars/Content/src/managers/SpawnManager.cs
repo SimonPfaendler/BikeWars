@@ -24,8 +24,10 @@ namespace BikeWars.Content.managers
         private double _timeSinceLastSpawn;
         private double _timeSinceLastSwarm;
         private double _timeSinceLastCircle;
-        private const double SWARM_INTERVAL = 75.0;
-        private const double CIRCLE_SPAWN_INTERVAL = 60.0;
+        private double _timeSinceLastSlowEnemyLinear;
+        private const double SWARM_INTERVAL = 33.0;
+        private const double CIRCLE_SPAWN_INTERVAL = 67.0;
+        private const double SLOW_ENEMY_SPAWN_INTERVAL = 42.0;
 
         private readonly List<ICollider> _spawnQueryBuffer = new(32);
 
@@ -66,6 +68,7 @@ namespace BikeWars.Content.managers
             _timeSinceLastSwarm += elapsed;
             _timeSinceLastCircle += elapsed;
             _timeSinceLastTram += elapsed;
+            _timeSinceLastSlowEnemyLinear += elapsed;
 
             // Update spawn interval based on progression
             // Lerp from start interval to end interval based on time fraction
@@ -106,14 +109,73 @@ namespace BikeWars.Content.managers
                     _raveGroups.RemoveAt(i);
             }
 
+            if (_timeSinceLastSlowEnemyLinear >= SLOW_ENEMY_SPAWN_INTERVAL)
+            {
+                SpawnSlowEnemyLiniear(100, progress);
+                _timeSinceLastSlowEnemyLinear = 0;
+            }
+
+
+        }
+        
+        public void SpawnSlowEnemyLiniear(int count, double progress)
+        {
+            float difficultyMultiplier = 1.0f + (1.2f * (float)progress);
+            float speedMultiplier = 0.5f;
+
+            if (_gameObjectManager.Player1 == null) return;
+            Vector2 center = _gameObjectManager.Player1.Transform.Position;
+
+            float spacing = 50f; // Spacing between enemies
+            Vector2 startPos;
+            Vector2 step;
+
+            if (center.X <= 5600 && center.Y <= 5600) // upper left: line to the left of the player, vertical
+            {
+                startPos = center + new Vector2(-400f, -((count - 1) * spacing) / 2f);
+                step = new Vector2(0, spacing);
+            }
+            else if (center.X <= 5600 && center.Y > 5600) // lower left: line below the player, horizontal
+            {
+                startPos = center + new Vector2(-((count - 1) * spacing) / 2f, 400f);
+                step = new Vector2(spacing, 0);
+            }
+            else if (center.X > 5600 && center.Y > 5600) // lower right: line to the right of the player, vertical
+            {
+                startPos = center + new Vector2(400f, -((count - 1) * spacing) / 2f);
+                step = new Vector2(0, spacing);
+            }
+            else // upper right: line above the player, horizontal
+            {
+                startPos = center + new Vector2(-((count - 1) * spacing) / 2f, -400f);
+                step = new Vector2(spacing, 0);
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                Vector2 pos = startPos + step * i;
+
+                if (!IsValidSpawnPosition(pos)) continue;
+
+                CharacterBase enemy = new Hobo(pos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler);
+
+                ApplyScaling(enemy, difficultyMultiplier, speedMultiplier);
+                _gameObjectManager.AddCharacter(enemy);
+            }
         }
 
         public void SpawnTram(float spawnRadius = 5000f)
         {
-            if (_gameObjectManager.Player1 == null) return;
+            List<Player> validPlayers = new List<Player>();
+            if (_gameObjectManager.Player1 != null && !_gameObjectManager.Player1.IsDead) validPlayers.Add(_gameObjectManager.Player1);
+            if (_gameObjectManager.Player2 != null && !_gameObjectManager.Player2.IsDead) validPlayers.Add(_gameObjectManager.Player2);
+
+            if (validPlayers.Count == 0) return;
+
+            Player targetPlayer = validPlayers[RandomUtil.NextInt(0, validPlayers.Count)];
 
             // Spawn far outside the screen
-            Vector2 playerPos = _gameObjectManager.Player1.Transform.Position;
+            Vector2 playerPos = targetPlayer.Transform.Position;
             float angle = (float)(RandomUtil.NextDouble() * Math.PI * 2);
             Vector2 startPos = playerPos + new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * spawnRadius;
 
@@ -121,16 +183,16 @@ namespace BikeWars.Content.managers
             Vector2 targetOffset = new Vector2((float)(RandomUtil.NextDouble() - 0.5) * 10, (float)(RandomUtil.NextDouble() - 0.5) * 10);
             Vector2 targetPos = playerPos + targetOffset;
 
-            Tram tram = new Tram(startPos, targetPos,  _audioService, _gameObjectManager.Player1);
+            Tram tram = new Tram(startPos, targetPos,  _audioService, targetPlayer);
             _gameObjectManager.AddTram(tram);
         }
         private void SpawnSwarm(double progress)
         {
 
             // Spawn 10-15 Hobos
-            int count = RandomUtil.NextInt(10, 16);
+            int count = RandomUtil.NextInt(20, 40);
 
-            float speedMultiplier = 1.5f + (0.5f * (float)progress); // Start fast, get faster
+            float speedMultiplier = 1f + (0.5f * (float)progress); // Start fast, get faster
             float difficultyMultiplier = 1.0f + (2.0f * (float)progress);
 
             // Spawn them in a cluster
@@ -140,7 +202,7 @@ namespace BikeWars.Content.managers
              for (int i = 0; i < count; i++)
              {
                  // Small random offset from cluster center for each unit
-                 Vector2 offset = new Vector2((float)(RandomUtil.NextDouble() - 0.5) * 100, (float)(RandomUtil.NextDouble() - 0.5) * 100);
+                 Vector2 offset = new Vector2((float)(RandomUtil.NextDouble() - 0.5) * 300, (float)(RandomUtil.NextDouble() - 0.5) * 300);
                  Vector2 spawnPos = clusterCenter + offset;
 
                  if (!IsValidSpawnPosition(spawnPos))
@@ -254,14 +316,15 @@ namespace BikeWars.Content.managers
             }
             return false;
         }
-
+        
         // spawn the rave group
         private void SpawnCircle(double progress)
         {
-            if (_gameObjectManager.Player1 == null) return;
+            Player? target = _gameObjectManager.GetTargetPlayer(Vector2.Zero);
+            if (target == null) return;
 
-            int count = 12 + (int)(progress * 10); // 12..22
-            float startRadius = 100f;
+            int count = 30 + (int)(progress * 30); // 30..60
+            float startRadius = 500f;
 
             // pick a size you want for ravers
             Point raverSize = new Point(32, 32);
@@ -279,7 +342,7 @@ namespace BikeWars.Content.managers
                 gameObjectManager: _gameObjectManager,
                 collisionManager: _collisionManager,
                 shrinkSpeed: 30f,
-                minRadius: 55f,
+                minRadius: 300f,
                 beatInterval: 0.2f
             );
 
@@ -290,36 +353,12 @@ namespace BikeWars.Content.managers
             }
         }
 
-        private void SpawnRCircle(double progress)
-        {
-            int count = 12 + (int)(progress * 10); // 12 to 22 enemies
-            float radius = 300f;
-            float angleStep = (float)(Math.PI * 2 / count);
-            float difficultyMultiplier = 1.0f + (2.0f * (float)progress);
-            float speedMultiplier = 1.0f + (0.5f * (float)progress);
-
-            if (_gameObjectManager.Player1 == null) return;
-            Vector2 center = _gameObjectManager.Player1.Transform.Position;
-
-            for (int i = 0; i < count; i++)
-            {
-                float angle = i * angleStep;
-                Vector2 pos = center + new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * radius;
-
-                if (!IsValidSpawnPosition(pos)) continue;
-
-                CharacterBase enemy = new Hobo(pos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler);
-
-                ApplyScaling(enemy, difficultyMultiplier, speedMultiplier);
-                _gameObjectManager.AddCharacter(enemy);
-            }
-        }
-
         private Vector2 GetRandomSpawnPosition()
         {
-            if (_gameObjectManager.Player1 == null) return Vector2.Zero;
+            Player? target = _gameObjectManager.GetTargetPlayer(Vector2.Zero);
+            if (target == null) return Vector2.Zero;
 
-            Vector2 playerPos = _gameObjectManager.Player1.Transform.Position;
+            Vector2 playerPos = target.Transform.Position;
 
             for (int i = 0; i < 20; i++) // Try 20 times to find a valid position
             {

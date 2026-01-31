@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using BikeWars.Content.managers;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -39,6 +40,7 @@ public class Achievement
     }
 
     private Texture2D _picture { get; set;}
+    [JsonIgnore]
     public Texture2D Picture {
         get => _picture;
         set

@@ -5,7 +5,8 @@ using Microsoft.Xna.Framework.Graphics;
 namespace BikeWars.Content.screens;
 public class AchievementsComponent
 {
-    private static int HEIGHT_OF_COMPONENT = 4 * 20; // Check this in AchievementsScreen. Not optimla but works now
+    public const int HEIGHT_OF_COMPONENT = 4 * 20; // Check this in AchievementsScreen. Not optimla but works now
+    public const int WIDTH_OF_COMPONENT = 500; // Check this in AchievementsScreen. Not optimla but works now
     private const int PADDING = 5;
     public Achievement achievement {get; set;}
     public AchievementsComponent(Achievement a)
@@ -14,8 +15,8 @@ public class AchievementsComponent
     }
     public void Draw(SpriteBatch sb, Texture2D basicTexture, Color overlayColor, Vector2 drawPos, SpriteFont font)
     {
-        if (achievement.Id == 0)return;
-        Rectangle box = new Rectangle((int)drawPos.X, (int)drawPos.Y, 500, HEIGHT_OF_COMPONENT);
+        if (achievement.Id == 0) return;
+        Rectangle box = new Rectangle((int)drawPos.X, (int)drawPos.Y, WIDTH_OF_COMPONENT, HEIGHT_OF_COMPONENT);
         Rectangle pictureBox = new Rectangle((int)drawPos.X, (int)drawPos.Y, 100, HEIGHT_OF_COMPONENT); // Should be on the left side
         sb.Draw(basicTexture, box, overlayColor);
 

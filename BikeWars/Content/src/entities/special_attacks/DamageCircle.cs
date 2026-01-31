@@ -15,7 +15,7 @@ namespace BikeWars.Content.entities.items
     {
         private const string SPRITE_KEY = "DamageCircle";
 
-        private Texture2D _spriteSheet;
+        private Texture2D? _spriteSheet;
 
         private int _frameWidth;
         private int _frameHeight;
@@ -24,9 +24,8 @@ namespace BikeWars.Content.entities.items
 
         private float _frameTime = 0.18f; // How fast the animation runs
         private float _frameTimer = 0f;
-
-        private Player _player;
-        private float _rotation;
+        
+        private const float Rotation = 0f;
         private Vector2 _spritePos;
         
         private readonly Transform _sourceTransform;
@@ -55,7 +54,7 @@ namespace BikeWars.Content.entities.items
             Transform sourceTransform,
             CharacterBase? owner,
             bool damagePlayers = true)
-            : base(owner, damage: 20, duration: 2.0f)
+            : base(owner, damage: 40, duration: 2.0f)
         {
             _sourceTransform = sourceTransform;
             _damagePlayers = damagePlayers;
@@ -119,6 +118,9 @@ namespace BikeWars.Content.entities.items
 
         public override void Draw(SpriteBatch spriteBatch)
         {
+            if (_spriteSheet == null)
+                return;
+            
             Rectangle src = new Rectangle(
                 _currentFrame * _frameWidth,
                 0,
@@ -133,7 +135,7 @@ namespace BikeWars.Content.entities.items
                 _spritePos - origin,
                 src,
                 Color.White,
-                _rotation,
+                Rotation,
                 Vector2.Zero, // origin was not defined in original, so keep zero
                 1f,
                 SpriteEffects.None,

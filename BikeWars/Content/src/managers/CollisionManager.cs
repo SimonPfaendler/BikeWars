@@ -477,11 +477,6 @@ public class CollisionManager
     {
         foreach (ItemBase c in items)
         {
-            if (c is Musicians)
-                continue;
-        }
-        foreach (ItemBase c in items)
-        {
             AddDynamic(c.Collider);
         }
 

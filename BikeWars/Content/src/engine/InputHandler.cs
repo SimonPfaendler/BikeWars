@@ -56,7 +56,8 @@ namespace BikeWars.Content.engine
         UI_BACK,
         INVENTORY_NEXT,
         INVENTORY_PREV,
-        INVENTORY_USE
+        INVENTORY_USE,
+        REVIVE
     }
 
     public enum MouseButton
@@ -226,7 +227,7 @@ namespace BikeWars.Content.engine
             { GameAction.UI_DOWN, new[] { Keys.S, Keys.Down } },
             { GameAction.UI_CONFIRM, new[] { Keys.Enter, Keys.Space } },
             { GameAction.MODE_SWITCH, new[] { Keys.J} },
-
+            { GameAction.REVIVE, new[] { Keys.F } }
         };
         public static Dictionary<GameAction, MouseButton[]> MouseMapping { get; } = new()
         {
@@ -259,7 +260,8 @@ namespace BikeWars.Content.engine
             { GameAction.SHOOT, new[] { Buttons.RightTrigger } },
             { GameAction.INTERACT, new[] { Buttons.A } },
             { GameAction.SWITCH_WEAPON, new[] {Buttons.Y} },
-            { GameAction.SWITCH, new[] {Buttons.X } }
+            { GameAction.SWITCH, new[] {Buttons.X } },
+            { GameAction.REVIVE, new[] {Buttons.B} }
             /* INTERACT should be A not X, but X is already used and I m not sure for what.
              Should be fixed later*/
 

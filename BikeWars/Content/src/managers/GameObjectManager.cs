@@ -61,6 +61,9 @@ public class GameObjectManager
 
     public ContentManager _contentManager {get; set;} // TODO do we need this one?
 
+    private float _reviveCooldownTimer = 0f;
+    private const float REVIVE_COOLDOWN = 60f;
+
     private WorldAudioManager? _worldAudioManager;
     public GameObjectManager(ContentManager content, Player? player1, Player? player2)
     {
@@ -101,7 +104,27 @@ public class GameObjectManager
             Player2.ThrowBottle += target => OnPlayerThrowBottle(Player2, target);
             Player2.ThrowBeer += target => OnPlayerThrowBeer(Player2, target);
             Player2.OnTookDamage += HandleTookDamage;
+            if (Player1 != null)
+            {
+                Player1.CanRevive = true;
+            }
             Player2.Attributes.OnDied += HandlePlayerDied;
+        }
+    }
+
+    private void HandleRevival()
+    {
+        if (Player1 != null && Player2 != null)
+        {
+            float reviveDistance = 100f;
+            if (Player1.IsDying && Player2.IsActionPressed(GameAction.REVIVE))
+            {
+                if (_reviveCooldownTimer <= 0f && Vector2.Distance(Player2.Transform.Position, Player1.Transform.Position) < reviveDistance)
+                {
+                    Player1.Revive();
+                    _reviveCooldownTimer = REVIVE_COOLDOWN;
+                }
+            }
         }
     }
     public void AddTower(Tower tower)
@@ -172,7 +195,28 @@ public class GameObjectManager
     private void HandlePlayerDied(CharacterBase ch)
     {
         OnCharacterDied?.Invoke(ch);
+        if (ch == Player1) Player1 = null;
+        if (ch == Player2) Player2 = null;
     }
+
+    public Player? GetTargetPlayer(Vector2 enemyPosition)
+    {
+        bool p1Alive = Player1 != null && !Player1.IsDead;
+        bool p2Alive = Player2 != null && !Player2.IsDead;
+
+        if (p1Alive && p2Alive)
+        {
+            float d1 = Vector2.DistanceSquared(enemyPosition, Player1!.Transform.Position);
+            float d2 = Vector2.DistanceSquared(enemyPosition, Player2!.Transform.Position);
+            return d1 < d2 ? Player1 : Player2;
+        }
+
+        if (p1Alive) return Player1;
+        if (p2Alive) return Player2;
+
+        return null;
+    }
+
     private void HandleTowerTookDamage(Tower t, int amount)
     {
         OnTowerTookDamage?.Invoke(t, amount);
@@ -224,8 +268,8 @@ public class GameObjectManager
     public void Draw(SpriteBatch spriteBatch)
     {
 
-        if (Player1 != null) Player1.Draw(spriteBatch);
-        if (Player2 != null) Player2.Draw(spriteBatch);
+        if (Player1 != null && !Player1.IsDead) Player1.Draw(spriteBatch);
+        if (Player2 != null && !Player2.IsDead) Player2.Draw(spriteBatch);
         foreach (CharacterBase c in Characters)
         {
             c.Draw(spriteBatch);
@@ -269,13 +313,14 @@ public class GameObjectManager
 
     public void Update(GameTime gameTime, Vector2 mouseWorldPos)
     {
-        if (Player1 != null) Player1.Update(gameTime, mouseWorldPos);
-        if (Player2 != null) Player2.Update(gameTime, mouseWorldPos);
+        if (Player1 != null && !Player1.IsDead) Player1.Update(gameTime, mouseWorldPos);
+        if (Player2 != null && !Player2.IsDead) Player2.Update(gameTime, mouseWorldPos);
         foreach (CharacterBase c in Characters)
         {
-            if (c.Movement != null && Player1 != null)
+            Player? target = GetTargetPlayer(c.Transform.Position);
+            if (c.Movement != null && target != null)
             {
-                c.Movement.PlayerPosition = Player1.Transform.Position;
+                c.Movement.PlayerPosition = target.Transform.Position;
                 c.Movement.EnemyPosition = c.Transform.Position;
             }
             c.Update(gameTime);
@@ -366,7 +411,13 @@ public class GameObjectManager
             _damageAggregationTimer = AggregationInterval;
         }
 
+        if (_reviveCooldownTimer > 0f)
+        {
+            _reviveCooldownTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+        }
+
         DogBowl.UpdateBowl(gameTime);
+        HandleRevival();
     }
 
     private void OnPlayerShotBullet(Player player)
@@ -721,8 +772,24 @@ public class GameObjectManager
             case "AchievementTrigger":
                 return new AchievementTrigger(spawn.Name, start, size, spawn); // Name or something like that
             case "chest":
-                spawn.Properties.TryGetValue("item", out string? item);
+            {
+                spawn.Properties.TryGetValue("item", out string? itemString);
+
+                Chest.ChestItemType? item = itemString switch
+                {
+                    "Energygel" => Chest.ChestItemType.Energygel,
+                    "Frelo" => Chest.ChestItemType.Frelo,
+                    "Racingbike" => Chest.ChestItemType.Racingbike,
+                    "DogFood" => Chest.ChestItemType.DogFood,
+                    "DopingSpritze" => Chest.ChestItemType.DopingSpritze,
+                    "Beer" => Chest.ChestItemType.Beer,
+                    "Flame" => Chest.ChestItemType.Flame,
+                    "Ice" => Chest.ChestItemType.Ice,
+                    _ => null
+                };
+
                 return new Chest(start, size, item);
+            }
             case "dog-bowl":
                 return new DogBowl(start, size);
             case "musicians":

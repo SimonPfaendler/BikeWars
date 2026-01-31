@@ -51,4 +51,9 @@ public abstract class Bike: ItemBase, IBike
         // OnTookDamage?.Invoke(this, amount);
         Attributes.Health -= amount;
     }
+
+    public void Repair()
+    {
+        Attributes.Health = Attributes.MaxHealth;
+    }
 }

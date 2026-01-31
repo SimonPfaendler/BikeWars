@@ -70,6 +70,8 @@ public class AchievementsManager
 
     public event Action SaveFile;
 
+    public event Action<AchievementIds> Succeeded;
+
     // For DIABETES
     private bool ate_snacks = false;
     private Dictionary<AchievementIds, Achievement> _achievements;
@@ -149,6 +151,7 @@ public class AchievementsManager
     public void SuccededAchievement(AchievementIds id)
     {
         _achievements[id].Succeeded = true;
+        Succeeded?.Invoke(id);
     }
 
     public void HandleAchievement(AchievementIds id, Triggers trigger)

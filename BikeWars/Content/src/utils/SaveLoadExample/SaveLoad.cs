@@ -84,7 +84,7 @@ public static class SaveLoad
         public BasicSaveModel Basic {get;set;} = new();
         public ProjectileSaveModel() {}
 
-        public WeaponAttributes WeaponAttributes {get; set;}
+        public WeaponAttributes? WeaponAttributes {get; set;}
         public bool HasHit {get; set;}
 
         public Vector2Save Direction {get; set;} = new();
@@ -280,7 +280,6 @@ public static class SaveLoad
                 Achievements = achievementsManager.Achievements.Values.ToList(),
             };
             string json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
-
             // get the folder where the JSON file will be saved
             // if it doesn't exist yet, it creates one
             string? dir = Path.GetDirectoryName(SAVE_PATH);

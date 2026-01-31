@@ -10,7 +10,7 @@ namespace BikeWars.Content.entities.projectiles
         private readonly bool _emitLandingEvent;
 
         public ThrowBeer(Vector2 start, Vector2 target, object owner, bool emitLandingEvent = true)
-            : base(start, target, owner, textureKey: "Beer_throw", damage: 12, speed: 100f, arcScale: 1.2f, lingerDuration: 0.25f)
+            : base(start, target, owner, textureKey: "Beer_throw", damage: 40, speed: 100f, arcScale: 1.2f, lingerDuration: 0.25f)
         {
             _emitLandingEvent = emitLandingEvent;
         }

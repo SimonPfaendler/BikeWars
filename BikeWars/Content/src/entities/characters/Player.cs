@@ -30,6 +30,7 @@ namespace BikeWars.Entities.Characters
         public PlayerMovement movement { get; set; }
         public Bike CurrentBike => movement?.CrtBike;
         private IPlayerInput _input;
+        public bool IsActionPressed(GameAction action) => _input.IsPressed(action);
         private CooldownWithDuration sprint { get; }
         public new Vector2 GazeDirection { get; private set; }
         public int XpCounter { get; private set; } = 0;
@@ -204,6 +205,7 @@ namespace BikeWars.Entities.Characters
                         Attributes.AttackCooldown = 0.1f;
                         ThrowBeer?.Invoke(_mouseWorldPos);
                         _audio.Sounds.Play(AudioAssets.ThrowObject);
+                        _audio.Sounds.Play(AudioAssets.Jaegermeister);
                         Inventory.RemoveAt(_inventoryIndexBeer);
                         _beerThrowSelected = false;
                         CurrentWeapon = _weaponBefore;
@@ -301,7 +303,12 @@ namespace BikeWars.Entities.Characters
             if (!_input.IsPressed(GameAction.INTERACT)) return;
             if (obj is BikeShop shop)
             {
-                OnBikeShopOpen?.Invoke(shop);
+                if (shop.ShopReady)
+                {OnBikeShopOpen?.Invoke(shop);}
+                else
+                {
+                    _audio.Sounds.Play(AudioAssets.ShortPain);
+                }
                 return;
             }
 
@@ -424,12 +431,18 @@ namespace BikeWars.Entities.Characters
             _isThrowTargetInRange = Vector2.Distance(throwOrigin, _mouseWorldPos) <= ThrowRange;
             UpdateAttackCooldown(gameTime);
             UpdateMountTimer(gameTime);
+            if (IsDying)
+            {
+                UpdateDyingState(gameTime);
+                UpdateCollider();
+                return;
+            }
 
             if (_dopingTimer > 0f)
             {
                 _dopingTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
             }
-
+            Beer.UpdateCooldown(gameTime);
             HandleWeaponSwitch();
             HandleShooting();
             UpdateMovement(gameTime);
@@ -443,7 +456,6 @@ namespace BikeWars.Entities.Characters
             HandleSwitchMovement();
             UpdateHitFlash(gameTime);
             UpdateCollider();
-            Beer.UpdateCooldown(gameTime);
         }
 
         public override bool IsCharacterMoving()
@@ -514,16 +526,26 @@ namespace BikeWars.Entities.Characters
             if (_currentAnimation == null)
                 return;
 
+            // Dying Animation
+            float rotationOffset = IsDying ? MathHelper.PiOver2 : 0f;
+            Color drawColor = Color.White;
+
+            if (IsDying)
+            {
+                float dyingProgress = 1f - (DyingTimer / DyingDuration);
+                drawColor = Color.Lerp(Color.White, Color.Red, dyingProgress);
+            }
+
             if (movement.CurrentMovement.GetType() ==
                 typeof(WalkingMovement)) // TODO THIS IS ONLY INSERTED TO SHOW. BUT NOT GOOD!
             {
                 _currentAnimation.Draw(spriteBatch, RenderTransform.Position, RenderTransform.Size,
-                    movement.CurrentMovement.Rotation, _renderScale);
+                    movement.CurrentMovement.Rotation + rotationOffset, _renderScale, drawColor);
             }
             else
             {
                 _currentAnimation.Draw(spriteBatch, RenderTransform.Position, RenderTransform.Size,
-                    movement.CurrentMovement.Rotation + MathHelper.PiOver2, _renderScale);
+                    movement.CurrentMovement.Rotation + MathHelper.PiOver2 + rotationOffset, _renderScale, drawColor);
             }
 
             // Draw line from eye position only if GazeDirection is valid (non-zero)
@@ -608,6 +630,20 @@ namespace BikeWars.Entities.Characters
             if (XpCounter >= XpLevelUp)
             {
                 LevelUp();
+            }
+        }
+
+        public bool TrySpendXp(int cost)
+        {
+            if (XpCounter < cost)
+            {
+                _audio.Sounds.Play(AudioAssets.ShortPain);
+                return false;
+            }
+            else
+            {
+                XpCounter -= cost;
+                return true;
             }
         }
 
@@ -728,7 +764,7 @@ namespace BikeWars.Entities.Characters
                     _dopingTimer = 5f;
                     Attributes.Health = Math.Max(1, Attributes.Health - 50);
                 }
-                else if (item is Beer beer)
+                if (item is Beer beer)
                 {
 
                     if (beer.TryActivateBeer())
