@@ -653,7 +653,7 @@ public class GameObjectManager
         xp = new Xp_Money(pos, new Point(16, 16));
         AddItem(xp);
 
-        if (RandomUtil.NextDouble() <= 1.25) // 15% find a energybar
+        if (RandomUtil.NextDouble() <= 0.25) // 25% find a energybar
         {
             EnergyBar energyBar = new EnergyBar(pos, new Point(16, 16));
             AddItem(energyBar);
