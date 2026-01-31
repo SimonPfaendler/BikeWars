@@ -18,23 +18,23 @@ public class GunStatics: WeaponAttributes
         switch(Level)
         {
             case 1:
-                Damage = 20;
+                Damage = 30;
                 Speed = 200f;
             break;
             case 2:
-                Damage = 25;
+                Damage = 40;
                 Speed = 200f;
             break;
             case 3:
-                Damage = 25;
+                Damage = 40;
                 Speed = 250f;
             break;
             case 4:
-                Damage = 30;
+                Damage = 50;
                 Speed = 255f;
             break;
             case(5):
-                Damage = 40;
+                Damage = 70;
                 Speed = 255f;
             break;
         }

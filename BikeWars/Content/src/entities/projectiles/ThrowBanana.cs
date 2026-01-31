@@ -8,7 +8,7 @@ namespace BikeWars.Content.entities.projectiles
     public class ThrowBanana : ThrowObject
     {
         public ThrowBanana(Vector2 start, Vector2 target, object owner)
-            : base(start, target, owner, textureKey: "Banana", damage: 40, speed: 100f, arcScale: 1.2f, lingerDuration: 0.25f)
+            : base(start, target, owner, textureKey: "Banana", damage: 45, speed: 100f, arcScale: 1.2f, lingerDuration: 0.25f)
         {
         }
     }

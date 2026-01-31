@@ -54,7 +54,7 @@ namespace BikeWars.Content.entities.items
             Transform sourceTransform,
             CharacterBase? owner,
             bool damagePlayers = true)
-            : base(owner, damage: 30, duration: 2.0f)
+            : base(owner, damage: 40, duration: 2.0f)
         {
             _sourceTransform = sourceTransform;
             _damagePlayers = damagePlayers;

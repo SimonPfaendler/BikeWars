@@ -25,9 +25,9 @@ namespace BikeWars.Content.managers
         private double _timeSinceLastSwarm;
         private double _timeSinceLastCircle;
         private double _timeSinceLastSlowEnemyLinear;
-        private const double SWARM_INTERVAL = 75.0;
-        private const double CIRCLE_SPAWN_INTERVAL = 60.0;
-        private const double SLOW_ENEMY_SPAWN_INTERVAL = 30.0;
+        private const double SWARM_INTERVAL = 33.0;
+        private const double CIRCLE_SPAWN_INTERVAL = 67.0;
+        private const double SLOW_ENEMY_SPAWN_INTERVAL = 42.0;
 
         private readonly List<ICollider> _spawnQueryBuffer = new(32);
 
@@ -188,9 +188,9 @@ namespace BikeWars.Content.managers
         {
 
             // Spawn 10-15 Hobos
-            int count = RandomUtil.NextInt(10, 16);
+            int count = RandomUtil.NextInt(20, 40);
 
-            float speedMultiplier = 1.5f + (0.5f * (float)progress); // Start fast, get faster
+            float speedMultiplier = 1f + (0.5f * (float)progress); // Start fast, get faster
             float difficultyMultiplier = 1.0f + (2.0f * (float)progress);
 
             // Spawn them in a cluster
@@ -200,7 +200,7 @@ namespace BikeWars.Content.managers
              for (int i = 0; i < count; i++)
              {
                  // Small random offset from cluster center for each unit
-                 Vector2 offset = new Vector2((float)(RandomUtil.NextDouble() - 0.5) * 100, (float)(RandomUtil.NextDouble() - 0.5) * 100);
+                 Vector2 offset = new Vector2((float)(RandomUtil.NextDouble() - 0.5) * 300, (float)(RandomUtil.NextDouble() - 0.5) * 300);
                  Vector2 spawnPos = clusterCenter + offset;
 
                  if (!IsValidSpawnPosition(spawnPos))

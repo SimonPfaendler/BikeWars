@@ -76,24 +76,23 @@ public class Chest: ObjectBase
             
             return new WeaponItem(dropPos, new Point(32, 32), weaponType);
         }
-        else if (roll < 0.50) // 25% EnergyGel
+        else if (roll < 0.35) // 10% EnergyGel
         {
             return new EnergyGel(dropPos, new Point(32, 32));
         }
-        else if (roll < 0.65) // 20% Beer
+        else if (roll < 0.45) // 10% Beer
         {
             return new Beer(dropPos, new Point(32, 32));
         }
-        else if (roll < 0.80) // 15% DopingSpritze
+        else if (roll < 0.55) // 10% DopingSpritze
         {
             return new DopingSpritze(dropPos, new Point(32, 32));
         }
-        else if (roll < 0.90) // 10% DogFood
+        else if (roll < 0.65) // 10% DogFood
         {
             return new DogFood(dropPos, new Point(32, 32));
         }
-         // 10% Bikes
-        else if (roll < 0.95)
+        else if (roll < 0.95) // 30% Bikes
         {
             return new Frelo(dropPos, new Point(32, 32));
         }
