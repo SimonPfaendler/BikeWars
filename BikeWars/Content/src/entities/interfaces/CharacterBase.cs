@@ -113,7 +113,8 @@ public abstract class CharacterBase : ICharacter, ICombat
 
         // Squash Recovery
         // Lerp back to (1,1)
-        _renderScale = Vector2.Lerp(_renderScale, Vector2.One, 10f * dt);
+        float lerpT = MathF.Min(10f * dt, 1f);
+        _renderScale = Vector2.Lerp(_renderScale, Vector2.One, lerpT);
 
         // Continuous Pulse (only if close to 1,1 to avoid conflict with squash)
         if (Vector2.Distance(_renderScale, Vector2.One) < 0.15f)
