@@ -326,32 +326,6 @@ namespace BikeWars.Content.managers
                 _raveGroups.Add(group);
         }
 
-        private void SpawnRCircle(double progress)
-        {
-            int count = 12 + (int)(progress * 10); // 12 to 22 enemies
-            float radius = 300f;
-            float angleStep = (float)(Math.PI * 2 / count);
-            float difficultyMultiplier = 1.0f + (2.0f * (float)progress);
-            float speedMultiplier = 1.0f + (0.5f * (float)progress);
-
-            Player? target = _gameObjectManager.GetTargetPlayer(Vector2.Zero);
-            if (target == null) return;
-            Vector2 center = target.Transform.Position;
-
-            for (int i = 0; i < count; i++)
-            {
-                float angle = i * angleStep;
-                Vector2 pos = center + new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * radius;
-
-                if (!IsValidSpawnPosition(pos)) continue;
-
-                CharacterBase enemy = new Hobo(pos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler);
-
-                ApplyScaling(enemy, difficultyMultiplier, speedMultiplier);
-                _gameObjectManager.AddCharacter(enemy);
-            }
-        }
-
         private Vector2 GetRandomSpawnPosition()
         {
             Player? target = _gameObjectManager.GetTargetPlayer(Vector2.Zero);
