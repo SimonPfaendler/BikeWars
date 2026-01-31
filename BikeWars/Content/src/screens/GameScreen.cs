@@ -246,7 +246,7 @@ namespace BikeWars.Content.screens
             if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);
             if (_gameObjectManager.Player2 != null) players.Add(_gameObjectManager.Player2);
 
-            _collisionManager.Insertions(_gameObjectManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(), _gameObjectManager.Objects, _gameObjectManager.Towers);
+            _collisionManager.Insertions(_gameObjectManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(),_gameObjectManager.Cars, _gameObjectManager.Objects, _gameObjectManager.Towers);
             GameEvents.OnResumeTimer += ResumeTimer;
             HandleLoadNonInGameData();
             _gameTimer.OnTimerFinished += OnGameTimerFinished;
@@ -280,6 +280,7 @@ namespace BikeWars.Content.screens
             _collisionManager.OnBaechleHit += _combatManager.HandleBaechleHit;
             _collisionManager.OnProjectileHitDestructible += _combatManager.HandleprojecticleHitDestructible;
             _collisionManager.OnAOEHitDestructible += _combatManager.HandleAOEHitDestructible;
+            _collisionManager.OnCarHit += _combatManager.HandleCarHit;
 
             _combatManager.OnHitStopRequested += TriggerHitStop;
             _onScreenShake = (intensity, duration) => camera.Shake(intensity, duration);
@@ -460,7 +461,7 @@ namespace BikeWars.Content.screens
                 DespawnOffscreenEnemies(_offscreenAccum);
                 _offscreenAccum = 0f;
             }
-            _collisionManager.Update(players, _gameObjectManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(_gameObjectManager.Trams), _gameObjectManager.Objects, _gameObjectManager.Towers);
+            _collisionManager.Update(players, _gameObjectManager.Items, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(_gameObjectManager.Trams), _gameObjectManager.Cars, _gameObjectManager.Objects, _gameObjectManager.Towers);
 
             if (InputHandler.IsPressed(GameAction.DEBUG_HEAL))
                 _gameObjectManager.Player1.Attributes.Health = _gameObjectManager.Player1.Attributes.MaxHealth;
@@ -911,9 +912,12 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.Projectiles,
                     _gameObjectManager.AOEAttacks,
                     new List<Tram>(_gameObjectManager.Trams),
+                    _gameObjectManager.Cars,
                     _gameObjectManager.Objects,
                     _gameObjectManager.Towers
                 );
+                
+                _collisionManager.DrawLayerDebug(sb, RenderPrimitives.Pixel, "Streets", Color.Magenta);
             }
 
             // draws A* paths for enemies in tech demo

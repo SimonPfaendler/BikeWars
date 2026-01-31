@@ -169,6 +169,26 @@ public class CombatManager
             HandleDeath(target);
         }
     }
+    
+    // car collision damage
+    public void HandleCarHit(CharacterBase target)
+    {
+        if (target.IsDead) return;
+        if (target.IsGodMode) return;
+        
+        target.TakeDamage(4);
+
+        // feedback similar to tram
+        _audio.Sounds.Play(AudioAssets.CarCrash);
+        OnScreenShakeRequested?.Invoke(3.25f, 0.12f);
+        OnHitStopRequested?.Invoke(0.08f);
+
+        if (target.Attributes.Health <= 0)
+        {
+            HandleDeath(target);
+        }
+    }
+
 
     public void HandleBaechleHit(CharacterBase target, object baechle)
     {

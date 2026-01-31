@@ -12,6 +12,8 @@ using MonoGame.Extended.Tiled;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Entities;
+using BikeWars.Content.entities.npcharacters;
+
 
 namespace BikeWars.Content.managers;
 
@@ -30,6 +32,11 @@ public class CollisionManager
     public event Action<CharacterBase, AreaOfEffectBase> OnAOEHit;
     public event Action<CharacterBase, object> OnTramHit;
     public event Action<CharacterBase, object> OnBaechleHit;
+    
+    // car action
+    public event Action<CharacterBase> OnCarHit;
+    public int GlobalIdentifier { get; }
+
 
     public event Action <DestructibleObject, ProjectileBase> OnProjectileHitDestructible;
     public event Action <DestructibleObject, AreaOfEffectBase> OnAOEHitDestructible;
@@ -88,6 +95,15 @@ public class CollisionManager
 
     // base (unpadded) walkability snapshot to support cheap local updates
     private bool[,] _baseWalkableGrid;
+    
+    // grid data for road tiles
+    private bool[,] _roadGrid;
+    private readonly HashSet<int> _carRoadGids = new()
+    {
+        2348,
+        2350
+    };
+    private readonly List<Point> _roadTiles = new();
 
     public CollisionManager(int cellSize, int worldBounds, GameObjectManager gameObjectManager)
     {
@@ -183,6 +199,65 @@ public class CollisionManager
 
             ApplyGlobalPaddingFromBase();
         }
+    }
+    
+    // checks if a given grid position is a road tile
+    public bool IsRoadTile(Point g)
+    {
+        if (_roadGrid == null) return false;
+        
+        int w = _roadGrid.GetLength(0);
+        int h = _roadGrid.GetLength(1);
+        
+        if (g.X < 0 || g.X >= w || g.Y < 0 || g.Y >= h) return false;
+        
+        return _roadGrid[g.X, g.Y];
+    }
+    
+    // returns true if the world position is on a road
+    public bool IsRoadWorld(Vector2 worldPos)
+    {
+        int gid = GetTileGidAtWorld("Streets", worldPos);
+        return IsRealRoadGid(gid);
+    }
+    
+    private bool IsRealRoadGid(int gid)
+    {
+        if (gid == 0)
+            return false;
+
+        // Explicitly allow ONLY asphalt tiles
+        return gid == 2348 || gid == 2350;
+    }
+    
+    public int GetTileGidAtWorld(string layerName, Vector2 worldPos)
+    {
+        var layer = TiledMap.GetLayer<MonoGame.Extended.Tiled.TiledMapTileLayer>(layerName);
+
+        if (layer == null)
+            return 0;
+
+        Point g = WorldToGrid(worldPos);
+
+        if (g.X < 0 || g.X >= layer.Width || g.Y < 0 || g.Y >= layer.Height)
+            return 0;
+
+        var tile = layer.GetTile((ushort)g.X, (ushort)g.Y);
+        return tile.GlobalIdentifier; // int
+    }
+
+    
+    // random road spawn
+    public Vector2 GetRandomRoadWorldCenter(Random rng)
+    {
+        if (_roadTiles.Count == 0)
+            return Vector2.Zero;
+
+        var g = _roadTiles[rng.Next(_roadTiles.Count)];
+        return new Vector2(
+            g.X * _cellSize + _cellSize / 2f,
+            g.Y * _cellSize + _cellSize / 2f
+        );
     }
 
     private void SetBaseWalkableForRect(Rectangle rect, bool walkable)
@@ -473,7 +548,7 @@ public class CollisionManager
     }
 
     public void Insertions(List<ItemBase> items, HashSet<Player> players, List<ProjectileBase> projectiles,
-        List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters, List<Tram> trams, List<ObjectBase> objects, List<Tower> towers)
+        List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters, List<Tram> trams, List<Car> cars, List<ObjectBase> objects, List<Tower> towers)
     {
         foreach (ItemBase c in items)
         {
@@ -532,6 +607,13 @@ public class CollisionManager
             {
                 AddDynamic(col);
             }
+        }
+        
+        // handle car collisions
+        foreach (var car in cars)
+        {
+            if (car?.Collider != null)
+                AddDynamic(car.Collider);
         }
     }
 
@@ -688,6 +770,7 @@ public class CollisionManager
             HandleCharacters(c, d);
             HandleTowers(c, d);
             HandleTramCollision(c, d);
+            HandleCarCollision(c, d);
         }
     }
 
@@ -698,6 +781,19 @@ public class CollisionManager
             if (c.Intersects(d))
             {
                 OnTramHit?.Invoke((CharacterBase)d.Owner, c.Owner);
+            }
+        }
+    }
+    
+    // car collision
+    private void HandleCarCollision(ICollider c, ICollider d)
+    {
+        if (c.Layer == CollisionLayer.CAR &&
+            (d.Layer == CollisionLayer.CHARACTER || d.Layer == CollisionLayer.PLAYER))
+        {
+            if (c.Intersects(d))
+            {
+                OnCarHit?.Invoke((CharacterBase)d.Owner);
             }
         }
     }
@@ -925,17 +1021,17 @@ public class CollisionManager
         }
     }
     public void Update(HashSet<Player> players, List<ItemBase> items, List<ProjectileBase> projectiles,
-        List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters, List<Tram> trams, List<ObjectBase> objects, List<Tower> towers)
+        List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters, List<Tram> trams, List<Car> cars, List<ObjectBase> objects, List<Tower> towers)
     {
         allDynamics.Clear();
         DynamicHash.Clear();
-        Insertions(items, players, projectiles, aoeAttacks, characters, trams, objects, towers);
+        Insertions(items, players, projectiles, aoeAttacks, characters, trams, cars, objects, towers);
 
         foreach (var c in allDynamics)
         {
             if (c.Layer != CollisionLayer.CHARACTER && c.Layer != CollisionLayer.PLAYER &&
                 c.Layer != CollisionLayer.PROJECTILE && c.Layer != CollisionLayer.TRAM &&
-                c.Layer != CollisionLayer.AOE)
+                c.Layer != CollisionLayer.AOE && c.Layer != CollisionLayer.CAR)
             {
                 continue;
             }
@@ -1021,7 +1117,7 @@ public class CollisionManager
     // makes the hitboxes visible for when in the tech demo
     public void DrawHitboxes(SpriteBatch spriteBatch, Texture2D pixel,
         Player player, List<CharacterBase> characters,
-        List<ItemBase> items, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks, List<Tram> trams, List<ObjectBase> objects, List<Tower> towers)
+        List<ItemBase> items, List<ProjectileBase> projectiles, List<AreaOfEffectBase> aoeAttacks, List<Tram> trams, List<Car> cars, List<ObjectBase> objects, List<Tower> towers)
     {
         foreach (var cell in StaticHash._cells)
         {
@@ -1120,7 +1216,15 @@ public class CollisionManager
                 DrawRectOutline(spriteBatch, pixel, tramRect, Color.Red * 0.7f);
             }
         }
-
+        
+        // draw car hitboxes
+        foreach (var car in cars)
+        {
+            if (car?.Collider == null) continue;
+            var carRect = GetColliderRectangle(car.Collider);
+            DrawRectOutline(spriteBatch, pixel, carRect, Color.Yellow * 0.7f);
+        }
+        
         foreach (var tower in towers)
         {
             if (tower?.Collider != null)
@@ -1241,6 +1345,13 @@ public class CollisionManager
         var layer = TiledMap.GetLayer<TiledMapTileLayer>(layerName);
         if (layer == null)
             return;
+        
+        // init road grid data
+        if (type == TerrainType.ROAD && _roadGrid == null)
+        {
+            _roadGrid = new bool[layer.Width, layer.Height];
+            _roadTiles.Clear();
+        }
 
         foreach (var tile in layer.Tiles)
         {
@@ -1249,6 +1360,18 @@ public class CollisionManager
 
             int x = tile.X * _cellSize;
             int y = tile.Y * _cellSize;
+            
+            // remember road tiles
+            int gid = tile.GlobalIdentifier;
+    
+            if (type == TerrainType.ROAD)
+            {
+                if (!IsRealRoadGid(gid))
+                    continue;
+
+                _roadGrid[tile.X, tile.Y] = true;
+                _roadTiles.Add(new Point(tile.X, tile.Y));
+            }
 
             TerrainCollider tc = new TerrainCollider(
                 new Vector2(x, y),
@@ -1331,6 +1454,7 @@ public class CollisionManager
         OnCharacterCollision = null;
         OnAOEHit = null;
         OnTramHit = null;
+        OnCarHit = null;
 
         DynamicHash?.Clear();
         StaticHash?.Clear();
@@ -1344,6 +1468,9 @@ public class CollisionManager
         _toRemoveColliders.Clear();
         _toRemoveStaticColliders.Clear();
         _toUpdateWalkableRects.Clear();
+        
+        _roadGrid = null;
+        _roadTiles.Clear();
 
         ObjectSpawns.Clear();
         PathGrid = null;
@@ -1385,6 +1512,32 @@ public class CollisionManager
         catch
         {
             // Layer might not exist; continue without it
+        }
+    }
+    
+    
+    public void DrawLayerDebug(
+        SpriteBatch spriteBatch,
+        Texture2D pixel,
+        string layerName,
+        Color color,
+        float alpha = 0.35f)
+    {
+        var layer = TiledMap.GetLayer<TiledMapTileLayer>(layerName);
+        if (layer == null) return;
+
+        foreach (var tile in layer.Tiles)
+        {
+            if (tile.GlobalIdentifier == 0) continue;
+
+            int x = tile.X * _cellSize;
+            int y = tile.Y * _cellSize;
+
+            spriteBatch.Draw(
+                pixel,
+                new Rectangle(x, y, _cellSize, _cellSize),
+                color * alpha
+            );
         }
     }
 }

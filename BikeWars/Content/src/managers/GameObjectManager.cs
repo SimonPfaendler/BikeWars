@@ -19,6 +19,7 @@ using BikeWars.Content.entities.projectiles;
 using BikeWars.Entities;
 using BikeWars.Utilities;
 using System.Linq;
+using BikeWars.Content.entities.npcharacters;
 
 namespace BikeWars.Content.managers;
 public class GameObjectManager
@@ -58,6 +59,10 @@ public class GameObjectManager
 
     private HashSet<Tram> _trams = new HashSet<Tram>();
     public HashSet<Tram> Trams => _trams;
+    
+    // store all active cars in the world
+    private readonly List<Car> _cars;
+    public List<Car> Cars => _cars;
 
     public ContentManager _contentManager {get; set;} // TODO do we need this one?
 
@@ -76,6 +81,7 @@ public class GameObjectManager
         _statics = new List<BoxCollider>();
         _projectiles = new List<ProjectileBase>();
         _towers = new List<Tower>();
+        _cars = new List<Car>();
 
         if (Player1 != null)
         {
@@ -160,6 +166,21 @@ public class GameObjectManager
         Characters.Add(character);
         character.Attributes.OnDied += HandleCharacterDeath;
         character.OnTookDamage += HandleTookDamage;
+    }
+    
+    // add a car to the world
+    public void AddCar(Car car)
+    {
+        if (_worldAudioManager != null && car is IWorldAudioAware wa)
+            wa.SetWorldAudioManager(_worldAudioManager);
+        
+        _cars.Add(car);
+    }
+
+    // helper to remove despawned cars
+    public void RemoveDeadCars()
+    {
+        _cars.RemoveAll(c => c == null || c.IsDead);
     }
 
     private Dictionary<CharacterBase, int> _pendingDamage = new Dictionary<CharacterBase, int>();
@@ -304,6 +325,12 @@ public class GameObjectManager
         {
             tram.Draw(spriteBatch);
         }
+        
+        // only draws an orange rectangle for now
+        foreach (var car in _cars)
+        {
+            car.Draw(spriteBatch, RenderPrimitives.Pixel);
+        }
 
         foreach (BoxCollider s in Statics)
         {
@@ -385,6 +412,15 @@ public class GameObjectManager
             tram.Update(gameTime);
         }
         _trams.RemoveWhere(t => t.IsExpired);
+        
+        // update each car
+        foreach (var car in _cars)
+        {
+            car.Update(gameTime);
+        }
+        
+        RemoveDeadCars();
+        
         _damageNumbers.RemoveWhere(dn =>
         {
             dn.Update(gameTime);
@@ -622,6 +658,12 @@ public class GameObjectManager
             if (t is IWorldAudioAware wa)
                 wa.SetWorldAudioManager(worldAudioManager);
         }
+        
+        foreach (var car in _cars)
+        {
+            if (car is IWorldAudioAware waCar)
+                waCar.SetWorldAudioManager(worldAudioManager);
+        }
     }
 
     // Notify characters that the path grid changed (force enemies to recalculate paths)
@@ -809,6 +851,7 @@ public class GameObjectManager
         Projectiles.Clear();
         AOEAttacks.Clear();
         Trams.Clear();
+        Cars.Clear();
 
         Statics.Clear();
     }

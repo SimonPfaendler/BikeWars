@@ -47,6 +47,12 @@ namespace BikeWars.Content.managers
 
         // raver logic
         private List<RaveGroup> _raveGroups = new List<RaveGroup>();
+        
+        // car logic
+        private readonly Random _rng = new Random();
+        private double _timeSinceLastCar;
+        private const double CAR_SPAWN_START = 3.0; 
+        private const double CAR_SPAWN_END   = 3.0; 
 
         private readonly RepathScheduler _repathScheduler;
         public SpawnManager(GameObjectManager gameObjectManager, CollisionManager collisionManager, AudioService audioService, PathFinding pathFinding, RepathScheduler repathScheduler, WorldAudioManager worldAudioManager)
@@ -68,12 +74,14 @@ namespace BikeWars.Content.managers
             _timeSinceLastSwarm += elapsed;
             _timeSinceLastCircle += elapsed;
             _timeSinceLastTram += elapsed;
+            _timeSinceLastCar += elapsed;
             _timeSinceLastSlowEnemyLinear += elapsed;
 
             // Update spawn interval based on progression
             // Lerp from start interval to end interval based on time fraction
             double progress = Math.Clamp(_totalTime / GAME_DURATION, 0, 1);
             _spawnInterval = START_SPAWN_INTERVAL + (END_SPAWN_INTERVAL - START_SPAWN_INTERVAL) * progress;
+            double carInterval = CAR_SPAWN_START + (CAR_SPAWN_END - CAR_SPAWN_START) * progress;
 
             if (_timeSinceLastSpawn >= _spawnInterval)
             {
@@ -107,6 +115,12 @@ namespace BikeWars.Content.managers
                 // remove finished/dispersed groups
                 if (!_raveGroups[i].IsActive)
                     _raveGroups.RemoveAt(i);
+            }
+            
+            if (_timeSinceLastCar >= carInterval)
+            {
+                SpawnCar(progress);
+                _timeSinceLastCar = 0;
             }
 
             if (_timeSinceLastSlowEnemyLinear >= SLOW_ENEMY_SPAWN_INTERVAL)
@@ -186,6 +200,67 @@ namespace BikeWars.Content.managers
             Tram tram = new Tram(startPos, targetPos,  _audioService, targetPlayer);
             _gameObjectManager.AddTram(tram);
         }
+        
+        // car stuff
+        private void SpawnCar(double progress)
+        {
+            // Try to find a valid road spawn position
+            Vector2 spawnPos = Vector2.Zero;
+            Point spawnTile = Point.Zero;
+            
+            // try a few times to get a position that maps back to a road tile
+            for (int tries = 0; tries < 30; tries++)
+            {
+                spawnPos = _collisionManager.GetRandomRoadWorldCenter(_rng);
+                if (spawnPos == Vector2.Zero) return;
+                
+                spawnTile = _collisionManager.WorldToGrid(spawnPos);
+                
+                if (_collisionManager.IsRoadTile(spawnTile))
+                    break;
+
+                spawnPos = Vector2.Zero;
+            }
+            
+            if (spawnPos == Vector2.Zero) return;
+            
+            var dirs = new[] { 
+                new Point(1, 0),   // East
+                new Point(-1, 0),  // West
+                new Point(0, 1),   // South
+                new Point(0, -1)   // North
+            };
+            var validDirs = new System.Collections.Generic.List<Point>();
+            
+            // check all directions and keep the ones that lead to a road tile
+            foreach (var d in dirs)
+            {
+                Point neighbor = new Point(spawnTile.X + d.X, spawnTile.Y + d.Y);
+                if (_collisionManager.IsRoadTile(neighbor))
+                {
+                    // Double-check with world position
+                    Vector2 neighborWorld = new Vector2(
+                        neighbor.X * _collisionManager._cellSize + _collisionManager._cellSize / 2f,
+                        neighbor.Y * _collisionManager._cellSize + _collisionManager._cellSize / 2f
+                    );
+            
+                    if (_collisionManager.IsRoadWorld(neighborWorld))
+                    {
+                        validDirs.Add(d);
+                    }
+                }
+            }
+
+            if (validDirs.Count == 0) return;
+            
+            // IMPORTANT: Pick the FIRST valid direction instead of random
+            // This makes cars more predictable and flow better
+            Point dir = validDirs[0];
+
+            var car = new Car(spawnPos, dir, _collisionManager, _rng);
+            _gameObjectManager.AddCar(car);
+        }
+        
         private void SpawnSwarm(double progress)
         {
 

@@ -15,5 +15,6 @@ public enum CollisionLayer
     AOE, // area-of-affect damange
     TOWER,
     TRIGGER, // Should be used for the Achievements or Statistic. Mostly if someone walks on. Similar like Terrain
-    TRAM
+    TRAM,
+    CAR
 }
