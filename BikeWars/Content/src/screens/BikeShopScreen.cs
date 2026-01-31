@@ -144,7 +144,7 @@ public class BikeShopScreen : IScreen
             case ShopOption.RepairBike:
                 if (_player.CurrentBike == null)
                     return false;
-                if (_player.TrySpendXp(25))
+                if (_player.TrySpendXp(10))
                 {
                     Bike bike = _player.CurrentBike;
 
@@ -154,7 +154,7 @@ public class BikeShopScreen : IScreen
                 }
                 return false;
         case ShopOption.BuyFrelo:
-                if (_player.TrySpendXp(25))
+                if (_player.TrySpendXp(15))
                 {
                     var dropPos = _shop.Transform.Position + new Vector2(50, -50);
                     SpawnFrelo?.Invoke(dropPos);
@@ -163,7 +163,7 @@ public class BikeShopScreen : IScreen
                 }
                 return false;
             case ShopOption.BuyRacingBike:
-                if (_player.TrySpendXp(30))
+                if (_player.TrySpendXp(20))
                 {
                     var dropPos1 = _shop.Transform.Position + new Vector2(50, -50);
                     SpawnRacingBike?.Invoke(dropPos1);
@@ -223,9 +223,9 @@ public class BikeShopScreen : IScreen
         string message = option switch
         {
             ShopOption.HealFull => "Leben auf Max | 120s Cooldown",
-            ShopOption.RepairBike => $"Fahrrad Leben auf Max {xp}Xp/15Xp | 20s Cooldown",
-            ShopOption.BuyFrelo => $"Kaufe ein Frelo {xp}Xp/25Xp | 20s Cooldown",
-            ShopOption.BuyRacingBike  => $"Kaufe ein Rennrad {xp}Xp/30Xp | 20s Cooldown",
+            ShopOption.RepairBike => $"Fahrrad Leben auf Max {xp}Xp/10Xp | 20s Cooldown",
+            ShopOption.BuyFrelo => $"Kaufe ein Frelo {xp}Xp/15Xp | 20s Cooldown",
+            ShopOption.BuyRacingBike  => $"Kaufe ein Rennrad {xp}Xp/20Xp | 20s Cooldown",
             ShopOption.Close => "Close",
             
             _ => option.ToString()
