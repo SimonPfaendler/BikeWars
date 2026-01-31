@@ -151,10 +151,7 @@ namespace BikeWars.Content.screens
 
             _gameObjectManager = new GameObjectManager(content, player, player2);
             _debugger = new Debugger(_gameObjectManager.Player1);
-            // Initial spawning is now handled by SpawnManager
 
-            _gameObjectManager.AddItem(new Frelo(new Vector2(5700, 5700), new Point(32, 32)));
-            _gameObjectManager.AddItem(new RacingBike(new Vector2(5800, 5800), new Point(32, 32)));
             _freelook = false;
             // camera.Position is set by Update usually, but let's init it
             if (player2 == null)

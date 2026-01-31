@@ -21,7 +21,7 @@ public class Frelo: Bike
         CurrentTex = TexRight;
 
         Attributes = new BikeAttributes(
-            this, 30, 30, 3, 0, 180, 1.2f, 3, 1.2f, 1.2f, 1.2f
+            this, 150, 150, 3, 0, 180, 1.2f, 3, 1.2f, 1.2f, 1.2f
         );
     }
 }

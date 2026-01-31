@@ -299,8 +299,8 @@ namespace BikeWars.Content.managers
             Player? target = _gameObjectManager.GetTargetPlayer(Vector2.Zero);
             if (target == null) return;
 
-            int count = 12 + (int)(progress * 10); // 12..22
-            float startRadius = 100f;
+            int count = 30 + (int)(progress * 10); // 12..22
+            float startRadius = 500f;
 
             // pick a size you want for ravers
             Point raverSize = new Point(32, 32);
@@ -318,7 +318,7 @@ namespace BikeWars.Content.managers
                 gameObjectManager: _gameObjectManager,
                 collisionManager: _collisionManager,
                 shrinkSpeed: 30f,
-                minRadius: 55f,
+                minRadius: 300f,
                 beatInterval: 0.2f
             );
 
