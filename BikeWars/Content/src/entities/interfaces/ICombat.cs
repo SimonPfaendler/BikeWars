@@ -6,7 +6,7 @@ public interface ICombat
 {
     CharacterAttributes Attributes {get; set;}
 
-    void TakeDamage(int amount);
+    void TakeDamage(int amount, object hitBy);
     void Attack(ICombat target);
 
     void UpdateAttackCooldown(GameTime gameTime);

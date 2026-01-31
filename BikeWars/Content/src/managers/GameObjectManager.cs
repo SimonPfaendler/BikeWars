@@ -25,9 +25,8 @@ public class GameObjectManager
 {
     public event Action<CharacterBase>? OnCharacterDied;
     public event Action<Tower>? OnTowerDied;
-    public event Action<CharacterBase, int>? OnTookDamage;
+    public event Action<CharacterBase, int, object>? OnTookDamage;
     public event Action<Tower, int>? OnTowerTookDamage;
-    public event Action OnEneryBarPickedUp;
     private Player? _player1 {get; set;}
     public Player? Player1{get => _player1; set => _player1 = value;}
     private Player? _player2 {get; set;}
@@ -154,7 +153,7 @@ public class GameObjectManager
     {
         OnTowerDied?.Invoke(t);
     }
-    private void HandleTookDamage(CharacterBase c, int amount)
+    private void HandleTookDamage(CharacterBase c, int amount, object hitBy)
     {
         // Aggregate damage
         if (!_pendingDamage.ContainsKey(c))
@@ -163,11 +162,11 @@ public class GameObjectManager
         }
         _pendingDamage[c] += amount;
 
-        OnTookDamage?.Invoke(c, amount);
+        OnTookDamage?.Invoke(c, amount, hitBy);
 
         if (c is Player || c == Player1 || c == Player2)
         {
-             OnScreenShakeRequested?.Invoke(5.5f, 0.2f);
+            OnScreenShakeRequested?.Invoke(5.5f, 0.2f);
         }
     }
     private void HandlePlayerDied(CharacterBase ch)
@@ -603,11 +602,10 @@ public class GameObjectManager
         xp = new Xp_Money(pos, new Point(16, 16));
         AddItem(xp);
 
-        if (RandomUtil.NextDouble() <= 0.15) // 15% find a energybar
+        if (RandomUtil.NextDouble() <= 1.25) // 15% find a energybar
         {
             EnergyBar energyBar = new EnergyBar(pos, new Point(16, 16));
             AddItem(energyBar);
-            OnEneryBarPickedUp?.Invoke();
         }
 
         if (RandomUtil.NextDouble() <= 0.05) // 5% chance to drop an energy gel

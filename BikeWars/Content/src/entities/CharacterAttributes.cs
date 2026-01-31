@@ -16,7 +16,7 @@ public class CharacterAttributes : AttributesBase
         }
         protected override void Die()
         {
-        if (Owner is CharacterBase character)
-            OnDied?.Invoke(character);
+            if (Owner is CharacterBase character)
+                OnDied?.Invoke(character);
         }
     }

@@ -39,7 +39,7 @@ public abstract class CharacterBase : ICharacter, ICombat
 
     protected virtual string WalkingSound => AudioAssets.Walking;
 
-    public event Action<CharacterBase, int> OnTookDamage;
+    public event Action<CharacterBase, int, object> OnTookDamage;
 
     protected Vector2 _knockbackVelocity;
     private const float KnockbackDecay = 10f; // Velocity decay per second
@@ -135,12 +135,12 @@ public abstract class CharacterBase : ICharacter, ICombat
         return 1.0f;
     }
 
-    public virtual void TakeDamage(int amount, bool shouldSquash = true)
+    public virtual void TakeDamage(int amount, object hitBy, bool shouldSquash = true)
     {
         if (IsGodMode || IsDead) return;
 
-        OnTookDamage?.Invoke(this, amount);
         Attributes.Health -= amount;
+        OnTookDamage?.Invoke(this, amount, hitBy);
         _hitFlashTimer = 0.2f;
 
         // Squash effect on hit
@@ -151,9 +151,9 @@ public abstract class CharacterBase : ICharacter, ICombat
     }
 
     // Explicit interface implementation to satisfy ICombat
-    void ICombat.TakeDamage(int amount)
+    void ICombat.TakeDamage(int amount, object hitBy)
     {
-        TakeDamage(amount, true);
+        TakeDamage(amount, hitBy, true);
     }
 
     public bool CanAttack()
@@ -172,7 +172,7 @@ public abstract class CharacterBase : ICharacter, ICombat
     public virtual void Attack(ICombat target)
     {
         if (!CanAttack()) return;
-        target.TakeDamage(Attributes.AttackDamage);
+        target.TakeDamage(Attributes.AttackDamage, this);
         ResetAttackCooldown();
     }
 

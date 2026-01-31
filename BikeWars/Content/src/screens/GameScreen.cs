@@ -29,7 +29,7 @@ namespace BikeWars.Content.screens
         private BikeShopScreen _bikeShopScreen;
         private Camera2D camera;
         private Rectangle worldBounds;
-        private Overlay _overlay;
+        protected Overlay _overlay;
         private TiledMapRenderer _tiledMapRenderer;
         private Debugger _debugger;
         private bool _isAlive = true; // If the Screen is still alive. Necessary for the switch
@@ -46,13 +46,13 @@ namespace BikeWars.Content.screens
         private const int CELL_SIZE = 16;
         private WorldAudioManager _worldAudioManager;
 
-        private StatisticsManager _statisticsManager {get; set;}
+        protected StatisticsManager _statisticsManager {get; set;}
         public StatisticsManager StatisticsManager => _statisticsManager;
 
-        private AchievementsManager _achievementsManager {get; set;}
+        protected AchievementsManager _achievementsManager {get; set;}
         public AchievementsManager AchievementsManager => _achievementsManager;
 
-        private readonly AudioService _audioService;
+        protected readonly AudioService _audioService;
         public AudioService AudioService => _audioService;
 
         private PlayerManager _playerManager;
@@ -66,7 +66,7 @@ namespace BikeWars.Content.screens
         private Texture2D hudTexture;
 
         private CollisionManager _collisionManager;
-        private GameObjectManager _gameObjectManager;
+        protected GameObjectManager _gameObjectManager;
         public GameObjectManager GameObjectManager => _gameObjectManager;
 
         private CombatManager _combatManager;
@@ -93,7 +93,7 @@ namespace BikeWars.Content.screens
         private float _offscreenAccum = 0f;
         private const float OFFSCREEN_CHECK_INTERVAL = 0.25f;
 
-        private GameTimer _gameTimer;
+        protected GameTimer _gameTimer;
         private const float GAME_TIME_LIMIT = 300f;
         private SpriteFont _timerFont;
         private Vector2 _timerPosition;
@@ -161,11 +161,14 @@ namespace BikeWars.Content.screens
 
             _statisticsManager = new StatisticsManager();
             _achievementsManager = new AchievementsManager();
+            _achievementsManager.SaveFile += SaveNonGame;
             _gameTimer = new GameTimer(GAME_TIME_LIMIT);
 
             _gameObjectManager.OnCharacterDied += _statisticsManager.HandleCharacterDied;
+            _gameObjectManager.OnCharacterDied += _achievementsManager.OnPlayerDied;
             _gameObjectManager.OnTookDamage += _statisticsManager.HandleTookDamage;
             _gameObjectManager.Player1.OnTookDamage += _statisticsManager.HandleTookDamage;
+            _gameObjectManager.Player1.OnTookDamage += _achievementsManager.OnDiedByTram;
             _gameObjectManager.Player1.OnLevelUp += _statisticsManager.HandleLevel;
             _gameObjectManager.Player1.OnMoreXP += _statisticsManager.HandleExperience;
             _gameObjectManager.Player1.ShotBullet += _statisticsManager.HandleShotFired;
@@ -174,10 +177,12 @@ namespace BikeWars.Content.screens
             _gameObjectManager.Player1.ThrowBook += _statisticsManager.HandleThrowing;
             _gameObjectManager.Player1.ThrowBottle += _statisticsManager.HandleThrowing;
             _gameObjectManager.Player1.FoundBike += () => _statisticsManager.HandleFoundBike(_gameTimer.TimePassed());
+            _gameObjectManager.Player1.OnEneryBarPickedUp += _achievementsManager.OnEnergyBarPickedUp;
 
             if (_gameObjectManager.Player2 != null)
             {
                 _gameObjectManager.Player2.OnTookDamage += _statisticsManager.HandleTookDamage;
+                _gameObjectManager.Player2.OnTookDamage += _achievementsManager.OnDiedByTram;
                 _gameObjectManager.Player2.OnLevelUp += _statisticsManager.HandleLevel;
                 _gameObjectManager.Player2.OnMoreXP += _statisticsManager.HandleExperience;
                 _gameObjectManager.Player2.ShotBullet += _statisticsManager.HandleShotFired;
@@ -185,10 +190,9 @@ namespace BikeWars.Content.screens
                 _gameObjectManager.Player2.ThrowBanana += _statisticsManager.HandleThrowing;
                 _gameObjectManager.Player2.ThrowBook += _statisticsManager.HandleThrowing;
                 _gameObjectManager.Player2.ThrowBottle += _statisticsManager.HandleThrowing;
-                _gameObjectManager.Player1.FoundBike += () => _statisticsManager.HandleFoundBike(_gameTimer.TimePassed());
+                _gameObjectManager.Player2.FoundBike += () => _statisticsManager.HandleFoundBike(_gameTimer.TimePassed());
+                _gameObjectManager.Player2.OnEneryBarPickedUp += _achievementsManager.OnEnergyBarPickedUp;
             }
-
-            _gameObjectManager.OnEneryBarPickedUp += _achievementsManager.OnEnergyBarPickedUp;
 
             _collisionManager = new CollisionManager(CELL_SIZE, worldBounds.Height, _gameObjectManager);
             var players = new HashSet<Player>();
@@ -311,7 +315,7 @@ namespace BikeWars.Content.screens
 
             // Spawn Manager
             _spawnManager = new SpawnManager(_gameObjectManager, _collisionManager, _audioService, _pathFinding, _repathScheduler, _worldAudioManager);
-
+            _spawnManager.RaverGroupDied += _achievementsManager.OnRaverGroupDied;
 
             // timer
             _timerFont = content.Load<SpriteFont>("assets/fonts/Arial");
@@ -419,7 +423,6 @@ namespace BikeWars.Content.screens
                 _statisticsManager.HandleTime(_gameTimer.TimePassed());
                 GameOver?.Invoke(_statisticsManager.Statistic);
                 _statisticsManager.SaveStatistic();
-                _achievementsManager.SaveAchievement();
                 SaveLoad.SaveNonGame(_statisticsManager, _achievementsManager);
             }
 
@@ -884,7 +887,7 @@ namespace BikeWars.Content.screens
             _gameTimer.Restart(); // restart Timer
         }
 
-        private void OnGameTimerFinished()
+        protected void OnGameTimerFinished()
         {
             _audioService.Sounds.PauseAll();
             _audioService.Music.Stop();
@@ -895,7 +898,6 @@ namespace BikeWars.Content.screens
             _achievementsManager.HandleAchievement(AchievementIds.UNIVERSITY_NEVER_FORGETS, Triggers.WON_GAME);
             _achievementsManager.HandleAchievement(AchievementIds.BACHELOR_HERE_I_COME, Triggers.WON_GAME);
             _statisticsManager.SaveStatistic();
-            _achievementsManager.SaveAchievement();
             SaveLoad.SaveNonGame(_statisticsManager, _achievementsManager);
         }
 
@@ -1142,6 +1144,10 @@ namespace BikeWars.Content.screens
         private void OnPauseMenuClicked(int id, IScreen screen)
         {
 
+        }
+        public void SaveNonGame()
+        {
+            SaveLoad.SaveNonGame(_statisticsManager, _achievementsManager);
         }
     }
 }

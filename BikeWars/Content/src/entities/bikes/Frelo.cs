@@ -1,15 +1,13 @@
-using BikeWars.Content.engine.interfaces;
-using BikeWars.Content.engine;
 using BikeWars.Entities.Characters;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using BikeWars.Content.managers;
 
 namespace BikeWars.Content.entities.interfaces;
 public class Frelo: Bike
 {
     public Frelo(Vector2 start, Point size, BikeAttributes attributes) : base(start, size, attributes)
     {
-        TexRight = managers.SpriteManager.GetTexture("Frelo");
+        TexRight = SpriteManager.GetTexture("Frelo");
         CurrentTex = TexRight;
         Attributes = attributes;
         InitpickupRange();
@@ -17,7 +15,7 @@ public class Frelo: Bike
 
     public Frelo(Vector2 start, Point size) : base(start, size)
     {
-        TexRight = managers.SpriteManager.GetTexture("Frelo");
+        TexRight = SpriteManager.GetTexture("Frelo");
         CurrentTex = TexRight;
 
         Attributes = new BikeAttributes(

@@ -105,7 +105,6 @@ public class SoundManager
         {
             if (!AudioAssets.SoundEffectPaths.TryGetValue(id, out var path))
                 return;
-
             try
             {
                 sfx = _content.Load<SoundEffect>(path);
@@ -117,7 +116,6 @@ public class SoundManager
                 return;
             }
         }
-
         // Rest wie gehabt
         if (CountInstancesOf(id) >= MaxPerType)
             return;

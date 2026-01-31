@@ -37,6 +37,8 @@ namespace BikeWars.Content.managers
         private const float MAX_SPAWN_RADIUS = 900f;
         private readonly WorldAudioManager _worldAudioManager;
 
+        public event Action RaverGroupDied;
+
         // Tram Logic
         private double _timeSinceLastTram;
         private const double TRAM_SPAWN_INTERVAL = 30.0; // Every 15 seconds
@@ -158,7 +160,7 @@ namespace BikeWars.Content.managers
         {
             // Determine type of enemy
             // As time progresses, higher chance for stronger enemies (BikeThief vs Hobo)
-            
+
 
             Vector2 spawnPos = GetRandomSpawnPosition();
 
@@ -170,16 +172,16 @@ namespace BikeWars.Content.managers
             // chances of each type can be changed here
             // hobo starts at 0.4 and after ends at 0.3
             // progress starts at 0.0 and is 1.0 at the end of Gametime
-            // start and end percentages must be 100 in total 
+            // start and end percentages must be 100 in total
             double pHobo = 0.35 - 0.15 * progress; //35% -> 20%
             double pDog = 0.35 - 0.15 * progress; // 35 -> 20
             double pThief    = 0.13 + 0.02 * progress;  // 13 15
             double pDozent   = 0.02 + 0.13 * progress;  // 2  15
             double pKamikaze = 0.05 + 0.1 * progress;  // 5 15
             double pPolice = 0.1 + 0.05 * progress;  // 10 -> 15
-            
+
             double val = RandomUtil.NextDouble();
-            
+
             double spawnHobo = pHobo;
             double spawnDog = spawnHobo + pDog;
             double spawnThief = spawnDog + pThief;
@@ -282,7 +284,10 @@ namespace BikeWars.Content.managers
             );
 
             if (group != null)
+            {
+                group.OnDied += HandleRaveGroupDied;
                 _raveGroups.Add(group);
+            }
         }
 
         private void SpawnRCircle(double progress)
@@ -339,6 +344,10 @@ namespace BikeWars.Content.managers
         public void Dispose()
         {
 
+        }
+        public void HandleRaveGroupDied()
+        {
+            RaverGroupDied?.Invoke();
         }
     }
 }

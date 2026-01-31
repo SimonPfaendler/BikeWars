@@ -9,7 +9,6 @@ using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.src.utils.SaveLoadExample;
 using System;
 using BikeWars.Content.events;
-using System.Collections.Generic;
 using BikeWars.Content.engine.input;
 
 namespace BikeWars;
@@ -174,7 +173,8 @@ public class Game1 : Game
                         break;
 
                     case ButtonAction.Achievements:
-                        AchievementsScreen avs = new AchievementsScreen(background, UIAssets.DefaultFont, _audioService, GraphicsDevice.Viewport);
+                        AchievementsManager av = new AchievementsManager();
+                        AchievementsScreen avs = new AchievementsScreen(background, UIAssets.DefaultFont, _audioService, GraphicsDevice.Viewport, av);
                         avs.LoadContent(Content, GraphicsDevice);
                         avs.BtnClicked += OnBtnClicked;
                         ScreenManager.AddScreen(avs);
@@ -186,6 +186,8 @@ public class Game1 : Game
                         tds.LoadContent(Content, GraphicsDevice);
                         tds.PauseBtnPressed += OnPauseBtnPressed;
                         tds.BtnClicked += OnBtnClicked;
+                        tds.GameOver += OnGameOver;
+                        tds.GameWon += OnGameWon;
                         ScreenManager.AddScreen(tds);
                         break;
 
@@ -473,6 +475,8 @@ public class Game1 : Game
         tds.LoadContent(Content, GraphicsDevice);
         tds.PauseBtnPressed += OnPauseBtnPressed;
         tds.BtnClicked += OnBtnClicked;
+        tds.GameOver += OnGameOver;
+        tds.GameWon += OnGameWon;
         ScreenManager.RemoveScreen(screen);
         ScreenManager.AddScreen(tds);
     }

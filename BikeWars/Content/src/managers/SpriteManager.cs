@@ -101,6 +101,14 @@ namespace BikeWars.Content.managers
             { "pfand_icon", "assets/images/pfand_icon"},
             { "Revolver", "assets/images/Revolver"},
 
+            // Achievements
+            {"UNIVERSITY_NEVER_FORGETS", "assets/images/university_never_forgets"},
+            {"BACHELOR_HERE_I_COME", "assets/images/bachelor_here_i_come"},
+            {"OUCH", "assets/images/ouch"},
+            {"NERD", "assets/images/nerd"},
+            {"UZZ_UZZ", "assets/images/uzz_uzz"},
+            {"DIE_BY_TRAM", "assets/images/die_by_tram"},
+            {"DIABETES", "assets/images/energy_bar"},
         };
 
         // No single-image map sprites here; map sprites are loaded from atlas JSON.

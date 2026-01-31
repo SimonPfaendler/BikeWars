@@ -4,8 +4,9 @@ using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
 using System.Collections.Generic;
 using BikeWars.Content.engine;
-using BikeWars.Content.src.utils.SaveLoadExample;
 using Microsoft.Xna.Framework.Content;
+using BikeWars.Content.managers;
+using System.Linq;
 
 namespace BikeWars.Content.screens;
 public class AchievementsScreen : MenuScreenBase
@@ -15,19 +16,20 @@ public class AchievementsScreen : MenuScreenBase
     public string DesiredMusic => AudioAssets.MenuMusic;
     public float MusicVolume => 1f;
 
-    private static int HEIGHT_OF_COMPONENT = 10 + 11*20;
+    private static int HEIGHT_OF_COMPONENT = 10 + 4*20;
 
     public List<Achievement> Achievements;
 
     private List<AchievementsComponent> _components;
 
-    public AchievementsScreen(Texture2D background, SpriteFont font, AudioService audioService, Viewport vp)
+    public AchievementsScreen(Texture2D background, SpriteFont font, AudioService audioService, Viewport vp, AchievementsManager achievementsManager)
     : base(background, font, vp)
     {
         _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
 
-        var state = SaveLoad.LoadGame();
-        Achievements = state.Achievements ?? new List<Achievement>();
+        // var state = SaveLoad.LoadGame();
+        // Achievements = state.Achievements ?? new List<Achievement>();
+        Achievements = achievementsManager.createAchievements().Values.ToList();
 
         _achievements = new ScrollBox(
             RenderPrimitives.Pixel,
@@ -82,7 +84,7 @@ public class AchievementsScreen : MenuScreenBase
     {
         foreach (var comp in _components)
         {
-            comp.Draw(sb, RenderPrimitives.Pixel, new Color(50, 50, 50, 200), startPos, _font);
+            comp.Draw(sb, RenderPrimitives.Pixel, new Color(83, 195, 189, 200), startPos, _font);
             startPos.Y += HEIGHT_OF_COMPONENT;
         }
     }

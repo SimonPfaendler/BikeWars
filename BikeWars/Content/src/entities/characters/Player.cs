@@ -54,6 +54,7 @@ namespace BikeWars.Entities.Characters
         public event Action IceTrail;
         public event Action FireTrail;
         public event Action DamageCircle;
+        public event Action OnEneryBarPickedUp;
         public event Action<Vector2> ThrowBook;
         public event Action<Vector2> ThrowBanana;
         public event Action<Vector2> ThrowBottle;
@@ -237,6 +238,8 @@ namespace BikeWars.Entities.Characters
             {
                 Attributes.Health += eb.HealAmount;
                 sprint.DecreaseCoolDownTimer(eb.DecreaseSprintCoolDown);
+                OnEneryBarPickedUp?.Invoke();
+                _audio.Sounds.Play(AudioAssets.EatingSnack);
             }
             if (item.InventoryItem)
             {
@@ -454,7 +457,7 @@ namespace BikeWars.Entities.Characters
             return movement.OwnsBike ? 0.5f : 1.0f;
         }
 
-        public override void TakeDamage(int amount, bool shouldSquash = true)
+        public override void TakeDamage(int amount, object hitBy, bool shouldSquash = true)
         {
             // Deactivate Godmode for testing damage
             if (IsGodMode)
@@ -469,7 +472,7 @@ namespace BikeWars.Entities.Characters
 
                 int reducedDamage = Math.Max(0, amount - bike.Attributes.Armor);
                 if (IsDoped) reducedDamage = 0; // Invulnerable
-                base.TakeDamage(reducedDamage, shouldSquash);
+                base.TakeDamage(reducedDamage, hitBy, shouldSquash);
 
                 if (bike.IsDestroyed)
                 {
@@ -479,7 +482,7 @@ namespace BikeWars.Entities.Characters
             else
             {
                 if (IsDoped) amount = 0; // Invulnerable
-                base.TakeDamage(amount, shouldSquash);
+                base.TakeDamage(amount, hitBy, shouldSquash);
             }
         }
 

@@ -45,7 +45,7 @@ public class StatisticsManager
         Statistic.CurrentXP(xp);
     }
 
-    public void HandleTookDamage(CharacterBase c, int amount)
+    public void HandleTookDamage(CharacterBase c, int amount, object hitBy)
     {
         Statistic.AddDamage(c, amount);
         if (c is Player)

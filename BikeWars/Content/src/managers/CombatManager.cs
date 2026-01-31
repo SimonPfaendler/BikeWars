@@ -62,7 +62,7 @@ public class CombatManager
         }
 
         // Apply Damage
-        target.TakeDamage(damage);
+        target.TakeDamage(damage, projectile.Owner);
         projectile.HasHit = true;
 
         // Notify GameScreen to Shake
@@ -94,7 +94,7 @@ public class CombatManager
         if (target == aoe.Owner) return;
 
         // Apply Damage
-        target.TakeDamage(aoe.Damage, shouldSquash: false);
+        target.TakeDamage(aoe.Damage, aoe.Owner, shouldSquash: false);
 
         if (aoe is IceTrail)
         {
@@ -139,12 +139,12 @@ public class CombatManager
         }
 
     }
-    public void HandleTramHit(CharacterBase target)
+    public void HandleTramHit(CharacterBase target, object tram)
     {
         if (target.IsDead) return;
         if (target.IsGodMode) return;
 
-        target.TakeDamage(10);
+        target.TakeDamage(10, tram);
         _audio.Sounds.Play(AudioAssets.TrainHit);
 
         if (target.Attributes.Health <= 0)
@@ -153,12 +153,12 @@ public class CombatManager
         }
     }
 
-    public void HandleBaechleHit(CharacterBase target)
+    public void HandleBaechleHit(CharacterBase target, object baechle)
     {
         if (target.IsDead) return;
         if (target.IsGodMode) return;
 
-        target.TakeDamage(1);
+        target.TakeDamage(1, baechle);
         _audio.Sounds.Play(AudioAssets.BaechleSplash);
 
         if (target.Attributes.Health <= 0)

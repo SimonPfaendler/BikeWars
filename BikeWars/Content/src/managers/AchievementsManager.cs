@@ -1,4 +1,8 @@
+using BikeWars.Content.components;
 using BikeWars.Content.engine;
+using BikeWars.Content.entities.interfaces;
+using BikeWars.Content.src.utils.SaveLoadExample;
+using BikeWars.Entities.Characters;
 using System;
 using System.Collections.Generic;
 
@@ -54,9 +58,6 @@ public class AchievementsManager
     // For OUCH
     private bool player_died = false;
 
-    // For NERD
-    private bool got_all_achievements = false;
-
     // For RAVER
     private bool killed_raver = false;
 
@@ -66,6 +67,8 @@ public class AchievementsManager
     public int CrtSnackCount = 0;
 
     private const int SNACK_COUNT = 20;
+
+    public event Action SaveFile;
 
     // For DIABETES
     private bool ate_snacks = false;
@@ -82,7 +85,7 @@ public class AchievementsManager
     public AchievementsManager()
     {
         Achievements = createAchievements();
-        Achievement = createAchievement();
+        Achievement = new Achievement();
     }
 
     public AchievementsManager(Achievement a, Dictionary<AchievementIds, Achievement> at)
@@ -91,7 +94,7 @@ public class AchievementsManager
         Achievement = a;
     }
 
-    private Dictionary<AchievementIds, Achievement> createAchievements()
+    public Dictionary<AchievementIds, Achievement> createAchievements()
     {
         Dictionary<AchievementIds, Achievement> achievements = new Dictionary<AchievementIds, Achievement>
         {
@@ -103,50 +106,50 @@ public class AchievementsManager
             { AchievementIds.DIE_BY_TRAM, DieByTram() },
             { AchievementIds.DIABETES, Diabetes() },
         };
+        var state = SaveLoad.LoadGame();
+        foreach (Achievement a in state.Achievements)
+        {
+            if (a.Id == AchievementIds.NONE) continue;
+            a.Picture = achievements[a.Id].Picture;
+            achievements[a.Id] = a; // just overwrite the current values with what is saved in the file
+        }
         return achievements;
     }
-    private Achievement createAchievement()
-    {
-        return new Achievement();
-    }
-
     private Achievement UniversityNeverForgets()
     {
-        return new Achievement(AchievementIds.UNIVERSITY_NEVER_FORGETS, "Die Uni vergisst dich nie!", "Du hast das Spiel gewonnen, da du die maximale Zeit ueberlebt hast!", false);
+        return new Achievement(AchievementIds.UNIVERSITY_NEVER_FORGETS, "Die Uni vergisst dich nie!", "Du hast das Spiel gewonnen, da du die maximale Zeit ueberlebt hast!", false, SpriteManager.GetTexture("UNIVERSITY_NEVER_FORGETS"));
     }
 
     private Achievement BachelorHereICome()
     {
-        return new Achievement(AchievementIds.BACHELOR_HERE_I_COME, "Bachelor, ich komme!", "Gewinne das Spiel und habe dabei die Uni erreicht.", false);
+        return new Achievement(AchievementIds.BACHELOR_HERE_I_COME, "Bachelor, ich komme!", "Gewinne das Spiel und habe dabei die Uni erreicht.", false, SpriteManager.GetTexture("BACHELOR_HERE_I_COME"));
     }
 
     private Achievement Ouch()
     {
-        return new Achievement(AchievementIds.OUCH, "Autsch! Das tat weh!", "Stirb im Spiel.", false);
+        return new Achievement(AchievementIds.OUCH, "Autsch! Das tat weh!", "Stirb im Spiel.", false, SpriteManager.GetTexture("OUCH"));
     }
 
     private Achievement Nerd()
     {
-        return new Achievement(AchievementIds.NERD, "Streeeeeber!", "Erhalte alle Achievements die es gibt.", false);
+        return new Achievement(AchievementIds.NERD, "Streeeeeber!", "Erhalte alle Achievements die es gibt.", false, SpriteManager.GetTexture("NERD"));
     }
     private Achievement UzzUzz()
     {
-        return new Achievement(AchievementIds.UZZ_UZZ, "Uzz! Uzz! Uzz!", "Besiege die Rave-Horde.", false);
+        return new Achievement(AchievementIds.UZZ_UZZ, "Uzz! Uzz! Uzz!", "Besiege die Rave-Horde.", false, SpriteManager.GetTexture("UZZ_UZZ"));
     }
     private Achievement DieByTram()
     {
-        return new Achievement(AchievementIds.DIE_BY_TRAM, "Die letzte verpasst? Die naechste kommt!", "Stirb wegen der Strassenbahn.", false);
+        return new Achievement(AchievementIds.DIE_BY_TRAM, "Die letzte verpasst? Die naechste kommt!", "Stirb wegen der Strassenbahn.", false, SpriteManager.GetTexture("DIE_BY_TRAM"));
     }
     private Achievement Diabetes()
     {
-        return new Achievement(AchievementIds.DIABETES, "Diabetes", "Esse 20 Riegel in einem Spiel.", false);
+        return new Achievement(AchievementIds.DIABETES, "Diabetes", "Esse 20 Riegel in einem Spiel.", false,SpriteManager.GetTexture("EnergyBar"));
     }
     public void SuccededAchievement(AchievementIds id)
     {
         _achievements[id].Succeeded = true;
     }
-
-    // public void
 
     public void HandleAchievement(AchievementIds id, Triggers trigger)
     {
@@ -168,67 +171,108 @@ public class AchievementsManager
             died_by_tram = true;
             break;
             case Triggers.ATE_SNACKS:
-            ate_snacks = true;
             CrtSnackCount += 1;
+            if (CrtSnackCount >= SNACK_COUNT)
+            {
+                ate_snacks = true;
+            }
             break;
-        }
-
-        if (reached_area && won_game && player_died && killed_raver && died_by_tram && ate_snacks)
-        {
-            got_all_achievements = true;
         }
 
         switch(id)
         {
             case AchievementIds.UNIVERSITY_NEVER_FORGETS:
+            if (_achievements[AchievementIds.UNIVERSITY_NEVER_FORGETS].Succeeded) return;
             if (won_game)
             {
                 SuccededAchievement(id);
+                SaveAchievement(false);
             }
             break;
             case AchievementIds.BACHELOR_HERE_I_COME:
+            if (_achievements[AchievementIds.BACHELOR_HERE_I_COME].Succeeded) return;
             if (reached_area && won_game)
             {
                 SuccededAchievement(id);
+                SaveAchievement(false);
             }
             break;
             case AchievementIds.OUCH:
+            if (_achievements[AchievementIds.OUCH].Succeeded) return;
             if (player_died)
             {
                 SuccededAchievement(id);
-            }
-            break;
-            case AchievementIds.NERD:
-            if (got_all_achievements)
-            {
-                SuccededAchievement(id);
+                SaveAchievement(true);
             }
             break;
             case AchievementIds.UZZ_UZZ:
+            if (_achievements[AchievementIds.UZZ_UZZ].Succeeded) return;
             if (killed_raver)
             {
                 SuccededAchievement(id);
+                SaveAchievement(true);
             }
             break;
             case AchievementIds.DIE_BY_TRAM:
+            if (_achievements[AchievementIds.DIE_BY_TRAM].Succeeded) return;
             if (died_by_tram)
             {
                 SuccededAchievement(id);
+                SaveAchievement(true);
             }
             break;
             case AchievementIds.DIABETES:
+            if (_achievements[AchievementIds.DIABETES].Succeeded) return;
             if (ate_snacks && CrtSnackCount >= SNACK_COUNT)
             {
                 SuccededAchievement(id);
+                SaveAchievement(true);
             }
             break;
         }
+
+        if (!gotAllAchievements()) return;
+        if (_achievements[AchievementIds.NERD].Succeeded) return;
+        SuccededAchievement(AchievementIds.NERD);
+        SaveAchievement(true);
+    }
+
+    private bool gotAllAchievements()
+    {
+        foreach (Achievement a in Achievements.Values)
+        {
+            if (!a.Succeeded && a.Id != 0 && a.Id != AchievementIds.NERD)
+            {
+                return false;
+            }
+        }
+        return true;
     }
     public void OnEnergyBarPickedUp()
     {
         HandleAchievement(AchievementIds.DIABETES, Triggers.ATE_SNACKS);
     }
-    public void SaveAchievement()
+    public void OnDiedByTram(CharacterBase c, int amount, object hitBy)
+    {
+        if (c is not Player p) return;
+        if (hitBy is not Tram) return;
+        if (p.IsDead)
+        {
+            HandleAchievement(AchievementIds.DIE_BY_TRAM, Triggers.DIED_BY_TRAM);
+        }
+    }
+    public void OnRaverGroupDied()
+    {
+        HandleAchievement(AchievementIds.UZZ_UZZ, Triggers.KILLED_RAVER);
+    }
+    public void OnPlayerDied(CharacterBase c)
+    {
+        if (c is not Player) return;
+        HandleAchievement(AchievementIds.OUCH, Triggers.PLAYER_DIED);
+    }
+
+    // needsSavingInFile is just necessary if we don't want to save double the entries
+    public void SaveAchievement(bool needsSavingInFile)
     {
         if (Achievements == null)
             Achievements = new Dictionary<AchievementIds, Achievement>();
@@ -237,5 +281,7 @@ public class AchievementsManager
             Achievement = new Achievement();
 
         Achievements[Achievement.Id] = Achievement;
+        if (!needsSavingInFile) return;
+        SaveFile?.Invoke();
     }
 }

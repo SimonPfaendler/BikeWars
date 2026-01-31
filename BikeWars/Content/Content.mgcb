@@ -22,6 +22,18 @@
 /processorParam:TextureFormat=Compressed
 /build:assets/fonts/Arial.spritefont;assets/fonts/Arial
 
+#begin assets/images/bachelor_here_i_come.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/bachelor_here_i_come.png
+
 #begin assets/images/banana_icon.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -93,6 +105,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:assets/images/ControllerBelegung.png
+
+#begin assets/images/die_by_tram.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/die_by_tram.png
 
 #begin assets/images/DogFood.png
 /importer:TextureImporter
@@ -202,6 +226,30 @@
 /processorParam:TextureFormat=Color
 /build:assets/images/klingel.jpg
 
+#begin assets/images/nerd.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/nerd.png
+
+#begin assets/images/ouch.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/ouch.png
+
 #begin assets/images/pfand_icon.jpg
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -297,6 +345,30 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:assets/images/tower_ally.png
+
+#begin assets/images/university_never_forgets.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/university_never_forgets.png
+
+#begin assets/images/uzz_uzz.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/images/uzz_uzz.png
 
 #begin assets/Map/Bike_Shop_Template.tx
 /copy:assets/Map/Bike_Shop_Template.tx
@@ -477,6 +549,12 @@
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:assets/sounds/Dogs/Miau.mp3
+
+#begin assets/sounds/eating_snacks.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/eating_snacks.mp3
 
 #begin assets/sounds/flamethrower.wav
 /importer:WavImporter

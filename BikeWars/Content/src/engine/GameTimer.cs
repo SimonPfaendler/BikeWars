@@ -100,5 +100,11 @@ namespace BikeWars.Content.engine
             _isRunning = isRunning;
             _isPaused = isPaused;
         }
+
+        // Will be used mainly because of the techdemo
+        public void setGameTimer(float time)
+        {
+            _currentTime = time;
+        }
     }
 }

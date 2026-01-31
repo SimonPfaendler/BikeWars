@@ -36,7 +36,8 @@ namespace BikeWars.Content.engine.Audio
         public const string WoodDestroy = "wood_destroy";
         public const string RaverSound = "raver_audio";
         public const string ThrowObject = "throw_object";
-        
+        public const string EatingSnack = "eating_snack";
+
 
         // Mapping ID -> Content-Path
         public static readonly IReadOnlyDictionary<string, string> SoundEffectPaths = new Dictionary<string, string>
@@ -71,8 +72,8 @@ namespace BikeWars.Content.engine.Audio
             { WoodDestroy, "assets/sounds/wood_destroy"},
             { Miau, "assets/sounds/Dogs/Miau"},
             { RaverSound, "assets/sounds/raver_audio" },
-            { ThrowObject, "assets/sounds/throw_object" }
-            
+            { ThrowObject, "assets/sounds/throw_object" },
+            { EatingSnack, "assets/sounds/eating_snacks" }
         };
 
         // Song IDs to be used in the code
@@ -80,7 +81,7 @@ namespace BikeWars.Content.engine.Audio
         public const string GameMusic = "Game_music";
         public const string LatinMusic = "Latin_music";
         public const string Metal = "Metal";
-        
+
         public static readonly IReadOnlyDictionary<string, string> SongPaths = new Dictionary<string, string>
         {
             { MenuMusic, "assets/sounds/Menu_music" },

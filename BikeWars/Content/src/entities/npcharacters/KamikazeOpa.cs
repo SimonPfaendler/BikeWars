@@ -105,7 +105,7 @@ namespace BikeWars.Entities.Characters
                 float distSq = Vector2.DistanceSquared(Transform.Position, enemyMove.PlayerPosition);
                 if (distSq < TriggerDistanceSq)
                 {
-                    TakeDamage(SelfDestructDamage);
+                    TakeDamage(SelfDestructDamage, this);
                 }
             }
         }
@@ -123,7 +123,7 @@ namespace BikeWars.Entities.Characters
                 float distSq = Vector2.DistanceSquared(Transform.Position, player.Transform.Position);
                 if (distSq < ExplosionRadiusSq)
                 {
-                    player.TakeDamage(ExplosionDamage);
+                    player.TakeDamage(ExplosionDamage, this);
                 }
             }
 

@@ -28,8 +28,8 @@ public class CollisionManager
     public event Action<CharacterBase, CharacterBase> OnCharacterCollision;
 
     public event Action<CharacterBase, AreaOfEffectBase> OnAOEHit;
-    public event Action<CharacterBase> OnTramHit;
-    public event Action<CharacterBase> OnBaechleHit;
+    public event Action<CharacterBase, object> OnTramHit;
+    public event Action<CharacterBase, object> OnBaechleHit;
 
     public event Action <DestructibleObject, ProjectileBase> OnProjectileHitDestructible;
     public event Action <DestructibleObject, AreaOfEffectBase> OnAOEHitDestructible;
@@ -700,10 +700,10 @@ public class CollisionManager
     {
         if (c.Layer == CollisionLayer.TRAM && (d.Layer == CollisionLayer.CHARACTER || d.Layer == CollisionLayer.PLAYER))
         {
-             if (c.Intersects(d))
-             {
-                 OnTramHit?.Invoke((CharacterBase)d.Owner);
-             }
+            if (c.Intersects(d))
+            {
+                OnTramHit?.Invoke((CharacterBase)d.Owner, c.Owner);
+            }
         }
     }
 
@@ -889,7 +889,7 @@ public class CollisionManager
 
                 if (player.CurrentTerrain.TerrainType == TerrainType.BAECHLE)
                 {
-                    OnBaechleHit?.Invoke(player);
+                    OnBaechleHit?.Invoke(player, s.Owner);
                 }
                 return;
             }

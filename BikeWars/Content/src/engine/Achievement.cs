@@ -1,4 +1,5 @@
 using BikeWars.Content.managers;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace BikeWars.Content.engine;
 public class Achievement
@@ -36,19 +37,32 @@ public class Achievement
             _succeeded = value;
         }
     }
+
+    private Texture2D _picture { get; set;}
+    public Texture2D Picture {
+        get => _picture;
+        set
+        {
+            _picture = value;
+        }
+    }
+
+
     public Achievement()
     {
         Id = 0;
         Name = "";
         Succeeded = false;
         Description = "";
+        Picture = null;
     }
 
-    public Achievement(AchievementIds id, string name, string description, bool succeded)
+    public Achievement(AchievementIds id, string name, string description, bool succeded, Texture2D picture)
     {
         Id = id;
         Name = name;
         Description = description;
         Succeeded = succeded;
+        Picture = picture;
     }
 }

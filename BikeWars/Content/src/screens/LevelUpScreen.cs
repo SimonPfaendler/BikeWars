@@ -48,7 +48,7 @@ public class LevelUpScreen : MenuScreenBase, IScreen
         IsOpen = true;
         _selectedOption = 0;
         // here different options can be listed, for example depending on which level it is or which where chosen before
-        
+
         if (player.CurrentLevel == 2)
         {
             _option1 = SkillTree.SkillId.WeaponGun;

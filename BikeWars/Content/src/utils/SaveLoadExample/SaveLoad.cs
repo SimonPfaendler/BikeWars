@@ -57,7 +57,6 @@ public static class SaveLoad
         public List<Statistic> Statistics{get; set;} = new();
         public Statistic Statistic{get; set;} = new();
         public List<Achievement> Achievements{get; set;} = new();
-        public Achievement Achievement{get; set;} = new();
         public int GameMode { get; set; } = 0;
     }
 
@@ -233,7 +232,6 @@ public static class SaveLoad
                 Statistics = statisticsManager.Statistics,
                 Statistic = statisticsManager.Statistic,
                 Achievements = achievementsManager.Achievements.Values.ToList(),
-                // Achievement = achievementsManager.Achievement
             };
             string json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
 

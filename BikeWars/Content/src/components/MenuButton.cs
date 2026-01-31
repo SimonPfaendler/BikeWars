@@ -10,7 +10,7 @@ namespace BikeWars.Content.components
     {
         private readonly Texture2D _texture;
         private readonly SpriteFont _font;
-        private readonly string _text;
+        private string _text;
         private readonly AudioService _audioService;
 
         private Rectangle _originalBounds;
@@ -66,7 +66,7 @@ namespace BikeWars.Content.components
 
         public bool IsHovered => _isHovered;
         public Rectangle Bounds => _collisionBounds;
-        public string Text => _text;
+        public string Text {get =>_text; set => _text = value;}
 
         public void Update(MouseState mouseState, GameTime gameTime)
         {
