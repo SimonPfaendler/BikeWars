@@ -125,11 +125,33 @@ namespace BikeWars.Content.managers
             Vector2 center = _gameObjectManager.Player1.Transform.Position;
 
             float spacing = 50f; // Spacing between enemies
-            Vector2 startPos = center + new Vector2(-((count - 1) * spacing) / 2, -400f); // Start above the player
+            Vector2 startPos;
+            Vector2 step;
+
+            if (center.X <= 5600 && center.Y <= 5600) // upper left: line to the left of the player, vertical
+            {
+                startPos = center + new Vector2(-400f, -((count - 1) * spacing) / 2f);
+                step = new Vector2(0, spacing);
+            }
+            else if (center.X <= 5600 && center.Y > 5600) // lower left: line below the player, horizontal
+            {
+                startPos = center + new Vector2(-((count - 1) * spacing) / 2f, 400f);
+                step = new Vector2(spacing, 0);
+            }
+            else if (center.X > 5600 && center.Y > 5600) // lower right: line to the right of the player, vertical
+            {
+                startPos = center + new Vector2(400f, -((count - 1) * spacing) / 2f);
+                step = new Vector2(0, spacing);
+            }
+            else // upper right: line above the player, horizontal
+            {
+                startPos = center + new Vector2(-((count - 1) * spacing) / 2f, -400f);
+                step = new Vector2(spacing, 0);
+            }
 
             for (int i = 0; i < count; i++)
             {
-                Vector2 pos = startPos + new Vector2(i * spacing, 0);
+                Vector2 pos = startPos + step * i;
 
                 if (!IsValidSpawnPosition(pos)) continue;
 
@@ -299,7 +321,7 @@ namespace BikeWars.Content.managers
             Player? target = _gameObjectManager.GetTargetPlayer(Vector2.Zero);
             if (target == null) return;
 
-            int count = 30 + (int)(progress * 10); // 12..22
+            int count = 30 + (int)(progress * 30); // 30..60
             float startRadius = 500f;
 
             // pick a size you want for ravers
