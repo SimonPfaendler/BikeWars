@@ -1298,6 +1298,7 @@ namespace BikeWars.Content.screens
         protected void AddAchievementToShow(AchievementIds id)
         {
             _showAchievementTimes.Add(_achievementsManager.Achievements[id], 5f);
+            _audioService.PlaySound(AudioAssets.Cool);
         }
         public void SaveNonGame()
         {

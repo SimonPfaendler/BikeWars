@@ -520,6 +520,12 @@
 /processorParam:Quality=Best
 /build:assets/sounds/CarHorn.mp3
 
+#begin assets/sounds/cool.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/cool.mp3
+
 #begin assets/sounds/damage_circle.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
@@ -592,11 +598,6 @@
 /processorParam:Quality=Best
 /build:assets/sounds/Dogs/Miau.mp3
 
-#begin assets/sounds/eating_snacks.mp3
-/importer:Mp3Importer
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:assets/sounds/eating_snacks.mp3
 #begin assets/sounds/DozentHit.mp3
 /importer:Mp3Importer
 /processor:SoundEffectProcessor
@@ -620,6 +621,12 @@
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:assets/sounds/DozentTalk_3.mp3
+
+#begin assets/sounds/eating_snacks.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/eating_snacks.mp3
 
 #begin assets/sounds/Explosion.mp3
 /importer:Mp3Importer

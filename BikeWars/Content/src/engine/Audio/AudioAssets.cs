@@ -59,7 +59,7 @@ namespace BikeWars.Content.engine.Audio
         public const string HoboTalk2 = "hobo_talk_2";
         public const string HoboHit1 = "hobo_hit_1";
         public const string HoboHit2 = "hobo_hit_2";
-
+        public const string Cool = "cool";
 
 
         // Mapping ID -> Content-Path
@@ -117,8 +117,8 @@ namespace BikeWars.Content.engine.Audio
             { HoboTalk1, "assets/sounds/HoboTalk1"},
             { HoboTalk2, "assets/sounds/HoboTalk2"},
             { HoboHit1, "assets/sounds/HoboHit1"},
-            { HoboHit2, "assets/sounds/HoboHit2"}
-
+            { HoboHit2, "assets/sounds/HoboHit2"},
+            { Cool, "assets/sounds/cool"}
         };
 
         // Song IDs to be used in the code
