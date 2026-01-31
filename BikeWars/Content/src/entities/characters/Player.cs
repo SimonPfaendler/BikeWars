@@ -758,7 +758,7 @@ namespace BikeWars.Entities.Characters
                     _dopingTimer = 5f;
                     Attributes.Health = Math.Max(1, Attributes.Health - 50);
                 }
-                else if (item is Beer beer)
+                if (item is Beer beer)
                 {
 
                     if (beer.TryActivateBeer())
