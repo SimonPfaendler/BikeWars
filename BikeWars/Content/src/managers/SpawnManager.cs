@@ -24,8 +24,10 @@ namespace BikeWars.Content.managers
         private double _timeSinceLastSpawn;
         private double _timeSinceLastSwarm;
         private double _timeSinceLastCircle;
+        private double _timeSinceLastSlowEnemyLinear;
         private const double SWARM_INTERVAL = 75.0;
         private const double CIRCLE_SPAWN_INTERVAL = 60.0;
+        private const double SLOW_ENEMY_SPAWN_INTERVAL = 30.0;
 
         private readonly List<ICollider> _spawnQueryBuffer = new(32);
 
@@ -64,6 +66,7 @@ namespace BikeWars.Content.managers
             _timeSinceLastSwarm += elapsed;
             _timeSinceLastCircle += elapsed;
             _timeSinceLastTram += elapsed;
+            _timeSinceLastSlowEnemyLinear += elapsed;
 
             // Update spawn interval based on progression
             // Lerp from start interval to end interval based on time fraction
@@ -104,6 +107,37 @@ namespace BikeWars.Content.managers
                     _raveGroups.RemoveAt(i);
             }
 
+            if (_timeSinceLastSlowEnemyLinear >= SLOW_ENEMY_SPAWN_INTERVAL)
+            {
+                SpawnSlowEnemyLiniear(100, progress);
+                _timeSinceLastSlowEnemyLinear = 0;
+            }
+
+
+        }
+        
+        public void SpawnSlowEnemyLiniear(int count, double progress)
+        {
+            float difficultyMultiplier = 1.0f + (1.2f * (float)progress);
+            float speedMultiplier = 0.5f;
+
+            if (_gameObjectManager.Player1 == null) return;
+            Vector2 center = _gameObjectManager.Player1.Transform.Position;
+
+            float spacing = 50f; // Spacing between enemies
+            Vector2 startPos = center + new Vector2(-((count - 1) * spacing) / 2, -400f); // Start above the player
+
+            for (int i = 0; i < count; i++)
+            {
+                Vector2 pos = startPos + new Vector2(i * spacing, 0);
+
+                if (!IsValidSpawnPosition(pos)) continue;
+
+                CharacterBase enemy = new Hobo(pos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler);
+
+                ApplyScaling(enemy, difficultyMultiplier, speedMultiplier);
+                _gameObjectManager.AddCharacter(enemy);
+            }
         }
 
         public void SpawnTram(float spawnRadius = 5000f)

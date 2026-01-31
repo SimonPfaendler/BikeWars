@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.input;
@@ -15,6 +17,20 @@ namespace BikeWars.Content.managers
 
     public class PlayerManager
     {
+        private static readonly Random _rng = new();
+
+        // Define possible starting points
+        private static readonly List<Vector2> _startPositions = new()
+        {
+            new Vector2(3511, 1313),
+            new Vector2(4799, 7618),
+            new Vector2(8576, 8758),
+            new Vector2(9045, 5198),
+            new Vector2(9960, 2091),
+            new Vector2(5279, 4816),
+            new Vector2(1390, 9856)
+        };
+
         public Player Player1 { get; private set; }
         public Player Player2 { get; private set; }
         public Camera2D Camera { get; private set; }
@@ -27,9 +43,13 @@ namespace BikeWars.Content.managers
                 worldBounds
             );
 
+            // Pick random starting spots
+            Vector2 p1Start = PickStartPosition();
+            Vector2 p2Start = p1Start + new Vector2(200, 0);
+
             // Player 1 - Keyboard
             var inputP1 = new KeyboardPlayerInput(Camera);
-            Player1 = new Player(new Vector2(worldBounds.Width / 2, worldBounds.Height / 2), 15, new Point(32,32), audioService, inputP1, isTechDemo);
+            Player1 = new Player(p1Start, 15, new Point(32,32), audioService, inputP1, isTechDemo);
 
             if (isTechDemo)
             {
@@ -43,12 +63,22 @@ namespace BikeWars.Content.managers
             }
             // Assign Player 2 to the second controller. Player 1 starts on Keyboard but can switch to Pad 1.
             var inputP2 = new GamepadPlayerInput(PlayerIndex.Two);
-            Player2 = new Player(new Vector2(worldBounds.Width / 2 + 50, worldBounds.Height / 2), 12, new Point(32, 32), audioService, inputP2, isTechDemo, "Character2");
+            Player2 = new Player(p2Start, 12, new Point(32, 32), audioService, inputP2, isTechDemo, "Character2");
 
             if (isTechDemo)
             {
                 Player2.IsGodMode = true;
             }
+        }
+
+        private static Vector2 PickStartPosition()
+        {
+            if (_startPositions.Count == 0)
+            {
+                return Vector2.Zero;
+            }
+
+            return _startPositions[_rng.Next(_startPositions.Count)];
         }
     }
 }
