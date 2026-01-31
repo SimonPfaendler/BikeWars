@@ -224,11 +224,7 @@ public class CollisionManager
     // checks whether a tile id is one of the allowed road tiles
     private bool IsRealRoadGid(int gid)
     {
-        if (gid == 0)
-            return false;
-
-        // Explicitly allow only asphalt tiles
-        return gid == 2348 || gid == 2350;
+        return gid == 2348;
     }
     
     // converts a world position to grid coordinates and returns that tile’s GID

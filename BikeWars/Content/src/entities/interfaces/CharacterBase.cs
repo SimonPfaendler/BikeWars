@@ -122,7 +122,7 @@ public abstract class CharacterBase : ICharacter, ICombat
             _pulseTimer += dt * 5f;
             float intensity = 0.1f * GetPulseMultiplier();
             float pulse = MathF.Sin(_pulseTimer) * intensity;
-            _renderScale = new Vector2(1f + pulse, 1f - pulse);
+            _renderScale = Vector2.Lerp(_renderScale, Vector2.One, Math.Min(10f * dt, 1f));
         }
         else
         {
