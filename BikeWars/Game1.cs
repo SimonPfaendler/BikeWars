@@ -16,6 +16,8 @@ namespace BikeWars;
 public class Game1 : Game
 {
     private readonly GraphicsDeviceManager _graphics;
+    private int _windowWidth = 1280;
+    private int _windowHeight = 720;
     public SpriteBatch SpriteBatch { get; private set; }
     public ScreenManager ScreenManager;
     private AudioService _audioService;
@@ -83,15 +85,52 @@ public class Game1 : Game
 
     private void OnGraphicsRequested(GraphicsCommand gc)
     {
-        SetResolution(gc.Width, gc.Height, _graphics.IsFullScreen = !_graphics.IsFullScreen);
+        bool toggleFullscreen = gc.Fullscreen;
+        bool targetFullscreen = _graphics.IsFullScreen;
 
-        // Need to update all the Screens
+        int targetWidth;
+        int targetHeight;
+
+        if (toggleFullscreen)
+        {
+            targetFullscreen = !_graphics.IsFullScreen;
+
+            if (targetFullscreen)
+            {
+                var mode = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
+                targetWidth = mode.Width;
+                targetHeight = mode.Height;
+            }
+            else
+            {
+                targetWidth = _windowWidth;
+                targetHeight = _windowHeight;
+            }
+        }
+        else
+        {
+            targetWidth = gc.Width > 0 ? gc.Width : _graphics.PreferredBackBufferWidth;
+            targetHeight = gc.Height > 0 ? gc.Height : _graphics.PreferredBackBufferHeight;
+            targetFullscreen = false;
+            _windowWidth = targetWidth;
+            _windowHeight = targetHeight;
+        }
+
+        SetResolution(targetWidth, targetHeight, targetFullscreen);
+
+        var viewport = GraphicsDevice.Viewport;
+
+        // Update all active screens so layout/camera matches new resolution
         foreach (var screen in ScreenManager.Screens)
         {
-            if (screen is MenuScreenBase menu)
+            switch (screen)
             {
-                menu.ViewPort = GraphicsDevice.Viewport;
-                menu.OnActivated();
+                case MenuScreenBase menu:
+                    menu.OnViewportChanged(viewport);
+                    break;
+                case GameScreen gs:
+                    gs.OnViewportChanged(viewport);
+                    break;
             }
         }
     }

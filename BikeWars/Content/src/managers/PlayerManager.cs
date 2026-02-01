@@ -71,6 +71,26 @@ namespace BikeWars.Content.managers
             }
         }
 
+        public void ReinitializeCamera(Viewport viewport, Rectangle worldBounds)
+        {
+            Camera = new Camera2D(
+                viewport.Width,
+                viewport.Height,
+                worldBounds
+            );
+
+            if (Player1 != null)
+            {
+                Player1.SetInput(new KeyboardPlayerInput(Camera));
+            }
+
+            // Player 2 uses controller; no input remap needed, but keep reference consistent
+            if (Player2 != null)
+            {
+                Player2.UpdateCollider();
+            }
+        }
+
         private static Vector2 PickStartPosition()
         {
             if (_startPositions.Count == 0)

@@ -143,6 +143,41 @@ namespace BikeWars.Content.screens
             _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
             _gameMode = gameMode;
         }
+
+        public virtual void OnViewportChanged(Viewport viewport)
+        {
+            ViewPort = viewport;
+
+            if (_playerManager != null)
+            {
+                _playerManager.ReinitializeCamera(viewport, worldBounds);
+                camera = _playerManager.Camera;
+
+                var p1 = _gameObjectManager?.Player1?.Transform.Position;
+                var p2 = _gameObjectManager?.Player2?.Transform.Position;
+                if (p1.HasValue && p2.HasValue)
+                {
+                    camera.Position = Maths.Middle(p1.Value, p2.Value);
+                }
+                else if (p1.HasValue)
+                {
+                    camera.Position = p1.Value;
+                }
+                else if (p2.HasValue)
+                {
+                    camera.Position = p2.Value;
+                }
+            }
+
+            // reposition HUD elements that depend on viewport size
+            int viewW = ViewPort.Width;
+            int viewH = ViewPort.Height;
+            _timerPosition = new Vector2(viewW / 2f, 40f);
+            if (_hudP2 != null)
+            {
+                _hudP2.Position = new Vector2(viewW - 350, viewH - 170);
+            }
+        }
         public virtual void LoadContent(ContentManager content, GraphicsDevice gd)
         {
             // Font and Debugger

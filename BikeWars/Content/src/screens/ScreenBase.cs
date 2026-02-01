@@ -30,6 +30,17 @@ public abstract class MenuScreenBase : IScreen, IDisposable
     // Resolution tracking
     protected int _lastScreenWidth;
     protected int _lastScreenHeight;
+    private bool _pendingLayoutRefresh = false;
+
+    private void RefreshLayout()
+    {
+        _lastScreenWidth = ViewPort.Width;
+        _lastScreenHeight = ViewPort.Height;
+        _buttons.Clear();
+        InitializeButtons();
+        UpdateSelection(0);
+        _previousMouseState = Mouse.GetState();
+    }
 
     protected MenuScreenBase(Texture2D background, SpriteFont font, Viewport viewport)
     {
@@ -45,9 +56,14 @@ public abstract class MenuScreenBase : IScreen, IDisposable
     public virtual void LoadContent(ContentManager content, GraphicsDevice gd)
     {
         // Track initial resolution
-        _lastScreenWidth = ViewPort.Width;
-        _lastScreenHeight = ViewPort.Height;
-        InitializeButtons();
+        RefreshLayout();
+    }
+
+    public virtual void OnViewportChanged(Viewport viewport)
+    {
+        ViewPort = viewport;
+        RefreshLayout();
+        _pendingLayoutRefresh = false;
     }
 
     protected void AddButton(MenuButton button)
@@ -66,13 +82,19 @@ public abstract class MenuScreenBase : IScreen, IDisposable
 
     public virtual void Update(GameTime gameTime)
     {
-        // Check for Resolution Change
-        if (ViewPort.Width != _lastScreenWidth || ViewPort.Height != _lastScreenHeight)
+        // Check for Resolution Change or a queued external refresh
+        bool layoutChanged = false;
+        if (_pendingLayoutRefresh || ViewPort.Width != _lastScreenWidth || ViewPort.Height != _lastScreenHeight)
         {
-            _lastScreenWidth = ViewPort.Width;
-            _lastScreenHeight = ViewPort.Height;
-            _buttons.Clear();
-            InitializeButtons();
+            _pendingLayoutRefresh = false;
+            RefreshLayout();
+            layoutChanged = true;
+        }
+
+        if (layoutChanged)
+        {
+            // Skip input processing this frame; layout will be correct next frame.
+            return;
         }
 
         // Controller / Keyboard Navigation
@@ -104,14 +126,19 @@ public abstract class MenuScreenBase : IScreen, IDisposable
             _lastClickTime = now;
         }
 
-        foreach (var button in _buttons)
+        var buttonsSnapshot = _buttons.ToArray();
+        foreach (var button in buttonsSnapshot)
         {
             button.Update(currentMouseState, gameTime);
 
             if (button.IsHovered)
             {
                 _usingMouse = true;
-                UpdateSelection(_buttons.IndexOf(button));
+                int idx = _buttons.IndexOf(button);
+                if (idx >= 0)
+                {
+                    UpdateSelection(idx);
+                }
             }
 
             if (_usingMouse && button.IsClicked(currentMouseState, _previousMouseState))
