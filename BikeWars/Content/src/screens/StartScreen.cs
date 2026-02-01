@@ -20,7 +20,6 @@ public class StartScreen : MenuScreenBase, IScreen
         _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
     }
 
-
     public override void LoadContent(ContentManager content, GraphicsDevice gd)
     {
         base.LoadContent(content, gd);
@@ -48,11 +47,6 @@ public class StartScreen : MenuScreenBase, IScreen
             audioService: _audioService
         ));
         UpdateSelection(0);
-    }
-
-    private void Forward(GraphicsCommand cmd)
-    {
-        GraphicsRequested?.Invoke(cmd);
     }
     public override bool DrawLower => false;
     public override bool UpdateLower => false;

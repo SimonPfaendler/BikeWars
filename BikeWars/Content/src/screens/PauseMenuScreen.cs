@@ -3,8 +3,6 @@ using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
-using BikeWars.Content.events;
-using BikeWars.Content.managers;
 using System;
 using Microsoft.Xna.Framework.Content;
 
@@ -16,7 +14,6 @@ namespace BikeWars.Content.screens
         public string DesiredMusic => AudioAssets.GameMusic;
         public float MusicVolume => 0.5f;
         public event Action<GraphicsCommand> GraphicsRequested;
-
 
         public PauseMenuScreen(SpriteFont font, AudioService audioService, Viewport vp)
             :base(null, font, vp)
@@ -68,58 +65,8 @@ namespace BikeWars.Content.screens
             UpdateSelection(0);
         }
 
-        // protected void HandleButtonClick(MenuButton button, ContentManager content, GraphicsDevice gd)
-        // {
-        //     // Use _currentGameTime from ScreenBase class if GameTime is needed
-        //     switch ((ButtonAction)button.Id)
-        //     {
-        //         case ButtonAction.Resume:
-        //             _audioService.Sounds.ResumeAll();
-        //             GameEvents.RaiseResumeTimer();
-        //             // ScreenManager.RemoveScreen(this);
-        //             break;
-
-        //         case ButtonAction.SaveGame:
-        //             // TODO: Save game logic
-        //             break;
-
-        //         case ButtonAction.LoadGame:
-        //             // TODO: Load game logic
-        //             break;
-
-        //         case ButtonAction.MainMenu:
-        //             _audioService.Sounds.StopAll();
-        //             _audioService.Sounds.Play(AudioAssets.SoftClick);
-        //             // ScreenManager.ReturnToMainMenu();
-        //             break;
-
-        //         case ButtonAction.Options:
-        //             OptionScreen optionScreen = new OptionScreen(_backgroundTexture, _font, _audioService, ViewPort);
-        //             optionScreen.LoadContent(content, gd);
-        //             optionScreen.GraphicsRequested += Forward;
-        //             // ScreenManager.AddScreen(optionScreen);
-        //             break;
-
-        //         case ButtonAction.Exit:
-        //             ConfirmationDialogScreen confirmDialog = new ConfirmationDialogScreen(
-        //                 _font,
-        //                 "Bist Du Dir sicher?",
-        //                 this,
-        //                 _audioService,
-        //                 ViewPort
-        //             );
-        //             // ScreenManager.AddScreen(confirmDialog);
-        //             break;
-        //     }
-        // }
-        private void Forward(GraphicsCommand cmd)
-        {
-            GraphicsRequested?.Invoke(cmd);
-        }
-
         public override void Draw(GameTime gameTime, SpriteBatch sb)
         {
-
             sb.Begin();
             sb.Draw(RenderPrimitives.Pixel, new Rectangle(0, 0, ViewPort.Width, ViewPort.Height), Color.Black * 0.7f);
             foreach (var button in _buttons)

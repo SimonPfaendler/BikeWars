@@ -22,14 +22,8 @@ public abstract class ProjectileBase : IProjectile, IWeapon
     private IMoveable _movement { get; set; }
     public virtual IMoveable Movement { get => _movement; set => _movement = value; }
 
-    private Texture2D _texUp {get; set;}
-    private Texture2D _texDown {get; set;}
-    private Texture2D _texLeft {get; set;}
     private Texture2D _texRight {get; set;}
     private Texture2D _currentTex {get; set;}
-    public Texture2D TexUp {get => _texUp; set => _texUp = value;}
-    public Texture2D TexDown {get => _texDown; set => _texDown = value;}
-    public Texture2D TexLeft {get => _texLeft; set => _texLeft = value;}
     public Texture2D TexRight {get => _texRight; set => _texRight = value;}
     public Texture2D CurrentTex {get => _currentTex; set => _currentTex = value;}
     public abstract void Update(GameTime gameTime);

@@ -6,7 +6,6 @@ using BikeWars.Content.entities.items;
 using BikeWars.Utilities;
 using Microsoft.Xna.Framework;
 using BikeWars.Entities;
-using System.Diagnostics.Contracts;
 using BikeWars.Content.entities.npcharacters;
 using BikeWars.Entities.Characters.MapObjects;
 
@@ -47,7 +46,6 @@ public class CombatManager
             return;
 
         PlayDeathSound(target);
-
 
         target._XpDropped = true;
         _gameObjects.SpawnXp(target);
@@ -169,15 +167,15 @@ public class CombatManager
             HandleDeath(target);
         }
     }
-    
+
     // car collision damage
     public void HandleCarHit(CharacterBase target,  object car)
     {
         if (target.IsDead) return;
         if (target.IsGodMode) return;
-        
+
         target.TakeDamage(12, car);
-        
+
         _audio.Sounds.Play(AudioAssets.CarCrash);
 
         if (target.Attributes.Health <= 0)
@@ -185,8 +183,6 @@ public class CombatManager
             HandleDeath(target);
         }
     }
-
-
     public void HandleBaechleHit(CharacterBase target, object baechle)
     {
         if (target.IsDead) return;

@@ -14,10 +14,7 @@ public class DogBowl: ObjectBase
     private readonly Texture2D _texEmpty;
     private readonly Texture2D _texFull;
 
-    //private BoxCollider _collisionCollider {get;set;}
-    //public BoxCollider CollisionCollider {get => _collisionCollider; set => _collisionCollider = value; }
     private int PADDING_INTERACTION_AREA = 40;
-    
     private static readonly CooldownWithDuration _bowlCooldown =
         new CooldownWithDuration(durationSeconds: 20f, cooldownSeconds: 5f);
 
@@ -32,7 +29,6 @@ public class DogBowl: ObjectBase
         _full = full;
         Transform = new Transform(start, size);
         Collider = new BoxCollider(new Vector2(Transform.Position.X - PADDING_INTERACTION_AREA / 2, Transform.Position.Y - PADDING_INTERACTION_AREA / 2), Transform.Size.X + PADDING_INTERACTION_AREA, Transform.Size.Y + PADDING_INTERACTION_AREA, CollisionLayer.INTERACT, this);
-        //CollisionCollider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.WALL, this);
         _texEmpty = managers.SpriteManager.GetTexture("Dog_Bowl");
         _texFull  = managers.SpriteManager.GetTexture("Dog_Bowl_full");
         if (_full)
@@ -75,7 +71,7 @@ public class DogBowl: ObjectBase
         BowlPosition = bowlposition;
         _bowlCooldown.Activate();
     }
-    
+
     public void FillUpDogBowl()
     {
         if (_full) return;
@@ -87,6 +83,6 @@ public class DogBowl: ObjectBase
     {
         _bowlCooldown.Update(gameTime);
     }
-    
+
 
 }

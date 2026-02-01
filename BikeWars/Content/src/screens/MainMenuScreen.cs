@@ -4,8 +4,6 @@ using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
-using BikeWars.Content.managers;
-using BikeWars.Content.src.utils.SaveLoadExample;
 using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.screens
@@ -40,8 +38,6 @@ namespace BikeWars.Content.screens
 
             int leftStartY = screenHeight / 7;
             int rightStartY = screenHeight / 7;
-
-            // _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
 
             // Buttons on the left side
             AddButton(new MenuButton(
@@ -115,23 +111,7 @@ namespace BikeWars.Content.screens
             UpdateSelection(0);
         }
 
-        protected void HandleButtonClick(MenuButton button, ContentManager content, GraphicsDevice gd)
-        {
-
-        }
-
-        private void Forward(GraphicsCommand cmd)
-        {
-            GraphicsRequested?.Invoke(cmd);
-        }
-
-        private void OnExit()
-        {
-            Exit?.Invoke();
-        }
-        public override void Dispose()
-        {
-
+        public override void Dispose() {
         }
 
         public override bool DrawLower => false;

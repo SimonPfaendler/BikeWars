@@ -10,7 +10,6 @@ namespace BikeWars.Content.engine
         public Rectangle Bounds { get; private set; }
         public TerrainType TerrainType { get; private set; }
 
-
         public TerrainCollider(Vector2 position, int width, int height, TerrainType type)
         {
             TerrainType = type;

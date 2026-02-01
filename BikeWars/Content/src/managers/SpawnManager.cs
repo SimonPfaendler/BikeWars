@@ -3,7 +3,6 @@ using System.Linq;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Entities.Characters;
-using BikeWars.Content.managers;
 using BikeWars.Content.entities.interfaces;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
@@ -12,7 +11,6 @@ using BikeWars.Content.components;
 using BikeWars.Content.entities.npcharacters;
 using BikeWars.Utilities;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.managers
 {
@@ -49,16 +47,12 @@ namespace BikeWars.Content.managers
 
         // raver logic
         private List<RaveGroup> _raveGroups = new List<RaveGroup>();
-        
+
         // car logic
         private readonly Random _rng = new Random();
         private double _timeSinceLastCar;
-        private const double CAR_SPAWN_START = 1.5; 
-        private const double CAR_SPAWN_END   = 0.7; 
-        
-        // car sprites
-        private Texture2D[] _carSide;
-        private Texture2D[] _carUp;
+        private const double CAR_SPAWN_START = 1.5;
+        private const double CAR_SPAWN_END   = 0.7;
 
         private readonly RepathScheduler _repathScheduler;
         public SpawnManager(GameObjectManager gameObjectManager, CollisionManager collisionManager, AudioService audioService, PathFinding pathFinding, RepathScheduler repathScheduler, WorldAudioManager worldAudioManager)
@@ -122,7 +116,7 @@ namespace BikeWars.Content.managers
                 if (!_raveGroups[i].IsActive)
                     _raveGroups.RemoveAt(i);
             }
-            
+
             if (_timeSinceLastCar >= carInterval)
             {
                 SpawnCar(progress);
@@ -134,10 +128,8 @@ namespace BikeWars.Content.managers
                 SpawnSlowEnemyLiniear(100, progress);
                 _timeSinceLastSlowEnemyLinear = 0;
             }
-
-
         }
-        
+
         public void SpawnSlowEnemyLiniear(int count, double progress)
         {
             float difficultyMultiplier = 1.0f + (1.2f * (float)progress);
@@ -206,14 +198,14 @@ namespace BikeWars.Content.managers
             Tram tram = new Tram(startPos, targetPos,  _audioService, targetPlayer);
             _gameObjectManager.AddTram(tram);
         }
-        
+
         // spawn the car
         public void SpawnCar(double progress)
         {
             Vector2 spawnPos = Vector2.Zero;
             Point spawnTile = Point.Zero;
             bool found = false;
-            
+
             // Try up to 100 times to find a road tile where the car can safely spawn
             for (int tries = 0; tries < 100; tries++)
             {
@@ -242,7 +234,7 @@ namespace BikeWars.Content.managers
                 new Point(0, -1)
             };
             var validDirs = new List<Point>(4);
-            
+
             // Find valid road directions
             foreach (var d in dirs)
             {
@@ -279,7 +271,7 @@ namespace BikeWars.Content.managers
             var car = new Car(spawnPos, dir, _collisionManager, _rng, sideKey, upKey);
             _gameObjectManager.AddCar(car);
         }
-        
+
         // checks if the spawn position is far enough away from other cars
         private bool IsCarSpawnFree(Vector2 spawnPos, float minDist = 10f)
         {
@@ -291,10 +283,9 @@ namespace BikeWars.Content.managers
             }
             return true;
         }
-        
+
         private void SpawnSwarm(double progress)
         {
-
             // Spawn 10-15 Hobos
             int count = RandomUtil.NextInt(20, 40);
 
@@ -345,7 +336,6 @@ namespace BikeWars.Content.managers
             double pDog = 0.35 - 0.15 * progress; // 35 -> 20
             double pThief    = 0.13 + 0.02 * progress;  // 13 15
             double pDozent   = 0.02 + 0.13 * progress;  // 2  15
-            double pKamikaze = 0.05 + 0.1 * progress;  // 5 15
             double pPolice = 0.1 + 0.05 * progress;  // 10 -> 15
 
             double val = RandomUtil.NextDouble();
@@ -411,7 +401,6 @@ namespace BikeWars.Content.managers
             BoxCollider checkCollider = new BoxCollider(pos, 32, 32, CollisionLayer.CHARACTER, null);
 
             _spawnQueryBuffer.Clear();
-            // _collisionManager.StaticHash.QueryNearby(pos, 3, _spawnQueryBuffer);
             _collisionManager.StaticHash.QueryNearby(pos, 3, _spawnQueryBuffer);
             foreach (var col in _spawnQueryBuffer)
             {
@@ -422,7 +411,7 @@ namespace BikeWars.Content.managers
             }
             return false;
         }
-        
+
         // spawn the rave group
         private void SpawnCircle(double progress)
         {
@@ -487,9 +476,7 @@ namespace BikeWars.Content.managers
             return playerPos + new Vector2(MIN_SPAWN_RADIUS, 0);
         }
 
-        public void Dispose()
-        {
-
+        public void Dispose() {
         }
         public void HandleRaveGroupDied()
         {

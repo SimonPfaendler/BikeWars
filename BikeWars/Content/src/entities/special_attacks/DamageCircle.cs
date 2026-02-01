@@ -24,10 +24,10 @@ namespace BikeWars.Content.entities.items
 
         private float _frameTime = 0.18f; // How fast the animation runs
         private float _frameTimer = 0f;
-        
+
         private const float Rotation = 0f;
         private Vector2 _spritePos;
-        
+
         private readonly Transform _sourceTransform;
         private readonly Func<Vector2> _positionProvider;
         private readonly bool _damagePlayers;
@@ -76,9 +76,6 @@ namespace BikeWars.Content.entities.items
             }
         }
 
-
-
-
         public override void LoadContent(ContentManager content)
         {
             _spriteSheet = SpriteManager.GetTexture(SPRITE_KEY);
@@ -115,12 +112,11 @@ namespace BikeWars.Content.entities.items
             return base.CanDamage(target);
         }
 
-
         public override void Draw(SpriteBatch spriteBatch)
         {
             if (_spriteSheet == null)
                 return;
-            
+
             Rectangle src = new Rectangle(
                 _currentFrame * _frameWidth,
                 0,

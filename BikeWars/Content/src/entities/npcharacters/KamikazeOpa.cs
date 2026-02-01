@@ -28,10 +28,9 @@ namespace BikeWars.Entities.Characters
 
         private readonly GameObjectManager _gameObjectManager;
         private readonly RepathScheduler _repathScheduler;
-        
+
         private float _talkTimer = 3f;
         private const float TALK_INTERVAL = 5f;
-
         protected override string WalkingSound => AudioAssets.Walking;
 
         public KamikazeOpa(Vector2 start, float size, AudioService audio, PathFinding pathFinding,
@@ -69,7 +68,7 @@ namespace BikeWars.Entities.Characters
             UpdateAttackCooldown(gameTime);
             UpdateKnockback(gameTime);
             UpdateHitFlash(gameTime);
-            
+
             _talkTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             if (_talkTimer >= TALK_INTERVAL)
@@ -177,7 +176,7 @@ namespace BikeWars.Entities.Characters
         {
             Attributes.OnDied += (c) => SpawnExplosion();
         }
-        
+
         private void PlayTalkWithWorldAudio()
         {
             if (_worldAudioManager == null) {

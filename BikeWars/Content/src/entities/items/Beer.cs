@@ -1,13 +1,10 @@
 ﻿using System;
-using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
 using BikeWars.Content.engine;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.engine.interfaces;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace BikeWars.Content.entities.items;
-
 public class Beer : ItemBase, IPickable
 {
     public bool _isDestroyed;

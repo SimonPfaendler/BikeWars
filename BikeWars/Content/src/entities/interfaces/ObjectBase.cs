@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace BikeWars.Content.entities.interfaces;
-
 public abstract class ObjectBase
 {
     public Transform Transform { get; protected set; }

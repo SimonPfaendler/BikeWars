@@ -1,10 +1,8 @@
-using System;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.Audio;
-using BikeWars.Content.managers;
 using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.screens;
@@ -15,12 +13,10 @@ public class OptionScreen : MenuScreenBase, IScreen
     public string DesiredMusic => AudioAssets.MenuMusic;
     public float MusicVolume => 1f;
 
-    public event Action<GraphicsCommand> GraphicsRequested;
     public OptionScreen(Texture2D background, SpriteFont font, AudioService audioService, Viewport vp)
         : base(background, font, vp)
     {
         _audioService = audioService;
-
     }
     public override void LoadContent(ContentManager content, GraphicsDevice gd)
     {

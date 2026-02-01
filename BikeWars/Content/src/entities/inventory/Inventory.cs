@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using BikeWars.Content.components;
-using BikeWars.Content.engine;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.entities.items;
 using BikeWars.Content.entities.MapObjects;
@@ -40,7 +39,7 @@ public class Inventory
 
         return false;
     }
-    
+
     public ItemBase GetItemAt(int index)
     {
         if (index < 0 || index >= MaxSlots) return null;
@@ -78,7 +77,7 @@ public class Inventory
 
             Rectangle slotRect = new Rectangle(x, y, slotSize, slotSize);
             spriteBatch.Draw(pixel, slotRect, Color.White);
-            
+
 
             var item = _items[i];
             if (item != null)
@@ -118,7 +117,7 @@ public class Inventory
             _invalidSlotTimer = 0f;
         }
     }
-    
+
     public void RemoveItem(ItemBase item)
     {
         for(int i=0; i < MaxSlots; i++)
@@ -130,12 +129,12 @@ public class Inventory
             }
         }
     }
-    
+
     public void RemoveAt(int index)
     {
         if (index < 0 || index >= MaxSlots)
             return;
-            
+
         _items[index] = null;
     }
 

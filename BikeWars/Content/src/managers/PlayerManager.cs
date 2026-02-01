@@ -97,7 +97,6 @@ namespace BikeWars.Content.managers
             {
                 return Vector2.Zero;
             }
-
             return _startPositions[_rng.Next(_startPositions.Count)];
         }
     }

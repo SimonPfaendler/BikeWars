@@ -15,14 +15,8 @@ public abstract class ItemBase : IItem
     private BoxCollider _collider { get; set; }
     public virtual BoxCollider Collider { get => _collider; set => _collider = value; }
     public bool IsPickedUp {get; set;}
-    private Texture2D _texUp {get; set;}
-    private Texture2D _texDown {get; set;}
-    private Texture2D _texLeft {get; set;}
     private Texture2D _texRight {get; set;}
     private Texture2D _currentTex {get; set;}
-    public Texture2D TexUp {get => _texUp; set => _texUp = value;}
-    public Texture2D TexDown {get => _texDown; set => _texDown = value;}
-    public Texture2D TexLeft {get => _texLeft; set => _texLeft = value;}
     public Texture2D TexRight {get => _texRight; set => _texRight = value;}
     public Texture2D CurrentTex {get => _currentTex; set => _currentTex = value;}
 
@@ -40,7 +34,6 @@ public abstract class ItemBase : IItem
     }
     protected void InitpickupRange(int pickupRange = 40)   // should be used for real Items
     {
-
         Collider = new BoxCollider(
             new Vector2(Transform.Position.X - pickupRange / 2f,
                 Transform.Position.Y - pickupRange / 2f),
@@ -50,5 +43,4 @@ public abstract class ItemBase : IItem
             this
         );
     }
-    
 }

@@ -102,7 +102,7 @@ namespace BikeWars.Content.managers
                 ("Raver06_LeftUp", "Raver06_RightUp"),
             };
 
-            var ravers =  new List<Raver>(count);
+            var ravers = new List<Raver>(count);
 
             // spawn ravers evenly spaced around the circle
             for (int i = 0; i < count; i++)
@@ -145,7 +145,7 @@ namespace BikeWars.Content.managers
             group.StartRaveMusic();
             return group;
         }
-        
+
         private void PruneMissingRavers()
         {
             // If something else removed ravers from the world (off-screen despawn),
@@ -174,12 +174,11 @@ namespace BikeWars.Content.managers
         {
             if (_isDispersed)
                 return;
-            
+
             PruneMissingRavers();
 
             // the circle shouldnt shrink every frame
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            // Vector2 playerPos = _gameObjectManager.Player1.Transform.Position;
             float nearestDist = GetNearestAlivePlayerDistance(_circleCenter);
 
             if (nearestDist < float.PositiveInfinity)
@@ -187,7 +186,7 @@ namespace BikeWars.Content.managers
             else
                 StopRaveMusic();
 
-            //shrink the circle
+            // shrink the circle
             _radius = Math.Max(_minRadius,  _radius - _shrinkSpeed * dt);
 
             // the raver animation shouldn't change every frame
@@ -200,7 +199,7 @@ namespace BikeWars.Content.managers
             if (CheckBreakCondition())
                 Disperse();
         }
-        
+
         // returns distance of the nearest alive player to the circle center
         private float GetNearestAlivePlayerDistance(Vector2 center)
         {
@@ -425,7 +424,7 @@ namespace BikeWars.Content.managers
             _ravers.Clear();
             OnDied?.Invoke();
         }
-        
+
         public void ForceDisperse()
         {
             if (_isDispersed) return;

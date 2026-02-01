@@ -173,17 +173,6 @@ public abstract class MenuScreenBase : IScreen, IDisposable
         sb.End();
     }
 
-    // CreateSimpleTexture might be changed for a better graphic later
-    // protected Texture2D CreateSimpleTexture(int width, int height)
-    // {
-    //     Texture2D texture = new Texture2D(ScreenManager.GraphicsDevice, width, height);
-    //     Color[] data = new Color[width * height];
-    //     for (int i = 0; i < data.Length; i++)
-    //         data[i] = Color.White;
-    //     texture.SetData(data);
-    //     return texture;
-    // }
-
     // Every screen has to handle their own button clicks
     // protected abstract void HandleButtonClick(MenuButton button, ContentManager content, GraphicsDevice gd);
 
@@ -205,9 +194,7 @@ public abstract class MenuScreenBase : IScreen, IDisposable
         _buttonTexture = null;
     }
 
-    public void Unload()
-    {
-
+    public void Unload() {
     }
 
     public virtual bool DrawLower => false;

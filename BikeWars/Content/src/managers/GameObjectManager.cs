@@ -39,7 +39,6 @@ public class GameObjectManager
     private List<Tower> _towers {get; set;}
     public List<Tower> Towers {get => _towers;}
 
-
     private readonly List<ItemBase> _items = new();
     public List<ItemBase> Items => _items;
     private readonly List<ObjectBase> _objects = new();
@@ -59,7 +58,7 @@ public class GameObjectManager
 
     private HashSet<Tram> _trams = new HashSet<Tram>();
     public HashSet<Tram> Trams => _trams;
-    
+
     // store all active cars in the world
     private readonly List<Car> _cars;
     public List<Car> Cars => _cars;
@@ -167,13 +166,13 @@ public class GameObjectManager
         character.Attributes.OnDied += HandleCharacterDeath;
         character.OnTookDamage += HandleTookDamage;
     }
-    
+
     // add a car to the world
     public void AddCar(Car car)
     {
         if (_worldAudioManager != null && car is IWorldAudioAware wa)
             wa.SetWorldAudioManager(_worldAudioManager);
-        
+
         _cars.Add(car);
     }
 
@@ -234,7 +233,6 @@ public class GameObjectManager
 
         if (p1Alive) return Player1;
         if (p2Alive) return Player2;
-
         return null;
     }
 
@@ -283,12 +281,11 @@ public class GameObjectManager
         {
             a.LoadContent(content);
         }
-        _damageFont = content.Load<SpriteFont>("assets/fonts/Arial"); // Using existing Arial font for now
+        _damageFont = UIAssets.DefaultFont;
     }
 
     public void Draw(SpriteBatch spriteBatch)
     {
-
         if (Player1 != null && !Player1.IsDead) Player1.Draw(spriteBatch);
         if (Player2 != null && !Player2.IsDead) Player2.Draw(spriteBatch);
         foreach (CharacterBase c in Characters)
@@ -325,16 +322,11 @@ public class GameObjectManager
         {
             tram.Draw(spriteBatch);
         }
-        
+
         // only draws an orange rectangle for now
         foreach (var car in _cars)
         {
             car.Draw(spriteBatch);
-        }
-
-        foreach (BoxCollider s in Statics)
-        {
-            // s.LoadContent();
         }
     }
 
@@ -412,15 +404,15 @@ public class GameObjectManager
             tram.Update(gameTime);
         }
         _trams.RemoveWhere(t => t.IsExpired);
-        
+
         // update each car
         foreach (var car in _cars)
         {
             car.Update(gameTime);
         }
-        
+
         RemoveDeadCars();
-        
+
         _damageNumbers.RemoveWhere(dn =>
         {
             dn.Update(gameTime);
@@ -486,18 +478,6 @@ public class GameObjectManager
         OnScreenShakeRequested?.Invoke(1.5f, 0.05f);
     }
 
-    private Vector2 RotateVector(Vector2 vec, float angle)
-    {
-        float cos = MathF.Cos(angle);
-        float sin = MathF.Sin(angle);
-        return new Vector2(
-            vec.X * cos - vec.Y * sin,
-            vec.X * sin + vec.Y * cos
-        );
-}
-
-
-
     private void OnPlayerFlamethrower(Player player)
     {
         Vector2 direction = player.GazeDirection;
@@ -505,8 +485,6 @@ public class GameObjectManager
         f.LoadContent(_contentManager);
         AddAOE(f);
     }
-
-
 
     private void OnPlayerIceTrail(Player player)
     {
@@ -538,9 +516,7 @@ public class GameObjectManager
         AddAOE(dc);
 
         // Shake screen on cast
-        //OnScreenShakeRequested?.Invoke(6f, 0.8f);
         OnScreenShakeRequested?.Invoke(7f, 2.0f);
-
     }
 
     private void OnPlayerThrowBook(Player player, Vector2 target)
@@ -603,7 +579,6 @@ public class GameObjectManager
         AddProjectile(beer);
     }
 
-
     private void OnPlayerThrowBeer(Player player, Vector2 target)
     {
         Vector2 spawnPos = player.Transform.Bounds.Center.ToVector2();
@@ -632,7 +607,6 @@ public class GameObjectManager
         return beer;
     }
 
-
     public void RequestScreenShake(float intensity, float duration)
     {
         OnScreenShakeRequested?.Invoke(intensity, duration);
@@ -658,7 +632,7 @@ public class GameObjectManager
             if (t is IWorldAudioAware wa)
                 wa.SetWorldAudioManager(worldAudioManager);
         }
-        
+
         foreach (var car in _cars)
         {
             if (car is IWorldAudioAware waCar)
@@ -746,10 +720,6 @@ public class GameObjectManager
         if (isCrit) velocity *= 1.5f; // Bigger pop for crits
 
         _damageNumbers.Add(new DamageNumber(position, amount, isCrit, velocity));
-    }
-    public void Remove(ItemBase item)
-    {
-        _items.Remove(item);
     }
 
     public void SpawnFromTiledObjects(IEnumerable<TiledObjectInfo> spawns)

@@ -12,7 +12,6 @@ namespace BikeWars.Entities.Characters;
         public event Action<CharacterBase> OnDied;
         public bool SuppressDeathEvent { get; set; } = false;
 
-
         public CharacterAttributes(object owner, int maxHealth, int health, int attackDamage, float attackCoolDown, bool canAutoAttack)
             : base(owner, maxHealth, health, attackDamage, attackCoolDown, canAutoAttack)
         {

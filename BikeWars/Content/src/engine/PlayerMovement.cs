@@ -41,31 +41,6 @@ public class PlayerMovement
         CurrentMovement = new WalkingMovement(canMove, isMoving, WalkingSpeed, SprintAcceleration);
     }
 
-    public void SwitchBicycle(Bike b)
-    {
-        if (CurrentMovement is WalkingMovement)
-        {
-            CurrentMovement = new BicycleMovement(CurrentMovement.CanMove, CurrentMovement.IsMoving, 0, b.Attributes.MaxSpeed, b.Attributes.SpeedAcceleration, b.Attributes.SprintAcceleration, b.Attributes.RotationAcceleration);
-            switch (b) {
-                case Frelo:
-                    CrtBike = new Frelo(b.Transform.Position, b.Transform.Size);
-                    break;
-                case RacingBike:
-                    CrtBike = new RacingBike(b.Transform.Position, b.Transform.Size);
-                    break;
-            }
-            OwnsBike = true;
-            return;
-        }
-    }
-
-    public void Dismount()
-    {
-        CurrentMovement = new WalkingMovement(CurrentMovement.CanMove, CurrentMovement.IsMoving, WalkingSpeed, SprintAcceleration);
-        OwnsBike = false;
-        OnDismounted?.Invoke(CrtBike);
-        CrtBike = null;
-    }
     private List<MoveDirection> MakeMoveDirections()
     {
         List<MoveDirection> directions = new List<MoveDirection>();

@@ -242,12 +242,6 @@ public class Statistic
         return (float)Math.Round(accuracy, 2);
     }
 
-    // Phase to find Bike
-    public void TimeToFindBike(float time)
-    {
-        PhaseFindBike = time;
-    }
-
     public Statistic()
     {
         Kills = 0;

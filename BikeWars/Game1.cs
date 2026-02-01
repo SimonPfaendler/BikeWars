@@ -72,7 +72,7 @@ public class Game1 : Game
         _audioService = new AudioService(Content);
         _audioService.LoadContent();
 
-        background = Content.Load<Texture2D>("assets/images/Startbildschirm");
+        background = SpriteManager.GetTexture("Startbildschirm");
         StartScreen startScreen = new StartScreen(background, UIAssets.DefaultFont, _audioService, GraphicsDevice.Viewport);
         startScreen.LoadContent(Content, GraphicsDevice);
         startScreen.GraphicsRequested += OnGraphicsRequested;

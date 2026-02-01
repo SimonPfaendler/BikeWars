@@ -12,8 +12,6 @@ public class StatisticsScreen : MenuScreenBase
 {
     private ScrollBox _statistics;
     private readonly AudioService _audioService;
-    public string DesiredMusic => AudioAssets.MenuMusic;
-    public float MusicVolume => 1f;
 
     private static int HEIGHT_OF_COMPONENT = 10 + 12*20;
 

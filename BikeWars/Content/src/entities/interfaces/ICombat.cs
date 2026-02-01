@@ -5,7 +5,6 @@ namespace BikeWars.Content.engine.interfaces;
 public interface ICombat
 {
     CharacterAttributes Attributes {get; set;}
-
     void TakeDamage(int amount, object hitBy);
     void Attack(ICombat target);
 
@@ -13,6 +12,5 @@ public interface ICombat
     bool CanAttack();
 
     void ResetAttackCooldown();
-
     bool IsDead { get; }
 }

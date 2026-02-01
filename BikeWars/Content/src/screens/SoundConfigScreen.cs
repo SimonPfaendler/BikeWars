@@ -1,12 +1,10 @@
 using BikeWars.Content.engine.Audio;
 using BikeWars.Content.components;
 using BikeWars.Content.engine.interfaces;
-using BikeWars.Content.managers;
 using BikeWars.Content.engine;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using MonoGame.Extended.Content;
 using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.screens;
@@ -182,7 +180,6 @@ public class SoundConfigScreen : MenuScreenBase, IScreen
 
         Rectangle box2 = new Rectangle((int)(track.Center.X - textSize.X / 2) - 5, (int)(track.Y - (70 * _uiScale)) - 5, 200, 30);
         sb.Draw(RenderPrimitives.Pixel, box2, Color.White);
-
 
         // track
         Color trackColor = isSelected ? Color.White * 0.8f : Color.Gray * 0.5f;

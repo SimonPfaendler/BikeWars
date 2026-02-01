@@ -1,9 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
-using System.Collections.Generic;
 using BikeWars.Content.entities.interfaces;
-using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
 using BikeWars.Content.managers;
 
@@ -19,10 +17,9 @@ namespace BikeWars.Content.entities.special_attacks
         {
             _position = position;
             _animation = SpriteManager.GetAnimation("KamikazeOpa_Death");
-            
+
             // Scaled to 0.75x
             // Visual Size: 256 * 0.75 = 192
-            
             // Hitbox removed for purely visual effect
         }
 

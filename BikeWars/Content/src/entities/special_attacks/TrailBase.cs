@@ -44,9 +44,6 @@ namespace BikeWars.Content.entities.items
 
         private List<TrailSprite> _trailSprites = new List<TrailSprite>();
 
-
-
-
         protected TrailBase(Player player, Vector2 dir, string spriteKey, int damage, float duration)
             : base(owner: player, damage: damage, duration: duration)
         {
@@ -100,13 +97,11 @@ namespace BikeWars.Content.entities.items
                     CollisionLayer.AOE,
                     this
                 ));
-
             }
 
             foreach (var t in _trailSprites)
             {
                 t.Timer += dt;
-
                 if (t.Timer >= _frameTime)
                 {
                     t.Timer -= _frameTime;

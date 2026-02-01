@@ -11,9 +11,6 @@ using BikeWars.Content.components;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Utilities;
 using BikeWars.Content.entities.npcharacters;
-using BikeWars.Content.engine;
-using BikeWars.Content.src.utils.SaveLoadExample;
-using System;
 
 // adds debugging tools for testing
 // like allowing the dev to spawn a large groups of enemies
@@ -33,7 +30,6 @@ namespace BikeWars.Content.screens
 
     public class TechDemoScreen : GameScreen
     {
-
         private MenuButton _spawnHoboBtn;
         private MenuButton _spawnBikeBtn;
         private MenuButton _spawnDogBtn;
@@ -238,13 +234,13 @@ namespace BikeWars.Content.screens
 
             if (_spawnPoliceBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Police, 5);
-            
+
             if (_spawnCarBtn.IsClicked(mouse, _prevMouse))
             {
                 var playerPos = GameObjectManager.Player1.Transform.Position;
 
                 if (!IsPlayerNearRoad(playerPos))
-                    return; 
+                    return;
 
                 for (int i = 0; i < 5; i++)
                     _spawnManager.SpawnCar(0.0);
@@ -273,7 +269,7 @@ namespace BikeWars.Content.screens
             }
             _prevMouse = mouse;
         }
-        
+
         // checks if the player is near a road
         private bool IsPlayerNearRoad(Vector2 playerPos, int radiusTiles = 3)
         {
@@ -288,7 +284,7 @@ namespace BikeWars.Content.screens
 
             return false;
         }
-        
+
         // spawns enemies when you click their button
         private void SpawnEnemies(EnemyType type, int amount)
         {
@@ -362,7 +358,7 @@ namespace BikeWars.Content.screens
         {
             if (_raveGroups.Any(g => g.IsActive))
                 return;
-            
+
             var target = GameObjectManager.Player1;
             if (target == null || target.IsDead)
                 return;

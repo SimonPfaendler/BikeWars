@@ -53,7 +53,7 @@ public class DestructibleObject : ObjectBase
         }
 
         // If the Tiled object had no explicit size, use the texture size so it's visible
-        if ((Transform.Size.X == 0 || Transform.Size.Y == 0))
+        if (Transform.Size.X == 0 || Transform.Size.Y == 0)
         {
             if (_usesAtlas && _atlasRect != Rectangle.Empty)
             {
@@ -70,9 +70,7 @@ public class DestructibleObject : ObjectBase
         Health -= amount;
     }
 
-    public override void Update(GameTime gameTime)
-    {
-        // nothing for now
+    public override void Update(GameTime gameTime) {
     }
 
     public override void Draw(SpriteBatch spriteBatch)

@@ -8,7 +8,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using BikeWars.Content.components;
-using BikeWars.Content.engine.Audio;
 using BikeWars.Content.entities.interfaces;
 
 namespace BikeWars.Content.screens;
@@ -36,7 +35,7 @@ public class BikeShopScreen : IScreen
     public event Action<int, IScreen> BtnClicked;
     public event Action<Bike> Repair;
     public event Action<Vector2> SpawnFrelo;
-    
+
     private BikeShop _shop;
     public event Action<Vector2> SpawnRacingBike;
 
@@ -78,7 +77,7 @@ public class BikeShopScreen : IScreen
             _selectedOption = (_selectedOption + 4) % 5; // wie -1
         else if (InputHandler.IsPressed(GameAction.UI_DOWN))
             _selectedOption = (_selectedOption + 1) % 5;
-        
+
         if (ks.IsKeyDown(Keys.D1) || ks.IsKeyDown(Keys.NumPad1))
         {
             if (ApplyOption(_option1))
@@ -227,7 +226,7 @@ public class BikeShopScreen : IScreen
             ShopOption.BuyFrelo => $"Kaufe ein Frelo {xp}Xp/15Xp | 20s Cooldown",
             ShopOption.BuyRacingBike  => $"Kaufe ein Rennrad {xp}Xp/20Xp | 20s Cooldown",
             ShopOption.Close => "Close",
-            
+
             _ => option.ToString()
         };
 
@@ -242,17 +241,14 @@ public class BikeShopScreen : IScreen
     }
     public bool DrawLower => false;
     public bool UpdateLower => false;
-    
-    public virtual void Dispose()
-    {
 
+    public virtual void Dispose() {
     }
     public void OnActivated()
     {
         throw new NotImplementedException();
     }
 
-    public void Unload()
-    {
+    public void Unload() {
     }
 }

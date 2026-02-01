@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
@@ -8,7 +7,6 @@ using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.entities.MapObjects;
 using BikeWars.Content.managers;
 using BikeWars.Utilities;
-
 
 namespace BikeWars.Entities.Characters
 {
@@ -26,11 +24,6 @@ namespace BikeWars.Entities.Characters
         private readonly RepathScheduler _repathScheduler;
 
         protected override string WalkingSound => AudioAssets.Walking;
-
-        // 1x1 Texture to represent the enemy
-        // private static Texture2D _pixel; seems like its not needed
-        // public static Texture2D Pixel => _pixel;
-
         private float _barkTimer = 0f;
         private const float BARK_INTERVAL = 4.0f;
 
@@ -45,7 +38,7 @@ namespace BikeWars.Entities.Characters
             AudioAssets.Miau,
             AudioAssets.BarkMadita
         };
-        
+
         public Dog(Vector2 start, float size, AudioService audio, PathFinding pathFinding,
             CollisionManager collisionManager, RepathScheduler repathScheduler)
         {
@@ -156,15 +149,6 @@ namespace BikeWars.Entities.Characters
             _worldAudioManager = manager;
         }
 
-        public void Immobalize(bool value)
-        {
-            if (value) {
-                Movement.CanMove = false;
-            } else
-            {
-                Movement.CanMove = true;
-            }
-        }
         public override void Attack(ICombat target)
         {
             if (!CanAttack()) return;

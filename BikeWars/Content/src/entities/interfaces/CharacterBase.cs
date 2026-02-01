@@ -18,7 +18,6 @@ public abstract class CharacterBase : ICharacter, ICombat
     public Transform RenderTransform { get => _renderTransform; set => _renderTransform = value; }
     public float Speed;
     public bool slowed;
-    public float SprintSpeed;
     public float CurrentSpeed { get; set; }
     private CircleCollider _collider { get; set; }
     public CircleCollider Collider {get => _collider; set => _collider = value;}
@@ -33,12 +32,9 @@ public abstract class CharacterBase : ICharacter, ICombat
     public float DyingTimer { get; protected set; } = 0f;
     protected const float DyingDuration = 20f;
 
-
     public bool _XpDropped { get; set; } = false; // for making sure each enemy only drops XP once
 
     public EnemyMovement Movement { get; protected set; }
-
-    protected SpriteAnimation CurrentAnimation;
     protected AudioService _audio;
     protected WorldAudioManager _worldAudioManager;
 
@@ -82,7 +78,6 @@ public abstract class CharacterBase : ICharacter, ICombat
             _knockbackVelocity.Normalize();
             _knockbackVelocity *= speed;
         }
-
     }
 
     public void UpdateAttackCooldown(GameTime gameTime)

@@ -26,10 +26,10 @@ public class Dozent: CharacterBase, IWorldAudioAware
         private const float AttackAnimationDuration = 2f;
 
         protected override string WalkingSound => AudioAssets.Walking;
-        
+
         private float _talkTimer = 0f;
         private const float TALK_INTERVAL = 7.5f;
-        
+
         private static readonly string[] TalkSounds = {
             AudioAssets.DozentTalk_1,
             AudioAssets.DozentTalk_2,
@@ -77,7 +77,7 @@ public class Dozent: CharacterBase, IWorldAudioAware
                 }
 
             }
-            
+
             _talkTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             if (_talkTimer >= TALK_INTERVAL)
@@ -86,7 +86,7 @@ public class Dozent: CharacterBase, IWorldAudioAware
 
                 PlayTalkWithWorldAudio();
             }
-            
+
             Movement.HandleMovement(gameTime);
             HandleSound(Movement.IsMoving);
             LastTransform = new Transform(Transform.Position, Transform.Size);
@@ -149,10 +149,6 @@ public class Dozent: CharacterBase, IWorldAudioAware
             _worldAudioManager = manager;
         }
 
-        public void Immobalize(bool value)
-        {
-            Movement.CanMove = !value;
-        }
         public override void Attack(ICombat target)
         {
             if (!CanAttack()) return;

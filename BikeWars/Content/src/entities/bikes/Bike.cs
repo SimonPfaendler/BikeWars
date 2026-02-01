@@ -1,15 +1,11 @@
-using System;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
-using BikeWars.Content.managers;
 using BikeWars.Entities.Characters;
 using Microsoft.Xna.Framework;
 
 namespace BikeWars.Content.entities.interfaces;
 public abstract class Bike: ItemBase, IBike
 {
-    private Transform _lastTransform { get; set; }
-    public Transform LastTransform { get => _lastTransform; set => _lastTransform = value; }
     private BikeAttributes _attributes {get;set;}
     public BikeAttributes Attributes {
         get => _attributes;
@@ -19,13 +15,6 @@ public abstract class Bike: ItemBase, IBike
         }
     }
     public bool IsDestroyed => Attributes.Health <= 0;
-    protected SpriteAnimation CurrentAnimation;
-    protected AudioService _audio;
-    protected WorldAudioManager _worldAudioManager;
-
-    protected virtual string WalkingSound => AudioAssets.Driving;
-
-    // public event Action<Bike, int> OnTookDamage; isn't used, not sure if it's still neded
     public bool IsGodMode { get; set; }
 
     public Bike(Vector2 start, Point size, BikeAttributes attributes)
@@ -45,7 +34,7 @@ public abstract class Bike: ItemBase, IBike
 
     public virtual void TakeDamage(int amount)
     {
-        if (IsGodMode) return;  
+        if (IsGodMode) return;
         if (Attributes == null) return;
         if (IsDestroyed) return;
         // OnTookDamage?.Invoke(this, amount);

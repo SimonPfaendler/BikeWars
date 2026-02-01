@@ -1,5 +1,3 @@
-using BikeWars.Content.screens;
-
 namespace BikeWars.Entities;
 public class WeaponAttributes
 {

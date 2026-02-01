@@ -49,7 +49,7 @@ namespace BikeWars.Content.entities.interfaces
         {
             if (target == null)
                 return false;
-            
+
             if (target == Owner)
                 return false;
 
@@ -84,16 +84,5 @@ namespace BikeWars.Content.entities.interfaces
 
         /// Returns list of colliders for the AOE
         public virtual List<ICollider> GetHitboxes() => _hitboxes;
-
-        /// Checks intersection against ANY hitbox
-        public virtual bool Intersects(ICollider other)
-        {
-            foreach (var box in _hitboxes)
-            {
-                if (box.Intersects(other))
-                    return true;
-            }
-            return false;
-        }
     }
 }

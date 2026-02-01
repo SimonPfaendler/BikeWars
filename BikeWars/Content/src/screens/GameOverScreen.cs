@@ -1,15 +1,12 @@
 using System;
 using System.IO;
 using System.Text.Json;
-using BikeWars.Content.engine.interfaces;
-using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using System.Linq;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
-using BikeWars.Content.managers;
 using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.screens
@@ -119,16 +116,13 @@ namespace BikeWars.Content.screens
             }
 
             DrawTitle(sb, "GAME OVER", Color.DarkRed, gameTime, 140);
-
             base.Draw(gameTime, sb);
- 
             sb.End();
         }
 
         public override void Update(GameTime gameTime)
         {
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
             if (_isAnimationLoaded)
             {
                 _animTotalTime += delta;
@@ -136,7 +130,6 @@ namespace BikeWars.Content.screens
                 int frameCount = _frames.Count;
                 _currentFrameIndex = (int)(_animTotalTime / _frameRate) % frameCount;
             }
-
             base.Update(gameTime);
         }
     }

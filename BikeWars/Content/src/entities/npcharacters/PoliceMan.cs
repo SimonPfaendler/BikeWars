@@ -19,7 +19,7 @@ public class PoliceMan: CharacterBase, IWorldAudioAware
         private readonly SpriteAnimation _walkDownAnimation;
         private readonly SpriteAnimation _attackLeftAnimation;
         private readonly SpriteAnimation _attackRightAnimation;
-        
+
         private SpriteAnimation _currentAnimation;
 
         private readonly PathFinding _pathFinding;
@@ -28,18 +28,16 @@ public class PoliceMan: CharacterBase, IWorldAudioAware
         private float _attackAnimationTimer = 0f;
         private const float AttackAnimationDuration = 1f;
         private bool IsAttacking => _attackAnimationTimer > 0f;
-        
+
         private float _talkTimer = 0f;
         private const float TALK_INTERVAL = 5.0f;
-        
+
         private static readonly string[] TalkSounds = {
             AudioAssets.HaltStop,
             AudioAssets.Geisterfahrer,
         };
 
-
         protected override string WalkingSound => AudioAssets.Walking;
-
 
         public PoliceMan(Vector2 start, float size, AudioService audio, PathFinding pathFinding,
             CollisionManager collisionManager, RepathScheduler repathScheduler)
@@ -76,7 +74,7 @@ public class PoliceMan: CharacterBase, IWorldAudioAware
 
                 PlayTalkWithWorldAudio();
             }
-            
+
             UpdateAttackCooldown(gameTime);
             UpdateKnockback(gameTime);
             UpdateHitFlash(gameTime);
@@ -93,7 +91,7 @@ public class PoliceMan: CharacterBase, IWorldAudioAware
             Movement.HandleMovement(gameTime);
             HandleSound(Movement.IsMoving);
             LastTransform = new Transform(Transform.Position, Transform.Size);
-            
+
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
             if (Movement.IsMoving)
             {
@@ -152,7 +150,7 @@ public class PoliceMan: CharacterBase, IWorldAudioAware
             base.Attack(target);
             _audio.Sounds.Play(AudioAssets.Punch);
             _attackAnimationTimer = AttackAnimationDuration;
-            
+
             if (_currentAnimation == _walkRightAnimation || _currentAnimation == _walkUpAnimation)
             {
                 _currentAnimation = _attackRightAnimation;

@@ -31,17 +31,15 @@ namespace BikeWars.Entities.Characters
         private float _throwAnimTimer;
 
         protected override string WalkingSound => AudioAssets.Walking;
-        
+
         private float _talkTimer = 0f;
         private const float TALK_INTERVAL = 5.0f;
-        
+
         private static readonly string[] TalkSounds = {
             AudioAssets.HoboTalk1,
             AudioAssets.HoboTalk2,
         };
 
-        // public Hobo(Vector2 start, Point size, AudioService audio, PathFinding pathFinding,
-        //     CollisionManager collisionManager, RepathScheduler repathScheduler)
         public Hobo(Vector2 start, float radius, AudioService audio, PathFinding pathFinding,
             CollisionManager collisionManager, RepathScheduler repathScheduler)
         {
@@ -72,7 +70,7 @@ namespace BikeWars.Entities.Characters
             UpdateAttackCooldown(gameTime);
             UpdateKnockback(gameTime);
             UpdateHitFlash(gameTime);
-            
+
             _talkTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             if (_talkTimer >= TALK_INTERVAL)
@@ -211,7 +209,7 @@ namespace BikeWars.Entities.Characters
             _currentAnimation = _throwAnimation;
             ResetAttackCooldown();
         }
-        
+
         private void PlayTalkWithWorldAudio()
         {
             if (_worldAudioManager == null) {

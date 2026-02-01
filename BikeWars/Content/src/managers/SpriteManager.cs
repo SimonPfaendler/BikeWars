@@ -66,6 +66,9 @@ namespace BikeWars.Content.managers
             // HUD
             { "HUD_Sheet", "assets/sprites/HUD/Hud_sheet2" },
 
+            // Screens
+            { "Startbildschirm", "assets/images/Startbildschirm"},
+
             // ITEMS
             { "Chest", "assets/sprites/chest_texture" },
             { "Chest_open", "assets/sprites/chest_open_texture" },
@@ -194,7 +197,7 @@ namespace BikeWars.Content.managers
             "policeman_walking_down",
             "policeman_attack_right",
             "policeman_attack_left",
-            
+
             // cars
             "Car1_Side",
             "Car1_Up",
@@ -204,8 +207,6 @@ namespace BikeWars.Content.managers
             "Car3_Up",
             "Car4_Side",
             "Car4_Up",
-            
-            
         };
 
         public static float GetAnimationSpeed(string key)

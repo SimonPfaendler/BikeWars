@@ -38,7 +38,6 @@ namespace BikeWars.Entities.Characters
         public int CurrentLevel { get; private set; } = 1;
         public Vector2 AimTarget { get; private set; }
         private Vector2 _facingDirection = Vector2.UnitX; // Default to right
-        private Vector2 _lastGazeDirection = Vector2.UnitX;
         private const float AimLength = 100f;
 
         //Range for throwing objects around the player
@@ -72,11 +71,9 @@ namespace BikeWars.Entities.Characters
         private Vector2 _mouseWorldPos;
         private bool _isThrowTargetInRange;
 
-
         public event Action<Bike> Dismounted;
 
         private readonly SpriteAnimation _bikeUpAnimation;
-
         private readonly SpriteAnimation _walkDownAnimation;
         private readonly SpriteAnimation _walkUpAnimation;
         private readonly SpriteAnimation _walkLeftAnimation;
@@ -93,7 +90,6 @@ namespace BikeWars.Entities.Characters
         public event Action<int> OnMoreXP;
 
         public event Action<ItemBase> ChestItemSpawn;
-
         private bool _isUsingItem = false;
         private float _itemUseTimer = 0f;
         private const float ItemUseDuration = 2f;
@@ -109,7 +105,6 @@ namespace BikeWars.Entities.Characters
         private int _inventoryIndexBeer = -1;
 
         // For achievements and statistics
-
         public bool phaseFoundBike;
         public event Action FoundBike;
 
@@ -226,14 +221,9 @@ namespace BikeWars.Entities.Characters
 
         public void OnPickUpItem(Player player, ItemBase item)
         {
-            if (player != this)
-            {
-                return;
-            }
-            if (item.IsPickedUp) // Because of the frames we have to cut it here
-            {
-                return;
-            }
+            if (player != this) return;
+
+            if (item.IsPickedUp) return; // Because of the frames we have to cut it here
 
             if (item is Xp xp)
             {
@@ -272,16 +262,6 @@ namespace BikeWars.Entities.Characters
                 {
                     upgradeWeapon(attributes);
                 } else {
-                    // switch (weapon.Type)
-                    // {
-                    //     case GunStatics:
-
-                    //     break;
-                    //     default:
-
-                    //     break;
-                    // }
-
                     WeaponAttributes wp = new WeaponAttributes();
                     _unlockedWeapons.Add(weapon.Type, wp);
                 }
@@ -292,7 +272,6 @@ namespace BikeWars.Entities.Characters
 
         private void upgradeWeapon(WeaponAttributes wa)
         {
-            // _unlockedWeapons.TryGetValue(wt, out var attributues)
         }
 
         public void OnInteractObject(Player player, ObjectBase obj)
@@ -348,7 +327,6 @@ namespace BikeWars.Entities.Characters
             _audio.Sounds.Play(AudioAssets.HandgunClick);
         }
 
-        // public Player(Vector2 start, Point size, Point renderSize, AudioService audio, IPlayerInput input, string characterPrefix = "Character1")
         public Player(Vector2 start, float radius, Point renderSize, AudioService audio, IPlayerInput input, bool isTechDemo = false, string characterPrefix = "Character1")
         {
             Attributes = new CharacterAttributes(this, 300, 0, 10, 2f, false);
@@ -998,7 +976,6 @@ namespace BikeWars.Entities.Characters
 
             _shootHeldPrev = shootHeld;
         }
-
 
         private void UpdateGazeDirection(Vector2 mousePos)
         {

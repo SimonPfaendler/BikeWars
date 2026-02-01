@@ -13,8 +13,6 @@ public class WeaponItem : ItemBase
     {
         Type = weaponType;
         Transform = new Transform(position, size);
-        
-       
         // weapon textures
         string textureKey = weaponType switch
         {
@@ -27,8 +25,8 @@ public class WeaponItem : ItemBase
             Player.WeaponType.BottleThrow => "pfand_icon",
             _ => "Book"
         };
-        
-        try 
+
+        try
         {
             CurrentTex = managers.SpriteManager.GetTexture(textureKey);
         }

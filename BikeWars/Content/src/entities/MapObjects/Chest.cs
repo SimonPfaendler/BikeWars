@@ -12,12 +12,10 @@ public class Chest: ObjectBase
     private bool _open;
     public bool Open => _open;
     public ChestItemType? Item { get; private set; }
-    // private BoxCollider _collisionCollider {get;set;}
     private Texture2D _texClosed;
     private Texture2D _texOpen;
-    // public BoxCollider CollisionCollider {get => _collisionCollider; set => _collisionCollider = value; }
     private int PADDING_INTERACTION_AREA = 40;
-    
+
     public enum ChestItemType
     {
         Energygel,
@@ -29,7 +27,6 @@ public class Chest: ObjectBase
         Flame,
         Ice
     }
-
 
     public Chest(Vector2 start, Point size, ChestItemType? item, bool open = false)
     {
@@ -135,9 +132,8 @@ public class Chest: ObjectBase
                 new Point(32, 32),
                 Player.WeaponType.IceTrail
             ),
-            
+
             _ => SpawnRandomItem(dropPos)
         };
-
     }
 }

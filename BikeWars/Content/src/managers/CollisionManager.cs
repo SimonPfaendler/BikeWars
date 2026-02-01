@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
-using BikeWars.Content.entities.MapObjects;
 using BikeWars.Entities.Characters;
 using BikeWars.Entities.Characters.MapObjects;
 using BikeWars.Content.components;
@@ -35,8 +34,6 @@ public class CollisionManager
 
     // car action
     public event Action<CharacterBase, object> OnCarHit;
-    public int GlobalIdentifier { get; }
-
 
     public event Action <DestructibleObject, ProjectileBase> OnProjectileHitDestructible;
     public event Action <DestructibleObject, AreaOfEffectBase> OnAOEHitDestructible;
@@ -115,11 +112,6 @@ public class CollisionManager
         _gameObjectManager = gameObjectManager;
     }
 
-    public bool isColliding(ICollider collisionBox1, ICollider collisionBox2)
-    {
-        return collisionBox1.Intersects(collisionBox2);
-    }
-
     public void LoadContent(ContentManager content)
     {
         TiledMap = content.Load<TiledMap>(MAP);
@@ -165,8 +157,6 @@ public class CollisionManager
         LoadTriggerLayer("AchievementsTrigger");
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
         // spawn shops/objects
-
-
         LoadObjectLayer("Chests");
         _gameObjectManager.SpawnFromTiledObjects(ObjectSpawns);
         LoadObjectLayer("Dog-Bowl");
@@ -625,12 +615,6 @@ public class CollisionManager
         );
     }
 
-    public bool WillCollide(BoxCollider moving, Vector2 delta, ICollider obstacle)
-    {
-        var projected = Projected(moving, delta);
-        return projected.Intersects(obstacle);
-    }
-
     private void HandleCharacterWithStatic(ICollider b, ICollider c)
     {
         // Ignore SPAWNENEMIES layer for characters
@@ -818,7 +802,6 @@ public class CollisionManager
         _toRemoveColliders.Add(item.Collider);
         allDynamics.Remove(item.Collider);
     }
-
     private void HandleCharacterCollision(ICollider c, ICollider d)
     {
         if (d.Layer != CollisionLayer.CHARACTER && d.Layer != CollisionLayer.PLAYER) return;
@@ -879,18 +862,15 @@ public class CollisionManager
             projCol.Layer != CollisionLayer.PROJECTILE)
             return;
 
-        if (!towerCol.Intersects(projCol))
-            return;
+        if (!towerCol.Intersects(projCol)) return;
 
         Tower tower = (Tower)towerCol.Owner;
         ProjectileBase p = (ProjectileBase)projCol.Owner;
 
-        if (p.HasHit)
-            return;
+        if (p.HasHit) return;
 
         // Don't let projectiles hit the tower that fired them
-        if (p.Owner == tower)
-            return;
+        if (p.Owner == tower) return;
 
         tower.TakeDamage(p.weaponAttributes.Damage);
         p.HasHit = true;
@@ -909,8 +889,7 @@ public class CollisionManager
         AreaOfEffectBase aoe = (AreaOfEffectBase)d.Owner;
 
         // prevent hitting yourself
-        if (aoe.Owner == c.Owner)
-            return;
+        if (aoe.Owner == c.Owner) return;
 
         if (c.Intersects(d))
         {
@@ -933,23 +912,14 @@ public class CollisionManager
     }
     private void HandleTowers(ICollider c, ICollider d)
     {
-        if (c.Layer != CollisionLayer.TOWER)
-        {
-            return;
-        }
+        if (c.Layer != CollisionLayer.TOWER) return;
 
         HandleProjectileWithTower(c, d);
         // AOE damage handling
-        if (d.Layer != CollisionLayer.AOE)
-        {
-            return;
-        }
+        if (d.Layer != CollisionLayer.AOE) return;
 
         AreaOfEffectBase aoe = (AreaOfEffectBase)d.Owner;
-
-        // prevent hitting yourself
-        if (aoe.Owner == c.Owner)
-            return;
+        if (aoe.Owner == c.Owner) return; // prevent hitting yourself
 
         if (c.Intersects(d))
         {
@@ -973,8 +943,7 @@ public class CollisionManager
 
     private void HandleTerrain(ICollider c, List<ICollider> statics)
     {
-        if (c.Owner is not Player player)
-            return;
+        if (c.Owner is not Player player) return;
 
         player.CurrentTerrain = null;
 
@@ -1156,9 +1125,7 @@ public class CollisionManager
         // Player hitbox
         if (player?.Collider != null)
         {
-            // var playerRect = GetColliderRectangle(player.Collider);
             var playerCirc = GetColliderCircle(player.Collider);
-            // DrawRectOutline(spriteBatch, pixel, playerRect, Color.Red * 0.7f);
             DrawCircleOutline(spriteBatch, pixel, player.Collider.Center(), playerCirc.Radius, Color.Red * 0.7f);
 
             // Draw a small indicator for player position
@@ -1178,9 +1145,6 @@ public class CollisionManager
 
             var charCirc = GetColliderCircle(character.Collider);
             DrawCircleOutline(spriteBatch, pixel, character.Collider.Center(), charCirc.Radius, Color.Red * 0.7f);
-
-            // var charRect = GetColliderRectangle(character.Collider);
-            // DrawRectOutline(spriteBatch, pixel, charRect, Color.Red * 0.7f);
         }
 
         // Item hitboxes
@@ -1520,7 +1484,6 @@ public class CollisionManager
             // Layer might not exist; continue without it
         }
     }
-
 
     public void DrawLayerDebug(
         SpriteBatch spriteBatch,

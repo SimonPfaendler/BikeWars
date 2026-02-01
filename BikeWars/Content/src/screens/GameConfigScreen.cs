@@ -7,7 +7,6 @@ using BikeWars.Content.managers;
 using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.screens;
-
 public class GameConfigScreen : MenuScreenBase, IScreen
 {
     private readonly AudioService _audioService;
@@ -19,7 +18,6 @@ public class GameConfigScreen : MenuScreenBase, IScreen
 
     private readonly Color _selectedColor = new Color(100, 149, 237);
     private readonly Color _defaultColor = Color.White;
-
 
     public GameConfigScreen(Texture2D background, SpriteFont font, AudioService audioService, Viewport vp)
         :base(background, font, vp)

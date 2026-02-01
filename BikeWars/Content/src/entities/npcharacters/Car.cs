@@ -2,7 +2,6 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
-using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.managers;
 using BikeWars.Content.engine.interfaces;
 using System.Collections.Generic;
@@ -14,48 +13,48 @@ namespace BikeWars.Content.entities.npcharacters
     {
         private readonly CollisionManager _collision;
         private readonly Random _rng;
-        
+
         public Transform Transform { get; private set; }
         public BoxCollider Collider { get; private set; }
-        
+
         private Point _dir;
-        
+
         public bool IsDead { get; private set; }
-        
-        private const float Speed = 100f;              
+
+        private const float Speed = 100f;
         private const float DespawnGrace = 4f;
         private float _offRoadTimer = 0f;
-        
+
         private float _deadEndTimer = 0f;
         private const float DeadEndGrace = 0.15f;
-        
-        private const float LookAheadDistance = 80f; 
+
+        private const float LookAheadDistance = 80f;
         private const float MinFollowDistance = 50f;
         const float MinAvoidSpeed = 20f;
-        private float _currentSpeed = Speed; 
-        
+        private float _currentSpeed = Speed;
+
         private float _aheadCheckTimer = 0f;
         private const float AheadCheckInterval = 0.5f;
-        
+
         private readonly List<ICollider> _nearbyCars = new(32);
         private readonly BoxCollider _checkBox = new BoxCollider(Vector2.Zero, 32, 32, CollisionLayer.CAR, null);
-        
+
         private readonly Rectangle _srcSide;
         private readonly Rectangle _srcUp;
-        
+
         // prevents the car from choosing a new direction multiple times in the same tile
         private Point _lastDecisionTile = new Point(int.MinValue, int.MinValue);
-        
+
         public Car(Vector2 startWorldCenter, Point startDir, CollisionManager collision, Random rng, string sideKey, string upKey)
         {
             _collision = collision;
             _rng = rng;
-            
+
             _srcSide = SpriteFrameDictionary.GetFrames(sideKey)[0];
             _srcUp   = SpriteFrameDictionary.GetFrames(upKey)[0];
 
             Transform = new Transform(startWorldCenter, new Point(150, 150));
-            
+
             Collider = new BoxCollider(
                 Transform.Position - new Vector2(75, 75),
                 150,
@@ -65,7 +64,7 @@ namespace BikeWars.Content.entities.npcharacters
             );
 
             _dir = startDir;
-            
+
             // immediately snap to lane center on spawn
             SnapToLaneCenter();
             UpdateCollider();
@@ -78,10 +77,10 @@ namespace BikeWars.Content.entities.npcharacters
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             ChooseDirectionIfNeeded(dt);
-            if (IsDead) return;    
+            if (IsDead) return;
 
             SnapToLaneCenter();
-            
+
             // check for cars ahead on a timer
             _aheadCheckTimer += dt;
             if (_aheadCheckTimer >= AheadCheckInterval)
@@ -89,7 +88,7 @@ namespace BikeWars.Content.entities.npcharacters
                 _aheadCheckTimer = 0f;
                 CheckForCarsAhead();
             }
-            
+
             SeparateFromNearbyCars(dt);
 
             Vector2 moveDir = new Vector2(_dir.X, _dir.Y);
@@ -97,7 +96,7 @@ namespace BikeWars.Content.entities.npcharacters
 
             // look slightly ahead to check if the car is about to drive into a dead end
             Vector2 aheadPos = Transform.Position + moveDir * (_collision._cellSize * 0.55f);
-            
+
             // Despawn the car if it keeps driving into a dead end
             if (!_collision.IsRoadWorld(aheadPos))
             {
@@ -116,7 +115,7 @@ namespace BikeWars.Content.entities.npcharacters
             Transform.Position += moveDir * _currentSpeed * dt;
             UpdateCollider();
 
-            // off-road despawn 
+            // off-road despawn
             if (_collision.IsRoadWorld(Transform.Position))
             {
                 _offRoadTimer = 0f;
@@ -128,7 +127,7 @@ namespace BikeWars.Content.entities.npcharacters
                     IsDead = true;
             }
         }
-        
+
         // Check if there's a car ahead and adjust speed accordingly
         private void CheckForCarsAhead()
         {
@@ -148,14 +147,14 @@ namespace BikeWars.Content.entities.npcharacters
             for (float dist = 10f; dist <= LookAheadDistance; dist += 15f)
             {
                Vector2 checkPos = Transform.Position + fwd * dist;
-               
+
                // move reusable check box in front of the car
                _checkBox.Position = checkPos - new Vector2(16, 16);
 
                 // reuse list instead of allocating a new one
                _nearbyCars.Clear();
                _collision.DynamicHash.QueryNearby(checkPos, 1, _nearbyCars);
-                
+
                // a car checks if there is another car in front of it
                foreach (var col in _nearbyCars)
                {
@@ -191,27 +190,27 @@ namespace BikeWars.Content.entities.npcharacters
                 _currentSpeed = Speed;
             }
         }
-        
+
         // Push cars apart if they're overlapping or too close
         private void SeparateFromNearbyCars(float dt)
         {
             _nearbyCars.Clear();
             _collision.DynamicHash.QueryNearby(Transform.Position, 2, _nearbyCars);
-    
+
             Vector2 separationForce = Vector2.Zero;
             int nearbyCount = 0;
-    
+
             foreach (var col in _nearbyCars)
             {
                 if (col.Owner == this) continue;
                 if (col.Owner is Car otherCar && otherCar.IsDead) continue;
-        
+
                 if (col.Layer == CollisionLayer.CAR && col.Intersects(Collider))
                 {
                     // calculate direction away from other car
                     Vector2 toCar = Transform.Position - ((Car)col.Owner).Transform.Position;
                     float distance = toCar.Length();
-            
+
                     // If too close, push away
                     if (distance < 150f && distance > 0.1f)
                     {
@@ -223,7 +222,7 @@ namespace BikeWars.Content.entities.npcharacters
                     }
                 }
             }
-    
+
             // Apply the separation force
             if (nearbyCount > 0)
             {
@@ -231,16 +230,16 @@ namespace BikeWars.Content.entities.npcharacters
                 Transform.Position += separationForce * 150f * dt; // Push speed
             }
         }
-        
+
         // snap to exact lane center
         private void SnapToLaneCenter()
         {
             Point gridPos = _collision.WorldToGrid(Transform.Position);
             float cz = _collision._cellSize;
             Vector2 center = new Vector2(gridPos.X * cz + cz / 2f, gridPos.Y * cz + cz / 2f);
-            
+
             // if moving horizontally, lock y to center
-            if (_dir.X != 0) 
+            if (_dir.X != 0)
             {
                 Transform.Position = new Vector2(Transform.Position.X, center.Y);
             }
@@ -250,7 +249,7 @@ namespace BikeWars.Content.entities.npcharacters
                 Transform.Position = new Vector2(center.X, Transform.Position.Y);
             }
         }
-        
+
         // chooses when and where the car should turn
         private void ChooseDirectionIfNeeded(float dt)
         {
@@ -296,11 +295,11 @@ namespace BikeWars.Content.entities.npcharacters
 
             Point opposite = new Point(-_dir.X, -_dir.Y);
             var options = new List<Point>(4);
-            
+
             // find possible turn directions, but don't allow reversing
             foreach (var d in dirs)
             {
-                if (d == opposite) continue;   
+                if (d == opposite) continue;
                 if (IsRoadNeighbor(curTile, d))
                     options.Add(d);
             }
@@ -315,7 +314,7 @@ namespace BikeWars.Content.entities.npcharacters
                 IsDead = true;
             }
         }
-        
+
         // center car on tile
         private void SnapToTileCenter()
         {
@@ -327,7 +326,7 @@ namespace BikeWars.Content.entities.npcharacters
                 g.Y * cs + cs / 2f
             );
         }
-        
+
         // returns true if moving in this direction leads to another road tile
         private bool IsRoadNeighbor(Point tile, Point dir)
         {
@@ -335,7 +334,7 @@ namespace BikeWars.Content.entities.npcharacters
             Point n = new Point(tile.X + dir.X, tile.Y + dir.Y);
             return _collision.IsRoadTile(n);
         }
-        
+
         // returns the intended driving direction for this road tile
         private Point GetPreferredDirForTile(Point tile)
         {
@@ -356,12 +355,12 @@ namespace BikeWars.Content.entities.npcharacters
             // if we can't go in our traffic direction, return zero -> caller will despawn/fallback
             return Point.Zero;
         }
-        
+
         public void UpdateCollider()
         {
             Collider.Position = Transform.Position - new Vector2(Collider.Width / 2f, Collider.Height / 2f);
         }
-        
+
         public void Draw(SpriteBatch sb)
         {
             if (IsDead) return;

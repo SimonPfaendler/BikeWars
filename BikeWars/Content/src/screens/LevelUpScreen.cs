@@ -28,13 +28,10 @@ public class LevelUpScreen : MenuScreenBase, IScreen
     public event Action<SkillTree.SkillId> OnOptionSelected;
     public event Action Closed;
 
-    // public new event Action<int, IScreen> BtnClicked; reactivate, if needed
-
     public LevelUpScreen(SpriteFont font, string message, AudioService audioService, Viewport vp): base(null, font, vp)
     {
         _message = message;
         _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
-
     }
 
     public override void LoadContent(ContentManager content, GraphicsDevice gd)
@@ -76,7 +73,6 @@ public class LevelUpScreen : MenuScreenBase, IScreen
         Closed?.Invoke();
     }
 
-
     public override void Update(GameTime gameTime)
     {
         if (!IsOpen) return;
@@ -103,9 +99,8 @@ public class LevelUpScreen : MenuScreenBase, IScreen
         }
     }
     protected sealed override void InitializeButtons()
-        {
-
-        }
+    {
+    }
 
     public override void Draw(GameTime gameTime, SpriteBatch sb)
     {
@@ -173,7 +168,6 @@ public class LevelUpScreen : MenuScreenBase, IScreen
 
     public new void Unload()
     {
-
     }
 
     public override void OnActivated()

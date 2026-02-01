@@ -1,13 +1,8 @@
-using System;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using System.Collections.Generic;
 using BikeWars.Content.engine.Audio;
-using BikeWars.Content.managers;
-using MonoGame.Extended.Content;
 using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.screens;
@@ -21,7 +16,6 @@ public class ProfileScreen: MenuScreenBase, IScreen
         : base(background, font, vp)
     {
         _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
-
     }
 
     public override void LoadContent(ContentManager content, GraphicsDevice gd)
@@ -42,9 +36,6 @@ public class ProfileScreen: MenuScreenBase, IScreen
 
             int leftStartY = screenHeight / 4;
             int rightStartY = screenHeight / 4;
-
-            // _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
-            // _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
 
             // Buttons on the left side
             _buttons.Add(new MenuButton(
@@ -87,30 +78,6 @@ public class ProfileScreen: MenuScreenBase, IScreen
 
             UpdateSelection(0);
         }
-
-
-        // protected override void HandleButtonClick(MenuButton button, ContentManager content, GraphicsDevice gd)
-        // {
-        //     switch ((ButtonAction)button.Id)
-        //     {
-        //         case ButtonAction.Back:
-        //             // ScreenManager.RemoveScreen(this);
-        //             break;
-
-        //         case ButtonAction.NewProfile:
-        //             // TODO: Profile Creation Logic
-        //             break;
-
-        //         case ButtonAction.AchievementsCharacter1:
-        //             // TODO: open achievements of first character
-        //             break;
-
-        //         case ButtonAction.AchievementsCharacter2:
-        //             // TODO: open achievements of second character
-        //             break;
-        //     }
-        // }
-
         public override bool DrawLower => false;
         public override bool UpdateLower => false;
 }

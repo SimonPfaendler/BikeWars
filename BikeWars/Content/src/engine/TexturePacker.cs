@@ -8,7 +8,6 @@ namespace BikeWars.Content.engine
     public class TexturePackerRoot
     {
         public List<TexturePackerFrame> Frames { get; set; }
-        public TexturePackerMeta Meta { get; set; }
     }
 
     /// <summary>
@@ -18,10 +17,6 @@ namespace BikeWars.Content.engine
     {
         public string Filename { get; set; }
         public TexturePackerRect Frame { get; set; }
-        public bool Rotated { get; set; }
-        public bool Trimmed { get; set; }
-        public TexturePackerRect SpriteSourceSize { get; set; }
-        public TexturePackerSize SourceSize { get; set; }
     }
 
     /// <summary>
@@ -40,20 +35,5 @@ namespace BikeWars.Content.engine
     /// </summary>
     public class TexturePackerSize
     {
-        public int W { get; set; }
-        public int H { get; set; }
-    }
-
-    /// <summary>
-    /// Metadata from TexturePacker JSON.
-    /// </summary>
-    public class TexturePackerMeta
-    {
-        public string App { get; set; }
-        public string Version { get; set; }
-        public string Image { get; set; }
-        public string Format { get; set; }
-        public TexturePackerSize Size { get; set; }
-        public string Scale { get; set; }
     }
 }

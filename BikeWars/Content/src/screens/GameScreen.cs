@@ -22,7 +22,6 @@ using BikeWars.Content.entities.MapObjects;
 using BikeWars.Entities.Characters.MapObjects;
 using BikeWars.Entities;
 using MonoGame.Extended.Tiled;
-using Microsoft.Xna.Framework.Input;
 
 namespace BikeWars.Content.screens
 {
@@ -53,13 +52,11 @@ namespace BikeWars.Content.screens
         public StatisticsManager StatisticsManager => _statisticsManager;
 
         protected AchievementsManager _achievementsManager {get; set;}
-        public AchievementsManager AchievementsManager => _achievementsManager;
 
         protected readonly AudioService _audioService;
         public AudioService AudioService => _audioService;
 
         private PlayerManager _playerManager;
-        public PlayerManager PlayerManager => _playerManager;
 
         public string DesiredMusic => AudioAssets.GameMusic;
         public float MusicVolume => 1f;
@@ -548,9 +545,7 @@ namespace BikeWars.Content.screens
                 }
             }
 
-
             bool playerNearMusicians = false;
-
             foreach (var obj in _gameObjectManager.Objects)
             {
                 if (obj is Musicians musicians)
@@ -593,7 +588,6 @@ namespace BikeWars.Content.screens
                         _activeMusiciansForAOE = musicians;
                         _musicianDamageCircleCount = 0;
                         _musicianDamageCircleTimer = MUSICIAN_DAMAGE_CIRCLE_INTERVAL;
-
                         break;
                     }
                 }
@@ -845,7 +839,7 @@ namespace BikeWars.Content.screens
                     );
                     _gameObjectManager.Projectiles.Clear();
                     _gameObjectManager.Cars.Clear();
-                    
+
                     OnTechDemoReset();
 
                     Console.WriteLine("Tech demo reset: removed all enemies and projectiles.");
@@ -859,7 +853,6 @@ namespace BikeWars.Content.screens
                 }
             }
         }
-
         protected virtual void OnTechDemoReset()
         {
         }
@@ -941,7 +934,6 @@ namespace BikeWars.Content.screens
                 player.Inventory.Draw(sb, RenderPrimitives.Pixel, player.SelectedInventoryIndex, showSelection);
                 _hud.Draw(sb, _gameObjectManager.Player1);
             }
-
 
             if (_gameObjectManager.Player2 != null)
             {
@@ -1063,8 +1055,6 @@ namespace BikeWars.Content.screens
             }
             if (_gameTimer.CurrentTime < 30f)
             {
-                timerColor = Color.Red;
-
                 // blink when time is about to run out
                 float blink = (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds * 10) * 0.5f + 0.5f;
                 timerColor = Color.Lerp(Color.Red, Color.White, blink);
@@ -1087,12 +1077,6 @@ namespace BikeWars.Content.screens
             spriteBatch.Draw(RenderPrimitives.Pixel, backgroundRect, Color.Black * 0.5f);
 
             spriteBatch.DrawString(_timerFont, timerText, centeredPosition, timerColor);
-        }
-
-        // Pass it to Game1 to Exit the Game
-        private void OnExit()
-        {
-            Exit?.Invoke();
         }
 
         public void ResetGameTimer()
@@ -1286,9 +1270,7 @@ namespace BikeWars.Content.screens
             );
             spriteBatch.Draw(icon, destRect, Color.White);
         }
-        public void OnActivated()
-        {
-            // throw new NotImplementedException();
+        public void OnActivated() {
         }
 
         private void OnObjectInteraction(Player player, ObjectBase obj)
@@ -1297,7 +1279,6 @@ namespace BikeWars.Content.screens
             if (obj is not AchievementTrigger at) return;
             _achievementsManager.HandleAchievement(at.Id, Triggers.REACHED_AREA);
         }
-
 
         public void OnHandleRepair(Bike bike)
         {
@@ -1313,11 +1294,6 @@ namespace BikeWars.Content.screens
         public void OnSpawnRacingBike(Vector2 dropPos)
         {
             _gameObjectManager.AddItem(new RacingBike(dropPos, new Point(32, 32)));
-        }
-
-        private void OnPauseMenuClicked(int id, IScreen screen)
-        {
-
         }
 
         protected void ShowAchievements(GameTime gameTime, SpriteBatch sb)
@@ -1367,6 +1343,5 @@ namespace BikeWars.Content.screens
                 _ => null
             };
         }
-
     }
 }

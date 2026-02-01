@@ -46,7 +46,6 @@ namespace BikeWars.Content.screens
             int buttonHeight = 50;
             int spacing = 15;
 
-
             int startY = screenHeight / 4;
             int leftColumnX = (screenWidth / 3) - (buttonWidth / 2);
             int rightColumnX = (2 * screenWidth / 3) - (buttonWidth / 2);
@@ -55,7 +54,6 @@ namespace BikeWars.Content.screens
             AddButton(ButtonAction.Resolution1536x864, "1536 x 864", leftColumnX, startY + 1 * (buttonHeight + spacing), buttonWidth, buttonHeight);
             AddButton(ButtonAction.Resolution1280x720, "1280 x 720", leftColumnX, startY + 2 * (buttonHeight + spacing), buttonWidth, buttonHeight);
             AddButton(ButtonAction.Resolution800x600, "800 x 600", leftColumnX, startY + 3 * (buttonHeight + spacing), buttonWidth, buttonHeight);
-
 
             AddButton(ButtonAction.ResolutionPortrait1080x1920, "1080 x 1920", rightColumnX, startY, buttonWidth, buttonHeight);
             AddButton(ButtonAction.ResolutionPortrait864x1536, "864 x 1536", rightColumnX, startY + 1 * (buttonHeight + spacing), buttonWidth, buttonHeight);
@@ -66,7 +64,6 @@ namespace BikeWars.Content.screens
             int centerX = (screenWidth - buttonWidth) / 2;
 
             AddButton(ButtonAction.Back, "Back", centerX, footerY + (buttonHeight + spacing), buttonWidth, buttonHeight);
-
             UpdateSelection(0);
         }
 

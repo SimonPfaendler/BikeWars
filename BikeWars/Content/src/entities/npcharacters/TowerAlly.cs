@@ -1,9 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
-using BikeWars.Content.engine.Audio;
 using BikeWars.Content.managers;
-using BikeWars.Entities;
 using System;
 using BikeWars.Content.entities.interfaces;
 using System.Collections.Generic;

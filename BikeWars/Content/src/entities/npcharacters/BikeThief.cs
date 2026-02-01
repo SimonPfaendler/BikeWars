@@ -22,7 +22,7 @@ namespace BikeWars.Entities.Characters
         private readonly RepathScheduler _repathScheduler;
         private float _talkTimer = 0f;
         private const float TALK_INTERVAL = 7.5f;
-        
+
         private static readonly string[] TalkSounds = {
             AudioAssets.BikeThiefLaugh,
             AudioAssets.BikeThiefTalk,
@@ -62,7 +62,7 @@ namespace BikeWars.Entities.Characters
                 }
             }
             Movement.HandleMovement(gameTime);
-            
+
             _talkTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             if (_talkTimer >= TALK_INTERVAL)
@@ -131,24 +131,13 @@ namespace BikeWars.Entities.Characters
             _worldAudioManager = manager;
         }
 
-        public void Immobalize(bool value)
-        {
-            if (value)
-            {
-                Movement.CanMove = false;
-            }
-            else
-            {
-                Movement.CanMove = true;
-            }
-        }
         public override void Attack(ICombat target)
         {
             if (!CanAttack()) return;
             base.Attack(target);
             _audio.Sounds.Play(AudioAssets.Punch);
         }
-        
+
         private void PlayTalkWithWorldAudio()
         {
             if (_worldAudioManager == null) {

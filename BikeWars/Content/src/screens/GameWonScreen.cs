@@ -1,8 +1,6 @@
 using System;
 using System.IO;
 using System.Text.Json;
-using BikeWars.Content.engine.interfaces;
-using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
@@ -33,8 +31,6 @@ namespace BikeWars.Content.screens
         private const float _frameRate = 1f / 6f;
         private int _currentFrameIndex = 0;
         private bool _isAnimationLoaded = false;
-
-        private float _animationDurationSeconds = 0f;
 
         public GameWonScreen(SpriteFont font, AudioService audioService, Statistic statistic, Viewport vp)
             :base(font, audioService, statistic, vp)
@@ -108,7 +104,6 @@ namespace BikeWars.Content.screens
                 if (_winFrames != null && _beerFrames != null && _winFrames.Count > 0 && _beerFrames.Count > 0)
                 {
                     _isAnimationLoaded = true;
-                    _animationDurationSeconds = _winFrames.Count * _frameRate;
                 }
             }
             catch (Exception ex)
@@ -154,7 +149,7 @@ namespace BikeWars.Content.screens
             DrawTitle(sb, "Gewonnen!", Color.LawnGreen, gameTime, 40);
 
             base.Draw(gameTime, sb);
-            
+
             sb.End();
         }
 
@@ -179,12 +174,10 @@ namespace BikeWars.Content.screens
                     if (_currentState == AnimationState.Win)
                     {
                         _currentState = AnimationState.Beer;
-                        _animationDurationSeconds = _beerFrames.Count * _frameRate;
                     }
                     else // State == AnimationState.Beer
                     {
                         _currentState = AnimationState.Win;
-                        _animationDurationSeconds = _winFrames.Count * _frameRate;
                     }
                 }
             }

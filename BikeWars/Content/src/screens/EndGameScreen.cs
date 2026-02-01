@@ -4,7 +4,6 @@ using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using BikeWars.Content.managers;
 using BikeWars.Content.engine;
 
 namespace BikeWars.Content.screens
@@ -89,7 +88,7 @@ namespace BikeWars.Content.screens
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch sb)
-        {           
+        {
             foreach (var button in _buttons)
             {
                 button.Draw(sb);
@@ -135,7 +134,6 @@ namespace BikeWars.Content.screens
                 0f
             );
         }
-
         public override bool DrawLower => true;
         public override bool UpdateLower => false;
     }
