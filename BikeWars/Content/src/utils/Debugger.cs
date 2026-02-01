@@ -44,7 +44,7 @@ namespace BikeWars.Utilities
                 _fps = _fps <= 0f ? instantaneousFps : MathHelper.Lerp(_fps, instantaneousFps, 0.1f); // light smoothing to avoid jitter
             }
         }
-        public void Draw(SpriteBatch spriteBatch)
+        public void Draw(SpriteBatch spriteBatch, Viewport viewport)
         {
             if (!_isVisible) return;
 
@@ -60,7 +60,17 @@ namespace BikeWars.Utilities
                                (_player.CurrentBike != null ? $"\nBike Health: {_player.CurrentBike.Attributes.Health}" : "");
 
 
-            spriteBatch.DrawString(UIAssets.DefaultFont, debugInfo, new Vector2(10, 600), Color.White);
+            Vector2 textSize = UIAssets.DefaultFont.MeasureString(debugInfo);
+
+            const float padding = 16f;
+            float x = (viewport.Width - textSize.X) * 0.5f;
+            float y = viewport.Height - textSize.Y - padding;
+
+            // clamp so text stays on screen for very small viewports
+            x = MathF.Max(padding, x);
+            y = MathF.Max(padding, y);
+
+            spriteBatch.DrawString(UIAssets.DefaultFont, debugInfo, new Vector2(x, y), Color.White);
         }
     }
 }

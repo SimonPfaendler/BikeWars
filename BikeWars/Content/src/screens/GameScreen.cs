@@ -884,7 +884,7 @@ namespace BikeWars.Content.screens
             sb.End();
             sb.Begin();
 
-            _debugger.Draw(sb);
+            _debugger.Draw(sb, ViewPort);
             DrawTimer(sb, gameTime);
 
             var player = _gameObjectManager.Player1;
