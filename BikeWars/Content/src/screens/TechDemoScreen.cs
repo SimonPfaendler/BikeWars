@@ -173,7 +173,7 @@ namespace BikeWars.Content.screens
             _spawnCarBtn = new MenuButton(
                 id: 11,
                 texture: RenderPrimitives.Pixel,
-                bounds: new Rectangle(1050, 290, 200, 60),
+                bounds: new Rectangle(1050, 290, 250, 60),
                 text: "Spawn 5 Cars",
                 font: UIAssets.DefaultFont,
                 audioService: AudioService
@@ -243,7 +243,7 @@ namespace BikeWars.Content.screens
                 var playerPos = GameObjectManager.Player1.Transform.Position;
 
                 if (!IsPlayerNearRoad(playerPos))
-                    return; // or play error sound, or change button text
+                    return; 
 
                 for (int i = 0; i < 5; i++)
                     _spawnManager.SpawnCar(0.0);

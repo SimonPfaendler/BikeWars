@@ -249,6 +249,19 @@ namespace BikeWars.Content.utils
              policeAttackLeft.AddRange(GetFramesFromAtlas("policeman_attack_left_4.png", 1, 1));
              policeAttackLeft.AddRange(GetFramesFromAtlas("policeman_attack_left_5.png", 1, 1));
              AnimationFrames["policeman_attack_left"] = policeAttackLeft;
+             
+             // cars (single-frame)
+             AnimationFrames["Car1_Side"] = GetFramesFromAtlas("car1_side.png", 1, 1);
+             AnimationFrames["Car1_Up"]   = GetFramesFromAtlas("car1_up.png", 1, 1);
+
+             AnimationFrames["Car2_Side"] = GetFramesFromAtlas("car2_side.png", 1, 1);
+             AnimationFrames["Car2_Up"]   = GetFramesFromAtlas("car2_up.png", 1, 1);
+
+             AnimationFrames["Car3_Side"] = GetFramesFromAtlas("car3_side.png", 1, 1);
+             AnimationFrames["Car3_Up"]   = GetFramesFromAtlas("car3_up.png", 1, 1);
+
+             AnimationFrames["Car4_Side"] = GetFramesFromAtlas("car4_side.png", 1, 1);
+             AnimationFrames["Car4_Up"]   = GetFramesFromAtlas("car4_up.png", 1, 1);
         }
 
         public static List<Rectangle> GetFrames(string key)

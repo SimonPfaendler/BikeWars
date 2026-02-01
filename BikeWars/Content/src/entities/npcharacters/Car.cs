@@ -6,13 +6,12 @@ using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.managers;
 using BikeWars.Content.engine.interfaces;
 using System.Collections.Generic;
+using BikeWars.Content.utils;
 
 namespace BikeWars.Content.entities.npcharacters
 {
     public class Car
     {
-        public int Hp = 5;
-        
         private readonly CollisionManager _collision;
         private readonly Random _rng;
         
@@ -41,20 +40,26 @@ namespace BikeWars.Content.entities.npcharacters
         private readonly List<ICollider> _nearbyCars = new(32);
         private readonly BoxCollider _checkBox = new BoxCollider(Vector2.Zero, 32, 32, CollisionLayer.CAR, null);
         
+        private readonly Rectangle _srcSide;
+        private readonly Rectangle _srcUp;
+        
         // prevents the car from choosing a new direction multiple times in the same tile
         private Point _lastDecisionTile = new Point(int.MinValue, int.MinValue);
         
-        public Car(Vector2 startWorldCenter, Point startDir, CollisionManager collision, Random rng)
+        public Car(Vector2 startWorldCenter, Point startDir, CollisionManager collision, Random rng, string sideKey, string upKey)
         {
             _collision = collision;
             _rng = rng;
+            
+            _srcSide = SpriteFrameDictionary.GetFrames(sideKey)[0];
+            _srcUp   = SpriteFrameDictionary.GetFrames(upKey)[0];
 
-            Transform = new Transform(startWorldCenter, new Point(32, 32));
+            Transform = new Transform(startWorldCenter, new Point(150, 150));
             
             Collider = new BoxCollider(
-                Transform.Position - new Vector2(16, 16),
-                32,
-                32,
+                Transform.Position - new Vector2(75, 75),
+                150,
+                150,
                 CollisionLayer.CAR,
                 this
             );
@@ -73,23 +78,27 @@ namespace BikeWars.Content.entities.npcharacters
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
             ChooseDirectionIfNeeded(dt);
-            if (IsDead) return;          // IMPORTANT: ChooseDirection can set IsDead
+            if (IsDead) return;    
 
             SnapToLaneCenter();
             
+            // check for cars ahead on a timer
             _aheadCheckTimer += dt;
             if (_aheadCheckTimer >= AheadCheckInterval)
             {
                 _aheadCheckTimer = 0f;
                 CheckForCarsAhead();
             }
+            
+            SeparateFromNearbyCars(dt);
 
             Vector2 moveDir = new Vector2(_dir.X, _dir.Y);
             if (moveDir.LengthSquared() > 0) moveDir.Normalize();
 
-            // dead-end probe (prevents end bouncing & stuck)
+            // look slightly ahead to check if the car is about to drive into a dead end
             Vector2 aheadPos = Transform.Position + moveDir * (_collision._cellSize * 0.55f);
-
+            
+            // Despawn the car if it keeps driving into a dead end
             if (!_collision.IsRoadWorld(aheadPos))
             {
                 _deadEndTimer += dt;
@@ -107,7 +116,7 @@ namespace BikeWars.Content.entities.npcharacters
             Transform.Position += moveDir * _currentSpeed * dt;
             UpdateCollider();
 
-            // off-road despawn (keep)
+            // off-road despawn 
             if (_collision.IsRoadWorld(Transform.Position))
             {
                 _offRoadTimer = 0f;
@@ -132,7 +141,7 @@ namespace BikeWars.Content.entities.npcharacters
 
             fwd.Normalize();
 
-            // Sample a few points ahead to detect cars
+            // sample a few points ahead to detect cars
             float closestCarDistance = float.MaxValue;
             bool carDetected = false;
 
@@ -146,7 +155,8 @@ namespace BikeWars.Content.entities.npcharacters
                 // reuse list instead of allocating a new one
                _nearbyCars.Clear();
                _collision.DynamicHash.QueryNearby(checkPos, 1, _nearbyCars);
-
+                
+               // a car checks if there is another car in front of it
                foreach (var col in _nearbyCars)
                {
                    if (col.Owner == this) continue;
@@ -163,7 +173,7 @@ namespace BikeWars.Content.entities.npcharacters
                     break;
             }
 
-            // Adjust speed based on car ahead
+            // adjust speed based on car ahead
             if (carDetected)
             {
 
@@ -177,8 +187,48 @@ namespace BikeWars.Content.entities.npcharacters
             }
             else
             {
-                // No car ahead, go full speed
+                // no car ahead, go full speed
                 _currentSpeed = Speed;
+            }
+        }
+        
+        // Push cars apart if they're overlapping or too close
+        private void SeparateFromNearbyCars(float dt)
+        {
+            _nearbyCars.Clear();
+            _collision.DynamicHash.QueryNearby(Transform.Position, 2, _nearbyCars);
+    
+            Vector2 separationForce = Vector2.Zero;
+            int nearbyCount = 0;
+    
+            foreach (var col in _nearbyCars)
+            {
+                if (col.Owner == this) continue;
+                if (col.Owner is Car otherCar && otherCar.IsDead) continue;
+        
+                if (col.Layer == CollisionLayer.CAR && col.Intersects(Collider))
+                {
+                    // calculate direction away from other car
+                    Vector2 toCar = Transform.Position - ((Car)col.Owner).Transform.Position;
+                    float distance = toCar.Length();
+            
+                    // If too close, push away
+                    if (distance < 150f && distance > 0.1f)
+                    {
+                        toCar.Normalize();
+                        // Stronger push when closer
+                        float pushStrength = (150f - distance) / 150f;
+                        separationForce += toCar * pushStrength;
+                        nearbyCount++;
+                    }
+                }
+            }
+    
+            // Apply the separation force
+            if (nearbyCount > 0)
+            {
+                separationForce /= nearbyCount; // Average the force
+                Transform.Position += separationForce * 150f * dt; // Push speed
             }
         }
         
@@ -189,12 +239,12 @@ namespace BikeWars.Content.entities.npcharacters
             float cz = _collision._cellSize;
             Vector2 center = new Vector2(gridPos.X * cz + cz / 2f, gridPos.Y * cz + cz / 2f);
             
-            // If moving horizontally, lock y to center
+            // if moving horizontally, lock y to center
             if (_dir.X != 0) 
             {
                 Transform.Position = new Vector2(Transform.Position.X, center.Y);
             }
-            // If moving vertically, lock x to center
+            // if moving vertically, lock x to center
             else if (_dir.Y != 0)
             {
                 Transform.Position = new Vector2(center.X, Transform.Position.Y);
@@ -209,14 +259,14 @@ namespace BikeWars.Content.entities.npcharacters
             if (curTile == _lastDecisionTile) return;
             _lastDecisionTile = curTile;
 
-            // snap ONCE per tile to remove drift
+            // snap once per tile to remove drift
             SnapToTileCenter();
             UpdateCollider();
 
             // preferred traffic direction for this tile
             Point preferred = GetPreferredDirForTile(curTile);
 
-            // If traffic rule says "no valid forward direction", despawn
+            // if traffic rule says "no valid forward direction", despawn
             if (preferred == Point.Zero)
             {
                 IsDead = true;
@@ -233,7 +283,6 @@ namespace BikeWars.Content.entities.npcharacters
             // Try to keep going straight (only if not reversing)
             if (_dir != Point.Zero && IsRoadNeighbor(curTile, _dir))
             {
-                _dir = _dir;
                 return;
             }
 
@@ -247,7 +296,8 @@ namespace BikeWars.Content.entities.npcharacters
 
             Point opposite = new Point(-_dir.X, -_dir.Y);
             var options = new List<Point>(4);
-
+            
+            // find possible turn directions, but don't allow reversing
             foreach (var d in dirs)
             {
                 if (d == opposite) continue;   
@@ -261,11 +311,12 @@ namespace BikeWars.Content.entities.npcharacters
             }
             else
             {
-                // Only possible move would be reversing → despawn instead
+                // if the only possible move is reverse, despawn the car
                 IsDead = true;
             }
         }
         
+        // center car on tile
         private void SnapToTileCenter()
         {
             Point g = _collision.WorldToGrid(Transform.Position);
@@ -277,6 +328,7 @@ namespace BikeWars.Content.entities.npcharacters
             );
         }
         
+        // returns true if moving in this direction leads to another road tile
         private bool IsRoadNeighbor(Point tile, Point dir)
         {
             if (dir == Point.Zero) return false;
@@ -284,6 +336,7 @@ namespace BikeWars.Content.entities.npcharacters
             return _collision.IsRoadTile(n);
         }
         
+        // returns the intended driving direction for this road tile
         private Point GetPreferredDirForTile(Point tile)
         {
             bool left  = _collision.IsRoadTile(new Point(tile.X - 1, tile.Y));
@@ -309,18 +362,41 @@ namespace BikeWars.Content.entities.npcharacters
             Collider.Position = Transform.Position - new Vector2(Collider.Width / 2f, Collider.Height / 2f);
         }
         
-        public void Draw(SpriteBatch sb, Texture2D pixel)
+        public void Draw(SpriteBatch sb)
         {
             if (IsDead) return;
-            
-            var rect = new Rectangle(
-                (int)Collider.Position.X,
-                (int)Collider.Position.Y,
-                Collider.Width,
-                Collider.Height
-            );
 
-            sb.Draw(pixel, rect, Color.Orange);
+            Texture2D atlas = SpriteManager.GetCharacterAtlas();
+
+            Rectangle src;
+            SpriteEffects fx = SpriteEffects.None;
+
+            if (_dir.X != 0)
+            {
+                src = _srcSide;
+                if (_dir.X > 0) fx = SpriteEffects.FlipHorizontally; // right
+            }
+            else
+            {
+                src = _srcUp;
+                if (_dir.Y < 0) fx = SpriteEffects.FlipVertically;   // up
+            }
+
+            // scale down to tile size
+            float targetPx = 150f; // try 40f if you want bigger
+            float scale = targetPx / MathF.Max(src.Width, src.Height);
+
+            sb.Draw(
+                atlas,
+                Transform.Position,
+                src,
+                Color.White,
+                0f,
+                new Vector2(src.Width / 2f, src.Height / 2f),
+                scale,
+                fx,
+                0f
+            );
         }
     }
 }

@@ -793,6 +793,15 @@ public class CollisionManager
                 OnCarHit?.Invoke((CharacterBase)d.Owner, c.Owner);
             }
         }
+        
+        if (d.Layer == CollisionLayer.CAR &&
+            (c.Layer == CollisionLayer.CHARACTER || c.Layer == CollisionLayer.PLAYER))
+        {
+            if (c.Intersects(d))
+            {
+                OnCarHit?.Invoke((CharacterBase)c.Owner, d.Owner);
+            }
+        }
     }
 
     private void PickingUpItem(ICollider c, ICollider d)

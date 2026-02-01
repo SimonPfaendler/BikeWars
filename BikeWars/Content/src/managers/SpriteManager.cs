@@ -193,7 +193,19 @@ namespace BikeWars.Content.managers
             "policeman_walking_up",
             "policeman_walking_down",
             "policeman_attack_right",
-            "policeman_attack_left"
+            "policeman_attack_left",
+            
+            // cars
+            "Car1_Side",
+            "Car1_Up",
+            "Car2_Side",
+            "Car2_Up",
+            "Car3_Side",
+            "Car3_Up",
+            "Car4_Side",
+            "Car4_Up",
+            
+            
         };
 
         public static float GetAnimationSpeed(string key)

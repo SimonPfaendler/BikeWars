@@ -177,11 +177,8 @@ public class CombatManager
         if (target.IsGodMode) return;
         
         target.TakeDamage(12, car);
-
-        // feedback similar to tram
+        
         _audio.Sounds.Play(AudioAssets.CarCrash);
-        // OnScreenShakeRequested?.Invoke(3.25f, 0.12f);
-        // OnHitStopRequested?.Invoke(0.08f);
 
         if (target.Attributes.Health <= 0)
         {

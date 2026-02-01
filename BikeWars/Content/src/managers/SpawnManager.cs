@@ -11,6 +11,8 @@ using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.components;
 using BikeWars.Content.entities.npcharacters;
 using BikeWars.Utilities;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.managers
 {
@@ -53,6 +55,10 @@ namespace BikeWars.Content.managers
         private double _timeSinceLastCar;
         private const double CAR_SPAWN_START = 1.5; 
         private const double CAR_SPAWN_END   = 0.7; 
+        
+        // car sprites
+        private Texture2D[] _carSide;
+        private Texture2D[] _carUp;
 
         private readonly RepathScheduler _repathScheduler;
         public SpawnManager(GameObjectManager gameObjectManager, CollisionManager collisionManager, AudioService audioService, PathFinding pathFinding, RepathScheduler repathScheduler, WorldAudioManager worldAudioManager)
@@ -207,7 +213,8 @@ namespace BikeWars.Content.managers
             Vector2 spawnPos = Vector2.Zero;
             Point spawnTile = Point.Zero;
             bool found = false;
-
+            
+            // Try up to 100 times to find a road tile where the car can safely spawn
             for (int tries = 0; tries < 100; tries++)
             {
                 spawnPos = _collisionManager.GetRandomRoadWorldCenter(_rng);
@@ -227,7 +234,7 @@ namespace BikeWars.Content.managers
 
             if (!found) return;
 
-            // Build valid directions (fallback)
+            // Build valid directions
             var dirs = new[] {
                 new Point(1, 0),
                 new Point(-1, 0),
@@ -235,7 +242,8 @@ namespace BikeWars.Content.managers
                 new Point(0, -1)
             };
             var validDirs = new List<Point>(4);
-
+            
+            // Find valid road directions
             foreach (var d in dirs)
             {
                 Point neighbor = new Point(spawnTile.X + d.X, spawnTile.Y + d.Y);
@@ -245,7 +253,7 @@ namespace BikeWars.Content.managers
 
             if (validDirs.Count == 0) return;
 
-            // Decide direction by street orientation
+            // decide direction by street orientation
             bool left  = _collisionManager.IsRoadTile(new Point(spawnTile.X - 1, spawnTile.Y));
             bool right = _collisionManager.IsRoadTile(new Point(spawnTile.X + 1, spawnTile.Y));
             bool up    = _collisionManager.IsRoadTile(new Point(spawnTile.X, spawnTile.Y - 1));
@@ -253,24 +261,28 @@ namespace BikeWars.Content.managers
 
             Point dir;
 
-            // purely horizontal segment -> left
+            // if horizontal road go left
             if ((left || right) && !(up || down))
                 dir = new Point(-1, 0);
+            // else go down
             else
-                dir = new Point(0, 1); // vertical or intersection -> down
+                dir = new Point(0, 1);
 
-            // If our chosen dir isn't actually valid here, fall back
+            // if the chosen dir isn't actually valid here, fall back
             if (!validDirs.Contains(dir))
                 dir = validDirs[_rng.Next(validDirs.Count)];
 
-            var car = new Car(spawnPos, dir, _collisionManager, _rng);
+            int type = _rng.Next(1, 5);
+            string sideKey = $"Car{type}_Side";
+            string upKey   = $"Car{type}_Up";
+
+            var car = new Car(spawnPos, dir, _collisionManager, _rng, sideKey, upKey);
             _gameObjectManager.AddCar(car);
         }
         
+        // checks if the spawn position is far enough away from other cars
         private bool IsCarSpawnFree(Vector2 spawnPos, float minDist = 10f)
         {
-            // simplest: compare to existing cars’ positions
-            // (assuming _gameObjectManager has Cars list; if not, adapt to your storage)
             foreach (var car in _gameObjectManager.Cars)
             {
                 if (car == null || car.IsDead) continue;

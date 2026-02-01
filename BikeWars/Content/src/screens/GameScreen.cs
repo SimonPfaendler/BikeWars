@@ -844,6 +844,7 @@ namespace BikeWars.Content.screens
                         ch != _gameObjectManager.Player2
                     );
                     _gameObjectManager.Projectiles.Clear();
+                    _gameObjectManager.Cars.Clear();
 
                     OnTechDemoReset();
 
@@ -1135,6 +1136,8 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.Player1.ItemPickedUp -= _collisionManager.OnRemoveItem;
                 }
                 _collisionManager.OnTramHit -= _combatManager.HandleTramHit;
+                
+                _collisionManager.OnCarHit -= _combatManager.HandleCarHit;
             }
 
             if (_combatManager != null)

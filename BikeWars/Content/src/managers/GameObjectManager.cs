@@ -329,7 +329,7 @@ public class GameObjectManager
         // only draws an orange rectangle for now
         foreach (var car in _cars)
         {
-            car.Draw(spriteBatch, RenderPrimitives.Pixel);
+            car.Draw(spriteBatch);
         }
 
         foreach (BoxCollider s in Statics)
