@@ -184,6 +184,9 @@ namespace BikeWars.Content.screens
 
         protected override void OnTechDemoReset()
         {
+            for (int i = _raveGroups.Count - 1; i >= 0; i--)
+                _raveGroups[i]?.ForceDisperse();
+
             _raveGroups.Clear();
         }
         public override void Update(GameTime gameTime)

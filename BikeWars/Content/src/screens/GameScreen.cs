@@ -845,7 +845,7 @@ namespace BikeWars.Content.screens
                     );
                     _gameObjectManager.Projectiles.Clear();
                     _gameObjectManager.Cars.Clear();
-
+                    
                     OnTechDemoReset();
 
                     Console.WriteLine("Tech demo reset: removed all enemies and projectiles.");
