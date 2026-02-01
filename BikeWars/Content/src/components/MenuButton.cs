@@ -13,6 +13,8 @@ namespace BikeWars.Content.components
         private string _text;
         private readonly AudioService _audioService;
 
+        private float _textScale = 1.5f;
+
         private Rectangle _originalBounds;
         private Rectangle _hoverBounds;
         private Rectangle _collisionBounds;
@@ -67,6 +69,12 @@ namespace BikeWars.Content.components
         public bool IsHovered => _isHovered;
         public Rectangle Bounds => _collisionBounds;
         public string Text {get =>_text; set => _text = value;}
+
+        public float TextScale
+        {
+            get => _textScale;
+            set => _textScale = MathF.Max(0.5f, value);
+        }
 
         public void Update(MouseState mouseState, GameTime gameTime)
         {
@@ -139,11 +147,9 @@ namespace BikeWars.Content.components
         private void DrawText(SpriteBatch spriteBatch, Rectangle bounds)
         {
             Vector2 textSize = _font.MeasureString(_text);
-            float scale = 1.5f;
-
             Vector2 position = new Vector2(
-                bounds.X + (bounds.Width - textSize.X * scale) / 2,
-                bounds.Y + (bounds.Height - textSize.Y * scale) / 2
+                bounds.X + (bounds.Width - textSize.X * _textScale) / 2,
+                bounds.Y + (bounds.Height - textSize.Y * _textScale) / 2
             );
 
             spriteBatch.DrawString(
@@ -153,7 +159,7 @@ namespace BikeWars.Content.components
                 _textColor,
                 0f,
                 Vector2.Zero,
-                scale,
+                _textScale,
                 SpriteEffects.None,
                 0f
             );

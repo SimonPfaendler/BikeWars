@@ -58,96 +58,118 @@ namespace BikeWars.Content.screens
             base.LoadContent(content, gd);
 
             _gameTimer.OnTimerFinished += OnGameTimerFinished;
-            // creates simple button texture
-            // makes the 3 tech-demo buttons
+            // compact left-aligned column for tech-demo controls
+            int btnX = 20;
+            int btnY = 140;
+            int btnW = 240;
+            int btnH = 44;
+            int btnSpacing = 10;
+
+            Rectangle NextBtnRect()
+            {
+                var r = new Rectangle(btnX, btnY, btnW, btnH);
+                btnY += btnH + btnSpacing;
+                return r;
+            }
+
             _spawnHoboBtn = new MenuButton(
                 id: 1,
                 texture: RenderPrimitives.Pixel,
-                bounds: new Rectangle(30, 150, 200, 60),
+                bounds: NextBtnRect(),
                 text: "Spawn 100 Hobos",
                 font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
+            _spawnHoboBtn.TextScale = 1.15f;
 
             _spawnBikeBtn = new MenuButton(
                 id: 2,
                 texture: RenderPrimitives.Pixel,
-                bounds: new Rectangle(30, 220, 200, 60),
+                bounds: NextBtnRect(),
                 text: "Spawn 15 Thieves",
                 font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
+            _spawnBikeBtn.TextScale = 1.15f;
 
             _spawnDogBtn = new MenuButton(
                 id: 1,
                 texture: RenderPrimitives.Pixel,
-                bounds: new Rectangle(30, 290, 200, 60),
+                bounds: NextBtnRect(),
                 text: "Spawn 10 Dogs",
                 font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
+            _spawnDogBtn.TextScale = 1.15f;
 
             _spawnKamikazeBtn = new MenuButton(
                 id: 1,
                 texture: RenderPrimitives.Pixel,
-                bounds: new Rectangle(30, 360, 200, 60),
+                bounds: NextBtnRect(),
                 text: "Spawn 1 Opa",
                 font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
+            _spawnKamikazeBtn.TextScale = 1.15f;
 
             _spawnTramBtn = new MenuButton(
                 id: 1,
                 texture: RenderPrimitives.Pixel,
-                bounds: new Rectangle(30, 430, 200, 60),
+                bounds: NextBtnRect(),
                 text: "Spawn 1 Tram",
                 font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
+            _spawnTramBtn.TextScale = 1.15f;
 
             _spawnEnemyCircleBtn = new MenuButton(
                 id: 6,
                 texture: RenderPrimitives.Pixel,
-                bounds: new Rectangle(30, 500, 200, 60),
+                bounds: NextBtnRect(),
                 text: "Spawn Enemy Circle",
                 font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
+            _spawnEnemyCircleBtn.TextScale = 1.15f;
 
             _spawnDozentBtn = new MenuButton(
                 id: 6,
                 texture: RenderPrimitives.Pixel,
-                bounds: new Rectangle(30, 570, 200, 60),
+                bounds: NextBtnRect(),
                 text: "Spawn 10 Dozents",
                 font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
+            _spawnDozentBtn.TextScale = 1.15f;
 
             _spawnPoliceBtn = new MenuButton(
                 id: 7,
                 texture: RenderPrimitives.Pixel,
-                bounds: new Rectangle(30, 640, 200, 60),
+                bounds: NextBtnRect(),
                 text: "Spawn 5 Policemen",
                 font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
+            _spawnPoliceBtn.TextScale = 1.15f;
 
             _godModeSwitchBtn = new MenuButton(
                 id: 8,
                 texture: RenderPrimitives.Pixel,
-                bounds: new Rectangle(600, 150, 200, 60),
+                bounds: NextBtnRect(),
                 text: "GodMode On",
                 font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
+            _godModeSwitchBtn.TextScale = 1.15f;
             _startTimerBtn = new MenuButton(
                 id: 9,
                 texture: RenderPrimitives.Pixel,
-                bounds: new Rectangle(600, 220, 200, 60),
+                bounds: NextBtnRect(),
                 text: "Start Timer",
                 font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
+            _startTimerBtn.TextScale = 1.15f;
         }
 
         protected override void OnTechDemoReset()
@@ -199,9 +221,6 @@ namespace BikeWars.Content.screens
 
             if (_spawnEnemyCircleBtn.IsClicked(mouse, _prevMouse))
                 SpawnRaveCircle(count: 16, startRadius: 200f);
-
-            if (_spawnDozentBtn.IsClicked(mouse, _prevMouse))
-                SpawnEnemies(EnemyType.Dozent, 10);
 
             if (_spawnPoliceBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Police, 5);
