@@ -84,7 +84,7 @@ namespace BikeWars.Content.managers
             float beatInterval
         )
         {
-            if (target == null || target.IsDead)
+            if (target == null || target.IsDead || target.Attributes.Health <= 0)
                 return null;
 
             // ensure at least one raver so circle math never divides by zero
@@ -145,12 +145,37 @@ namespace BikeWars.Content.managers
             group.StartRaveMusic();
             return group;
         }
+        
+        private void PruneMissingRavers()
+        {
+            // If something else removed ravers from the world (off-screen despawn),
+            // we must notice it and clean up (especially music).
+            for (int i = _ravers.Count - 1; i >= 0; i--)
+            {
+                var r = _ravers[i];
+                if (r == null)
+                {
+                    _ravers.RemoveAt(i);
+                    continue;
+                }
 
+                // If the raver is no longer registered in the world, treat it as gone.
+                // (This is what happens when an "off-screen despawn" system removes it.)
+                if (!_gameObjectManager.Characters.Contains(r))
+                {
+                    // optional: mark dead to be consistent
+                    r.Attributes.Health = 0;
+                    _ravers.RemoveAt(i);
+                }
+            }
+        }
 
         public void Update(GameTime gameTime)
         {
             if (_isDispersed)
                 return;
+            
+            PruneMissingRavers();
 
             // the circle shouldnt shrink every frame
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -399,6 +424,12 @@ namespace BikeWars.Content.managers
             StopRaveMusic();
             _ravers.Clear();
             OnDied?.Invoke();
+        }
+        
+        public void ForceDisperse()
+        {
+            if (_isDispersed) return;
+            Disperse();
         }
     }
 }
