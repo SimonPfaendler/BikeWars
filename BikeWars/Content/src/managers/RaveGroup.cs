@@ -38,7 +38,7 @@ namespace BikeWars.Content.managers
         private readonly float _musicEnterRadius;
         // radius at which music stops when the player leaves
         private readonly float _musicExitRadius;
-
+        private static int _raveMusicUsers = 0;
         public bool IsActive => !_isDispersed && _ravers.Any(r => !r.IsDead);
 
         public event Action OnDied;
@@ -72,6 +72,7 @@ namespace BikeWars.Content.managers
 
         // Spawns a rave circle around Player1
         public static RaveGroup? SpawnAroundPlayer(
+            Player target,
             int count,
             float startRadius,
             float raverSize,
@@ -83,18 +84,14 @@ namespace BikeWars.Content.managers
             float beatInterval
         )
         {
-            if (gameObjectManager.Player1 == null)
+            if (target == null || target.IsDead)
                 return null;
-
-            // pause the game music and play the rave music
-            audioService.Music.Pause();
-            audioService.Sounds.PlayLoop(AudioAssets.RaverSound);
 
             // ensure at least one raver so circle math never divides by zero
             if (count < 1)
                 count = 1;
 
-            Vector2 circleCenter = gameObjectManager.Player1.Transform.Position;
+            Vector2 circleCenter = target.Transform.Position;
 
             // 4 raver variants
             (string Left, string Right)[] variants =
@@ -145,9 +142,7 @@ namespace BikeWars.Content.managers
                 beatInterval
             );
 
-            // there should be rave music when the ravers spawn
-            group._raveMusicActive = true;
-
+            group.StartRaveMusic();
             return group;
         }
 
@@ -157,14 +152,15 @@ namespace BikeWars.Content.managers
             if (_isDispersed)
                 return;
 
-            if (_gameObjectManager.Player1 == null)
-                return;
-
             // the circle shouldnt shrink every frame
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            Vector2 playerPos = _gameObjectManager.Player1.Transform.Position;
+            // Vector2 playerPos = _gameObjectManager.Player1.Transform.Position;
+            float nearestDist = GetNearestAlivePlayerDistance(_circleCenter);
 
-            UpdateMusicProximity(playerPos);
+            if (nearestDist < float.PositiveInfinity)
+                UpdateMusicProximityByDistance(nearestDist);
+            else
+                StopRaveMusic();
 
             //shrink the circle
             _radius = Math.Max(_minRadius,  _radius - _shrinkSpeed * dt);
@@ -179,12 +175,32 @@ namespace BikeWars.Content.managers
             if (CheckBreakCondition())
                 Disperse();
         }
-
-        // starts or stops rave music depending on player distance
-        private void UpdateMusicProximity(Vector2 playerPos)
+        
+        // returns distance of the nearest alive player to the circle center
+        private float GetNearestAlivePlayerDistance(Vector2 center)
         {
-            float dist = Vector2.Distance(playerPos, _circleCenter);
+            float best = float.PositiveInfinity;
 
+            var p1 = _gameObjectManager.Player1;
+            if (p1 != null && !p1.IsDead)
+            {
+                float d = Vector2.Distance(p1.Transform.Position, center);
+                if (d < best) best = d;
+            }
+
+            var p2 = _gameObjectManager.Player2;
+            if (p2 != null && !p2.IsDead)
+            {
+                float d = Vector2.Distance(p2.Transform.Position, center);
+                if (d < best) best = d;
+            }
+
+            return best;
+        }
+
+        // starts or stops rave music depending on nearest-player distance
+        private void UpdateMusicProximityByDistance(float dist)
+        {
             if (_raveMusicActive && dist > _musicExitRadius)
                 StopRaveMusic();
             else if (!_raveMusicActive && dist < _musicEnterRadius)
@@ -196,9 +212,15 @@ namespace BikeWars.Content.managers
             if (_raveMusicActive)
                 return;
 
-            _audioService.Music.Pause();
-            _audioService.Sounds.PlayLoop(AudioAssets.RaverSound);
             _raveMusicActive = true;
+            _raveMusicUsers++;
+
+            // Only the first user actually starts the loop
+            if (_raveMusicUsers == 1)
+            {
+                _audioService.Music.Pause();
+                _audioService.Sounds.PlayLoop(AudioAssets.RaverSound);
+            }
         }
 
         private void StopRaveMusic()
@@ -206,9 +228,15 @@ namespace BikeWars.Content.managers
             if (!_raveMusicActive)
                 return;
 
-            _audioService.Sounds.StopLoop(AudioAssets.RaverSound);
-            _audioService.Music.Resume();
             _raveMusicActive = false;
+            _raveMusicUsers = Math.Max(0, _raveMusicUsers - 1);
+
+            // Only stop when nobody needs it anymore
+            if (_raveMusicUsers == 0)
+            {
+                _audioService.Sounds.StopLoop(AudioAssets.RaverSound);
+                _audioService.Music.Resume();
+            }
         }
 
         // updates the beat timer and flips animation direction on each beat

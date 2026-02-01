@@ -359,8 +359,13 @@ namespace BikeWars.Content.screens
         {
             if (_raveGroups.Any(g => g.IsActive))
                 return;
+            
+            var target = GameObjectManager.Player1;
+            if (target == null || target.IsDead)
+                return;
 
             var group = RaveGroup.SpawnAroundPlayer(
+                target: target,
                 count: count,
                 startRadius: startRadius,
                 raverSize: 40,

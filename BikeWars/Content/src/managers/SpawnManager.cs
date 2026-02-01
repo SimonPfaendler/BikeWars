@@ -441,6 +441,7 @@ namespace BikeWars.Content.managers
 
             // Spawn the rave group (this already calls GameObjectManager.AddCharacter internally)
             var group = RaveGroup.SpawnAroundPlayer(
+                target: target,
                 count: count,
                 startRadius: startRadius,
                 raverSize: 20,
