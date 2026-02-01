@@ -238,10 +238,6 @@ namespace BikeWars.Entities.Characters
             if (item is Xp xp)
             {
                 AddXp(xp.xp_value);
-                if (XpCounter >= XpLevelUp)
-                {
-                    LevelUp();
-                }
             }
 
             if (item is EnergyBar eb)
@@ -272,29 +268,23 @@ namespace BikeWars.Entities.Characters
             }
             if (item is WeaponItem weapon)
             {
-                if (_input.IsPressed(GameAction.INTERACT))
+                if (_unlockedWeapons.TryGetValue(weapon.Type, out var attributes))
                 {
-                    if (_unlockedWeapons.TryGetValue(weapon.Type, out var attributes))
-                    {
-                        upgradeWeapon(attributes);
-                    } else {
-                        // switch (weapon.Type)
-                        // {
-                        //     case GunStatics:
+                    upgradeWeapon(attributes);
+                } else {
+                    // switch (weapon.Type)
+                    // {
+                    //     case GunStatics:
 
-                        //     break;
-                        //     default:
+                    //     break;
+                    //     default:
 
-                        //     break;
-                        // }
+                    //     break;
+                    // }
 
-                        WeaponAttributes wp = new WeaponAttributes();
-                        _unlockedWeapons.Add(weapon.Type, wp);
-                    }
-                    item.IsPickedUp = true;
-                    ItemPickedUp?.Invoke(item);
+                    WeaponAttributes wp = new WeaponAttributes();
+                    _unlockedWeapons.Add(weapon.Type, wp);
                 }
-                return;
             }
             item.IsPickedUp = true;
             ItemPickedUp?.Invoke(item);
