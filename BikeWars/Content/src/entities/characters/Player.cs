@@ -43,6 +43,14 @@ namespace BikeWars.Entities.Characters
 
         //Range for throwing objects around the player
         public const float ThrowRange = 400f;
+
+        // Virtual aim for analog throwing
+        private Vector2 _virtualAimDir = Vector2.UnitX;
+        private float _virtualAimDistance = 0f;
+        private bool _shootHeldPrev = false;
+        private const float THROW_AIM_MAX = 200f;
+        private const float THROW_AIM_MIN = 0f;
+        private const float THROW_AIM_GROW_SPEED = 400f; // px per second while holding trigger
         public TerrainCollider CurrentTerrain { get; set; }
         public float TerrainSpeedMultiplier = 1.0f;
         private const float IncreaseSpeed = 1.1f;
@@ -416,15 +424,10 @@ namespace BikeWars.Entities.Characters
         {
             _mouseWorldPos = mousePos;
 
-            // Simple virtual cursor for controller: aim in front of the player
+            // Analog: use virtual cursor that can be stretched while holding shoot
             if (_input.IsAnalog)
             {
-                var dir = GazeDirection != Vector2.Zero ? Vector2.Normalize(GazeDirection) : _facingDirection;
-                if (dir == Vector2.Zero)
-                {
-                    dir = Vector2.UnitX;
-                }
-                _mouseWorldPos = Transform.Position + dir * 100f;
+                UpdateAnalogThrowAim(gameTime);
             }
 
             var throwOrigin = Transform.Bounds.Center.ToVector2();
@@ -954,6 +957,58 @@ namespace BikeWars.Entities.Characters
             }
         }
 
+        private bool IsThrowWeapon(WeaponType weapon)
+        {
+            return weapon == WeaponType.BookThrow ||
+                   weapon == WeaponType.BananaThrow ||
+                   weapon == WeaponType.BottleThrow ||
+                   weapon == WeaponType.BeerThrow;
+        }
+
+        private void UpdateAnalogThrowAim(GameTime gameTime)
+        {
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            // Direction comes from right stick; fall back to facing
+            var dir = _input.GetAimDirection(Transform.Position, _facingDirection);
+            if (dir != Vector2.Zero)
+            {
+                _virtualAimDir = Vector2.Normalize(dir);
+            }
+            else if (_virtualAimDir == Vector2.Zero)
+            {
+                _virtualAimDir = _facingDirection == Vector2.Zero ? Vector2.UnitX : _facingDirection;
+            }
+
+            bool shootHeld = _input.IsHeld(GameAction.SHOOT);
+
+            if (shootHeld)
+            {
+                _virtualAimDistance += THROW_AIM_GROW_SPEED * dt;
+            }
+            else
+            {
+                // Decay slightly back toward a comfortable default
+                _virtualAimDistance = MathF.Max(_virtualAimDistance - THROW_AIM_GROW_SPEED * 0.5f * dt, THROW_AIM_MIN);
+            }
+
+            _virtualAimDistance = MathHelper.Clamp(_virtualAimDistance, THROW_AIM_MIN, THROW_AIM_MAX);
+
+            _mouseWorldPos = Transform.Position + _virtualAimDir * _virtualAimDistance;
+
+            // On trigger release, throw for analog-controlled throw weapons
+            if (_shootHeldPrev && !shootHeld && IsThrowWeapon(CurrentWeapon) && CanAttack())
+            {
+                bool fired = TryShoot();
+                if (fired)
+                {
+                    ResetAttackCooldown();
+                }
+            }
+
+            _shootHeldPrev = shootHeld;
+        }
+
 
         private void UpdateGazeDirection(Vector2 mousePos)
         {
@@ -998,6 +1053,14 @@ namespace BikeWars.Entities.Characters
 
         private void HandleShooting()
         {
+            bool isAnalogThrow = _input.IsAnalog && IsThrowWeapon(CurrentWeapon);
+
+            if (isAnalogThrow)
+            {
+                // Throw is handled on trigger release in UpdateAnalogThrowAim
+                return;
+            }
+
             bool shooting =
                 (Attributes.CanAutoAttack && _input.IsHeld(GameAction.SHOOT) ||
                  _input.IsPressed(GameAction.SHOOT)) && CanAttack();
