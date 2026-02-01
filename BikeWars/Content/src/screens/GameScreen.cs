@@ -177,6 +177,12 @@ namespace BikeWars.Content.screens
             {
                 _hudP2.Position = new Vector2(viewW - 350, viewH - 170);
             }
+
+            _levelUpScreen?.OnViewportChanged(viewport);
+            if (_bikeShopScreen != null)
+            {
+                _bikeShopScreen.ViewPort = viewport;
+            }
         }
         public virtual void LoadContent(ContentManager content, GraphicsDevice gd)
         {
