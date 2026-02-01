@@ -31,7 +31,7 @@ public abstract class CharacterBase : ICharacter, ICombat
     public bool CanRevive { get; set; } = false;
     public bool IsDying { get; protected set; } = false;
     public float DyingTimer { get; protected set; } = 0f;
-    protected const float DyingDuration = 5f;
+    protected const float DyingDuration = 20f;
 
 
     public bool _XpDropped { get; set; } = false; // for making sure each enemy only drops XP once
