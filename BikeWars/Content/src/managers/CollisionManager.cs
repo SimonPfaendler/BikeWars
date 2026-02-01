@@ -34,7 +34,7 @@ public class CollisionManager
     public event Action<CharacterBase, object> OnBaechleHit;
     
     // car action
-    public event Action<CharacterBase> OnCarHit;
+    public event Action<CharacterBase, object> OnCarHit;
     public int GlobalIdentifier { get; }
 
 
@@ -100,8 +100,7 @@ public class CollisionManager
     private bool[,] _roadGrid;
     private readonly HashSet<int> _carRoadGids = new()
     {
-        2348,
-        2350
+        2348
     };
     private readonly List<Point> _roadTiles = new();
 
@@ -791,7 +790,7 @@ public class CollisionManager
         {
             if (c.Intersects(d))
             {
-                OnCarHit?.Invoke((CharacterBase)d.Owner);
+                OnCarHit?.Invoke((CharacterBase)d.Owner, c.Owner);
             }
         }
     }

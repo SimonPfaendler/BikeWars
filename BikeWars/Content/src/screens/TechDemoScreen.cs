@@ -45,6 +45,7 @@ namespace BikeWars.Content.screens
         private MenuButton _spawnPoliceBtn;
         private MenuButton _godModeSwitchBtn;
         private MenuButton _startTimerBtn;
+        private MenuButton _spawnCarBtn;
         private readonly List<RaveGroup> _raveGroups = new List<RaveGroup>();
         private MouseState _prevMouse;
 
@@ -169,6 +170,14 @@ namespace BikeWars.Content.screens
                 font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
+            _spawnCarBtn = new MenuButton(
+                id: 11,
+                texture: RenderPrimitives.Pixel,
+                bounds: new Rectangle(1050, 290, 200, 60),
+                text: "Spawn 5 Cars",
+                font: UIAssets.DefaultFont,
+                audioService: AudioService
+            );
             _startTimerBtn.TextScale = 1.15f;
         }
 
@@ -200,6 +209,10 @@ namespace BikeWars.Content.screens
             _spawnPoliceBtn.Update(mouse, gameTime);
             _godModeSwitchBtn.Update(mouse, gameTime);
             _startTimerBtn.Update(mouse, gameTime);
+            _spawnCarBtn.Update(mouse, gameTime);
+            _spawnCarBtn.Text = IsPlayerNearRoad(GameObjectManager.Player1.Transform.Position)
+                ? "Spawn 5 Cars"
+                : "Spawn Cars (go to road)";
 
             if(_spawnHoboBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Hobo, 100);
@@ -224,6 +237,17 @@ namespace BikeWars.Content.screens
 
             if (_spawnPoliceBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Police, 5);
+            
+            if (_spawnCarBtn.IsClicked(mouse, _prevMouse))
+            {
+                var playerPos = GameObjectManager.Player1.Transform.Position;
+
+                if (!IsPlayerNearRoad(playerPos))
+                    return; // or play error sound, or change button text
+
+                for (int i = 0; i < 5; i++)
+                    _spawnManager.SpawnCar(0.0);
+            }
 
             if (_godModeSwitchBtn.IsClicked(mouse, _prevMouse))
             {
@@ -248,6 +272,22 @@ namespace BikeWars.Content.screens
             }
             _prevMouse = mouse;
         }
+        
+        // checks if the player is near a road
+        private bool IsPlayerNearRoad(Vector2 playerPos, int radiusTiles = 3)
+        {
+            Point p = CollisionManager.WorldToGrid(playerPos);
+
+            for (int y = -radiusTiles; y <= radiusTiles; y++)
+            for (int x = -radiusTiles; x <= radiusTiles; x++)
+            {
+                if (CollisionManager.IsRoadTile(new Point(p.X + x, p.Y + y)))
+                    return true;
+            }
+
+            return false;
+        }
+        
         // spawns enemies when you click their button
         private void SpawnEnemies(EnemyType type, int amount)
         {
@@ -275,7 +315,6 @@ namespace BikeWars.Content.screens
                     if (!CollisionManager.PathGrid[grid.X, grid.Y].Walkable)
                         continue;
 
-                    // ok, this is a walkable tile → use it
                     spawnPos = candidate;
                     break;
                 }
@@ -357,6 +396,7 @@ namespace BikeWars.Content.screens
             _spawnPoliceBtn.Draw(sb);
             _godModeSwitchBtn.Draw(sb);
             _startTimerBtn.Draw(sb);
+            _spawnCarBtn.Draw(sb);
             sb.End();
         }
 

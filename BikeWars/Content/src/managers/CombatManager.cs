@@ -171,12 +171,12 @@ public class CombatManager
     }
     
     // car collision damage
-    public void HandleCarHit(CharacterBase target)
+    public void HandleCarHit(CharacterBase target,  object car)
     {
         if (target.IsDead) return;
         if (target.IsGodMode) return;
         
-        target.TakeDamage(12);
+        target.TakeDamage(12, car);
 
         // feedback similar to tram
         _audio.Sounds.Play(AudioAssets.CarCrash);

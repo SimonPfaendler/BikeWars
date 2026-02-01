@@ -51,8 +51,8 @@ namespace BikeWars.Content.managers
         // car logic
         private readonly Random _rng = new Random();
         private double _timeSinceLastCar;
-        private const double CAR_SPAWN_START = 3.0; 
-        private const double CAR_SPAWN_END   = 3.0; 
+        private const double CAR_SPAWN_START = 1.5; 
+        private const double CAR_SPAWN_END   = 0.7; 
 
         private readonly RepathScheduler _repathScheduler;
         public SpawnManager(GameObjectManager gameObjectManager, CollisionManager collisionManager, AudioService audioService, PathFinding pathFinding, RepathScheduler repathScheduler, WorldAudioManager worldAudioManager)
@@ -202,62 +202,82 @@ namespace BikeWars.Content.managers
         }
         
         // spawn the car
-        private void SpawnCar(double progress)
+        public void SpawnCar(double progress)
         {
-            // Try to find a valid road spawn position
             Vector2 spawnPos = Vector2.Zero;
             Point spawnTile = Point.Zero;
-            
-            // try a few times to get a position that maps back to a road tile
-            for (int tries = 0; tries < 30; tries++)
+            bool found = false;
+
+            for (int tries = 0; tries < 100; tries++)
             {
                 spawnPos = _collisionManager.GetRandomRoadWorldCenter(_rng);
                 if (spawnPos == Vector2.Zero) return;
-                
-                spawnTile = _collisionManager.WorldToGrid(spawnPos);
-                
-                if (_collisionManager.IsRoadTile(spawnTile))
-                    break;
 
-                spawnPos = Vector2.Zero;
+                spawnTile = _collisionManager.WorldToGrid(spawnPos);
+
+                if (!_collisionManager.IsRoadTile(spawnTile))
+                    continue;
+
+                if (!IsCarSpawnFree(spawnPos))
+                    continue;
+
+                found = true;
+                break;
             }
-            
-            if (spawnPos == Vector2.Zero) return;
-            
-            var dirs = new[] { 
-                new Point(1, 0),  
-                new Point(-1, 0),  
-                new Point(0, 1),   
-                new Point(0, -1)   
+
+            if (!found) return;
+
+            // Build valid directions (fallback)
+            var dirs = new[] {
+                new Point(1, 0),
+                new Point(-1, 0),
+                new Point(0, 1),
+                new Point(0, -1)
             };
-            var validDirs = new System.Collections.Generic.List<Point>();
-            
-            // check all directions and keep the ones that lead to a road tile
+            var validDirs = new List<Point>(4);
+
             foreach (var d in dirs)
             {
                 Point neighbor = new Point(spawnTile.X + d.X, spawnTile.Y + d.Y);
                 if (_collisionManager.IsRoadTile(neighbor))
-                {
-                    // double-check with world position
-                    Vector2 neighborWorld = new Vector2(
-                        neighbor.X * _collisionManager._cellSize + _collisionManager._cellSize / 2f,
-                        neighbor.Y * _collisionManager._cellSize + _collisionManager._cellSize / 2f
-                    );
-            
-                    if (_collisionManager.IsRoadWorld(neighborWorld))
-                    {
-                        validDirs.Add(d);
-                    }
-                }
+                    validDirs.Add(d);
             }
 
             if (validDirs.Count == 0) return;
-            
-            // pick the first valid direction 
-            Point dir = validDirs[0];
+
+            // Decide direction by street orientation
+            bool left  = _collisionManager.IsRoadTile(new Point(spawnTile.X - 1, spawnTile.Y));
+            bool right = _collisionManager.IsRoadTile(new Point(spawnTile.X + 1, spawnTile.Y));
+            bool up    = _collisionManager.IsRoadTile(new Point(spawnTile.X, spawnTile.Y - 1));
+            bool down  = _collisionManager.IsRoadTile(new Point(spawnTile.X, spawnTile.Y + 1));
+
+            Point dir;
+
+            // purely horizontal segment -> left
+            if ((left || right) && !(up || down))
+                dir = new Point(-1, 0);
+            else
+                dir = new Point(0, 1); // vertical or intersection -> down
+
+            // If our chosen dir isn't actually valid here, fall back
+            if (!validDirs.Contains(dir))
+                dir = validDirs[_rng.Next(validDirs.Count)];
 
             var car = new Car(spawnPos, dir, _collisionManager, _rng);
             _gameObjectManager.AddCar(car);
+        }
+        
+        private bool IsCarSpawnFree(Vector2 spawnPos, float minDist = 10f)
+        {
+            // simplest: compare to existing cars’ positions
+            // (assuming _gameObjectManager has Cars list; if not, adapt to your storage)
+            foreach (var car in _gameObjectManager.Cars)
+            {
+                if (car == null || car.IsDead) continue;
+                if (Vector2.Distance(car.Transform.Position, spawnPos) < minDist)
+                    return false;
+            }
+            return true;
         }
         
         private void SpawnSwarm(double progress)
