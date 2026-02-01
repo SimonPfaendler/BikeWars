@@ -170,15 +170,16 @@ namespace BikeWars.Content.screens
                 font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
+            _startTimerBtn.TextScale = 1.15f;
             _spawnCarBtn = new MenuButton(
                 id: 11,
                 texture: RenderPrimitives.Pixel,
-                bounds: new Rectangle(1050, 290, 250, 60),
+                bounds: NextBtnRect(),
                 text: "Spawn 5 Cars",
                 font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
-            _startTimerBtn.TextScale = 1.15f;
+            _spawnHoboBtn.TextScale = 1.15f;
         }
 
         protected override void OnTechDemoReset()
