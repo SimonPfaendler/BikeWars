@@ -554,9 +554,16 @@ namespace BikeWars.Entities.Characters
                 Vector2 center = Transform.Position;
 
                 // Draw static valid zone arc based on facing direction
-                float facingAngle = (float)Math.Atan2(_facingDirection.Y, _facingDirection.X);
-                DrawUtils.DrawArc(spriteBatch, RenderPrimitives.Pixel, center, 50f, facingAngle, MathHelper.ToRadians(240),
-                    Color.Red * 0.5f);
+                if (movement.OwnsBike)
+                {
+                    float facingAngle = (float)Math.Atan2(_facingDirection.Y, _facingDirection.X);
+                    DrawUtils.DrawArc(spriteBatch, RenderPrimitives.Pixel, center, 50f, facingAngle, MathHelper.ToRadians(240),
+                        Color.Red * 0.5f);
+                }
+                else
+                {
+                     DrawUtils.DrawCircleOutline(spriteBatch, RenderPrimitives.Pixel, center, 50f, Color.Red * 0.5f);
+                }
 
                 // Draw aiming line
                 Vector2 aimEnd = center + GazeDirection * 50f;
@@ -954,25 +961,34 @@ namespace BikeWars.Entities.Characters
             Vector2 eyePos = Transform.Position;
             Vector2 potentialGaze = _input.GetAimDirection(eyePos, _facingDirection);
 
-            // 3. Apply Angle Restriction (240 degrees total = +/- 120 degrees)
             if (potentialGaze != Vector2.Zero)
             {
                 AimTarget = eyePos + potentialGaze * AimLength;
-                // Check if the angle is within +/- 120 degrees
-                if (Vector2.Dot(_facingDirection, potentialGaze) > -0.5f)
+
+                if (!movement.OwnsBike)
                 {
+                    // Full 360 degree gaze when walking
                     GazeDirection = potentialGaze;
                 }
                 else
                 {
-                    // Clamp to nearest 120 degree angle
-                    float facingAngle = (float)Math.Atan2(_facingDirection.Y, _facingDirection.X);
-                    float cross = _facingDirection.X * potentialGaze.Y - _facingDirection.Y * potentialGaze.X;
-                    float limit = MathHelper.ToRadians(120);
+                    // 3. Apply Angle Restriction (240 degrees total = +/- 120 degrees) when on bike
+                    // Check if the angle is within +/- 120 degrees
+                    if (Vector2.Dot(_facingDirection, potentialGaze) > -0.5f)
+                    {
+                        GazeDirection = potentialGaze;
+                    }
+                    else
+                    {
+                        // Clamp to nearest 120 degree angle
+                        float facingAngle = (float)Math.Atan2(_facingDirection.Y, _facingDirection.X);
+                        float cross = _facingDirection.X * potentialGaze.Y - _facingDirection.Y * potentialGaze.X;
+                        float limit = MathHelper.ToRadians(120);
 
-                    float targetAngle = facingAngle + (cross > 0 ? limit : -limit);
+                        float targetAngle = facingAngle + (cross > 0 ? limit : -limit);
 
-                    GazeDirection = new Vector2((float)Math.Cos(targetAngle), (float)Math.Sin(targetAngle));
+                        GazeDirection = new Vector2((float)Math.Cos(targetAngle), (float)Math.Sin(targetAngle));
+                    }
                 }
             }
             if (GazeDirection == Vector2.Zero) {
