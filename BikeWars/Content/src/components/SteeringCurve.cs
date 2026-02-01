@@ -1,12 +1,11 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 
-
 namespace BikeWars.Content.components
 {
     /// <summary>
     /// calculates a steering multiplier based on the current speed
-    /// 
+    ///
     /// HOW TO TUNE: (balancing)
     /// Adjust the Vector2 keypoints in the constructor.
     /// X = Speed (0 to ~400)
@@ -45,14 +44,14 @@ namespace BikeWars.Content.components
                 // Fallback
                 _keypoints = new List<Vector2> { new Vector2(0, 1), new Vector2(1000, 0.2f) };
             }
-            
+
             // sort by speed (X)
             _keypoints.Sort((a, b) => a.X.CompareTo(b.X));
 
             // Precompute virtual points
             _virtualStart = _keypoints[0] - (_keypoints[1] - _keypoints[0]);
             _virtualEnd = _keypoints[^1] + (_keypoints[^1] - _keypoints[^2]);
-            
+
             _lastSegmentIndex = 0;
         }
 
@@ -87,7 +86,7 @@ namespace BikeWars.Content.components
             // P0, P1, P2, P3
             Vector2 p1 = _keypoints[i];
             Vector2 p2 = _keypoints[i + 1];
-            
+
             Vector2 p0 = (i == 0) ? _virtualStart : _keypoints[i - 1];
             Vector2 p3 = (i == _keypoints.Count - 2) ? _virtualEnd : _keypoints[i + 2];
 
@@ -99,7 +98,5 @@ namespace BikeWars.Content.components
             // Clamp
             return MathHelper.Clamp(result, 0f, 1.5f);
         }
-
-
     }
 }

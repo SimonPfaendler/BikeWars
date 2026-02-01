@@ -4,10 +4,8 @@ using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Content.managers;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace BikeWars.Entities;
-
 public class AchievementTrigger : ObjectBase
 {
     public AchievementIds Id;
@@ -19,19 +17,9 @@ public class AchievementTrigger : ObjectBase
         Collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.TRIGGER, this);
     }
 
-    public override void Update(GameTime gameTime)
-    {
-        // nothing for now
+    public override void Update(GameTime gameTime) {
     }
 
-    public override void Draw(SpriteBatch spriteBatch)
-    {
-        // if (_usesAtlas && _atlas != null && _atlasRect != Rectangle.Empty)
-        // {
-        //     spriteBatch.Draw(_atlas, Transform.Bounds, _atlasRect, Color.White);
-        // }
-        // No single-image fallback supported; nothing to draw if atlas not found
-    }
     public override bool Intersects(ICollider other)
     {
         return Collider.Intersects(other);

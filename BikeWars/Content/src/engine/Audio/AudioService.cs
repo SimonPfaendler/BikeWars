@@ -9,15 +9,13 @@ public class AudioService
     public MusicManager Music { get; }
 
     // Speichert, welche Sounds schon geladen wurden
-    private HashSet<string> _loadedSounds = new HashSet<string>();
-    private HashSet<string> _loadedMusic = new HashSet<string>();
+    private readonly HashSet<string> _loadedSounds = new HashSet<string>();
+    private readonly HashSet<string> _loadedMusic = new HashSet<string>();
 
-    private ContentManager _content;
     public AudioService(ContentManager c)
     {
         Sounds = new SoundManager(c);
         Music = new MusicManager(c);
-        _content = c;
     }
 
     public void LoadContent()
@@ -60,7 +58,6 @@ public class AudioService
         Music.Stop();
 
         // Give memory free
-        // Sounds.UnloadAll();
         Music.UnloadAll();
 
         _loadedSounds.Clear();

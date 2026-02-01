@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -186,7 +187,7 @@ namespace BikeWars.Content.engine
                 GamePads[i] = new GamePadInfo((PlayerIndex)i);
             }
         }
-        
+
         // Helper to get specific gamepad
         public static GamePadInfo GetGamePad(PlayerIndex index)
         {
@@ -211,7 +212,7 @@ namespace BikeWars.Content.engine
             { GameAction.ESC, new[] {Keys.Escape } },
             { GameAction.SPRINT, new[] { Keys.LeftShift, Keys.RightShift } },
             { GameAction.PAUSE, new[] { Keys.Escape, Keys.P } },
-            { GameAction.SHOOT, new Keys[0] },
+            { GameAction.SHOOT, Array.Empty<Keys>() },
             { GameAction.INTERACT, new[] {Keys.Q } },
             { GameAction.SWITCH, new[] {Keys.X } },
             { GameAction.DEBUG_HEAL, new[] {Keys.M } },
@@ -277,7 +278,7 @@ namespace BikeWars.Content.engine
             }
         }
 
-        
+
         public static bool IsHeld(GameAction action)
         {
             if (MouseMapping.TryGetValue(action, out var mouseButtons))

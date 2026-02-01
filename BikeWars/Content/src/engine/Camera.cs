@@ -37,8 +37,6 @@ namespace BikeWars.Content.engine
         private const float MoveSpeed = 8f;
         private const float LerpFactor = 0.1f;
 
-        private readonly float worldMinZoom;
-
         private Vector2 _lastCameraPosition;
 
         public Camera2D(int viewportWidth, int viewportHeight, Rectangle worldBounds)
@@ -46,9 +44,6 @@ namespace BikeWars.Content.engine
             _viewportWidth = viewportWidth;
             _viewportHeight = viewportHeight;
             _worldBounds = worldBounds;
-            float minZoomX = (float)_viewportWidth  / _worldBounds.Width;
-            float minZoomY = (float)_viewportHeight / _worldBounds.Height;
-            worldMinZoom = Math.Max(minZoomX, minZoomY);
         }
 
         // Screen Shake

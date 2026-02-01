@@ -8,7 +8,7 @@ namespace BikeWars.Content.engine
     public class GameTimer
     {
         private float _currentTime;
-        private float _totalTime;
+        private readonly float _totalTime;
         private bool _isRunning;
         private bool _isPaused;
 

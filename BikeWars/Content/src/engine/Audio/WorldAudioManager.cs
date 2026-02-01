@@ -32,9 +32,5 @@ namespace BikeWars.Content.engine.Audio
             // Optional: Hier könnte man später Distanz-basiertes Fading einbauen
             return IsAudible(worldPosition) ? 1f : 0f;
         }
-        public void Dispose()
-        {
-
-        }
     }
 }

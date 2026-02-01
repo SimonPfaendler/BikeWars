@@ -3,8 +3,8 @@ using Microsoft.Xna.Framework;
 namespace BikeWars.Content.engine;
 public class CooldownWithDuration
 {
-    private float _duration;
-    private float _cooldown;
+    private readonly float _duration;
+    private readonly float _cooldown;
     private float _durationTimer;
     private float _cooldownTimer;
     public float Duration {get; set;}

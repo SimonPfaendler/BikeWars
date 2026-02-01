@@ -88,7 +88,7 @@ public class BicycleMovement : IMoveable
         }
     }
 
-    private SteeringCurve _steeringCurve;
+    private readonly SteeringCurve _steeringCurve;
     public SteeringCurve Curve => _steeringCurve;
 
     public BicycleMovement(bool canMove, bool isMoving, float speed, float maxSpeed, float speedAcceleration, float sprintAcceleration, float rotationAcceleration)
@@ -115,10 +115,10 @@ public class BicycleMovement : IMoveable
         return MathHelper.Clamp(currentSpeed - acceleration, minSpeed, maxSpeed);
     }
 
-    public float HandleRotation(List<MoveDirection> moveDirections, float rotationAcceleration)
+    public float HandleRotation(List<MoveDirection> moveDirections, float currentAcceleration)
     {
         float steerFactor = _steeringCurve.Evaluate(Speed);
-        float adjustedRotation = rotationAcceleration * steerFactor;
+        float adjustedRotation = currentAcceleration * steerFactor;
 
         foreach (var dir in moveDirections)
         {

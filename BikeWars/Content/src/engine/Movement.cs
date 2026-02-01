@@ -10,19 +10,9 @@ public class Movement: MovementBase
         CanMove = canMove;
         IsMoving = isMoving;
     }
-    public void HandleBasicDirections(GameTime gameTime)
-    {
-        if (!CanMove)
-        {
-            return;
-        }
+    public void HandleBasicDirections(GameTime gameTime){
     }
-    public override void HandleMovement(GameTime gameTime)
-    {
-        if (!CanMove)
-        {
-            return;
-        }
+    public override void HandleMovement(GameTime gameTime){
     }
     public override void Update(GameTime gameTime){}
     public void HandleBasicDirections()

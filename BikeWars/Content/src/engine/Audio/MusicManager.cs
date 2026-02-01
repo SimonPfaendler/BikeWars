@@ -21,13 +21,12 @@ public class MusicManager
 
     public string CurrentSong => _currentSongId;
 
-    private ContentManager _content;
+    private readonly ContentManager _content;
 
     public MusicManager(ContentManager c)
     {
         _content = c;
     }
-
 
     // Load: used only once when starting the game: paths = ID -> content path
     public void Load(IReadOnlyDictionary<string, string> paths)

@@ -918,7 +918,7 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.Objects,
                     _gameObjectManager.Towers
                 );
-                
+
                 _collisionManager.DrawLayerDebug(sb, RenderPrimitives.Pixel, "Streets", Color.Magenta);
             }
 
@@ -1136,7 +1136,7 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.Player1.ItemPickedUp -= _collisionManager.OnRemoveItem;
                 }
                 _collisionManager.OnTramHit -= _combatManager.HandleTramHit;
-                
+
                 _collisionManager.OnCarHit -= _combatManager.HandleCarHit;
             }
 
@@ -1167,7 +1167,6 @@ namespace BikeWars.Content.screens
 
             // Manager cleanup
             _spawnManager?.Dispose();
-            _worldAudioManager?.Dispose();
 
             _collisionManager.Unload();
             _gameObjectManager.Unload();

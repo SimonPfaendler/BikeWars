@@ -32,7 +32,7 @@ public class CollisionManager
     public event Action<CharacterBase, AreaOfEffectBase> OnAOEHit;
     public event Action<CharacterBase, object> OnTramHit;
     public event Action<CharacterBase, object> OnBaechleHit;
-    
+
     // car action
     public event Action<CharacterBase, object> OnCarHit;
     public int GlobalIdentifier { get; }
@@ -95,7 +95,7 @@ public class CollisionManager
 
     // base (unpadded) walkability snapshot to support cheap local updates
     private bool[,] _baseWalkableGrid;
-    
+
     // grid data for road tiles
     private bool[,] _roadGrid;
     private readonly HashSet<int> _carRoadGids = new()
@@ -199,33 +199,33 @@ public class CollisionManager
             ApplyGlobalPaddingFromBase();
         }
     }
-    
+
     // checks if a given grid position is a road tile
     public bool IsRoadTile(Point g)
     {
         if (_roadGrid == null) return false;
-        
+
         int w = _roadGrid.GetLength(0);
         int h = _roadGrid.GetLength(1);
-        
+
         if (g.X < 0 || g.X >= w || g.Y < 0 || g.Y >= h) return false;
-        
+
         return _roadGrid[g.X, g.Y];
     }
-    
+
     // returns true if the world position is on a road
     public bool IsRoadWorld(Vector2 worldPos)
     {
         int gid = GetTileGidAtWorld("Streets", worldPos);
         return IsRealRoadGid(gid);
     }
-    
+
     // checks whether a tile id is one of the allowed road tiles
     private bool IsRealRoadGid(int gid)
     {
         return gid == 2348;
     }
-    
+
     // converts a world position to grid coordinates and returns that tile’s GID
     public int GetTileGidAtWorld(string layerName, Vector2 worldPos)
     {
@@ -243,7 +243,7 @@ public class CollisionManager
         return tile.GlobalIdentifier;
     }
 
-    
+
     // random road spawn
     public Vector2 GetRandomRoadWorldCenter(Random rng)
     {
@@ -605,7 +605,7 @@ public class CollisionManager
                 AddDynamic(col);
             }
         }
-        
+
         // handle car collisions
         foreach (var car in cars)
         {
@@ -635,7 +635,7 @@ public class CollisionManager
     {
         // Ignore SPAWNENEMIES layer for characters
         if (b.Layer == CollisionLayer.SPAWNENEMIES) return;
-        if (c.Layer != CollisionLayer.CHARACTER & c.Layer != CollisionLayer.PLAYER) return;
+        if (c.Layer != CollisionLayer.CHARACTER && c.Layer != CollisionLayer.PLAYER) return;
         Vector2 penetration = GetPenetrationVector(c, b);
         if (penetration.LengthSquared() < 0.0001f)
             return;
@@ -781,7 +781,7 @@ public class CollisionManager
             }
         }
     }
-    
+
     // car collision
     private void HandleCarCollision(ICollider c, ICollider d)
     {
@@ -793,7 +793,7 @@ public class CollisionManager
                 OnCarHit?.Invoke((CharacterBase)d.Owner, c.Owner);
             }
         }
-        
+
         if (d.Layer == CollisionLayer.CAR &&
             (c.Layer == CollisionLayer.CHARACTER || c.Layer == CollisionLayer.PLAYER))
         {
@@ -1222,7 +1222,7 @@ public class CollisionManager
                 DrawRectOutline(spriteBatch, pixel, tramRect, Color.Red * 0.7f);
             }
         }
-        
+
         // draw car hitboxes
         foreach (var car in cars)
         {
@@ -1230,7 +1230,7 @@ public class CollisionManager
             var carRect = GetColliderRectangle(car.Collider);
             DrawRectOutline(spriteBatch, pixel, carRect, Color.Yellow * 0.7f);
         }
-        
+
         foreach (var tower in towers)
         {
             if (tower?.Collider != null)
@@ -1351,7 +1351,7 @@ public class CollisionManager
         var layer = TiledMap.GetLayer<TiledMapTileLayer>(layerName);
         if (layer == null)
             return;
-        
+
         // init road grid data
         if (type == TerrainType.ROAD && _roadGrid == null)
         {
@@ -1366,10 +1366,10 @@ public class CollisionManager
 
             int x = tile.X * _cellSize;
             int y = tile.Y * _cellSize;
-            
+
             // remember road tiles
             int gid = tile.GlobalIdentifier;
-    
+
             if (type == TerrainType.ROAD)
             {
                 if (!IsRealRoadGid(gid))
@@ -1474,7 +1474,7 @@ public class CollisionManager
         _toRemoveColliders.Clear();
         _toRemoveStaticColliders.Clear();
         _toUpdateWalkableRects.Clear();
-        
+
         _roadGrid = null;
         _roadTiles.Clear();
 
@@ -1520,8 +1520,8 @@ public class CollisionManager
             // Layer might not exist; continue without it
         }
     }
-    
-    
+
+
     public void DrawLayerDebug(
         SpriteBatch spriteBatch,
         Texture2D pixel,

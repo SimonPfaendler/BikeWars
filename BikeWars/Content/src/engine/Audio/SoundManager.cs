@@ -20,7 +20,7 @@ public class SoundManager
     private const int MaxTotalSounds = 6;
     private const int MaxPerType = 2;
 
-    private ContentManager _content;
+    private readonly ContentManager _content;
 
     private int ActiveSoundCount =>
         _activeInstances.Count + _loopInstances.Count;
@@ -188,10 +188,9 @@ public class SoundManager
 
     public void PauseLoop(string id)
     {
-        if (_loopInstances.TryGetValue(id, out var inst))
+        if (_loopInstances.TryGetValue(id, out var inst) && inst.State == SoundState.Playing)
         {
-            if (inst.State == SoundState.Playing)
-                inst.Pause();
+            inst.Pause();
         }
     }
 

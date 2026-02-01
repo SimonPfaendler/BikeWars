@@ -1,11 +1,8 @@
-using System;
 using BikeWars.Content.components;
 using BikeWars.Content.engine.Audio;
-using BikeWars.Content.managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine.interfaces;
-using MonoGame.Extended.Content;
 using Microsoft.Xna.Framework.Content;
 
 namespace BikeWars.Content.screens
@@ -15,8 +12,6 @@ namespace BikeWars.Content.screens
         private AudioService _audioService;
         public string DesiredMusic => AudioAssets.MenuMusic;
         public float MusicVolume => 1f;
-
-        public event Action<GraphicsCommand> GraphicsRequested;
 
         public GraphicsConfigScreen(Texture2D background, SpriteFont font, AudioService audioService, Viewport vp)
             : base(background, font, vp)
@@ -56,9 +51,6 @@ namespace BikeWars.Content.screens
             int leftColumnX = (screenWidth / 3) - (buttonWidth / 2);
             int rightColumnX = (2 * screenWidth / 3) - (buttonWidth / 2);
 
-            // _buttonTexture = CreateSimpleTexture(buttonWidth, buttonHeight);
-
-
             AddButton(ButtonAction.Resolution1920x1080, "1920 x 1080", leftColumnX, startY, buttonWidth, buttonHeight);
             AddButton(ButtonAction.Resolution1536x864, "1536 x 864", leftColumnX, startY + 1 * (buttonHeight + spacing), buttonWidth, buttonHeight);
             AddButton(ButtonAction.Resolution1280x720, "1280 x 720", leftColumnX, startY + 2 * (buttonHeight + spacing), buttonWidth, buttonHeight);
@@ -82,7 +74,6 @@ namespace BikeWars.Content.screens
         {
             MenuButton mb = new MenuButton(
                 id: (int)action,
-                // texture: _buttonTexture,
                 texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(x, y, w, h),
                 text: text,
@@ -92,47 +83,8 @@ namespace BikeWars.Content.screens
             mb.Clicked += RaiseBtnClicked;
             _buttons.Add(mb);
         }
-
-        // protected override void HandleButtonClick(MenuButton button, ContentManager content, GraphicsDevice gd)
-        // {
-        //     switch ((ButtonAction)button.Id)
-        //     {
-        //         case ButtonAction.Resolution1920x1080:
-        //             GraphicsRequested?.Invoke(new GraphicsCommand(1920, 1080, false));
-        //             break;
-        //         case ButtonAction.Resolution1536x864:
-        //             GraphicsRequested?.Invoke(new GraphicsCommand(1536, 864, false));
-        //             break;
-        //         case ButtonAction.Resolution1280x720:
-        //             GraphicsRequested?.Invoke(new GraphicsCommand(1280, 720, false));
-        //             break;
-        //         case ButtonAction.Resolution800x600:
-        //             GraphicsRequested?.Invoke(new GraphicsCommand(800, 600, false));
-        //             break;
-
-        //         case ButtonAction.ResolutionPortrait1080x1920:
-        //             GraphicsRequested?.Invoke(new GraphicsCommand(1080, 1920, false));
-        //             break;
-        //         case ButtonAction.ResolutionPortrait864x1536:
-        //             GraphicsRequested?.Invoke(new GraphicsCommand(864, 1536, false));
-        //             break;
-        //         case ButtonAction.ResolutionPortrait720x1280:
-        //             GraphicsRequested?.Invoke(new GraphicsCommand(720, 1280, false));
-        //             break;
-        //         case ButtonAction.ResolutionPortrait600x800:
-        //             GraphicsRequested?.Invoke(new GraphicsCommand(600, 800, false));
-        //             break;
-        //         case ButtonAction.ToggleFullscreen:
-        //             GraphicsRequested?.Invoke(new GraphicsCommand(0, 0, true));
-        //             break;
-        //         case ButtonAction.Back:
-        //             // ScreenManager.RemoveScreen(this);
-        //             break;
-        //     }
-        // }
         public override void Dispose()
         {
-            GraphicsRequested = null;
             base.Dispose();
         }
     }

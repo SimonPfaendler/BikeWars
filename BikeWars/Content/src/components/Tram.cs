@@ -23,8 +23,8 @@ namespace BikeWars.Content.components
         private const int COLLIDER_SEGMENT_SIZE = 40;
         private const float SPEED = 700f;
 
-        private AudioService _audio;
-        private Player _player; // Reference to player for distance
+        private readonly AudioService _audio;
+        private readonly Player _player; // Reference to player for distance
         public event Action<float, float> RequestScreenShake;
 
         public Tram(Vector2 startPosition, Vector2 targetPosition, AudioService audio, Player player)
