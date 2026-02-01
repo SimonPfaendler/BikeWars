@@ -211,9 +211,6 @@ namespace BikeWars.Content.screens
             _godModeSwitchBtn.Update(mouse, gameTime);
             _startTimerBtn.Update(mouse, gameTime);
             _spawnCarBtn.Update(mouse, gameTime);
-            _spawnCarBtn.Text = IsPlayerNearRoad(GameObjectManager.Player1.Transform.Position)
-                ? "Spawn 5 Cars"
-                : "Spawn Cars (go to road)";
 
             if(_spawnHoboBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Hobo, 100);
