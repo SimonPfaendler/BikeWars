@@ -101,12 +101,12 @@ public abstract class MenuScreenBase : IScreen, IDisposable
         if (InputHandler.IsPressed(GameAction.UI_DOWN))
         {
             _usingMouse = false;
-            UpdateSelection(_selectedIndex + 1);
+            NavigateSpatial(new Vector2(0, 1));
         }
         else if (InputHandler.IsPressed(GameAction.UI_UP))
         {
             _usingMouse = false;
-            UpdateSelection(_selectedIndex - 1);
+            NavigateSpatial(new Vector2(0, -1));
         }
 
         if (InputHandler.IsPressed(GameAction.UI_CONFIRM))
@@ -114,6 +114,27 @@ public abstract class MenuScreenBase : IScreen, IDisposable
             _usingMouse = false;
             _buttons[_selectedIndex].TriggerClick();
             // HandleButtonClick(_buttons[_selectedIndex], content, gd);
+        }
+
+        if (InputHandler.IsPressed(GameAction.UI_BACK))
+        {
+            _usingMouse = false;
+            var backButton = _buttons.Find(b => b.Id == (int)ButtonAction.Back);
+
+            if (backButton != null)
+            {
+                backButton.TriggerClick();
+            }
+        }
+        if (InputHandler.IsPressed(GameAction.UI_LEFT))
+        {
+            _usingMouse = false;
+            NavigateSpatial(new Vector2(-1, 0));
+        }
+        else if (InputHandler.IsPressed(GameAction.UI_RIGHT))
+        {
+            _usingMouse = false;
+            NavigateSpatial(new Vector2(1, 0));
         }
 
         _currentGameTime = gameTime;
@@ -195,6 +216,48 @@ public abstract class MenuScreenBase : IScreen, IDisposable
     }
 
     public void Unload() {
+    }
+    
+    protected void NavigateSpatial(Vector2 direction)
+    {
+        // choose the button to switch to when pressed left or right on the controller
+        if (_buttons.Count <= 1) return;
+
+        var currentBtn = _buttons[_selectedIndex];
+        MenuButton bestCandidate = null;
+        float closestDistance = float.MaxValue;
+
+        foreach (var button in _buttons)
+        {
+            if (button == currentBtn) continue;
+            
+            Vector2 toTarget = new Vector2(button.Bounds.Center.X - currentBtn.Bounds.Center.X, 
+                button.Bounds.Center.Y - currentBtn.Bounds.Center.Y);
+            
+            bool isInDirection = false;
+            float thresholdX = currentBtn.Bounds.Width / 2f;
+            float thresholdY = currentBtn.Bounds.Height / 2f;
+
+            if (direction.X > 0) isInDirection = toTarget.X > thresholdX;
+            else if (direction.X < 0) isInDirection = toTarget.X < -thresholdX;
+            else if (direction.Y > 0) isInDirection = toTarget.Y > thresholdY;
+            else if (direction.Y < 0) isInDirection = toTarget.Y < -thresholdY;
+
+            if (isInDirection)
+            {
+                float distance = toTarget.Length();
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    bestCandidate = button;
+                }
+            }
+        }
+
+        if (bestCandidate != null)
+        {
+            UpdateSelection(_buttons.IndexOf(bestCandidate));
+        }
     }
 
     public virtual bool DrawLower => false;

@@ -105,19 +105,16 @@ namespace BikeWars.Content.components
                 _collisionBounds.Contains(currentMouseState.Position) &&
                 currentMouseState.LeftButton == ButtonState.Pressed &&
                 previousMouseState.LeftButton == ButtonState.Released;
-
-            if (isClicked)
-            {
-                if (Id == (int)ButtonAction.StartGame)
-                    _audioService.Sounds.Play(AudioAssets.HandgunClick);
-                else
-                    _audioService.Sounds.Play(AudioAssets.SoftClick);
-            }
+            
             return isClicked;
         }
 
         public void TriggerClick()
         {
+            if (Id == (int)ButtonAction.StartGame)
+                _audioService.Sounds.Play(AudioAssets.HandgunClick);
+            else
+                _audioService.Sounds.Play(AudioAssets.SoftClick);
             Clicked?.Invoke(Id);
         }
 
