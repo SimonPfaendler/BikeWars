@@ -116,6 +116,17 @@ public abstract class MenuScreenBase : IScreen, IDisposable
             // HandleButtonClick(_buttons[_selectedIndex], content, gd);
         }
 
+        if (InputHandler.IsPressed(GameAction.UI_BACK))
+        {
+            _usingMouse = false;
+            var backButton = _buttons.Find(b => b.Id == (int)ButtonAction.Back);
+
+            if (backButton != null)
+            {
+                backButton.TriggerClick();
+            }
+        }
+
         _currentGameTime = gameTime;
 
         MouseState currentMouseState = Mouse.GetState();
