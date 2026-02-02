@@ -290,6 +290,7 @@ namespace BikeWars.Content.screens
                 _collisionManager.OnItemPickup += _gameObjectManager.Player2.OnPickUpItem;
                 _collisionManager.OnObjectInteraction += _gameObjectManager.Player2.OnInteractObject;
                 _gameObjectManager.Player2.ItemPickedUp += _collisionManager.OnRemoveItem;
+                _gameObjectManager.Player2.Dismounted += _gameObjectManager.AddItem;
             }
 
             // Overlay
