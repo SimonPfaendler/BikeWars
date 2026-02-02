@@ -224,7 +224,6 @@ public class Game1 : Game
                         break;
 
                     case ButtonAction.Options:
-                        _audioService.Sounds.StopAll();
                         OptionScreen optionScreen = new OptionScreen(background, UIAssets.DefaultFont, _audioService, GraphicsDevice.Viewport);
                         optionScreen.LoadContent(Content, GraphicsDevice);
                         optionScreen.BtnClicked += OnBtnClicked;
