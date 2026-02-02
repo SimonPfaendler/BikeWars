@@ -39,6 +39,7 @@ namespace BikeWars.Content.screens
         private Action<int, int> _onPlayerLevelUp;
         private Action _onBikeShopClose;
         private Action<BikeShop> _onBikeShopOpen;
+        private Action<BikeShop> _onBikeShopOpen2;
         public Viewport ViewPort {get; set;}
         public event Action<int, IScreen> BtnClicked;
         public event Action PauseBtnPressed;
@@ -284,6 +285,12 @@ namespace BikeWars.Content.screens
             _onScreenShake = (intensity, duration) => camera.Shake(intensity, duration);
             _combatManager.OnScreenShakeRequested += _onScreenShake;
             _gameObjectManager.OnScreenShakeRequested += _onScreenShake;
+            
+            _onBikeShopOpen2 += shop =>
+            {
+                _audioService.Sounds.PauseAll();
+                _bikeShopScreen.Open(_gameObjectManager.Player2, shop);
+            };
 
             if (_gameObjectManager.Player2 != null)
             {
@@ -291,6 +298,9 @@ namespace BikeWars.Content.screens
                 _collisionManager.OnObjectInteraction += _gameObjectManager.Player2.OnInteractObject;
                 _gameObjectManager.Player2.ItemPickedUp += _collisionManager.OnRemoveItem;
                 _gameObjectManager.Player2.Dismounted += _gameObjectManager.AddItem;
+                _gameObjectManager.Player2.ChestItemSpawn += _gameObjectManager.AddItem;
+                _gameObjectManager.Player2.OnBikeShopOpen += _onBikeShopOpen2;
+                _collisionManager.OnTowerInteraction += _gameObjectManager.Player2.OnInteractTower;
             }
 
             // Overlay
