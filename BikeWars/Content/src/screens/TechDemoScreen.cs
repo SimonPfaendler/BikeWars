@@ -42,6 +42,7 @@ namespace BikeWars.Content.screens
         private MenuButton _godModeSwitchBtn;
         private MenuButton _startTimerBtn;
         private MenuButton _spawnCarBtn;
+        private MenuButton _spawnBikeItemBtn;
         private readonly List<RaveGroup> _raveGroups = new List<RaveGroup>();
         private MouseState _prevMouse;
 
@@ -175,7 +176,17 @@ namespace BikeWars.Content.screens
                 font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
-            _spawnHoboBtn.TextScale = 1.15f;
+            _spawnCarBtn.TextScale = 1.15f;
+
+            _spawnBikeItemBtn = new MenuButton(
+                id: 12,
+                texture: RenderPrimitives.Pixel,
+                bounds: NextBtnRect(),
+                text: "Spawn Bike",
+                font: UIAssets.DefaultFont,
+                audioService: AudioService
+            );
+            _spawnBikeItemBtn.TextScale = 1.15f;
         }
 
         protected override void OnTechDemoReset()
@@ -210,6 +221,7 @@ namespace BikeWars.Content.screens
             _godModeSwitchBtn.Update(mouse, gameTime);
             _startTimerBtn.Update(mouse, gameTime);
             _spawnCarBtn.Update(mouse, gameTime);
+            _spawnBikeItemBtn.Update(mouse, gameTime);
 
             if(_spawnHoboBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Hobo, 100);
@@ -244,6 +256,11 @@ namespace BikeWars.Content.screens
 
                 for (int i = 0; i < 5; i++)
                     _spawnManager.SpawnCar(0.0);
+            }
+
+            if (_spawnBikeItemBtn.IsClicked(mouse, _prevMouse))
+            {
+                SpawnBikeItemInFrontOfPlayer();
             }
 
             if (_godModeSwitchBtn.IsClicked(mouse, _prevMouse))
@@ -399,12 +416,34 @@ namespace BikeWars.Content.screens
             _godModeSwitchBtn.Draw(sb);
             _startTimerBtn.Draw(sb);
             _spawnCarBtn.Draw(sb);
+            _spawnBikeItemBtn.Draw(sb);
             sb.End();
         }
 
         public void HandleRaveGroupDied()
         {
             _achievementsManager.OnRaverGroupDied();
+        }
+
+        private void SpawnBikeItemInFrontOfPlayer()
+        {
+            var player = GameObjectManager.Player1;
+            if (player == null || player.IsDead)
+                return;
+
+            Vector2 forward = player.GazeDirection;
+            if (forward == Vector2.Zero)
+                forward = new Vector2(1f, 0f);
+
+            forward.Normalize();
+            Vector2 candidate = player.Transform.Position + forward * 80f;
+
+            bool spawnFrelo = RandomUtil.NextInt(0, 2) == 0;
+            ItemBase bike = spawnFrelo
+                ? new Frelo(candidate, new Point(32, 32))
+                : new RacingBike(candidate, new Point(32, 32));
+
+            GameObjectManager.AddItem(bike);
         }
     }
 }
