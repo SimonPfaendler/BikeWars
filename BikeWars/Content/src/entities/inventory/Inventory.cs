@@ -46,18 +46,27 @@ public class Inventory
         return _items[index];
     }
 
-    public void Draw(SpriteBatch spriteBatch, Texture2D pixel, int selectedInventoryIndex, bool showSelection)
+    public void Draw(SpriteBatch spriteBatch, Texture2D pixel, int selectedInventoryIndex, bool showSelection, int playerIndex)
     {
         int slotSize = 40;
         int slotGap = 8;
 
         int screenWidth = spriteBatch.GraphicsDevice.Viewport.Width;
+        int screenHeight = spriteBatch.GraphicsDevice.Viewport.Height;
 
         // total width of all slots combined
         int totalWidth = MaxSlots * slotSize + (MaxSlots - 1) * slotGap;
 
-        // position inventory row in the top-right corner of the screen
-        Vector2 startPos = new Vector2(screenWidth - totalWidth - 20, 40);
+        // position inventory row in the top-right corner of the screen if player1 is owner
+        Vector2 startPos;
+        if (playerIndex == 1)
+        {
+            startPos = new Vector2(screenWidth - totalWidth - 20, 40);
+        }
+        else
+        {
+            startPos = new Vector2(20, screenHeight - slotSize - 40);
+        }
 
         // draws the background of the inventory
         Rectangle backgroundRect = new Rectangle(
