@@ -52,7 +52,7 @@ namespace BikeWars.Entities.Characters
         private const float THROW_AIM_GROW_SPEED = 400f; // px per second while holding trigger
         public TerrainCollider CurrentTerrain { get; set; }
         public float TerrainSpeedMultiplier = 1.0f;
-        private const float IncreaseSpeed = 1.1f;
+        private const float IncreaseSpeed = 1.3f;
         private const float DecreaseSpeed = 0.75f;
         public new bool IsGodMode { get; set; }
 
@@ -329,7 +329,7 @@ namespace BikeWars.Entities.Characters
 
         public Player(Vector2 start, float radius, Point renderSize, AudioService audio, IPlayerInput input, bool isTechDemo = false, string characterPrefix = "Character1")
         {
-            Attributes = new CharacterAttributes(this, 300, 0, 10, 2f, false);
+            Attributes = new CharacterAttributes(this, 800, 0, 20, 2f, false);
             Transform = new Transform(start, radius);
             LastTransform = new Transform(start, radius);
             RenderTransform = new Transform(start, renderSize);

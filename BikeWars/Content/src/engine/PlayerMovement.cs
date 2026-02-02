@@ -23,7 +23,7 @@ public class PlayerMovement
         set => owns_bike = value;
     }
 
-    public float WalkingSpeed = 120f;
+    public float WalkingSpeed = 130f;
     public float SprintAcceleration = 1.5f;
 
     public float Rotation = 0.0f; // in Radiant
