@@ -74,20 +74,12 @@ namespace BikeWars.Content.screens
                 font: _font,
                 audioService: _audioService
             ));
-
+            
             AddButton(new MenuButton(
                 id: (int)ButtonAction.TechDemo,
                 texture: RenderPrimitives.Pixel,
-                bounds: new Rectangle(horizontalSpacing, leftStartY + 4 * (buttonHeight + verticalSpacing), buttonWidth, buttonHeight),
-                text: "Tech Demo",
-                font: _font,
-                audioService: _audioService
-            ));
-            AddButton(new MenuButton(
-                id: (int)ButtonAction.Profile,
-                texture: RenderPrimitives.Pixel,
                 bounds: new Rectangle(screenWidth - buttonWidth - horizontalSpacing, rightStartY, buttonWidth, buttonHeight),
-                text: "Profil",
+                text: "Tech Demo",
                 font: _font,
                 audioService: _audioService
             ));

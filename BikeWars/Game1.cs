@@ -197,13 +197,6 @@ public class Game1 : Game
                         }
                         break;
 
-                    case ButtonAction.Profile:
-                        ProfileScreen profileScreen = new ProfileScreen(background, UIAssets.DefaultFont, _audioService, GraphicsDevice.Viewport);
-                        profileScreen.LoadContent(Content, GraphicsDevice);
-                        profileScreen.BtnClicked += OnBtnClicked;
-                        ScreenManager.AddScreen(profileScreen);
-                        break;
-
                     case ButtonAction.Statistics:
                         StatisticsScreen ss = new StatisticsScreen(background, UIAssets.DefaultFont, _audioService, GraphicsDevice.Viewport);
                         ss.LoadContent(Content, GraphicsDevice);
@@ -381,10 +374,6 @@ public class Game1 : Game
 
                     case ButtonAction.Back:
                         ScreenManager.RemoveScreen(screen);
-                        break;
-
-                    case ButtonAction.NewProfile:
-                        // TODO: Profile Creation Logic
                         break;
 
                     case ButtonAction.Singleplayer:
