@@ -226,6 +226,42 @@
 		"pivot": {"x":0.5,"y":0.5}
 	},
 	{
+		"filename": "e2_bikethief_walking_left_frelo.png",
+		"frame": {"x":192,"y":2592,"w":128,"h":192},
+		"rotated": false,
+		"trimmed": false,
+		"spriteSourceSize": {"x":0,"y":0,"w":128,"h":192},
+		"sourceSize": {"w":128,"h":192},
+		"pivot": {"x":0.5,"y":0.5}
+	},
+	{
+		"filename": "e2_bikethief_walking_right_frelo.png",
+		"frame": {"x":320,"y":2592,"w":128,"h":192},
+		"rotated": false,
+		"trimmed": false,
+		"spriteSourceSize": {"x":0,"y":0,"w":128,"h":192},
+		"sourceSize": {"w":128,"h":192},
+		"pivot": {"x":0.5,"y":0.5}
+	},
+	{
+		"filename": "e2_bikethief_walking_left_racingbike.png",
+		"frame": {"x":466,"y":2592,"w":128,"h":192},
+		"rotated": false,
+		"trimmed": false,
+		"spriteSourceSize": {"x":0,"y":0,"w":128,"h":192},
+		"sourceSize": {"w":128,"h":192},
+		"pivot": {"x":0.5,"y":0.5}
+	},
+	{
+		"filename": "e2_bikethief_walking_right_racingbike.png",
+		"frame": {"x":594,"y":2592,"w":128,"h":192},
+		"rotated": false,
+		"trimmed": false,
+		"spriteSourceSize": {"x":0,"y":0,"w":128,"h":192},
+		"sourceSize": {"w":128,"h":192},
+		"pivot": {"x":0.5,"y":0.5}
+	},
+	{
 		"filename": "e2_bikethief_walking_left.png",
 		"frame": {"x":235,"y":493,"w":128,"h":184},
 		"rotated": false,
