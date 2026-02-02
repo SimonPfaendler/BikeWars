@@ -126,6 +126,10 @@ namespace BikeWars.Content.utils
             AnimationFrames["BikeThief_Idle"] = btWalkRight.Count > 0 ? new List<Rectangle> { btWalkRight[0] } : new List<Rectangle>();
             AnimationFrames["BikeThief_WalkLeft"] = GetFramesFromAtlas("e2_bikethief_walking_left.png", 2, 3);
             AnimationFrames["BikeThief_WalkRight"] = btWalkRight;
+            AnimationFrames["BikeThief_Frelo_WalkLeft"] = GetFramesFromAtlas("e2_bikethief_walking_left_frelo.png", 2, 3);
+            AnimationFrames["BikeThief_Frelo_WalkRight"] = GetFramesFromAtlas("e2_bikethief_walking_right_frelo.png", 2, 3);
+            AnimationFrames["BikeThief_Racing_WalkLeft"] = GetFramesFromAtlas("e2_bikethief_walking_left_racingbike.png", 2, 3);
+            AnimationFrames["BikeThief_Racing_WalkRight"] = GetFramesFromAtlas("e2_bikethief_walking_right_racingbike.png", 2, 3);
             
             // Dog
             AnimationFrames["Dog_Idle"] = GetFramesFromAtlas("e3_dog_walking_right.png", 1, 1);

@@ -158,6 +158,10 @@ namespace BikeWars.Content.managers
             "BikeThief_Idle",
             "BikeThief_WalkLeft",
             "BikeThief_WalkRight",
+            "BikeThief_Frelo_WalkLeft",
+            "BikeThief_Frelo_WalkRight",
+            "BikeThief_Racing_WalkLeft",
+            "BikeThief_Racing_WalkRight",
 
             // DOG
             "Dog_Idle",

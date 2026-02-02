@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
@@ -14,14 +15,25 @@ namespace BikeWars.Entities.Characters
         private readonly SpriteAnimation _idleAnimation;
         private readonly SpriteAnimation _walkLeftAnimation;
         private readonly SpriteAnimation _walkRightAnimation;
+        private readonly SpriteAnimation _walkLeftFreloAnimation;
+        private readonly SpriteAnimation _walkRightFreloAnimation;
+        private readonly SpriteAnimation _walkLeftRacingAnimation;
+        private readonly SpriteAnimation _walkRightRacingAnimation;
         private SpriteAnimation _currentAnimation;
         protected override string WalkingSound => AudioAssets.Walking;
+        private readonly float _baseSpeed = 150f;
 
         private readonly PathFinding _pathFinding;
         private readonly CollisionManager _collisionManager;
         private readonly RepathScheduler _repathScheduler;
         private float _talkTimer = 0f;
         private const float TALK_INTERVAL = 7.5f;
+
+        private Bike _stolenBike;
+        private bool _isEscaping;
+        private Vector2 _escapeTarget;
+        private const float KnockOffForce = 180f;
+        private static readonly Vector2 EscapeExit = new(9414f, 7815f);
 
         private static readonly string[] TalkSounds = {
             AudioAssets.BikeThiefLaugh,
@@ -40,14 +52,20 @@ namespace BikeWars.Entities.Characters
             Attributes = new CharacterAttributes(this, 40, 0, 5, 2f, false);
             Transform = new Transform(start, size);
             RenderTransform = new Transform(start, new Point(32, 32));
-            Speed = 125f;
+            Speed = _baseSpeed;
             Movement = new EnemyMovement(canMove: true, isMoving: false, pathFinding: _pathFinding,
                 gridMapper: _collisionManager, repathScheduler: _repathScheduler);
             _idleAnimation = SpriteManager.GetAnimation("BikeThief_Idle");
             _walkLeftAnimation = SpriteManager.GetAnimation("BikeThief_WalkLeft");
             _walkRightAnimation = SpriteManager.GetAnimation("BikeThief_WalkRight");
+            _walkLeftFreloAnimation = SpriteManager.GetAnimation("BikeThief_Frelo_WalkLeft");
+            _walkRightFreloAnimation = SpriteManager.GetAnimation("BikeThief_Frelo_WalkRight");
+            _walkLeftRacingAnimation = SpriteManager.GetAnimation("BikeThief_Racing_WalkLeft");
+            _walkRightRacingAnimation = SpriteManager.GetAnimation("BikeThief_Racing_WalkRight");
             _currentAnimation = _idleAnimation;
             UpdateCollider();
+
+            Attributes.OnDied += _ => DropStolenBike();
         }
 
         public override void Update(GameTime gameTime)
@@ -56,12 +74,25 @@ namespace BikeWars.Entities.Characters
             {
                 em.EnemyPosition = Transform.Position;
                 Player? target = _collisionManager.GameObjectManager.GetTargetPlayer(Transform.Position);
-                if (target != null)
+                if (_isEscaping)
+                {
+                    em.PlayerPosition = _escapeTarget;
+                }
+                else if (target != null)
                 {
                     em.PlayerPosition = target.Transform.Position;
                 }
             }
             Movement.HandleMovement(gameTime);
+
+            if (_isEscaping && Vector2.DistanceSquared(Transform.Position, _escapeTarget) < 25f * 25f)
+            {
+                _isEscaping = false;
+                Movement.CanMove = false;
+                Movement.Direction = Vector2.Zero;
+                Speed = _baseSpeed;
+                return;
+            }
 
             _talkTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
@@ -92,20 +123,20 @@ namespace BikeWars.Entities.Characters
 
                 if (direction.X > 0.1f)
                 {
-                    _currentAnimation = _walkRightAnimation;
+                    _currentAnimation = SelectRightAnimation();
                 }
                 else if (direction.X < -0.1f)
                 {
-                    _currentAnimation = _walkLeftAnimation;
+                    _currentAnimation = SelectLeftAnimation();
                 }
                 else
                 {
-                    _currentAnimation = _idleAnimation;
+                    _currentAnimation = SelectIdleAnimation();
                 }
             }
             else
             {
-                _currentAnimation = _idleAnimation;
+                _currentAnimation = SelectIdleAnimation();
             }
 
             if (_currentAnimation != null)
@@ -134,6 +165,19 @@ namespace BikeWars.Entities.Characters
         public override void Attack(ICombat target)
         {
             if (!CanAttack()) return;
+
+            if (target is Player player)
+            {
+                if (TryStealBike(player))
+                {
+                    ResetAttackCooldown();
+                    return;
+                }
+            }
+
+            if (_stolenBike != null)
+                return;
+
             base.Attack(target);
             _audio.Sounds.Play(AudioAssets.Punch);
         }
@@ -154,5 +198,98 @@ namespace BikeWars.Entities.Characters
                 _audio.Sounds.Play(randomTalk);
             }
         }
+
+        private bool TryStealBike(Player player)
+        {
+            if (player?.movement == null)
+                return false;
+
+            if (!player.movement.OwnsBike || player.CurrentBike == null)
+                return false;
+
+            _stolenBike = player.CurrentBike;
+
+            // Knock the player off the bike without dropping it as an item yet
+            player.movement.CurrentMovement = new WalkingMovement(
+                player.movement.CurrentMovement.CanMove,
+                player.movement.CurrentMovement.IsMoving,
+                player.movement.WalkingSpeed,
+                player.movement.SprintAcceleration);
+            player.movement.OwnsBike = false;
+            player.movement.CrtBike = null;
+
+            Vector2 knockDir = player.Transform.Position - Transform.Position;
+            if (knockDir != Vector2.Zero)
+            {
+                player.ApplyKnockback(knockDir, KnockOffForce);
+            }
+
+            _isEscaping = true;
+            _escapeTarget = EscapeExit;
+            Speed = _baseSpeed;
+
+            if (Movement is EnemyMovement em)
+            {
+                em.PlayerPosition = _escapeTarget;
+                em.ForceRepath();
+            }
+
+            UpdateAnimationSet();
+            return true;
+        }
+
+        private void UpdateAnimationSet()
+        {
+            if (_stolenBike == null)
+                return;
+
+            // pick idle variant based on latest movement; fallback already handled in update loop
+            _currentAnimation = _idleAnimation;
+        }
+
+        private SpriteAnimation SelectLeftAnimation()
+        {
+            if (_stolenBike is Frelo)
+                return _walkLeftFreloAnimation;
+
+            if (_stolenBike is RacingBike)
+                return _walkLeftRacingAnimation;
+
+            return _walkLeftAnimation;
+        }
+
+        private SpriteAnimation SelectRightAnimation()
+        {
+            if (_stolenBike is Frelo)
+                return _walkRightFreloAnimation;
+
+            if (_stolenBike is RacingBike)
+                return _walkRightRacingAnimation;
+
+            return _walkRightAnimation;
+        }
+
+        private SpriteAnimation SelectIdleAnimation()
+        {
+            if (_stolenBike is Frelo)
+                return _walkRightFreloAnimation;
+
+            if (_stolenBike is RacingBike)
+                return _walkRightRacingAnimation;
+
+            return _idleAnimation;
+        }
+
+        private void DropStolenBike()
+        {
+            if (_stolenBike == null)
+                return;
+
+            _stolenBike.Transform.Position = Transform.Position;
+            _stolenBike.Collider.Position = new Vector2(Collider.Position.X, Collider.Position.Y);
+            _collisionManager.GameObjectManager.AddItem(_stolenBike);
+            _stolenBike = null;
+        }
+
     }
 }
