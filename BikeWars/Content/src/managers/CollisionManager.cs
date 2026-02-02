@@ -16,9 +16,6 @@ using BikeWars.Content.entities.npcharacters;
 
 namespace BikeWars.Content.managers;
 
-/*TODO we're loading the TileMap in this class. I think we should Load it in a separate class and
- use Collision Manager only for Collision handling.
- Especially, because we will Load destroyable Objects and other Map Objects with the Tilemap */
 public class CollisionManager
 {
     // Events that can be followed by other classes
@@ -184,6 +181,16 @@ public class CollisionManager
                 {
                     SetBaseWalkableForRect(d.Transform.Bounds, false);
                 }
+                else if (obj is BikeShop b)
+                {
+                    SetBaseWalkableForRect(b.Transform.Bounds, false);
+                }
+                
+            }
+
+            foreach (var tower in _gameObjectManager.Towers)
+            {
+                SetBaseWalkableForRect(tower.Transform.Bounds, false);
             }
 
             ApplyGlobalPaddingFromBase();
