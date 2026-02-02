@@ -928,17 +928,18 @@ namespace BikeWars.Content.screens
             _debugger.Draw(sb, ViewPort);
             DrawTimer(sb, gameTime);
 
-            var player = _gameObjectManager.Player1;
-            bool showSelection = true;
-            if (_gameObjectManager.Player1 != null)
+            var player1 = _gameObjectManager.Player1;
+            var player2 = _gameObjectManager.Player2;
+            if (player1 != null)
             {
-                player.Inventory.Draw(sb, RenderPrimitives.Pixel, player.SelectedInventoryIndex, showSelection);
+                player1.Inventory.Draw(sb, RenderPrimitives.Pixel, player1.SelectedInventoryIndex, true, 1);
                 _hud.Draw(sb, _gameObjectManager.Player1);
             }
 
-            if (_gameObjectManager.Player2 != null)
+            if (player2 != null)
             {
                 _hudP2.Draw(sb, _gameObjectManager.Player2);
+                player2.Inventory.Draw(sb, RenderPrimitives.Pixel, player2.SelectedInventoryIndex, true, 2);
             }
 
             if (_levelUpScreen.IsOpen)
@@ -950,11 +951,11 @@ namespace BikeWars.Content.screens
                 _bikeShopScreen.Draw(gameTime, sb);
             }
 
-            if (player != null)
+            if (player1 != null)
             {
-                DrawAttackIcon(sb, player, 1);
+                DrawAttackIcon(sb, player1, 1);
             }
-            var player2 = _gameObjectManager.Player2;
+            
             if (player2 != null)
             {
                 DrawAttackIcon(sb, player2, 2);
@@ -1247,28 +1248,32 @@ namespace BikeWars.Content.screens
 
             int targetSize = 80;
             int margin = 20;
-            float xFactor;
-            int y;
+            
+            int screenWidth = ViewPort.Width;
+            int screenHeight = ViewPort.Height;
+            
+            Vector2 position;
+            int inventoryWidth = 252;
 
             if (playerIndex == 1)
             {
-                xFactor = 0.75f;
-                y = margin;
+                position = new Vector2(screenWidth - inventoryWidth - targetSize - 40, 30);
             }
             else
             {
-                xFactor = 0.25f;
-                y = ViewPort.Height - 5 * margin;
+                position = new Vector2(20 + inventoryWidth + 20, screenHeight - targetSize - 40);
             }
 
-            int x = (int)(ViewPort.Width * xFactor) - targetSize / 2;
-
             Rectangle destRect = new Rectangle(
-                x,
-                y,
+                (int)position.X,
+                (int)position.Y,
                 targetSize,
                 targetSize
             );
+            
+            Rectangle backgroundRect = destRect;
+            backgroundRect.Inflate(10, 10);
+            spriteBatch.Draw(RenderPrimitives.Pixel, backgroundRect, Color.Black * 0.5f);
             spriteBatch.Draw(icon, destRect, Color.White);
         }
         public void OnActivated() {
