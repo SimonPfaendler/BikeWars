@@ -708,6 +708,10 @@ namespace BikeWars.Entities.Characters
                 Dismounted?.Invoke(movement.CrtBike);
             }
             movement.CrtBike = null;
+            if (isBikeWeapon(CurrentWeapon))
+            {
+                CurrentWeapon = WeaponType.BookThrow;
+            }
         }
 
         private void StartUsingItem(int inventoryIndex)
@@ -858,7 +862,8 @@ namespace BikeWars.Entities.Characters
 
                 if (_unlockedWeapons.TryGetValue(nextType, out var weaponAttributes))
                 {
-
+                    if (isBikeWeapon(nextType) && !movement.OwnsBike)
+                        continue;
                     CurrentWeapon = nextType;
                     return;
                 }
@@ -1159,6 +1164,13 @@ namespace BikeWars.Entities.Characters
         public bool IsInteractPressed()
         {
             return _input.IsPressed(GameAction.INTERACT);
+        }
+
+        private bool isBikeWeapon(WeaponType weapon)
+        {
+            return weapon == WeaponType.IceTrail
+                   || weapon == WeaponType.FireTrail
+                   || weapon == WeaponType.DamageCircle;
         }
     }
 }
