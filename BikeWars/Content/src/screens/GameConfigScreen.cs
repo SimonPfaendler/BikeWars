@@ -41,18 +41,10 @@ public class GameConfigScreen : MenuScreenBase, IScreen
         int verticalSpacing = 20;
         int horizontalSpacing = screenWidth / 15;
 
-        int leftStartY = screenHeight / 4;
-        int rightStartY = screenHeight / 4;
+        int leftStartY = screenHeight / 3;
+        int rightStartY = screenHeight / 3;
 
         // Buttons on the left side
-        AddButton(new MenuButton(
-            id: (int)ButtonAction.NewProfile,
-            texture: RenderPrimitives.Pixel,
-            bounds: new Rectangle(horizontalSpacing, leftStartY, buttonWidth, buttonHeight),
-            text: "Neues Profil",
-            font: _font,
-            audioService: _audioService
-        ));
 
         AddButton(new MenuButton(
             id: (int)ButtonAction.Back,
