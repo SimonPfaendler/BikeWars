@@ -14,6 +14,11 @@ namespace BikeWars.Content.entities.projectiles
         {
             _emitLandingEvent = emitLandingEvent;
         }
+        public ThrowBeer(Vector2 start, Vector2 target, bool emitLandingEvent = true)
+            : base(start, target, null, textureKey: "Beer_throw", damage: 40, speed: 100f, arcScale: 1.2f, lingerDuration: 0.25f)
+        {
+            _emitLandingEvent = emitLandingEvent;
+        }
 
         protected override void OnLanded()
         {

@@ -1,5 +1,4 @@
 ﻿#nullable enable
-
 using System;
 using System.IO;
 using System.Text.Json;
@@ -14,9 +13,10 @@ using BikeWars.Content.entities.MapObjects;
 using BikeWars.Entities.Characters.MapObjects;
 using BikeWars.Entities;
 using System.Linq;
+using BikeWars.Content.entities.npcharacters;
+using BikeWars.Content.entities.projectiles;
 
 namespace BikeWars.Content.src.utils.SaveLoadExample;
-
 public static class SaveLoad
 {
     private static int _worldBounds = 11200 / 2;
@@ -25,15 +25,32 @@ public static class SaveLoad
         BULLET,
         HOBO,
         DOG,
+        DOG_FOOD,
+        POLICE_MAN,
+        DOZENT,
+        KAMIKAZE_OPA,
         BIKETHIEF,
         CHEST,
         ENERGY_GEL,
+        ENERGY_BAR,
+        DOPING,
         BEER,
         MONEY,
         FRELO,
         RACINGBIKE,
         BIKESHOP,
-        DOGBOWL
+        DOGBOWL,
+        DESTRUCTIBLE,
+        TRIGGER,
+        MUSICIANS,
+        THROWBEER,
+        THROWBOTTLE,
+        THROWBOOK,
+        THROWBANANA,
+        FLAMETHROWERFIRE,
+        ICETRAIL,
+        FIRETRAIL,
+        BELL
     }
     // save file path in the user's Documents folder
     private static readonly string SAVE_PATH = Path.Combine(
@@ -51,6 +68,7 @@ public static class SaveLoad
         public float PlayerX { get; set; } = _worldBounds;
         public float PlayerY { get; set; } = _worldBounds;
         public List<ProjectileSaveModel> Projectiles {get; set;} = new();
+        public List<AOESaveModel> AOESaves {get; set;} = new();
         public List<CharacterSaveModel> Characters {get; set;} = new();
         public List<ItemSaveModel> Items {get; set;} = new();
         public List<ObjectSaveModel> Objects { get; set; } = new();
@@ -92,7 +110,9 @@ public static class SaveLoad
         public bool CanMove {get; set;}
         public float Rotation {get; set;}
 
-        public ProjectileSaveModel(BasicSaveModel b, bool hasHit, Vector2 direction, bool isMoving, bool canMove, float rotation, WeaponAttributes weaponAttributes)
+        public Vector2Save Target {get; set;}
+
+        public ProjectileSaveModel(BasicSaveModel b, bool hasHit, Vector2 direction, bool isMoving, bool canMove, float rotation, WeaponAttributes weaponAttributes, Vector2 target)
         {
             Basic = b;
             WeaponAttributes = weaponAttributes;
@@ -101,6 +121,36 @@ public static class SaveLoad
             IsMoving = isMoving;
             CanMove = canMove;
             Rotation = rotation;
+            Target = new Vector2Save(target);
+        }
+    }
+
+    public class AOESaveModel
+    {
+        public BasicSaveModel Basic {get;set;} = new();
+        public AOESaveModel() {}
+
+        public WeaponAttributes? WeaponAttributes {get; set;}
+        public bool HasHit {get; set;}
+
+        public Vector2Save Direction {get; set;} = new();
+        public Vector2Save Position {get; set;} = new();
+        public PointSave Size {get; set;} = new();
+        // public bool IsMoving {get; set;}
+        // public bool CanMove {get; set;}
+        // public float Rotation {get; set;}
+
+        // public Vector2Save Target {get; set;}
+
+        // public AOESaveModel(BasicSaveModel b, bool hasHit, Vector2 direction, bool isMoving, bool canMove, float rotation, WeaponAttributes weaponAttributes, Vector2 target)
+        public AOESaveModel(BasicSaveModel b, Vector2 direction, Vector2 position, Point size)
+        {
+            Basic = b;
+            // WeaponAttributes = weaponAttributes;
+            // HasHit = hasHit;
+            Direction = new Vector2Save(direction);
+            Position = new Vector2Save(position);
+            Size = new PointSave(size);
         }
     }
 
@@ -153,6 +203,14 @@ public static class SaveLoad
         }
     }
 
+    public class DestructibleObjectSaveModel
+    {
+        public string Name {get;set;}
+        public Vector2Save Position {get;set;} = new();
+        public PointSave Size {get;set;} = new();
+        public int Health {get; set;}
+        public string SpriteKey {get; set;}
+    }
     public class ObjectSaveModel
     {
         public TYPES Type { get; set; }
@@ -162,6 +220,11 @@ public static class SaveLoad
         public bool? IsOpen { get; set; }
         public string? Item { get; set; }
         public bool? IsFull { get; set; }
+        public AchievementIds? Id { get; set;} // Trigger
+
+        public int? Health {get; set;} // Destructible
+        public string? SpriteKey {get;set;} // Destructible
+
         public ObjectSaveModel() { }
         public ObjectSaveModel(TYPES type, Vector2 position, Point size)
         {
@@ -190,7 +253,6 @@ public static class SaveLoad
         public float Y { get; set; }
 
         public Vector2Save() {}
-
         public Vector2Save(Vector2 v)
         {
             X = v.X;
@@ -200,7 +262,6 @@ public static class SaveLoad
     }
 
     // save the counter in a JSON file
-    // public static void SaveGame(int counter, Transform playerPosition, List<ProjectileBase> projectiles)
     public static void SaveGame(GameTimer gameTimer, GameObjectManager gameObjectManager, StatisticsManager statisticsManager, AchievementsManager achievementsManager, GameMode gameMode)
     {
         try
@@ -212,7 +273,6 @@ public static class SaveLoad
                 playerX = gameObjectManager.Player1.Transform.Position.X;
                 playerY = gameObjectManager.Player1.Transform.Position.Y;
             }
-
             // serialize the current info into JSON text
             GameState state = new GameState
             {
@@ -226,6 +286,7 @@ public static class SaveLoad
                 PlayerY = playerY,
 
                 Projectiles = MakeProjectileSaveList(gameObjectManager.Projectiles),
+                // AOESaves = MakeAOESaveList(gameObjectManager.AOEAttacks),
                 Characters = MakeCharacterSaveList(gameObjectManager.Characters),
                 Items = MakeItemSaveList(gameObjectManager.Items),
                 Objects = MakeObjectSaveList(gameObjectManager.Objects),
@@ -326,11 +387,28 @@ public static class SaveLoad
     {
         return projectile switch
         {
-            // Bullet b => new ProjectileSaveModel(new BasicSaveModel(TYPES.BULLET, projectile.Transform.Position, projectile.Transform.Size), b.weaponAttributes.Damage, b.HasHit, b.Movement.Direction, b.Movement.IsMoving, b.Movement.CanMove, b.Movement.Rotation),
-            Bullet b => new ProjectileSaveModel(new BasicSaveModel(TYPES.BULLET, projectile.Transform.Position, projectile.Transform.Size), b.HasHit, b.Movement.Direction, b.Movement.IsMoving, b.Movement.CanMove, b.Movement.Rotation, b.weaponAttributes),
+            Bullet b => new ProjectileSaveModel(new BasicSaveModel(TYPES.BULLET, projectile.Transform.Position, projectile.Transform.Size), b.HasHit, b.Movement.Direction, b.Movement.IsMoving, b.Movement.CanMove, b.Movement.Rotation, b.weaponAttributes, Vector2.Zero),
+            ThrowBeer tb => new ProjectileSaveModel(new BasicSaveModel(TYPES.THROWBEER, projectile.Transform.Position, projectile.Transform.Size), tb.HasHit, Vector2.Zero, true, true, 0, tb.weaponAttributes, tb._target),
+            ThrowBanana banana => new ProjectileSaveModel(new BasicSaveModel(TYPES.THROWBANANA, projectile.Transform.Position, projectile.Transform.Size), banana.HasHit, Vector2.Zero, true, true, 0, banana.weaponAttributes, banana._target),
+            ThrowBook book => new ProjectileSaveModel(new BasicSaveModel(TYPES.THROWBOOK, projectile.Transform.Position, projectile.Transform.Size), book.HasHit, Vector2.Zero, true, true, 0, book.weaponAttributes, book._target),
+            ThrowBottle tbo => new ProjectileSaveModel(new BasicSaveModel(TYPES.THROWBOTTLE, projectile.Transform.Position, projectile.Transform.Size), tbo.HasHit, Vector2.Zero, true, true, 0, tbo.weaponAttributes, tbo._target),
             _ => throw new NotSupportedException($"Projectile type {projectile.GetType().Name} is not supported for saving.")
         };
     }
+
+    // private static AOESaveModel MakeAOESaveModel(AreaOfEffectBase aoe)
+    // {
+    //     return aoe switch
+    //     {
+    //         // Bullet b => new ProjectileSaveModel(new BasicSaveModel(TYPES.BULLET, projectile.Transform.Position, projectile.Transform.Size), b.weaponAttributes.Damage, b.HasHit, b.Movement.Direction, b.Movement.IsMoving, b.Movement.CanMove, b.Movement.Rotation),
+    //         // Flamethrower f => new AOESaveModel(new BasicSaveModel(TYPES.FLAMETHROWERFIRE, Vector2.Zero, new Point(0,0)), f._dir, f.Position, f.Size),
+    //         // ThrowBeer tb => new ProjectileSaveModel(new BasicSaveModel(TYPES.THROWBEER, projectile.Transform.Position, projectile.Transform.Size), tb.HasHit, tb.Movement.Direction, tb.Movement.IsMoving, tb.Movement.CanMove, tb.Movement.Rotation, tb.weaponAttributes, Vector2.Zero),
+    //         // ThrowBanana banana => new ProjectileSaveModel(new BasicSaveModel(TYPES.THROWBANANA, projectile.Transform.Position, projectile.Transform.Size), banana.HasHit, banana.Movement.Direction, banana.Movement.IsMoving, banana.Movement.CanMove, banana.Movement.Rotation, banana.weaponAttributes, Vector2.Zero),
+    //         // ThrowBook book => new ProjectileSaveModel(new BasicSaveModel(TYPES.THROWBOOK, projectile.Transform.Position, projectile.Transform.Size), book.HasHit, book.Movement.Direction, book.Movement.IsMoving, book.Movement.CanMove, book.Movement.Rotation, book.weaponAttributes),
+    //         // ThrowBottle tbo => new ProjectileSaveModel(new BasicSaveModel(TYPES.THROWBOTTLE, projectile.Transform.Position, projectile.Transform.Size), tbo.HasHit, tbo.Movement.Direction, tbo.Movement.IsMoving, tbo.Movement.CanMove, tbo.Movement.Rotation, tbo.weaponAttributes),
+    //         _ => throw new NotSupportedException($"Projectile type {aoe.GetType().Name} is not supported for saving.")
+    //     };
+    // }
     private static ItemSaveModel MakeItemSaveModel(ItemBase item)
     {
         return item switch
@@ -338,6 +416,8 @@ public static class SaveLoad
             Beer b => new ItemSaveModel(TYPES.BEER, item.Transform.Position, item.Transform.Size),
             Xp_Money b => new ItemSaveModel(TYPES.MONEY, item.Transform.Position, item.Transform.Size),
             EnergyGel e => new ItemSaveModel(TYPES.ENERGY_GEL, item.Transform.Position, item.Transform.Size),
+            DopingSpritze e => new ItemSaveModel(TYPES.DOPING, item.Transform.Position, item.Transform.Size),
+            EnergyBar eb => new ItemSaveModel(TYPES.ENERGY_BAR, item.Transform.Position, item.Transform.Size),
             Frelo f => new ItemSaveModel(TYPES.FRELO, item.Transform.Position, item.Transform.Size),
             RacingBike r => new ItemSaveModel(TYPES.RACINGBIKE, item.Transform.Position, item.Transform.Size),
             _ => throw new NotSupportedException($"Item type {item.GetType().Name} is not supported for saving.")
@@ -357,8 +437,17 @@ public static class SaveLoad
                 IsFull = db.Full,
             },
             BikeShop bs => new ObjectSaveModel(TYPES.BIKESHOP, obj.Transform.Position, obj.Transform.Size),
+            DestructibleObject dObj => new ObjectSaveModel(TYPES.DESTRUCTIBLE, obj.Transform.Position, obj.Transform.Size)
+            {
+                Health = dObj.Health,
+                SpriteKey = dObj.SpriteKey,
+            },
+            AchievementTrigger at => new ObjectSaveModel(TYPES.TRIGGER, obj.Transform.Position, obj.Transform.Size)
+            {
+                Id = at.Id,
+            },
+            Musicians mu => new ObjectSaveModel(TYPES.MUSICIANS, obj.Transform.Position, obj.Transform.Size),
             _ => throw new NotSupportedException($"Object type {obj.GetType().Name} is not supported for saving.")
-
         };
     }
 
@@ -369,6 +458,9 @@ public static class SaveLoad
             Hobo h => new CharacterSaveModel(TYPES.HOBO, character.Transform.Position, character.Transform.Size),
             BikeThief bt => new CharacterSaveModel(TYPES.BIKETHIEF, character.Transform.Position, character.Transform.Size),
             Dog dg => new CharacterSaveModel(TYPES.DOG, character.Transform.Position, character.Transform.Size),
+            PoliceMan pm => new CharacterSaveModel(TYPES.POLICE_MAN, character.Transform.Position, character.Transform.Size),
+            Dozent dz => new CharacterSaveModel(TYPES.DOZENT, character.Transform.Position, character.Transform.Size),
+            KamikazeOpa opa => new CharacterSaveModel(TYPES.KAMIKAZE_OPA, character.Transform.Position, character.Transform.Size),
             _ => throw new NotSupportedException($"Character type {character.GetType().Name} is not supported for saving.")
         };
     }
@@ -381,6 +473,16 @@ public static class SaveLoad
         }
         return crtList;
     }
+
+    // private static List<AOESaveModel> MakeAOESaveList(List<AreaOfEffectBase> aoeList)
+    // {
+    //     List<AOESaveModel> crtList = new List<AOESaveModel>();
+    //     foreach (var aoe in aoeList)
+    //     {
+    //         crtList.Add(MakeAOESaveModel(aoe));
+    //     }
+    //     return crtList;
+    // }
     private static List<CharacterSaveModel> MakeCharacterSaveList(List<CharacterBase> pList)
     {
         List<CharacterSaveModel> crtList = new List<CharacterSaveModel>();
@@ -403,7 +505,7 @@ public static class SaveLoad
 
     private static List<ObjectSaveModel> MakeObjectSaveList(List<ObjectBase> list)
     {
-        var set = new List<ObjectSaveModel>();
+        List<ObjectSaveModel> set = new List<ObjectSaveModel>();
         foreach (var o in list)
             set.Add(MakeObjectSaveModel(o));
         return set;

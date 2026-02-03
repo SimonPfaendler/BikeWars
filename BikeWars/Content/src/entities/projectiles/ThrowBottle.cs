@@ -11,5 +11,9 @@ namespace BikeWars.Content.entities.projectiles
             : base(start, target, owner, textureKey: "Bottle", damage: 45, speed: 100f, arcScale: 1.2f, lingerDuration: 0.25f)
         {
         }
+        public ThrowBottle(Vector2 start, Vector2 target)
+            : base(start, target, null, textureKey: "Bottle", damage: 45, speed: 100f, arcScale: 1.2f, lingerDuration: 0.25f)
+        {
+        }
     }
 }
