@@ -87,6 +87,7 @@ namespace BikeWars.Content.screens
         // bool that checks if you're in the tech demo or normal gameplay
         private readonly bool _isTechDemo;
         private bool _showStaticHitboxes = true;
+        protected bool StaticHitboxesVisible => _showStaticHitboxes;
 
         private readonly Dictionary<CharacterBase, float> _offscreenTimers = new();
         private const float OFFSCREEN_DESPAWN_SECONDS = 15f;
@@ -483,7 +484,7 @@ namespace BikeWars.Content.screens
 
             if (InputHandler.IsPressed(GameAction.DEBUG_HITBOXES) && _isTechDemo)
             {
-                _showStaticHitboxes = !_showStaticHitboxes;
+                ToggleStaticHitboxes();
             }
 
             bool p1Dead = _gameObjectManager.Player1 == null || _gameObjectManager.Player1.IsDead;
@@ -1033,6 +1034,25 @@ namespace BikeWars.Content.screens
                     _gameObjectManager.Characters.RemoveAt(i);
                     _offscreenTimers.Remove(ch);
                 }
+            }
+        }
+
+        protected bool ToggleStaticHitboxes()
+        {
+            _showStaticHitboxes = !_showStaticHitboxes;
+            return _showStaticHitboxes;
+        }
+
+        protected void ClearEnemies()
+        {
+            for (int i = _gameObjectManager.Characters.Count - 1; i >= 0; i--)
+            {
+                var ch = _gameObjectManager.Characters[i];
+                if (ch is Player)
+                    continue;
+
+                _gameObjectManager.Characters.RemoveAt(i);
+                _offscreenTimers.Remove(ch);
             }
         }
 
