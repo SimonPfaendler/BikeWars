@@ -345,6 +345,7 @@ namespace BikeWars.Content.screens
                 _levelUpScreen.Open(_gameObjectManager.Player1);
             };
             _gameObjectManager.Player1.OnLevelUp += _onPlayerLevelUp;
+            _gameObjectManager.Player2.OnLevelUp += _onPlayerLevelUp;
 
             _bikeShopScreen = new BikeShopScreen(ViewPort);
 
