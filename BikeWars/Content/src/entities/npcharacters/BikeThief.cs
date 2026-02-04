@@ -20,7 +20,7 @@ namespace BikeWars.Entities.Characters
         private readonly SpriteAnimation _walkRightRacingAnimation;
         private SpriteAnimation _currentAnimation;
         protected override string WalkingSound => AudioAssets.Walking;
-        private readonly float _baseSpeed = 150f;
+        private readonly float _baseSpeed = 100f;
 
         private readonly PathFinding _pathFinding;
         private readonly CollisionManager _collisionManager;

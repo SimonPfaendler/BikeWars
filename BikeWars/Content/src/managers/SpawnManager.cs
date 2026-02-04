@@ -6,6 +6,7 @@ using BikeWars.Entities.Characters;
 using BikeWars.Content.entities.interfaces;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
+using Autofac.Features.GeneratedFactories;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.components;
 using BikeWars.Content.entities.npcharacters;
@@ -43,7 +44,7 @@ namespace BikeWars.Content.managers
 
         // Tram Logic
         private double _timeSinceLastTram;
-        private const double TRAM_SPAWN_INTERVAL = 30.0; // Every 15 seconds
+        private const double TRAM_SPAWN_INTERVAL = 20.0; // Every 15 seconds
 
         // raver logic
         private List<RaveGroup> _raveGroups = new List<RaveGroup>();
@@ -336,7 +337,9 @@ namespace BikeWars.Content.managers
             // Health and Damage multiplier: 1.0 to 3.0 over 15 mins
             float difficultyMultiplier = 1.0f + (1.2f * (float)progress);
             // Speed scaling: 1.0 to 1.5 over 15 mins
-            float speedMultiplier = 1.0f + (4f * (float)progress);
+            double basespeedMultiplier = 1.0 + (1.5 * progress);
+            float speedMultiplier;
+            speedMultiplier = (float)RandomSpeed(basespeedMultiplier);
             // chances of each type can be changed here
             // hobo starts at 0.4 and after ends at 0.3
             // progress starts at 0.0 and is 1.0 at the end of Gametime
@@ -495,6 +498,21 @@ namespace BikeWars.Content.managers
         public void HandleRaveGroupDied()
         {
             RaverGroupDied?.Invoke();
+        }
+
+        private double RandomSpeed(double basespeed)
+        {
+            double normalRange = 0.20f;
+            double rareRange = 0.60f;
+            double rareChance = 0.50f;
+            double varchance = RandomUtil.NextDouble();
+            double factor;
+            if (varchance < rareChance)
+            {factor = 1f + ((float)RandomUtil.NextDouble() * 2f - 1f) * normalRange;} // bis zu =- 20%
+            else
+            {factor = 1f + ((float)RandomUtil.NextDouble() * 2f - 1f) * normalRange;} // bis zu +- 40%
+
+            return basespeed * factor;
         }
     }
 }

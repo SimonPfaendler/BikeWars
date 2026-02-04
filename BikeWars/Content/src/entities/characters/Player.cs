@@ -646,6 +646,7 @@ namespace BikeWars.Entities.Characters
             if (skill is SkillTree.SkillId.MoreHp)
             {
                 Attributes.MaxHealth += 30;
+                Attributes.Health += 30;
             }
             else if (skill is SkillTree.SkillId.MoreDamage)
             {
