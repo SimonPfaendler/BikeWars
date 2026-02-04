@@ -166,7 +166,6 @@ namespace BikeWars.Content.managers
                 {
                     // optional: mark dead to be consistent
                     r.Attributes.Health = 0;
-                    _ravers.RemoveAt(i);
                 }
             }
         }
