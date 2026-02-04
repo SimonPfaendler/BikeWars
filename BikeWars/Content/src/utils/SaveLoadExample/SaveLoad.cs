@@ -484,6 +484,7 @@ public static class SaveLoad
             DopingSpritze e => new ItemSaveModel(TYPES.DOPING, item.Transform.Position, item.Transform.Size),
             EnergyBar eb => new ItemSaveModel(TYPES.ENERGY_BAR, item.Transform.Position, item.Transform.Size),
             Frelo f => new ItemSaveModel(TYPES.FRELO, item.Transform.Position, item.Transform.Size),
+            DogFood df => new ItemSaveModel(TYPES.DOG_FOOD, item.Transform.Position, item.Transform.Size),
             RacingBike r => new ItemSaveModel(TYPES.RACINGBIKE, item.Transform.Position, item.Transform.Size),
             _ => throw new NotSupportedException($"Item type {item.GetType().Name} is not supported for saving.")
         };
