@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
@@ -63,7 +62,7 @@ namespace BikeWars.Entities.Characters
             _walkLeftRacingAnimation = SpriteManager.GetAnimation("BikeThief_Racing_WalkLeft");
             _walkRightRacingAnimation = SpriteManager.GetAnimation("BikeThief_Racing_WalkRight");
             _currentAnimation = _idleAnimation;
-            UpdateCollider();
+            UpdateCollider(CollisionLayer.CHARACTER);
 
             Attributes.OnDied += _ => DropStolenBike();
         }
@@ -143,7 +142,7 @@ namespace BikeWars.Entities.Characters
             {
                 _currentAnimation.Update(gameTime, Movement.IsMoving);
             }
-            UpdateCollider();
+            UpdateCollider(CollisionLayer.CHARACTER);
         }
 
         public override void Draw(SpriteBatch spriteBatch)

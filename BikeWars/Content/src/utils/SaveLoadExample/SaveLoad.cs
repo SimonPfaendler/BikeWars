@@ -65,13 +65,13 @@ public static class SaveLoad
         public float GameTimerTotalTime { get; set; } = 120f;
         public bool IsGameTimerRunning {get; set;} = true;
         public bool IsGameTimerPaused { get; set; } = false;
-        public float PlayerX { get; set; } = _worldBounds;
-        public float PlayerY { get; set; } = _worldBounds;
+        public List<PlayerSaveModel> Players {get;set;} = new();
         public List<ProjectileSaveModel> Projectiles {get; set;} = new();
         public List<AOESaveModel> AOESaves {get; set;} = new();
         public List<CharacterSaveModel> Characters {get; set;} = new();
         public List<ItemSaveModel> Items {get; set;} = new();
         public List<ObjectSaveModel> Objects { get; set; } = new();
+        public List<CarSaveModel> Cars {get;set;} = new();
         public List<Statistic> Statistics{get; set;} = new();
         public Statistic Statistic{get; set;} = new();
         public List<Achievement> Achievements{get; set;} = new();
@@ -181,6 +181,26 @@ public static class SaveLoad
         }
     }
 
+    public class PlayerSaveModel
+    {
+        public uint PlayerNumber {get;set;}
+        public Vector2Save Position { get; set; } = new();
+
+        public PointSave RenderSize {get;set;}  = new();
+
+        public float Radius {get;set;}
+
+        public PlayerSaveModel() {}
+
+        public PlayerSaveModel(uint playerNumber, Vector2 position, float radius, Point renderSize)
+        {
+            PlayerNumber = playerNumber;
+            Position = new Vector2Save(position);
+            Radius = radius;
+            RenderSize = new PointSave(renderSize);
+        }
+    }
+
     public class ItemSaveModel
     {
         public TYPES Type {get; set;} // Item Type Like Chest
@@ -210,6 +230,26 @@ public static class SaveLoad
         public PointSave Size {get;set;} = new();
         public int Health {get; set;}
         public string SpriteKey {get; set;}
+    }
+    public class CarSaveModel
+    {
+        public TYPES Type { get; set; }
+        public Vector2Save Position { get; set; } = new();
+        public PointSave Size { get; set; } = new();
+        public Random Rng {get;set;}
+        public string SideKey { get; set;}
+        public string UpKey { get; set;}
+
+        public CarSaveModel() { }
+        public CarSaveModel(TYPES type, Vector2 position, Point size, Random rng, string sideKey, string upKey)
+        {
+            Type = type;
+            Position = new Vector2Save(position);
+            Size = new PointSave(size);
+            Rng = rng;
+            SideKey = sideKey;
+            UpKey = upKey;
+        }
     }
     public class ObjectSaveModel
     {
@@ -273,6 +313,15 @@ public static class SaveLoad
                 playerX = gameObjectManager.Player1.Transform.Position.X;
                 playerY = gameObjectManager.Player1.Transform.Position.Y;
             }
+            List<PlayerSaveModel> playerList = new List<PlayerSaveModel>();
+            if (gameObjectManager.Player1 != null)
+            {
+                playerList.Add(MakePlayerSaveModel(1, gameObjectManager.Player1));
+            }
+            if (gameObjectManager.Player2 != null)
+            {
+                playerList.Add(MakePlayerSaveModel(2, gameObjectManager.Player2));
+            }
             // serialize the current info into JSON text
             GameState state = new GameState
             {
@@ -282,14 +331,13 @@ public static class SaveLoad
                 IsGameTimerRunning = gameTimer.IsRunning,
                 IsGameTimerPaused = gameTimer.IsPaused,
 
-                PlayerX = playerX,
-                PlayerY = playerY,
-
+                Players = playerList,
                 Projectiles = MakeProjectileSaveList(gameObjectManager.Projectiles),
                 // AOESaves = MakeAOESaveList(gameObjectManager.AOEAttacks),
                 Characters = MakeCharacterSaveList(gameObjectManager.Characters),
                 Items = MakeItemSaveList(gameObjectManager.Items),
                 Objects = MakeObjectSaveList(gameObjectManager.Objects),
+                Cars = MakeCarsSaveList(gameObjectManager.Cars),
                 Statistics = statisticsManager.Statistics,
                 Statistic = statisticsManager.Statistic,
                 Achievements = achievementsManager.Achievements.Values.ToList(),
@@ -328,10 +376,7 @@ public static class SaveLoad
                 GameTimerTotalTime = loadState.GameTimerTotalTime,
                 IsGameTimerRunning = loadState.IsGameTimerRunning,
                 IsGameTimerPaused = loadState.IsGameTimerPaused,
-
-                PlayerX = loadState.PlayerX,
-                PlayerY = loadState.PlayerY,
-
+                Players = loadState.Players,
                 Projectiles = loadState.Projectiles,
                 Characters = loadState.Characters,
                 Items = loadState.Items,
@@ -379,7 +424,6 @@ public static class SaveLoad
         }
 
         Console.WriteLine($"Timer loaded: {FormatTime(state.GameTimerCurrentTime)}");
-        Console.WriteLine("Loaded. Player Position=" + state.PlayerX + " " + state.PlayerY);
         return state;
     }
 
@@ -424,6 +468,10 @@ public static class SaveLoad
         };
     }
 
+    private static CarSaveModel MakeCarSaveModel(Car carBase)
+    {
+        return new CarSaveModel(TYPES.CHEST, carBase.Transform.Position, carBase.Transform.Size, carBase._rng, carBase.SideKey, carBase.UpKey);
+    }
     private static ObjectSaveModel MakeObjectSaveModel(ObjectBase obj)
     {
         return obj switch
@@ -451,16 +499,21 @@ public static class SaveLoad
         };
     }
 
+    private static PlayerSaveModel MakePlayerSaveModel(uint playerNumber, Player player)
+    {
+        return new PlayerSaveModel(playerNumber, player.Transform.Position, player.Transform.Radius, player.RenderTransform.Size);
+    }
+
     private static CharacterSaveModel MakeCharacterSaveModel(CharacterBase character)
     {
         return character switch
         {
-            Hobo h => new CharacterSaveModel(TYPES.HOBO, character.Transform.Position, character.Transform.Size),
-            BikeThief bt => new CharacterSaveModel(TYPES.BIKETHIEF, character.Transform.Position, character.Transform.Size),
-            Dog dg => new CharacterSaveModel(TYPES.DOG, character.Transform.Position, character.Transform.Size),
-            PoliceMan pm => new CharacterSaveModel(TYPES.POLICE_MAN, character.Transform.Position, character.Transform.Size),
-            Dozent dz => new CharacterSaveModel(TYPES.DOZENT, character.Transform.Position, character.Transform.Size),
-            KamikazeOpa opa => new CharacterSaveModel(TYPES.KAMIKAZE_OPA, character.Transform.Position, character.Transform.Size),
+            Hobo h => new CharacterSaveModel(TYPES.HOBO, character.Transform.Position, character.Transform.Radius),
+            BikeThief bt => new CharacterSaveModel(TYPES.BIKETHIEF, character.Transform.Position, character.Transform.Radius),
+            Dog dg => new CharacterSaveModel(TYPES.DOG, character.Transform.Position, character.Transform.Radius),
+            PoliceMan pm => new CharacterSaveModel(TYPES.POLICE_MAN, character.Transform.Position, character.Transform.Radius),
+            Dozent dz => new CharacterSaveModel(TYPES.DOZENT, character.Transform.Position, character.Transform.Radius),
+            KamikazeOpa opa => new CharacterSaveModel(TYPES.KAMIKAZE_OPA, character.Transform.Position, character.Transform.Radius),
             _ => throw new NotSupportedException($"Character type {character.GetType().Name} is not supported for saving.")
         };
     }
@@ -508,6 +561,14 @@ public static class SaveLoad
         List<ObjectSaveModel> set = new List<ObjectSaveModel>();
         foreach (var o in list)
             set.Add(MakeObjectSaveModel(o));
+        return set;
+    }
+
+    private static List<CarSaveModel> MakeCarsSaveList(List<Car> list)
+    {
+        List<CarSaveModel> set = new List<CarSaveModel>();
+        foreach (var c in list)
+            set.Add(MakeCarSaveModel(c));
         return set;
     }
 

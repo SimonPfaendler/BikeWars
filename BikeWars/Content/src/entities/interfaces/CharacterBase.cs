@@ -217,7 +217,7 @@ public abstract class CharacterBase : ICharacter, ICombat
 
     public virtual void ThrowAttack(ICombat target) { }
 
-    public void UpdateCollider()
+    public void UpdateCollider(CollisionLayer layer)
     {
         Vector2 colliderPosition = new Vector2(
             Transform.Position.X - Transform.Size.X / 2f,
@@ -229,11 +229,13 @@ public abstract class CharacterBase : ICharacter, ICombat
             Collider = new CircleCollider(
                 Transform.Radius,
                 colliderPosition,
-                CollisionLayer.PLAYER,
+                // CollisionLayer.PLAYER,
+                layer,
                 this
             );
         } else
         {
+            Collider.Radius = Transform.Radius;
             Collider.Position = colliderPosition;
             Collider.Width = Transform.Size.X;
             Collider.Height = Transform.Size.Y;

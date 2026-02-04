@@ -740,10 +740,35 @@ namespace BikeWars.Content.screens
         public void HandleLoadGame()
         {
             var state = SaveLoad.LoadGame();
-            _gameObjectManager.Player1.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
+            if (_gameObjectManager.Player1 != null)
+            {
+                foreach(var playerSave in state.Players)
+                {
+                    if (playerSave.PlayerNumber == 1)
+                    {
+                        _gameObjectManager.Player1.Transform.Position = playerSave.Position.ToVector2();
+                        break;
+                    }
+                }
+            }
+
+            if (_gameObjectManager.Player2 != null)
+            {
+                foreach(var playerSave in state.Players)
+                {
+                    if (playerSave.PlayerNumber == 2)
+                    {
+                        _gameObjectManager.Player2.Transform.Position = playerSave.Position.ToVector2();
+                        break;
+                    }
+                }
+            }
+
             _gameTimer.SetFromSave(state.GameTimerCurrentTime, state.IsGameTimerRunning, state.IsGameTimerPaused);
 
+            _gameObjectManager.Statics.Clear();
             _gameObjectManager.Projectiles.Clear();
+            _collisionManager.Unload();
             foreach (var p in state.Projectiles)
             {
                 switch(p.Basic.Type)
@@ -889,7 +914,9 @@ namespace BikeWars.Content.screens
                         _gameObjectManager.AddObject(new DogBowl(pos, size, full: o.IsFull ?? false));
                         break;
                     case SaveLoad.TYPES.DESTRUCTIBLE:
-                        _gameObjectManager.AddObject(new DestructibleObject(pos, size, o.Health.Value, o.SpriteKey));
+                        DestructibleObject dobj = new DestructibleObject(pos, size, o.Health.Value, o.SpriteKey);
+                        _gameObjectManager.AddObject(dobj);
+                        _gameObjectManager.AddStatic(dobj.Collider);
                         break;
                     case SaveLoad.TYPES.TRIGGER:
                         if (o.Id == null)
@@ -901,7 +928,21 @@ namespace BikeWars.Content.screens
                         break;
                 }
             }
+
+            _gameObjectManager.Cars.Clear();
+            foreach (var o in state.Cars)
+            {
+                _gameObjectManager.AddCar(new Car(o.Position.ToVector2(), o.Size.ToPoint(), _collisionManager, o.Rng, o.SideKey, o.UpKey));
+            }
             _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.RegularKills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level, state.Statistic.Time, state.Statistic.DeathCount, state.Statistic.ShotsFired, state.Statistic.OpponentsHit, state.Statistic.Repairs, state.Statistic.PhaseFindBike);
+            var players = new HashSet<Player>();
+            if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);
+            if (_gameObjectManager.Player2 != null) players.Add(_gameObjectManager.Player2);
+            _collisionManager.Insertions(_gameObjectManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(),_gameObjectManager.Cars, _gameObjectManager.Objects, _gameObjectManager.Towers);
+            foreach (var s in _gameObjectManager.Statics)
+            {
+                _collisionManager.StaticHash.Insert(s);
+            }
             Console.WriteLine("Game loaded.");
         }
         private void HandleSaveLoadInput()

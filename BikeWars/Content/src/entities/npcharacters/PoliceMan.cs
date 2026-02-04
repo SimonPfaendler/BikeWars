@@ -61,7 +61,7 @@ public class PoliceMan: CharacterBase, IWorldAudioAware
             _attackLeftAnimation = SpriteManager.GetAnimation("policeman_attack_left");
             _attackRightAnimation = SpriteManager.GetAnimation("policeman_attack_right");
             _currentAnimation = _walkDownAnimation;
-            UpdateCollider();
+            UpdateCollider(CollisionLayer.CHARACTER);
         }
 
         public override void Update(GameTime gameTime)
@@ -121,7 +121,7 @@ public class PoliceMan: CharacterBase, IWorldAudioAware
 
                 _currentAnimation.Update(gameTime, Movement.IsMoving);
             }
-            UpdateCollider();
+            UpdateCollider(CollisionLayer.CHARACTER);
         }
 
         public override void Draw(SpriteBatch spriteBatch)

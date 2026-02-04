@@ -161,7 +161,6 @@ public class GameObjectManager
     {
         if (_worldAudioManager != null && character is IWorldAudioAware wa)
             wa.SetWorldAudioManager(_worldAudioManager);
-
         Characters.Add(character);
         character.Attributes.OnDied += HandleCharacterDeath;
         character.OnTookDamage += HandleTookDamage;
@@ -343,7 +342,7 @@ public class GameObjectManager
                 c.Movement.EnemyPosition = c.Transform.Position;
             }
             c.Update(gameTime);
-            c.UpdateCollider();
+            c.UpdateCollider(c.Collider.Layer);
         }
         foreach (Tower t in Towers)
         {

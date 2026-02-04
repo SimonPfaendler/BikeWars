@@ -57,7 +57,7 @@ namespace BikeWars.Entities.Characters
             _idleAnimation = SpriteManager.GetAnimation("KamikazeOpa_BikeDown");
             _currentAnimation = _idleAnimation;
 
-            UpdateCollider();
+            UpdateCollider(CollisionLayer.CHARACTER);
             SubscribeToDeath();
         }
 
@@ -108,7 +108,7 @@ namespace BikeWars.Entities.Characters
                 _currentAnimation.Update(gameTime, Movement.IsMoving);
             }
 
-            UpdateCollider();
+            UpdateCollider(CollisionLayer.CHARACTER);
 
             // Self-Destruct Trigger Logic
             if (Movement is EnemyMovement enemyMove)

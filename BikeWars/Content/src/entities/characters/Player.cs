@@ -380,7 +380,7 @@ namespace BikeWars.Entities.Characters
                 _unlockedWeapons.Add(WeaponType.BookThrow, new WeaponAttributes());
             }
             CurrentWeapon = WeaponType.BookThrow;
-            UpdateCollider();
+            UpdateCollider(CollisionLayer.PLAYER);
         }
 
         public override void Update(GameTime gameTime)
@@ -405,7 +405,7 @@ namespace BikeWars.Entities.Characters
             if (IsDying)
             {
                 UpdateDyingState(gameTime);
-                UpdateCollider();
+                UpdateCollider(CollisionLayer.PLAYER);
                 return;
             }
 
@@ -417,7 +417,7 @@ namespace BikeWars.Entities.Characters
             HandleWeaponSwitch();
             HandleShooting();
             UpdateMovement(gameTime);
-            UpdateCollider();
+            UpdateCollider(CollisionLayer.PLAYER);
             HandleInventoryNavigation();
             HandleItemUsage(gameTime);
             HandleMovementSound();
@@ -426,7 +426,7 @@ namespace BikeWars.Entities.Characters
             HandleGhostTrail(gameTime);
             HandleSwitchMovement();
             UpdateHitFlash(gameTime);
-            UpdateCollider();
+            UpdateCollider(CollisionLayer.PLAYER);
         }
 
         public override bool IsCharacterMoving()

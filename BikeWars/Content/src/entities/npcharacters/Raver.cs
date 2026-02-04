@@ -16,17 +16,17 @@ namespace BikeWars.Entities.Characters
         private readonly SpriteAnimation _walkRightAnimation;
 
         private SpriteAnimation _currentAnimation;
-        
+
         //constructor
         public Raver(Vector2 start, float size, AudioService audio, string leftAnimKey,
             string rightAnimKey)
         {
             _audio = audio;
             Attributes = new CharacterAttributes(this, maxHealth: 35, health: 35, attackDamage: 2, attackCoolDown: 0f, canAutoAttack: false);
-            
+
             //get the position of the raver
             Transform = new Transform(start, size);
-            
+
             // used to draw the sprite
             RenderTransform = new Transform(start, new Point(32, 32));
 
@@ -34,12 +34,12 @@ namespace BikeWars.Entities.Characters
 
             _walkLeftAnimation  = SpriteManager.GetAnimation(leftAnimKey);
             _walkRightAnimation = SpriteManager.GetAnimation(rightAnimKey);
-            
+
             _currentAnimation = _walkLeftAnimation;
-            
-            UpdateCollider();
+
+            UpdateCollider(CollisionLayer.CHARACTER);
         }
-        
+
         // Sets the direction the raver is facing by selecting
         // the appropriate walking animation
         public void SetFacingLeft(bool startLeft)
@@ -59,7 +59,7 @@ namespace BikeWars.Entities.Characters
             if (_currentAnimation != null)
                 _currentAnimation.Update(gameTime, false);
 
-            UpdateCollider();
+            UpdateCollider(CollisionLayer.CHARACTER);
         }
 
         public override void Draw(SpriteBatch spriteBatch)
