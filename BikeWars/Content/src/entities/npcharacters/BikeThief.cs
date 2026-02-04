@@ -20,7 +20,7 @@ namespace BikeWars.Entities.Characters
         private readonly SpriteAnimation _walkRightRacingAnimation;
         private SpriteAnimation _currentAnimation;
         protected override string WalkingSound => AudioAssets.Walking;
-        private readonly float _baseSpeed = 150f;
+        private readonly float _baseSpeed = 100f;
 
         private readonly PathFinding _pathFinding;
         private readonly CollisionManager _collisionManager;
@@ -191,11 +191,30 @@ namespace BikeWars.Entities.Characters
 
             if (volume > 0)
             {
-                int index = RandomUtil.NextInt(0, TalkSounds.Length);
-                string randomTalk = TalkSounds[index];
+                if (PlayerOnBike())
+                {
+                    int index = RandomUtil.NextInt(0, TalkSounds.Length);
+                    string randomTalk = TalkSounds[index];
 
-                _audio.Sounds.Play(randomTalk);
+                    _audio.Sounds.Play(randomTalk);
+                }
+                else
+                {_audio.Sounds.Play(AudioAssets.BikeThiefLaugh);}
+                    
             }
+        }
+
+        private bool PlayerOnBike()
+        {
+            var gom = _collisionManager.GameObjectManager;
+
+            if (gom.Player1 != null && gom.Player1.movement.OwnsBike)
+                return true;
+
+            if (gom.Player2 != null && gom.Player2.movement.OwnsBike)
+                return true;
+
+            return false;
         }
 
         private bool TryStealBike(Player player)

@@ -6,6 +6,7 @@ using BikeWars.Entities.Characters;
 using BikeWars.Content.entities.interfaces;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
+using Autofac.Features.GeneratedFactories;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.components;
 using BikeWars.Content.entities.npcharacters;
@@ -25,17 +26,17 @@ namespace BikeWars.Content.managers
         private double _timeSinceLastSwarm;
         private double _timeSinceLastCircle;
         private double _timeSinceLastSlowEnemyLinear;
-        private const double SWARM_INTERVAL = 33.0;
-        private const double CIRCLE_SPAWN_INTERVAL = 67.0;
-        private const double SLOW_ENEMY_SPAWN_INTERVAL = 42.0;
+        private const double SWARM_INTERVAL = 40.0;
+        private const double CIRCLE_SPAWN_INTERVAL = 40.0;
+        private const double SLOW_ENEMY_SPAWN_INTERVAL = 60.0;
 
         private readonly List<ICollider> _spawnQueryBuffer = new(32);
 
-        private const double GAME_DURATION = 5 * 60; // 15 minutes in seconds
+        private const double GAME_DURATION = 5 * 60; // 5 minutes in seconds
         private const double START_SPAWN_INTERVAL = 5; // Start with 4 seconds
-        private const double END_SPAWN_INTERVAL = 2;   // End with 0.5 seconds
+        private const double END_SPAWN_INTERVAL = 0.1;   // End with 0.5 seconds
         private double _spawnInterval;
-        private const float MIN_SPAWN_RADIUS = 300f;
+        private const float MIN_SPAWN_RADIUS = 450f;
         private const float MAX_SPAWN_RADIUS = 900f;
         private readonly WorldAudioManager _worldAudioManager;
 
@@ -43,7 +44,7 @@ namespace BikeWars.Content.managers
 
         // Tram Logic
         private double _timeSinceLastTram;
-        private const double TRAM_SPAWN_INTERVAL = 30.0; // Every 15 seconds
+        private const double TRAM_SPAWN_INTERVAL = 20.0; // Every 15 seconds
 
         // raver logic
         private List<RaveGroup> _raveGroups = new List<RaveGroup>();
@@ -80,7 +81,16 @@ namespace BikeWars.Content.managers
             // Update spawn interval based on progression
             // Lerp from start interval to end interval based on time fraction
             double progress = Math.Clamp(_totalTime / GAME_DURATION, 0, 1);
+            int playerCount = 0;
+            if (_gameObjectManager.Player1 != null && !_gameObjectManager.Player1.IsDead)
+                playerCount += 1;
+            if (_gameObjectManager.Player2 != null && !_gameObjectManager.Player2.IsDead)
+                playerCount += 1;
             _spawnInterval = START_SPAWN_INTERVAL + (END_SPAWN_INTERVAL - START_SPAWN_INTERVAL) * progress;
+            if (playerCount == 2)
+            {
+                _spawnInterval *= 0.7; 
+            }
             double carInterval = CAR_SPAWN_START + (CAR_SPAWN_END - CAR_SPAWN_START) * progress;
 
             if (_timeSinceLastSpawn >= _spawnInterval)
@@ -91,7 +101,6 @@ namespace BikeWars.Content.managers
 
             if (_timeSinceLastSwarm >= SWARM_INTERVAL)
             {
-
                 SpawnSwarm(progress);
                 _timeSinceLastSwarm = 0;
             }
@@ -125,14 +134,15 @@ namespace BikeWars.Content.managers
 
             if (_timeSinceLastSlowEnemyLinear >= SLOW_ENEMY_SPAWN_INTERVAL)
             {
-                SpawnSlowEnemyLiniear(100, progress);
+                SpawnSlowEnemyLiniear(150, progress);
                 _timeSinceLastSlowEnemyLinear = 0;
             }
         }
 
         public void SpawnSlowEnemyLiniear(int count, double progress)
         {
-            float difficultyMultiplier = 1.0f + (1.2f * (float)progress);
+            count *= (int)Math.Round(progress);
+            float difficultyMultiplier = 1.0f + (1.0f * (float)progress);
             float speedMultiplier = 0.5f;
 
             if (_gameObjectManager.Player1 == null) return;
@@ -286,11 +296,11 @@ namespace BikeWars.Content.managers
 
         private void SpawnSwarm(double progress)
         {
-            // Spawn 10-15 Hobos
-            int count = RandomUtil.NextInt(20, 40);
+            int baseCount = (int)Math.Round(8 + 17 * progress);
+            int count = RandomUtil.NextInt(baseCount - 3, baseCount + 4);
 
             float speedMultiplier = 1f + (0.5f * (float)progress); // Start fast, get faster
-            float difficultyMultiplier = 1.0f + (2.0f * (float)progress);
+            float difficultyMultiplier = 1.0f + (1.5f * (float)progress);
 
             // Spawn them in a cluster
             Vector2 clusterCenter = GetRandomSpawnPosition();
@@ -327,7 +337,9 @@ namespace BikeWars.Content.managers
             // Health and Damage multiplier: 1.0 to 3.0 over 15 mins
             float difficultyMultiplier = 1.0f + (1.2f * (float)progress);
             // Speed scaling: 1.0 to 1.5 over 15 mins
-            float speedMultiplier = 1.0f + (0.2f * (float)progress);
+            double basespeedMultiplier = 1.0 + (1.5 * progress);
+            float speedMultiplier;
+            speedMultiplier = (float)RandomSpeed(basespeedMultiplier);
             // chances of each type can be changed here
             // hobo starts at 0.4 and after ends at 0.3
             // progress starts at 0.0 and is 1.0 at the end of Gametime
@@ -458,8 +470,13 @@ namespace BikeWars.Content.managers
 
             for (int i = 0; i < 20; i++) // Try 20 times to find a valid position
             {
-                // Random angle
-                float angle = (float)(RandomUtil.NextDouble() * Math.PI * 2);
+                // Makes Oppenents mainly spawn in gaze direction
+                Vector2 forward = target.GazeDirection;
+                if (forward == Vector2.Zero) forward = Vector2.UnitX;
+                forward.Normalize();
+                float baseAngle = (float)Math.Atan2(forward.Y, forward.X);
+                float halfCone = MathHelper.ToRadians(20f);
+                float angle = baseAngle + (float)(RandomUtil.NextDouble() * 2 - 1) * halfCone;
                 // Random distance
                 float distance = MIN_SPAWN_RADIUS + (float)(RandomUtil.NextDouble() * (MAX_SPAWN_RADIUS - MIN_SPAWN_RADIUS));
 
@@ -481,6 +498,21 @@ namespace BikeWars.Content.managers
         public void HandleRaveGroupDied()
         {
             RaverGroupDied?.Invoke();
+        }
+
+        private double RandomSpeed(double basespeed)
+        {
+            double normalRange = 0.20f;
+            double rareRange = 0.60f;
+            double rareChance = 0.50f;
+            double varchance = RandomUtil.NextDouble();
+            double factor;
+            if (varchance < rareChance)
+            {factor = 1f + ((float)RandomUtil.NextDouble() * 2f - 1f) * normalRange;} // bis zu =- 20%
+            else
+            {factor = 1f + ((float)RandomUtil.NextDouble() * 2f - 1f) * normalRange;} // bis zu +- 40%
+
+            return basespeed * factor;
         }
     }
 }

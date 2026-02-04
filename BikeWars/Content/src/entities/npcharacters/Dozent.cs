@@ -49,7 +49,7 @@ public class Dozent: CharacterBase, IWorldAudioAware
             Transform = new Transform(start, size);
             LastTransform = new Transform(start, size);
             RenderTransform = new Transform(start, new Point(32, 32));
-            Speed = 120f;
+            Speed = 95f;
             Movement = new EnemyMovement(canMove: true, isMoving: false, pathFinding: _pathFinding,
                 gridMapper: _collisionManager, repathScheduler: _repathScheduler);
             _idleAnimation = SpriteManager.GetAnimation("Dozent_Idle");

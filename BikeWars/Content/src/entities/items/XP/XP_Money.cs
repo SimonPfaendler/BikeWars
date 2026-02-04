@@ -7,7 +7,7 @@ public class Xp_Money : Xp
 {
     private const string TextureKey = "XP_Money"; 
     public Xp_Money(Vector2 start, Point size, int? value = null)
-        : base(start, size, xp_value: value ?? 3, textureKey: TextureKey)
+        : base(start, size, xp_value: value ?? 7, textureKey: TextureKey)
     {
     }
     

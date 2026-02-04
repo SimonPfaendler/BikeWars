@@ -52,7 +52,7 @@ namespace BikeWars.Entities.Characters
         private const float THROW_AIM_GROW_SPEED = 400f; // px per second while holding trigger
         public TerrainCollider CurrentTerrain { get; set; }
         public float TerrainSpeedMultiplier = 1.0f;
-        private const float IncreaseSpeed = 1.1f;
+        private const float IncreaseSpeed = 1.3f;
         private const float DecreaseSpeed = 0.75f;
         public new bool IsGodMode { get; set; }
 
@@ -329,7 +329,7 @@ namespace BikeWars.Entities.Characters
 
         public Player(Vector2 start, float radius, Point renderSize, AudioService audio, IPlayerInput input, bool isTechDemo = false, string characterPrefix = "Character1")
         {
-            Attributes = new CharacterAttributes(this, 300, 0, 10, 2f, false);
+            Attributes = new CharacterAttributes(this, 800, 0, 20, 2f, false);
             Transform = new Transform(start, radius);
             LastTransform = new Transform(start, radius);
             RenderTransform = new Transform(start, renderSize);
@@ -646,6 +646,7 @@ namespace BikeWars.Entities.Characters
             if (skill is SkillTree.SkillId.MoreHp)
             {
                 Attributes.MaxHealth += 30;
+                Attributes.Health += 30;
             }
             else if (skill is SkillTree.SkillId.MoreDamage)
             {
@@ -708,6 +709,10 @@ namespace BikeWars.Entities.Characters
                 Dismounted?.Invoke(movement.CrtBike);
             }
             movement.CrtBike = null;
+            if (isBikeWeapon(CurrentWeapon))
+            {
+                CurrentWeapon = WeaponType.BookThrow;
+            }
         }
 
         private void StartUsingItem(int inventoryIndex)
@@ -858,7 +863,8 @@ namespace BikeWars.Entities.Characters
 
                 if (_unlockedWeapons.TryGetValue(nextType, out var weaponAttributes))
                 {
-
+                    if (isBikeWeapon(nextType) && !movement.OwnsBike)
+                        continue;
                     CurrentWeapon = nextType;
                     return;
                 }
@@ -1159,6 +1165,13 @@ namespace BikeWars.Entities.Characters
         public bool IsInteractPressed()
         {
             return _input.IsPressed(GameAction.INTERACT);
+        }
+
+        private bool isBikeWeapon(WeaponType weapon)
+        {
+            return weapon == WeaponType.IceTrail
+                   || weapon == WeaponType.FireTrail
+                   || weapon == WeaponType.DamageCircle;
         }
     }
 }

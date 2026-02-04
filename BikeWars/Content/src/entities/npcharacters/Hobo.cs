@@ -52,7 +52,7 @@ namespace BikeWars.Entities.Characters
             Transform = new Transform(start, radius);
             LastTransform = new Transform(start, radius);
             RenderTransform = new Transform(start, new Point(32, 32));
-            Speed = 105f;
+            Speed = 100f;
             Movement = new EnemyMovement(canMove: true, isMoving: false, pathFinding: _pathFinding,
                 gridMapper: _collisionManager, repathScheduler: _repathScheduler);
             _idleAnimation = SpriteManager.GetAnimation("Hobo_Idle");
