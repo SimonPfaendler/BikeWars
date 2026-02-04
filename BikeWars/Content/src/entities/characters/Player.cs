@@ -690,6 +690,10 @@ namespace BikeWars.Entities.Characters
                 wp.Owner = this;
                 _unlockedWeapons.Add(WeaponType.BottleThrow, wp);
             }
+            else if (skill is SkillTree.SkillId.CritChance)
+            {
+                Attributes.CritChance += 0.05f;
+            }
         }
 
         // When you dismount of the bike

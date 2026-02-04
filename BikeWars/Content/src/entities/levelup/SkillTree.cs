@@ -14,7 +14,8 @@ public class SkillTree
         // other option for example spacial skills can be added here
         WeaponGun,
         WeaponBanana,
-        WeaponBottle
+        WeaponBottle,
+        CritChance
     }
 
     // Dictionary: Welcher Skill hat welche Beschreibung?
@@ -33,5 +34,7 @@ public class SkillTree
         { SkillId.WeaponBanana, ("Bananenschale: Achtung rutschig!") },
 
         { SkillId.WeaponBottle, ("Pfandflasche: RECYCLINNGGG!") },
+
+        { SkillId.CritChance, ("Kritischer Treffer: +5% Chance") },
     };
 }

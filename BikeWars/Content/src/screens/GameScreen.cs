@@ -339,14 +339,22 @@ namespace BikeWars.Content.screens
 
 
             // checks if the event OnLevelUp is triggered if it is LevelUpSreen gets active
-            _onPlayerLevelUp = (xp, amount) =>
+            if (_gameObjectManager.Player1 != null)
             {
-                _audioService.Sounds.PauseAll();
-                _levelUpScreen.Open(_gameObjectManager.Player1);
-            };
-            _gameObjectManager.Player1.OnLevelUp += _onPlayerLevelUp;
-            _gameObjectManager.Player2.OnLevelUp += _onPlayerLevelUp;
-
+                _gameObjectManager.Player1.OnLevelUp += (xp, amount) =>
+                {
+                    _audioService.Sounds.PauseAll();
+                    _levelUpScreen.Open(_gameObjectManager.Player1);
+                };
+            }
+            if (_gameObjectManager.Player2 != null)
+            {
+                _gameObjectManager.Player2.OnLevelUp += (xp, amount) =>
+                {
+                    _audioService.Sounds.PauseAll();
+                    _levelUpScreen.Open(_gameObjectManager.Player2);
+                };
+            }
             _bikeShopScreen = new BikeShopScreen(ViewPort);
 
             _onBikeShopClose = () =>
@@ -371,8 +379,14 @@ namespace BikeWars.Content.screens
             // the Option selected gets upgraded
             _levelUpScreen.OnOptionSelected += skillId =>
             {
-                _gameObjectManager.Player1.UpgradeSkill(skillId);
-                _gameObjectManager.Player2.UpgradeSkill(skillId);
+                if (_gameObjectManager.Player1 != null)
+                {
+                    _gameObjectManager.Player1.UpgradeSkill(skillId);
+                }
+                if (_gameObjectManager.Player2 != null)
+                {
+                    _gameObjectManager.Player2.UpgradeSkill(skillId);
+                }
             };
 
             // Spawn Manager
