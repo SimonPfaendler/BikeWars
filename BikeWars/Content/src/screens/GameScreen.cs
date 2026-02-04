@@ -371,6 +371,7 @@ namespace BikeWars.Content.screens
             _levelUpScreen.OnOptionSelected += skillId =>
             {
                 _gameObjectManager.Player1.UpgradeSkill(skillId);
+                _gameObjectManager.Player2.UpgradeSkill(skillId);
             };
 
             // Spawn Manager
