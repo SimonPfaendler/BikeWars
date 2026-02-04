@@ -160,7 +160,7 @@ public class CombatManager
         if (target.IsDead) return;
         if (target.IsGodMode) return;
 
-        target.TakeDamage(12, tram);
+        target.TakeDamage(35, tram);
         _audio.Sounds.Play(AudioAssets.TrainHit);
 
         if (target.Attributes.Health <= 0)
