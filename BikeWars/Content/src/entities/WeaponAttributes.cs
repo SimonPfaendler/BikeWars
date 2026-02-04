@@ -3,7 +3,7 @@ public class WeaponAttributes
 {
     public object Owner { get; set; }
     private int _level { get; set; }
-    private int _max_level { get; set;}
+    protected int _max_level { get; set;}
 
     public int Level
     {
