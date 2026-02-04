@@ -23,7 +23,7 @@ public class SkillTree
     {
         { SkillId.MoreHp, ("Mehr Leben: +30 HP") },
 
-        { SkillId.MoreDamage, ("Mehr Schaden: +2 Schaden") },
+        { SkillId.MoreDamage, ("Mehr Schaden: +5 Schaden") },
 
         { SkillId.LongerSprintDuration, ("Laengere Sprintdauer: +0,5s Sprint dauer") },
 

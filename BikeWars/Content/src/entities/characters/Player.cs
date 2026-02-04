@@ -650,7 +650,7 @@ namespace BikeWars.Entities.Characters
             }
             else if (skill is SkillTree.SkillId.MoreDamage)
             {
-                Attributes.AttackDamage += 2;
+                Attributes.AttackDamage += 5;
             }
             else if (skill is SkillTree.SkillId.LongerSprintDuration)
             {
