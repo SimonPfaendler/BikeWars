@@ -36,6 +36,7 @@ namespace BikeWars.Entities.Characters
         public int XpCounter { get; private set; } = 0;
         public int XpLevelUp = 10;
         public int CurrentLevel { get; private set; } = 1;
+        public int PlayerNumber { get; }
         public Vector2 AimTarget { get; private set; }
         private Vector2 _facingDirection = Vector2.UnitX; // Default to right
         private const float AimLength = 100f;
@@ -261,7 +262,10 @@ namespace BikeWars.Entities.Characters
                 if (_unlockedWeapons.TryGetValue(weapon.Type, out var attributes))
                 {
                     upgradeWeapon(attributes);
-                } else {
+                } else
+                {
+                    if (weapon.Type == WeaponType.DamageCircle && player.PlayerNumber == 2)
+                    { return;}
                     WeaponAttributes wp = new WeaponAttributes();
                     _unlockedWeapons.Add(weapon.Type, wp);
                 }
@@ -327,9 +331,18 @@ namespace BikeWars.Entities.Characters
             _audio.Sounds.Play(AudioAssets.HandgunClick);
         }
 
-        public Player(Vector2 start, float radius, Point renderSize, AudioService audio, IPlayerInput input, bool isTechDemo = false, string characterPrefix = "Character1")
+        public Player(int Playernumber, Vector2 start, float radius, Point renderSize, AudioService audio,
+            IPlayerInput input, bool isTechDemo = false, string characterPrefix = "Character1")
         {
-            Attributes = new CharacterAttributes(this, 800, 0, 20, 2f, false);
+            PlayerNumber = Playernumber;
+            if (PlayerNumber == 1)
+            {
+                Attributes = new CharacterAttributes(this, 1000, 0, 25, 2f, false);
+            }
+            else
+            {
+                Attributes = new CharacterAttributes(this, 800, 0, 20, 1.5f, true);
+            }
             Transform = new Transform(start, radius);
             LastTransform = new Transform(start, radius);
             RenderTransform = new Transform(start, renderSize);

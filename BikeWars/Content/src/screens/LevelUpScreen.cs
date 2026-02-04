@@ -45,27 +45,14 @@ public class LevelUpScreen : MenuScreenBase, IScreen
         IsOpen = true;
         _selectedOption = 0;
         // here different options can be listed, for example depending on which level it is or which where chosen before
-
-        if (player.CurrentLevel == 2)
-        {
-            _option1 = SkillTree.SkillId.WeaponGun;
-            _option2 = SkillTree.SkillId.WeaponBanana;
-            _option3 = SkillTree.SkillId.WeaponBottle;
-        }
+        if (player.PlayerNumber == 1)
+        {LevelUpPlayer1(player);}
         else
         {
-            _option1 = SkillTree.SkillId.MoreHp;
-            if (player.Attributes.CanAutoAttack)
-            {
-                _option2 = SkillTree.SkillId.MoreDamage;
-            }
-            else
-            {
-                _option2 = SkillTree.SkillId.AutomaticFire;
-            }
-
-            _option3 = SkillTree.SkillId.LongerSprintDuration;
+            LevelUpPlayer2(player);
         }
+            
+        
     }
     public void Close()  // Game runs again and LevelUpScreen is closed
     {
@@ -174,4 +161,27 @@ public class LevelUpScreen : MenuScreenBase, IScreen
     {
         throw new NotImplementedException();
     }
+    private void LevelUpPlayer1(Player player)
+    {if (player.CurrentLevel == 2)
+        {
+            _option1 = SkillTree.SkillId.WeaponGun;
+            _option2 = SkillTree.SkillId.WeaponBanana;
+            _option3 = SkillTree.SkillId.WeaponBottle;
+        }
+        else
+        {
+            _option1 = SkillTree.SkillId.MoreHp;
+            if (player.Attributes.CanAutoAttack)
+            {
+                _option2 = SkillTree.SkillId.MoreDamage;
+            }
+            else
+            {
+                _option2 = SkillTree.SkillId.AutomaticFire;
+            }
+
+            _option3 = SkillTree.SkillId.LongerSprintDuration;
+        }}
+    private void LevelUpPlayer2(Player player)
+    {}
 }

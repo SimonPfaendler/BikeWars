@@ -345,7 +345,10 @@ namespace BikeWars.Content.screens
                 _levelUpScreen.Open(_gameObjectManager.Player1);
             };
             _gameObjectManager.Player1.OnLevelUp += _onPlayerLevelUp;
-            _gameObjectManager.Player2.OnLevelUp += _onPlayerLevelUp;
+            if (_gameObjectManager.Player2 != null)
+            {
+                _gameObjectManager.Player2.OnLevelUp += _onPlayerLevelUp;
+            }
 
             _bikeShopScreen = new BikeShopScreen(ViewPort);
 
@@ -372,7 +375,8 @@ namespace BikeWars.Content.screens
             _levelUpScreen.OnOptionSelected += skillId =>
             {
                 _gameObjectManager.Player1.UpgradeSkill(skillId);
-                _gameObjectManager.Player2.UpgradeSkill(skillId);
+                if (_gameObjectManager.Player2 != null)
+                {_gameObjectManager.Player2.UpgradeSkill(skillId);}
             };
 
             // Spawn Manager

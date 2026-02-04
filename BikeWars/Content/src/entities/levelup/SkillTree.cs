@@ -14,7 +14,10 @@ public class SkillTree
         // other option for example spacial skills can be added here
         WeaponGun,
         WeaponBanana,
-        WeaponBottle
+        WeaponBottle,
+        WeaponCircle,
+        WeaponIce,
+        WeaponFire
     }
 
     // Dictionary: Welcher Skill hat welche Beschreibung?
@@ -33,5 +36,7 @@ public class SkillTree
         { SkillId.WeaponBanana, ("Bananenschale: Achtung rutschig!") },
 
         { SkillId.WeaponBottle, ("Pfandflasche: RECYCLINNGGG!") },
+        { SkillId.WeaponCircle, ("Fahrradklingl: Flaechenschaden!! Ohne Fahrrad keine Fahrradklingel")},
+        { SkillId.WeaponIce, ("Eisreifen: Hinterlaesst eisige Spur!v")}
     };
 }
