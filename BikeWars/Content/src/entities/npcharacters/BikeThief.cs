@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
@@ -192,11 +191,30 @@ namespace BikeWars.Entities.Characters
 
             if (volume > 0)
             {
-                int index = RandomUtil.NextInt(0, TalkSounds.Length);
-                string randomTalk = TalkSounds[index];
+                if (PlayerOnBike())
+                {
+                    int index = RandomUtil.NextInt(0, TalkSounds.Length);
+                    string randomTalk = TalkSounds[index];
 
-                _audio.Sounds.Play(randomTalk);
+                    _audio.Sounds.Play(randomTalk);
+                }
+                else
+                {_audio.Sounds.Play(AudioAssets.BikeThiefLaugh);}
+                    
             }
+        }
+
+        private bool PlayerOnBike()
+        {
+            var gom = _collisionManager.GameObjectManager;
+
+            if (gom.Player1 != null && gom.Player1.movement.OwnsBike)
+                return true;
+
+            if (gom.Player2 != null && gom.Player2.movement.OwnsBike)
+                return true;
+
+            return false;
         }
 
         private bool TryStealBike(Player player)
