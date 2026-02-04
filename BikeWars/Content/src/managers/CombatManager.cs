@@ -70,6 +70,7 @@ public class CombatManager
 
         if (projectile.Owner is CharacterBase owner)
         {
+            damage += owner.Attributes.AttackDamage;
             if (RandomUtil.NextDouble() < owner.Attributes.CritChance)
             {
                 damage = (int)(damage * owner.Attributes.CritMultiplier);
