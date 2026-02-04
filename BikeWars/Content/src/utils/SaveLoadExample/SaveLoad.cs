@@ -15,6 +15,7 @@ using BikeWars.Entities;
 using System.Linq;
 using BikeWars.Content.entities.npcharacters;
 using BikeWars.Content.entities.projectiles;
+using BikeWars.Content.components;
 
 namespace BikeWars.Content.src.utils.SaveLoadExample;
 public static class SaveLoad
@@ -72,6 +73,7 @@ public static class SaveLoad
         public List<ItemSaveModel> Items {get; set;} = new();
         public List<ObjectSaveModel> Objects { get; set; } = new();
         public List<CarSaveModel> Cars {get;set;} = new();
+        public List<TramSaveModel> Trams {get;set;} = new();
         public List<Statistic> Statistics{get; set;} = new();
         public Statistic Statistic{get; set;} = new();
         public List<Achievement> Achievements{get; set;} = new();
@@ -251,6 +253,19 @@ public static class SaveLoad
             UpKey = upKey;
         }
     }
+    public class TramSaveModel
+    {
+        public Vector2Save StartPosition { get; set; } = new();
+        public Vector2Save Direction { get; set; } = new();
+        public float Rotation { get; set; } = new();
+        public TramSaveModel() { }
+        public TramSaveModel(Vector2 startPosition, Vector2 direction, float rotation)
+        {
+            StartPosition = new Vector2Save(startPosition);
+            Direction = new Vector2Save(direction);
+            Rotation = rotation;
+        }
+    }
     public class ObjectSaveModel
     {
         public TYPES Type { get; set; }
@@ -338,6 +353,7 @@ public static class SaveLoad
                 Items = MakeItemSaveList(gameObjectManager.Items),
                 Objects = MakeObjectSaveList(gameObjectManager.Objects),
                 Cars = MakeCarsSaveList(gameObjectManager.Cars),
+                Trams = MakeTramsSaveList(gameObjectManager.Trams.ToList()),
                 Statistics = statisticsManager.Statistics,
                 Statistic = statisticsManager.Statistic,
                 Achievements = achievementsManager.Achievements.Values.ToList(),
@@ -440,6 +456,11 @@ public static class SaveLoad
         };
     }
 
+    private static TramSaveModel MakeTramSaveModel(Tram tram)
+    {
+        return new TramSaveModel(tram.Position, tram.Velocity, tram.Rotation);
+    }
+
     // private static AOESaveModel MakeAOESaveModel(AreaOfEffectBase aoe)
     // {
     //     return aoe switch
@@ -470,7 +491,7 @@ public static class SaveLoad
 
     private static CarSaveModel MakeCarSaveModel(Car carBase)
     {
-        return new CarSaveModel(TYPES.CHEST, carBase.Transform.Position, carBase.Transform.Size, carBase._rng, carBase.SideKey, carBase.UpKey);
+        return new CarSaveModel(0, carBase.Transform.Position, carBase.Transform.Size, carBase._rng, carBase.SideKey, carBase.UpKey);
     }
     private static ObjectSaveModel MakeObjectSaveModel(ObjectBase obj)
     {
@@ -569,6 +590,14 @@ public static class SaveLoad
         List<CarSaveModel> set = new List<CarSaveModel>();
         foreach (var c in list)
             set.Add(MakeCarSaveModel(c));
+        return set;
+    }
+
+    private static List<TramSaveModel> MakeTramsSaveList(List<Tram> list)
+    {
+        List<TramSaveModel> set = new List<TramSaveModel>();
+        foreach (var c in list)
+            set.Add(MakeTramSaveModel(c));
         return set;
     }
 

@@ -934,6 +934,11 @@ namespace BikeWars.Content.screens
             {
                 _gameObjectManager.AddCar(new Car(o.Position.ToVector2(), o.Size.ToPoint(), _collisionManager, o.Rng, o.SideKey, o.UpKey));
             }
+            _gameObjectManager.Trams.Clear();
+            foreach (var o in state.Trams)
+            {
+                _gameObjectManager.AddTram(new Tram(o.StartPosition.ToVector2(), o.Direction.ToVector2(), o.Rotation, _audioService, _gameObjectManager.Player1));
+            }
             _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.RegularKills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level, state.Statistic.Time, state.Statistic.DeathCount, state.Statistic.ShotsFired, state.Statistic.OpponentsHit, state.Statistic.Repairs, state.Statistic.PhaseFindBike);
             var players = new HashSet<Player>();
             if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);
