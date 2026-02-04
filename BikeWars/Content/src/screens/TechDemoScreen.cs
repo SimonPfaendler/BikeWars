@@ -42,8 +42,12 @@ namespace BikeWars.Content.screens
         private MenuButton _godModeSwitchBtn;
         private MenuButton _startTimerBtn;
         private MenuButton _spawnCarBtn;
+        private MenuButton _spawnBikeItemBtn;
+        private MenuButton _toggleHitboxBtn;
+        private MenuButton _clearEnemiesBtn;
         private readonly List<RaveGroup> _raveGroups = new List<RaveGroup>();
         private MouseState _prevMouse;
+        private bool _lastHitboxVisible;
 
         public TechDemoScreen(AudioService audioService)
             : base(audioService, GameMode.SinglePlayer, true)
@@ -175,7 +179,40 @@ namespace BikeWars.Content.screens
                 font: UIAssets.DefaultFont,
                 audioService: AudioService
             );
-            _spawnHoboBtn.TextScale = 1.15f;
+            _spawnCarBtn.TextScale = 1.15f;
+
+            _spawnBikeItemBtn = new MenuButton(
+                id: 12,
+                texture: RenderPrimitives.Pixel,
+                bounds: NextBtnRect(),
+                text: "Spawn Bike",
+                font: UIAssets.DefaultFont,
+                audioService: AudioService
+            );
+            _spawnBikeItemBtn.TextScale = 1.15f;
+
+            _toggleHitboxBtn = new MenuButton(
+                id: 13,
+                texture: RenderPrimitives.Pixel,
+                bounds: NextBtnRect(),
+                text: "Hitboxes: On",
+                font: UIAssets.DefaultFont,
+                audioService: AudioService
+            );
+            _toggleHitboxBtn.TextScale = 1.15f;
+
+            _clearEnemiesBtn = new MenuButton(
+                id: 14,
+                texture: RenderPrimitives.Pixel,
+                bounds: NextBtnRect(),
+                text: "Clear Enemies",
+                font: UIAssets.DefaultFont,
+                audioService: AudioService
+            );
+            _clearEnemiesBtn.TextScale = 1.15f;
+
+            _lastHitboxVisible = StaticHitboxesVisible;
+            UpdateHitboxButtonText();
         }
 
         protected override void OnTechDemoReset()
@@ -210,6 +247,9 @@ namespace BikeWars.Content.screens
             _godModeSwitchBtn.Update(mouse, gameTime);
             _startTimerBtn.Update(mouse, gameTime);
             _spawnCarBtn.Update(mouse, gameTime);
+            _spawnBikeItemBtn.Update(mouse, gameTime);
+            _toggleHitboxBtn.Update(mouse, gameTime);
+            _clearEnemiesBtn.Update(mouse, gameTime);
 
             if(_spawnHoboBtn.IsClicked(mouse, _prevMouse))
                 SpawnEnemies(EnemyType.Hobo, 100);
@@ -246,6 +286,23 @@ namespace BikeWars.Content.screens
                     _spawnManager.SpawnCar(0.0);
             }
 
+            if (_spawnBikeItemBtn.IsClicked(mouse, _prevMouse))
+            {
+                SpawnBikeItemInFrontOfPlayer();
+            }
+
+            if (_toggleHitboxBtn.IsClicked(mouse, _prevMouse))
+            {
+                bool isVisible = ToggleStaticHitboxes();
+                _lastHitboxVisible = isVisible;
+                UpdateHitboxButtonText();
+            }
+
+            if (_clearEnemiesBtn.IsClicked(mouse, _prevMouse))
+            {
+                ClearEnemies();
+            }
+
             if (_godModeSwitchBtn.IsClicked(mouse, _prevMouse))
             {
                 GameObjectManager.Player1.IsGodMode = !GameObjectManager.Player1.IsGodMode;
@@ -266,6 +323,12 @@ namespace BikeWars.Content.screens
             {
                 _gameTimer.Start();
                 _gameTimer.setGameTimer(5f);
+            }
+
+            if (StaticHitboxesVisible != _lastHitboxVisible)
+            {
+                _lastHitboxVisible = StaticHitboxesVisible;
+                UpdateHitboxButtonText();
             }
             _prevMouse = mouse;
         }
@@ -297,10 +360,28 @@ namespace BikeWars.Content.screens
                 // Try up to 20 times to find a walkable spawn tile
                 for (int attempt = 0; attempt < 20; attempt++)
                 {
-                    float spawnX = RandomUtil.NextInt(-500, 501);
-                    float spawnY = RandomUtil.NextInt(-500, 501);
+                    Vector2 candidate;
 
-                    var candidate = playerPos + new Vector2(spawnX, spawnY);
+                    if (type == EnemyType.Hobo)
+                    {
+                        // push hobos to the side of the player so they don't block the front
+                        Vector2 forward = GameObjectManager.Player1.GazeDirection;
+                        if (forward == Vector2.Zero) forward = new Vector2(1f, 0f);
+                        forward.Normalize();
+                        Vector2 side = new Vector2(-forward.Y, forward.X);
+                        float sideDist = RandomUtil.NextInt(250, 451);
+                        float fwdJitter = RandomUtil.NextInt(-80, 81);
+                        float noiseX = RandomUtil.NextInt(-60, 61);
+                        float noiseY = RandomUtil.NextInt(-60, 61);
+                        candidate = playerPos + side * sideDist + forward * fwdJitter + new Vector2(noiseX, noiseY);
+                    }
+                    else
+                    {
+                        float spawnX = RandomUtil.NextInt(-500, 501);
+                        float spawnY = RandomUtil.NextInt(-500, 501);
+                        candidate = playerPos + new Vector2(spawnX, spawnY);
+                    }
+
                     var grid = CollisionManager.WorldToGrid(candidate);
 
                     var gridW = CollisionManager.PathGrid.GetLength(0);
@@ -399,12 +480,41 @@ namespace BikeWars.Content.screens
             _godModeSwitchBtn.Draw(sb);
             _startTimerBtn.Draw(sb);
             _spawnCarBtn.Draw(sb);
+            _spawnBikeItemBtn.Draw(sb);
+            _toggleHitboxBtn.Draw(sb);
+            _clearEnemiesBtn.Draw(sb);
             sb.End();
         }
 
         public void HandleRaveGroupDied()
         {
             _achievementsManager.OnRaverGroupDied();
+        }
+
+        private void SpawnBikeItemInFrontOfPlayer()
+        {
+            var player = GameObjectManager.Player1;
+            if (player == null || player.IsDead)
+                return;
+
+            Vector2 forward = player.GazeDirection;
+            if (forward == Vector2.Zero)
+                forward = new Vector2(1f, 0f);
+
+            forward.Normalize();
+            Vector2 candidate = player.Transform.Position + forward * 80f;
+
+            bool spawnFrelo = RandomUtil.NextInt(0, 2) == 0;
+            ItemBase bike = spawnFrelo
+                ? new Frelo(candidate, new Point(32, 32))
+                : new RacingBike(candidate, new Point(32, 32));
+
+            GameObjectManager.AddItem(bike);
+        }
+
+        private void UpdateHitboxButtonText()
+        {
+            _toggleHitboxBtn.Text = StaticHitboxesVisible ? "Hitboxes: On" : "Hitboxes: Off";
         }
     }
 }
