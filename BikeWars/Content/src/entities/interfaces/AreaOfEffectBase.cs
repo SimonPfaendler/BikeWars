@@ -35,7 +35,7 @@ namespace BikeWars.Content.entities.interfaces
         private readonly Dictionary<object, float> _lastDamageTime = new();
 
         /// Damage is applied once per this interval (in seconds)
-        protected float DamageInterval { get; set; } = 1.0f;
+        protected float DamageInterval { get; set; } = 0.5f;
 
         public AreaOfEffectBase(CharacterBase owner, int damage, float duration)
         {
