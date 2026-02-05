@@ -337,7 +337,7 @@ namespace BikeWars.Content.managers
             // Health and Damage multiplier: 1.0 to 3.0 over 15 mins
             float difficultyMultiplier = 1.0f + (1.2f * (float)progress);
             // Speed scaling: 1.0 to 1.5 over 15 mins
-            double basespeedMultiplier = 1.0 + (0.5f * progress);
+            double basespeedMultiplier = 1.0 + (0.7f * progress);
             float speedMultiplier;
             speedMultiplier = (float)RandomSpeed(basespeedMultiplier);
             // chances of each type can be changed here
@@ -347,8 +347,8 @@ namespace BikeWars.Content.managers
             double pHobo = 0.35 - 0.15 * progress; //35% -> 20%
             double pDog = 0.35 - 0.15 * progress; // 35 -> 20
             double pThief    = 0.13 + 0.02 * progress;  // 13 15
-            double pDozent   = 0.02 + 0.09 * progress;  // 2  15
-            double pPolice = 0.1 + 0.09 * progress;  // 10 -> 15
+            double pDozent   = 0.02 + 0.07 * progress;  // 2  15
+            double pPolice = 0.1 + 0.11 * progress;  // 10 -> 15
 
             double val = RandomUtil.NextDouble();
 
