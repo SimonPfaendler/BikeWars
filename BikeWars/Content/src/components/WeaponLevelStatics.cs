@@ -19,23 +19,23 @@ public class GunStatics: WeaponAttributes
         {
             case 1:
                 Damage = 5;
-                Speed = 200f;
+                Speed = 300f;
             break;
             case 2:
                 Damage = 10;
-                Speed = 270f;
+                Speed = 370f;
             break;
             case 3:
                 Damage = 20;
-                Speed = 350f;
+                Speed = 450f;
             break;
             case 4:
                 Damage = 30;
-                Speed = 450f;
+                Speed = 550f;
             break;
             case 5:
                 Damage = 45;
-                Speed = 600f;
+                Speed = 650f;
             break;
         }
     }
