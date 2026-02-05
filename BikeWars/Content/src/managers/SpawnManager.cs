@@ -26,9 +26,9 @@ namespace BikeWars.Content.managers
         private double _timeSinceLastSwarm;
         private double _timeSinceLastCircle;
         private double _timeSinceLastSlowEnemyLinear;
-        private const double SWARM_INTERVAL = 40.0;
-        private const double CIRCLE_SPAWN_INTERVAL = 40.0;
-        private const double SLOW_ENEMY_SPAWN_INTERVAL = 60.0;
+        private const double SWARM_INTERVAL = 68.0;
+        private const double CIRCLE_SPAWN_INTERVAL = 47.0;
+        private const double SLOW_ENEMY_SPAWN_INTERVAL = 53.0;
 
         private readonly List<ICollider> _spawnQueryBuffer = new(32);
 
@@ -44,7 +44,7 @@ namespace BikeWars.Content.managers
 
         // Tram Logic
         private double _timeSinceLastTram;
-        private const double TRAM_SPAWN_INTERVAL = 20.0; // Every 15 seconds
+        private const double TRAM_SPAWN_INTERVAL = 33.0;
 
         // raver logic
         private List<RaveGroup> _raveGroups = new List<RaveGroup>();
@@ -337,7 +337,7 @@ namespace BikeWars.Content.managers
             // Health and Damage multiplier: 1.0 to 3.0 over 15 mins
             float difficultyMultiplier = 1.0f + (1.2f * (float)progress);
             // Speed scaling: 1.0 to 1.5 over 15 mins
-            double basespeedMultiplier = 1.0 + (1.5 * progress);
+            double basespeedMultiplier = 1.0 + (1.3 * progress);
             float speedMultiplier;
             speedMultiplier = (float)RandomSpeed(basespeedMultiplier);
             // chances of each type can be changed here

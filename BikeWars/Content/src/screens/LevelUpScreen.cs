@@ -48,42 +48,47 @@ public class LevelUpScreen : MenuScreenBase, IScreen
 
         IsOpen = true;
         _selectedOption = 0;
-        // here different options can be listed, for example depending on which level it is or which where chosen before
-        var possibleSkills = new List<SkillTree.SkillId>
+        if (player.CurrentLevel == 2)
         {
-            SkillTree.SkillId.MoreHp,
-            SkillTree.SkillId.MoreDamage,
-            SkillTree.SkillId.CritChance,
-            SkillTree.SkillId.LongerSprintDuration
-        };
-
-        if (!player.Attributes.CanAutoAttack)
-        {
-            possibleSkills.Add(SkillTree.SkillId.AutomaticFire);
+            _option1 = SkillTree.SkillId.WeaponGun;
+            _option2 = SkillTree.SkillId.WeaponBanana;
+            _option3 = SkillTree.SkillId.WeaponBottle;
         }
+        else
+        {
+            var possibleSkills = new List<SkillTree.SkillId>
+            {
+                SkillTree.SkillId.MoreHp,
+                SkillTree.SkillId.MoreDamage,
+                SkillTree.SkillId.CritChance,
+                SkillTree.SkillId.LongerSprintDuration
+            };
 
-        // Add weapons if not max level
-        if (player.GetWeaponLevel(Player.WeaponType.Gun) < 5)
-             possibleSkills.Add(SkillTree.SkillId.WeaponGun);
+            if (!player.Attributes.CanAutoAttack)
+            {
+                possibleSkills.Add(SkillTree.SkillId.AutomaticFire);
+            }
+            if (player.GetWeaponLevel(Player.WeaponType.Gun) > 0 && player.GetWeaponLevel(Player.WeaponType.Gun) < 5)
+                 possibleSkills.Add(SkillTree.SkillId.WeaponGun);
         
-        if (player.GetWeaponLevel(Player.WeaponType.BananaThrow) < 5)
-             possibleSkills.Add(SkillTree.SkillId.WeaponBanana);
+            if (player.GetWeaponLevel(Player.WeaponType.BananaThrow) > 0 && player.GetWeaponLevel(Player.WeaponType.BananaThrow) < 5)
+                 possibleSkills.Add(SkillTree.SkillId.WeaponBanana);
 
-        if (player.GetWeaponLevel(Player.WeaponType.BottleThrow) < 5)
-             possibleSkills.Add(SkillTree.SkillId.WeaponBottle);
-        int n = possibleSkills.Count;
-        while (n > 1)
-        {
-            n--;
-            int k = RandomUtil.NextInt(0, n + 1);
-            var value = possibleSkills[k];
-            possibleSkills[k] = possibleSkills[n];
-            possibleSkills[n] = value;
+            if (player.GetWeaponLevel(Player.WeaponType.BottleThrow) > 0 && player.GetWeaponLevel(Player.WeaponType.BottleThrow) < 5)
+                 possibleSkills.Add(SkillTree.SkillId.WeaponBottle);
+            int n = possibleSkills.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = RandomUtil.NextInt(0, n + 1);
+                var value = possibleSkills[k];
+                possibleSkills[k] = possibleSkills[n];
+                possibleSkills[n] = value;
+            }
+            _option1 = possibleSkills[0 % possibleSkills.Count];
+            _option2 = possibleSkills[1 % possibleSkills.Count];
+            _option3 = possibleSkills[2 % possibleSkills.Count];
         }
-
-        _option1 = possibleSkills[0 % possibleSkills.Count];
-        _option2 = possibleSkills[1 % possibleSkills.Count];
-        _option3 = possibleSkills[2 % possibleSkills.Count];
     }
     public void Close()  // Game runs again and LevelUpScreen is closed
     {
