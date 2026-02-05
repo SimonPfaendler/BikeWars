@@ -40,7 +40,7 @@ public class CombatManager
         _gameObjects = gameObjects ?? throw new ArgumentNullException(nameof(gameObjects));
     }
 
-    public void HandleDeath(CharacterBase target)
+    public void HandleDeath(CharacterBase target, CharacterBase? owner = null)
     {
         if (target._XpDropped)
             return;
@@ -49,6 +49,10 @@ public class CombatManager
 
         target._XpDropped = true;
         _gameObjects.SpawnXp(target);
+        if (owner is Player player)
+        {
+            player.AddXp(4);
+        }
     }
     // Projectile hits a character
     public void HandleProjectileHit(CharacterBase target, ProjectileBase projectile)
@@ -96,7 +100,7 @@ public class CombatManager
 
         if (target.Attributes.Health <= 0)
         {
-            HandleDeath(target);
+            HandleDeath(target, projectile.Owner as CharacterBase);
         }
     }
 
