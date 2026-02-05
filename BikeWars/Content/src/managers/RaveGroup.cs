@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
 using BikeWars.Entities.Characters;
 using Microsoft.Xna.Framework;
@@ -321,12 +322,12 @@ namespace BikeWars.Content.managers
                 if (TryFindWalkablePos(desired, _circleCenter, out Vector2 resolved))
                 {
                     r.Transform.Position = resolved;
-                    r.UpdateCollider();
+                    r.UpdateCollider(CollisionLayer.CHARACTER);
                 }
                 else
                 {
                     // If no walkable tile was found nearby, keep current position
-                    r.UpdateCollider();
+                    r.UpdateCollider(CollisionLayer.CHARACTER);
                 }
             }
         }

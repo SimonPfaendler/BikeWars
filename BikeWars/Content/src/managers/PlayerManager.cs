@@ -87,7 +87,7 @@ namespace BikeWars.Content.managers
             // Player 2 uses controller; no input remap needed, but keep reference consistent
             if (Player2 != null)
             {
-                Player2.UpdateCollider();
+                Player2.UpdateCollider(CollisionLayer.PLAYER);
             }
         }
 

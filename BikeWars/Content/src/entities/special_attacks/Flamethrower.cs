@@ -7,7 +7,6 @@ using BikeWars.Entities.Characters;
 using BikeWars.Content.engine;
 using BikeWars.Content.managers;
 
-
 namespace BikeWars.Content.entities.items
 {
     public class Flamethrower : AreaOfEffectBase

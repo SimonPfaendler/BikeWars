@@ -62,7 +62,7 @@ namespace BikeWars.Entities.Characters
             _walkUpAnimation = SpriteManager.GetAnimation("Hobo_WalkUp");
             _throwAnimation = SpriteManager.GetAnimation("Hobo_Throw");
             _currentAnimation = _idleAnimation;
-            UpdateCollider();
+            UpdateCollider(CollisionLayer.CHARACTER);
         }
 
         public override void Update(GameTime gameTime)
@@ -153,7 +153,7 @@ namespace BikeWars.Entities.Characters
                 }
             }
 
-            UpdateCollider();
+            UpdateCollider(CollisionLayer.CHARACTER);
         }
 
         public override void Draw(SpriteBatch spriteBatch)

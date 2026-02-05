@@ -12,6 +12,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Entities;
 using BikeWars.Content.entities.npcharacters;
+using BikeWars.Content.entities.items;
 
 
 namespace BikeWars.Content.managers;
@@ -185,7 +186,6 @@ public class CollisionManager
                 {
                     SetBaseWalkableForRect(b.Transform.Bounds, false);
                 }
-                
             }
 
             foreach (var tower in _gameObjectManager.Towers)
@@ -226,7 +226,7 @@ public class CollisionManager
     // converts a world position to grid coordinates and returns that tile’s GID
     public int GetTileGidAtWorld(string layerName, Vector2 worldPos)
     {
-        var layer = TiledMap.GetLayer<MonoGame.Extended.Tiled.TiledMapTileLayer>(layerName);
+        var layer = TiledMap.GetLayer<TiledMapTileLayer>(layerName);
 
         if (layer == null)
             return 0;
@@ -632,7 +632,7 @@ public class CollisionManager
             return;
         CharacterBase ch = (CharacterBase)c.Owner;
         ch.Transform.Position -= penetration;
-        ch.UpdateCollider();
+        ch.UpdateCollider(c.Layer);
     }
 
     private void HandleProjectileWithStatic(ICollider b, ICollider c)
@@ -830,8 +830,8 @@ public class CollisionManager
         chd.Transform.Position += separation;
         OnCharacterCollision?.Invoke(ch, chd);
 
-        ch.UpdateCollider();
-        chd.UpdateCollider();
+        ch.UpdateCollider(c.Layer);
+        chd.UpdateCollider(d.Layer);
     }
     private void HandleCharacterProjectiles(ICollider c, ICollider d)
     {
@@ -847,9 +847,7 @@ public class CollisionManager
 
         // Ignore self-hit
         if (c.Owner == p.Owner) return;
-
         if (p.Owner is Tower && c.Owner is Player) return;
-
         // Event for a character or player gets hit by projectile
         OnProjectileHit?.Invoke((CharacterBase)c.Owner, (ProjectileBase)d.Owner);
 
@@ -888,7 +886,6 @@ public class CollisionManager
     private void HandleCharacters(ICollider c, ICollider d)
     {
         if (c.Layer != CollisionLayer.CHARACTER && c.Layer != CollisionLayer.PLAYER) return;
-
         HandleCharacterCollision(c, d);
         HandleCharacterProjectiles(c, d);
         // AOE damage handling
@@ -1426,13 +1423,6 @@ public class CollisionManager
     }
     public void Unload()
     {
-        OnItemPickup = null;
-        OnProjectileHit = null;
-        OnCharacterCollision = null;
-        OnAOEHit = null;
-        OnTramHit = null;
-        OnCarHit = null;
-
         DynamicHash?.Clear();
         StaticHash?.Clear();
 
@@ -1446,13 +1436,8 @@ public class CollisionManager
         _toRemoveStaticColliders.Clear();
         _toUpdateWalkableRects.Clear();
 
-        _roadGrid = null;
         _roadTiles.Clear();
-
         ObjectSpawns.Clear();
-        PathGrid = null;
-        _baseWalkableGrid = null;
-        TiledMap = null;
     }
 
     private void LoadWorldBorderCollision()
@@ -1499,6 +1484,7 @@ public class CollisionManager
         Color color,
         float alpha = 0.35f)
     {
+        if (TiledMap == null) return;
         var layer = TiledMap.GetLayer<TiledMapTileLayer>(layerName);
         if (layer == null) return;
 

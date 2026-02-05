@@ -22,6 +22,8 @@ using BikeWars.Content.entities.MapObjects;
 using BikeWars.Entities.Characters.MapObjects;
 using BikeWars.Entities;
 using MonoGame.Extended.Tiled;
+using BikeWars.Content.entities.npcharacters;
+using BikeWars.Content.entities.projectiles;
 
 namespace BikeWars.Content.screens
 {
@@ -286,7 +288,7 @@ namespace BikeWars.Content.screens
             _onScreenShake = (intensity, duration) => camera.Shake(intensity, duration);
             _combatManager.OnScreenShakeRequested += _onScreenShake;
             _gameObjectManager.OnScreenShakeRequested += _onScreenShake;
-            
+
             _onBikeShopOpen2 += shop =>
             {
                 _audioService.Sounds.PauseAll();
@@ -754,47 +756,127 @@ namespace BikeWars.Content.screens
                 _statisticsManager.Statistics = new List<Statistic>();
         }
 
-
         public void HandleLoadGame()
         {
             var state = SaveLoad.LoadGame();
-            _gameObjectManager.Player1.Transform.Position = new Vector2(state.PlayerX, state.PlayerY);
+            if (_gameObjectManager.Player1 != null)
+            {
+                foreach(var playerSave in state.Players)
+                {
+                    if (playerSave.PlayerNumber == 1)
+                    {
+                        _gameObjectManager.Player1.Transform.Position = playerSave.Position.ToVector2();
+                        break;
+                    }
+                }
+            }
+
+            if (_gameObjectManager.Player2 != null)
+            {
+                foreach(var playerSave in state.Players)
+                {
+                    if (playerSave.PlayerNumber == 2)
+                    {
+                        _gameObjectManager.Player2.Transform.Position = playerSave.Position.ToVector2();
+                        break;
+                    }
+                }
+            }
+
             _gameTimer.SetFromSave(state.GameTimerCurrentTime, state.IsGameTimerRunning, state.IsGameTimerPaused);
 
+            _gameObjectManager.Statics.Clear();
             _gameObjectManager.Projectiles.Clear();
+            _collisionManager.Unload();
             foreach (var p in state.Projectiles)
             {
-                if (p.Basic.Type == SaveLoad.TYPES.BULLET)
+                switch(p.Basic.Type)
                 {
-                    Bullet b = new Bullet(p.Basic.Position.ToVector2(), p.Basic.Size.ToPoint(), _gameObjectManager.Player1, p.WeaponAttributes); // TODO player doesn't make sense here
-                    b.HasHit = p.HasHit;
-                    b.Movement.IsMoving = p.IsMoving;
-                    b.Movement.CanMove = p.CanMove;
-                    b.Movement.Direction = p.Direction.ToVector2();
-                    b.Movement.Rotation = p.Rotation;
-                    _gameObjectManager.AddProjectile(b);
+                    case SaveLoad.TYPES.BULLET:
+                        Bullet b = new Bullet(p.Basic.Position.ToVector2(), p.Basic.Size.ToPoint(), _gameObjectManager.Player1, p.WeaponAttributes); // TODO player doesn't make sense here
+                        b.HasHit = p.HasHit;
+                        b.Movement.IsMoving = p.IsMoving;
+                        b.Movement.CanMove = p.CanMove;
+                        b.Movement.Direction = p.Direction.ToVector2();
+                        b.Movement.Rotation = p.Rotation;
+                        _gameObjectManager.AddProjectile(b);
+                        break;
+                    case SaveLoad.TYPES.THROWBEER:
+                        // ThrowBeer tb = new ThrowBeer(p.Basic.Position.ToVector2(), p.Basic.Size.ToPoint(), _gameObjectManager.Player1, p.WeaponAttributes); // TODO player doesn't make sense here
+                        ThrowBeer tb = new ThrowBeer(p.Basic.Position.ToVector2(), _gameObjectManager.Player1.Transform.Position, _gameObjectManager.Player1); // TODO player doesn't make sense here
+                        tb.HasHit = p.HasHit;
+                        _gameObjectManager.AddProjectile(tb);
+                        break;
+                    case SaveLoad.TYPES.THROWBOTTLE:
+                        ThrowBottle tbot = new ThrowBottle(p.Basic.Position.ToVector2(), p.Target.ToVector2()); // TODO player doesn't make sense here
+                        tbot.HasHit = p.HasHit;
+                        _gameObjectManager.AddProjectile(tbot);
+                        break;
+                    case SaveLoad.TYPES.THROWBOOK:
+                        ThrowBook tbo = new ThrowBook(p.Basic.Position.ToVector2(), p.Target.ToVector2()); // TODO player doesn't make sense here
+                        tbo.HasHit = p.HasHit;
+                        _gameObjectManager.AddProjectile(tbo);
+                        break;
+                    case SaveLoad.TYPES.THROWBANANA:
+                        ThrowBanana tba = new ThrowBanana(p.Basic.Position.ToVector2(), p.Target.ToVector2()); // TODO player doesn't make sense here
+                        tba.HasHit = p.HasHit;
+                        _gameObjectManager.AddProjectile(tba);
+                        break;
+                }
+            }
+
+            _gameObjectManager.AOEAttacks.Clear();
+            foreach (var aoe in state.AOESaves)
+            {
+                switch(aoe.Basic.Type)
+                {
+                    case SaveLoad.TYPES.FLAMETHROWERFIRE:
+                        // Flamethrower tba = new Flamethrower(aoe.Direction.ToVector2(), aoe.Position.ToVector2(), aoe.Size.ToVector2(), aoe.Direction.ToVector2()); // TODO player doesn't make sense here
+                        // _gameObjectManager.AddAOE(tba);
+                        break;
+                    case SaveLoad.TYPES.ICETRAIL:
+                        break;
+                    case SaveLoad.TYPES.FIRETRAIL:
+                        break;
+                    case SaveLoad.TYPES.BELL:
+                        break;
                 }
             }
             _gameObjectManager.Characters.Clear();
             foreach (var p in state.Characters)
             {
-                if (p.Type == SaveLoad.TYPES.HOBO)
+                switch (p.Type)
                 {
-                    Hobo b = new Hobo(p.Position.ToVector2(), p.Radius, _audioService, _pathFinding,
-                        _collisionManager, _repathScheduler);
-                    _gameObjectManager.AddCharacter(b);
-                }
-                if (p.Type == SaveLoad.TYPES.BIKETHIEF)
-                {
-                    BikeThief b = new BikeThief(p.Position.ToVector2(), p.Radius, _audioService, _pathFinding,
-                        _collisionManager, _repathScheduler);
-                    _gameObjectManager.AddCharacter(b);
-                }
-                if (p.Type == SaveLoad.TYPES.DOG)
-                {
-                    Dog b = new Dog(p.Position.ToVector2(), p.Radius, _audioService, _pathFinding,
-                        _collisionManager, _repathScheduler);
-                    _gameObjectManager.AddCharacter(b);
+                    case SaveLoad.TYPES.HOBO:
+                        Hobo b = new Hobo(p.Position.ToVector2(), p.Radius, _audioService, _pathFinding,
+                            _collisionManager, _repathScheduler);
+                        _gameObjectManager.AddCharacter(b);
+                        break;
+                    case SaveLoad.TYPES.BIKETHIEF:
+                        BikeThief bt = new BikeThief(p.Position.ToVector2(), p.Radius, _audioService, _pathFinding,
+                            _collisionManager, _repathScheduler);
+                        _gameObjectManager.AddCharacter(bt);
+                        break;
+                    case SaveLoad.TYPES.DOG:
+                        Dog d = new Dog(p.Position.ToVector2(), p.Radius, _audioService, _pathFinding,
+                            _collisionManager, _repathScheduler);
+                        _gameObjectManager.AddCharacter(d);
+                        break;
+                    case SaveLoad.TYPES.POLICE_MAN:
+                        PoliceMan pm = new PoliceMan(p.Position.ToVector2(), p.Radius, _audioService, _pathFinding,
+                            _collisionManager, _repathScheduler);
+                        _gameObjectManager.AddCharacter(pm);
+                        break;
+                    case SaveLoad.TYPES.DOZENT:
+                        Dozent dz = new Dozent(p.Position.ToVector2(), p.Radius, _audioService, _pathFinding,
+                            _collisionManager, _repathScheduler);
+                        _gameObjectManager.AddCharacter(dz);
+                        break;
+                    case SaveLoad.TYPES.KAMIKAZE_OPA:
+                        KamikazeOpa opa = new KamikazeOpa(p.Position.ToVector2(), p.Radius, _audioService, _pathFinding,
+                            _collisionManager, _gameObjectManager, _repathScheduler);
+                        _gameObjectManager.AddCharacter(opa);
+                        break;
                 }
             }
 
@@ -803,26 +885,32 @@ namespace BikeWars.Content.screens
             {
                 Vector2 pos = p.Position.ToVector2();
                 Point size = p.Size.ToPoint();
-
-                if (p.Type == SaveLoad.TYPES.BEER)
+                switch (p.Type)
                 {
-                    _gameObjectManager.AddItem(new Beer(pos, size));
-                }
-                else if (p.Type == SaveLoad.TYPES.MONEY)
-                {
-                    _gameObjectManager.AddItem(new Xp_Money(pos, size));
-                }
-                else if (p.Type == SaveLoad.TYPES.ENERGY_GEL)
-                {
-                    _gameObjectManager.AddItem(new EnergyGel(pos, size));
-                }
-                else if (p.Type == SaveLoad.TYPES.FRELO)
-                {
-                    _gameObjectManager.AddItem(new Frelo(pos, size));
-                }
-                else if (p.Type == SaveLoad.TYPES.RACINGBIKE)
-                {
-                    _gameObjectManager.AddItem(new RacingBike(pos, size));
+                    case SaveLoad.TYPES.BEER:
+                        _gameObjectManager.AddItem(new Beer(pos, size));
+                        break;
+                    case SaveLoad.TYPES.MONEY:
+                        _gameObjectManager.AddItem(new Xp_Money(pos, size));
+                        break;
+                    case SaveLoad.TYPES.ENERGY_BAR:
+                        _gameObjectManager.AddItem(new EnergyBar(pos, size));
+                        break;
+                    case SaveLoad.TYPES.DOPING:
+                        _gameObjectManager.AddItem(new DopingSpritze(pos, size));
+                        break;
+                    case SaveLoad.TYPES.ENERGY_GEL:
+                        _gameObjectManager.AddItem(new EnergyGel(pos, size));
+                        break;
+                    case SaveLoad.TYPES.FRELO:
+                        _gameObjectManager.AddItem(new Frelo(pos, size));
+                        break;
+                    case SaveLoad.TYPES.DOG_FOOD:
+                        _gameObjectManager.AddItem(new DogFood(pos, size));
+                        break;
+                    case SaveLoad.TYPES.RACINGBIKE:
+                        _gameObjectManager.AddItem(new RacingBike(pos, size));
+                        break;
                 }
             }
             _gameObjectManager.Objects.Clear();
@@ -830,22 +918,55 @@ namespace BikeWars.Content.screens
             {
                 var pos = o.Position.ToVector2();
                 var size = o.Size.ToPoint();
-
-                if (o.Type == SaveLoad.TYPES.CHEST)
+                switch(o.Type)
                 {
-                    var item = ParseChestItem(o.Item);
-                    _gameObjectManager.AddObject(
-                        new Chest(pos, size, item, o.IsOpen ?? false)
-                    );
-                }
-                else if (o.Type == SaveLoad.TYPES.BIKESHOP)
-                { _gameObjectManager.AddObject(new BikeShop(pos, size));}
-                else if (o.Type == SaveLoad.TYPES.DOGBOWL)
-                {
-                    _gameObjectManager.AddObject(new DogBowl(pos, size, full: o.IsFull ?? false));
+                    case SaveLoad.TYPES.CHEST:
+                        var item = ParseChestItem(o.Item);
+                        _gameObjectManager.AddObject(
+                            new Chest(pos, size, item, o.IsOpen ?? false)
+                        );
+                        break;
+                    case SaveLoad.TYPES.BIKESHOP:
+                        _gameObjectManager.AddObject(new BikeShop(pos, size));
+                        break;
+                    case SaveLoad.TYPES.DOGBOWL:
+                        _gameObjectManager.AddObject(new DogBowl(pos, size, full: o.IsFull ?? false));
+                        break;
+                    case SaveLoad.TYPES.DESTRUCTIBLE:
+                        DestructibleObject dobj = new DestructibleObject(pos, size, o.Health.Value, o.SpriteKey);
+                        _gameObjectManager.AddObject(dobj);
+                        _gameObjectManager.AddStatic(dobj.Collider);
+                        break;
+                    case SaveLoad.TYPES.TRIGGER:
+                        if (o.Id == null)
+                            throw new InvalidOperationException("Trigger benötigt eine AchievementId");
+                        _gameObjectManager.AddObject(new AchievementTrigger(o.Id.Value, pos, size));
+                        break;
+                    case SaveLoad.TYPES.MUSICIANS:
+                        _gameObjectManager.AddObject(new Musicians(pos, size));
+                        break;
                 }
             }
+
+            _gameObjectManager.Cars.Clear();
+            foreach (var o in state.Cars)
+            {
+                _gameObjectManager.AddCar(new Car(o.Position.ToVector2(), o.Size.ToPoint(), _collisionManager, o.Rng, o.SideKey, o.UpKey));
+            }
+            _gameObjectManager.Trams.Clear();
+            foreach (var o in state.Trams)
+            {
+                _gameObjectManager.AddTram(new Tram(o.StartPosition.ToVector2(), o.Direction.ToVector2(), o.Rotation, _audioService, _gameObjectManager.Player1));
+            }
             _statisticsManager.Statistic = new Statistic(state.Statistic.Kills, state.Statistic.RegularKills, state.Statistic.DealtDamage, state.Statistic.TookDamage, state.Statistic.XP, state.Statistic.Level, state.Statistic.Time, state.Statistic.DeathCount, state.Statistic.ShotsFired, state.Statistic.OpponentsHit, state.Statistic.Repairs, state.Statistic.PhaseFindBike);
+            var players = new HashSet<Player>();
+            if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);
+            if (_gameObjectManager.Player2 != null) players.Add(_gameObjectManager.Player2);
+            _collisionManager.Insertions(_gameObjectManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(),_gameObjectManager.Cars, _gameObjectManager.Objects, _gameObjectManager.Towers);
+            foreach (var s in _gameObjectManager.Statics)
+            {
+                _collisionManager.StaticHash.Insert(s);
+            }
             Console.WriteLine("Game loaded.");
         }
         private void HandleSaveLoadInput()
@@ -985,7 +1106,7 @@ namespace BikeWars.Content.screens
             {
                 DrawAttackIcon(sb, player1, 1);
             }
-            
+
             if (player2 != null)
             {
                 DrawAttackIcon(sb, player2, 2);
@@ -1297,10 +1418,10 @@ namespace BikeWars.Content.screens
 
             int targetSize = 80;
             int margin = 20;
-            
+
             int screenWidth = ViewPort.Width;
             int screenHeight = ViewPort.Height;
-            
+
             Vector2 position;
             int inventoryWidth = 252;
 
@@ -1319,7 +1440,7 @@ namespace BikeWars.Content.screens
                 targetSize,
                 targetSize
             );
-            
+
             Rectangle backgroundRect = destRect;
             backgroundRect.Inflate(10, 10);
             spriteBatch.Draw(RenderPrimitives.Pixel, backgroundRect, Color.Black * 0.5f);

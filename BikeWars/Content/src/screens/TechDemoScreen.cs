@@ -405,7 +405,6 @@ namespace BikeWars.Content.screens
                         enemy = new Hobo(spawnPos, 15, AudioService, PathFinding,
                             CollisionManager, RepathScheduler);
                         break;
-
                     case EnemyType.BikeThief:
                         enemy = new BikeThief(spawnPos, 15, AudioService, PathFinding,
                             CollisionManager, RepathScheduler);

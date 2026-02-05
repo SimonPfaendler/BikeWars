@@ -12,6 +12,7 @@ namespace BikeWars.Content.components
     public class Tram
     {
         public Vector2 Position { get; private set; }
+        public Vector2 TargetPosition {get; set;}
         public Vector2 Velocity { get; private set; }
         public float Rotation { get; private set; }
         public Point Size { get; private set; }
@@ -43,6 +44,24 @@ namespace BikeWars.Content.components
             }
             Velocity = direction * SPEED;
             Rotation = (float)Math.Atan2(direction.Y, direction.X);
+
+            Colliders = new List<BoxCollider>();
+            InitializeColliders();
+            _texture = SpriteManager.GetTexture("Tram");
+        }
+
+        // Can be used especially for Saving
+        public Tram(Vector2 startPosition, Vector2 velocity, float rotation, AudioService audio, Player player)
+        {
+            Position = startPosition;
+            Size = new Point(515, 50);
+
+            _audio = audio;
+            _player = player;
+
+            // Calculate Direction and Rotation
+            Velocity = velocity;
+            Rotation = rotation;
 
             Colliders = new List<BoxCollider>();
             InitializeColliders();

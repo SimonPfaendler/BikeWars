@@ -17,6 +17,8 @@ public class BoxCollider : ColliderBase
         Position = pos;
         Layer = layer;
         Owner = owner;
+
+        Update();
     }
 
     public Vector2 Center()
