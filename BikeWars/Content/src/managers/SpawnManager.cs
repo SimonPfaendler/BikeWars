@@ -27,13 +27,13 @@ namespace BikeWars.Content.managers
         private double _timeSinceLastCircle;
         private double _timeSinceLastSlowEnemyLinear;
         private const double SWARM_INTERVAL = 58.0;
-        private const double CIRCLE_SPAWN_INTERVAL = 97.0;
+        private const double CIRCLE_SPAWN_INTERVAL = 67.0;
         //private const double SLOW_ENEMY_SPAWN_INTERVAL = 53.0;
 
         private readonly List<ICollider> _spawnQueryBuffer = new(32);
 
         private const double GAME_DURATION = 5 * 60; // 5 minutes in seconds
-        private const double START_SPAWN_INTERVAL = 4; // Start with 4 seconds
+        private const double START_SPAWN_INTERVAL = 2.5f; // Start with 4 seconds
         private const double END_SPAWN_INTERVAL = 0.2;   // End with 0.5 seconds
         private double _spawnInterval;
         private const float MIN_SPAWN_RADIUS = 450f;
@@ -337,7 +337,7 @@ namespace BikeWars.Content.managers
             // Health and Damage multiplier: 1.0 to 3.0 over 15 mins
             float difficultyMultiplier = 1.0f + (1.2f * (float)progress);
             // Speed scaling: 1.0 to 1.5 over 15 mins
-            double basespeedMultiplier = 1.0 + (0.7f * progress);
+            double basespeedMultiplier = 1.0 + (0.9f * progress);
             float speedMultiplier;
             speedMultiplier = (float)RandomSpeed(basespeedMultiplier);
             // chances of each type can be changed here
