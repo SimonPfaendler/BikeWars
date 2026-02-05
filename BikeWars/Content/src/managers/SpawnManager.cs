@@ -91,10 +91,10 @@ namespace BikeWars.Content.managers
                 _spawnInterval *= 0.7; 
             }
             double carInterval = CAR_SPAWN_START + (CAR_SPAWN_END - CAR_SPAWN_START) * progress;
-            double tramChancePerSecond = 0.05 + 0.1 * progress;
+            double tramChancePerSecond = 0.05 + 0.7 * progress;
             double spawnProbability = tramChancePerSecond * elapsed;
 
-            if (RandomUtil.NextDouble() < spawnProbability)
+            if (RandomUtil.NextDouble() < spawnProbability && _totalTime > 90)
             {
                 SpawnTram();
             }
@@ -342,7 +342,7 @@ namespace BikeWars.Content.managers
             // Health and Damage multiplier: 1.0 to 3.0 over 15 mins
             float difficultyMultiplier = 1.0f + (1.5f * (float)progress);
             // Speed scaling: 1.0 to 1.5 over 15 mins
-            double basespeedMultiplier = 1.0 + (1.5 * progress);
+            double basespeedMultiplier = 1.0 + (0.9f * progress);
             float speedMultiplier;
             speedMultiplier = (float)RandomSpeed(basespeedMultiplier);
             // chances of each type can be changed here
@@ -405,7 +405,7 @@ namespace BikeWars.Content.managers
 
         private void ApplyScaling(CharacterBase character, float difficultyMultiplier, float speedMultiplier)
         {
-            character.Attributes.MaxHealth = (int)(character.Attributes.MaxHealth * difficultyMultiplier);
+            character.Attributes.MaxHealth = (int)(character.Attributes.MaxHealth * difficultyMultiplier * 1.3f);
             character.Attributes.Health = character.Attributes.MaxHealth;
             character.Attributes.AttackDamage = (int)(character.Attributes.AttackDamage * difficultyMultiplier);
             character.Speed *= speedMultiplier;

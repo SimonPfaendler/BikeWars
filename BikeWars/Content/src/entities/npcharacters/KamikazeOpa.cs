@@ -44,7 +44,7 @@ namespace BikeWars.Entities.Characters
             Attributes = new CharacterAttributes(this, 10, 0, 0, 0f, false);
             Transform = new Transform(start, size);
             RenderTransform = new Transform(start, new Point(32, 32));
-            Speed = 200f; // Very fast
+            Speed = 175f; // Very fast
 
             Movement = new EnemyMovement(canMove: true, isMoving: false, pathFinding: pathFinding,
                 gridMapper: collisionManager, repathScheduler: _repathScheduler);

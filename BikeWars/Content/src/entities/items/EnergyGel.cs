@@ -9,7 +9,7 @@ namespace BikeWars.Content.entities.items
     {
         public override bool InventoryItem => true;
         public override bool IsConsumable => true;
-        public override int HealAmount => 100;
+        public override int HealAmount => 150;
 
         public EnergyGel(Vector2 start, Point size)
         {
