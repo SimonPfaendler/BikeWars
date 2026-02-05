@@ -8,7 +8,7 @@ public class EnergyBar : ItemBase, IPickable
 {
     public override bool InventoryItem => false;
     public override bool IsConsumable => true;
-    public override int HealAmount => 2;
+    public override int HealAmount => 15;
     public float DecreaseSprintCoolDown = 1f;
     public EnergyBar(Vector2 start, Point size)
     {

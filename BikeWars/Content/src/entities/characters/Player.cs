@@ -649,7 +649,7 @@ namespace BikeWars.Entities.Characters
             {
                 XpCounter = XpCounter - XpLevelUp;
                 CurrentLevel++;
-                XpLevelUp = 7 + (CurrentLevel * CurrentLevel * 2);
+                XpLevelUp = 7 + (CurrentLevel * CurrentLevel * 3);
                 // level up screen is triggered:
                 OnLevelUp?.Invoke(XpLevelUp, CurrentLevel);
             }
@@ -663,12 +663,12 @@ namespace BikeWars.Entities.Characters
         {
             if (skill is SkillTree.SkillId.MoreHp)
             {
-                Attributes.MaxHealth += 30;
-                Attributes.Health += 30;
+                Attributes.MaxHealth += 50;
+                Attributes.Health += 50;
             }
             else if (skill is SkillTree.SkillId.MoreDamage)
             {
-                Attributes.AttackDamage += 5;
+                Attributes.AttackDamage += 10;
             }
             else if (skill is SkillTree.SkillId.LongerSprintDuration)
             {
