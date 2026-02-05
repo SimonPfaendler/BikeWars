@@ -79,7 +79,8 @@ public class LevelUpScreen : MenuScreenBase, IScreen
                 player.GetWeaponLevel(Player.WeaponType.BananaThrow) < 5)
                 possibleSkills.Add(SkillTree.SkillId.WeaponBanana);
 
-            if (player.GetWeaponLevel(Player.WeaponType.BottleThrow) < 5)
+            if (player.GetWeaponLevel(Player.WeaponType.BottleThrow) > 0 &&
+                player.GetWeaponLevel(Player.WeaponType.BottleThrow) < 5)
                 possibleSkills.Add(SkillTree.SkillId.WeaponBottle);
             int n = possibleSkills.Count;
             while (n > 1)

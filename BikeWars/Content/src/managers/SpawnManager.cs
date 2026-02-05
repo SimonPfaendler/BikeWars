@@ -26,9 +26,9 @@ namespace BikeWars.Content.managers
         private double _timeSinceLastSwarm;
         private double _timeSinceLastCircle;
         private double _timeSinceLastSlowEnemyLinear;
-        private const double SWARM_INTERVAL = 40.0;
-        private const double CIRCLE_SPAWN_INTERVAL = 40.0;
-        private const double SLOW_ENEMY_SPAWN_INTERVAL = 60.0;
+        private const double SWARM_INTERVAL = 33.0;
+        private const double CIRCLE_SPAWN_INTERVAL = 45.0;
+        //private const double SLOW_ENEMY_SPAWN_INTERVAL = 60.0;
         private readonly List<ICollider> _spawnQueryBuffer = new(32);
 
         private const double GAME_DURATION = 5 * 60; // 5 minutes in seconds
@@ -43,7 +43,7 @@ namespace BikeWars.Content.managers
 
         // Tram Logic
         private double _timeSinceLastTram;
-        private const double TRAM_SPAWN_INTERVAL = 20.0; // Every 15 seconds
+        private const double TRAM_SPAWN_INTERVAL = 28.0; // Every 15 seconds
 
         // raver logic
         private List<RaveGroup> _raveGroups = new List<RaveGroup>();
@@ -137,11 +137,11 @@ namespace BikeWars.Content.managers
                 _timeSinceLastCar = 0;
             }
 
-            if (_totalTime >= 90 && _timeSinceLastSlowEnemyLinear >= SLOW_ENEMY_SPAWN_INTERVAL)
-            {
-                SpawnSlowEnemyLiniear(12, progress);
-                _timeSinceLastSlowEnemyLinear = 0;
-            }
+            //if (_totalTime >= 90 && _timeSinceLastSlowEnemyLinear >= SLOW_ENEMY_SPAWN_INTERVAL)
+            //{
+            //    SpawnSlowEnemyLiniear(12, progress);
+            //    _timeSinceLastSlowEnemyLinear = 0;
+            //}
         }
 
         public void SpawnSlowEnemyLiniear(int count, double progress)
@@ -342,7 +342,7 @@ namespace BikeWars.Content.managers
             // Health and Damage multiplier: 1.0 to 3.0 over 15 mins
             float difficultyMultiplier = 1.0f + (1.5f * (float)progress);
             // Speed scaling: 1.0 to 1.5 over 15 mins
-            double basespeedMultiplier = 1.0 + (0.9f * progress);
+            double basespeedMultiplier = 1.0 + (1.1f * progress);
             float speedMultiplier;
             speedMultiplier = (float)RandomSpeed(basespeedMultiplier);
             // chances of each type can be changed here
