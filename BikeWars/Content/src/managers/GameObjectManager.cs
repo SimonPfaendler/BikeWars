@@ -544,7 +544,8 @@ public class GameObjectManager
                 ? spawnPos + Vector2.Normalize(toTarget) * Player.ThrowRange
                 : spawnPos;
         }
-        var banana = new ThrowBanana(spawnPos, target, player);
+        var attributes = player.GetWeaponAttributes(Player.WeaponType.BananaThrow);
+        var banana = new ThrowBanana(spawnPos, target, player, attributes: attributes);
         AddProjectile(banana);
     }
 
@@ -559,7 +560,8 @@ public class GameObjectManager
                 ? spawnPos + Vector2.Normalize(toTarget) * Player.ThrowRange
                 : spawnPos;
         }
-        var bottle = new ThrowBottle(spawnPos, target, player);
+        var attributes = player.GetWeaponAttributes(Player.WeaponType.BottleThrow);
+        var bottle = new ThrowBottle(spawnPos, target, player, attributes: attributes);
         AddProjectile(bottle);
     }
 

@@ -26,15 +26,15 @@ namespace BikeWars.Content.managers
         private double _timeSinceLastSwarm;
         private double _timeSinceLastCircle;
         private double _timeSinceLastSlowEnemyLinear;
-        private const double SWARM_INTERVAL = 40.0;
-        private const double CIRCLE_SPAWN_INTERVAL = 40.0;
-        private const double SLOW_ENEMY_SPAWN_INTERVAL = 60.0;
+        private const double SWARM_INTERVAL = 58.0;
+        private const double CIRCLE_SPAWN_INTERVAL = 97.0;
+        //private const double SLOW_ENEMY_SPAWN_INTERVAL = 53.0;
 
         private readonly List<ICollider> _spawnQueryBuffer = new(32);
 
         private const double GAME_DURATION = 5 * 60; // 5 minutes in seconds
-        private const double START_SPAWN_INTERVAL = 5; // Start with 4 seconds
-        private const double END_SPAWN_INTERVAL = 0.1;   // End with 0.5 seconds
+        private const double START_SPAWN_INTERVAL = 4; // Start with 4 seconds
+        private const double END_SPAWN_INTERVAL = 0.2;   // End with 0.5 seconds
         private double _spawnInterval;
         private const float MIN_SPAWN_RADIUS = 450f;
         private const float MAX_SPAWN_RADIUS = 900f;
@@ -44,7 +44,7 @@ namespace BikeWars.Content.managers
 
         // Tram Logic
         private double _timeSinceLastTram;
-        private const double TRAM_SPAWN_INTERVAL = 20.0; // Every 15 seconds
+        private const double TRAM_SPAWN_INTERVAL = 39.0;
 
         // raver logic
         private List<RaveGroup> _raveGroups = new List<RaveGroup>();
@@ -132,11 +132,11 @@ namespace BikeWars.Content.managers
                 _timeSinceLastCar = 0;
             }
 
-            if (_timeSinceLastSlowEnemyLinear >= SLOW_ENEMY_SPAWN_INTERVAL)
-            {
-                SpawnSlowEnemyLiniear(150, progress);
-                _timeSinceLastSlowEnemyLinear = 0;
-            }
+            //if (_timeSinceLastSlowEnemyLinear >= SLOW_ENEMY_SPAWN_INTERVAL)
+            //{
+            //    SpawnSlowEnemyLiniear(150, progress);
+            //    _timeSinceLastSlowEnemyLinear = 0;
+            //}
         }
 
         public void SpawnSlowEnemyLiniear(int count, double progress)
@@ -296,7 +296,7 @@ namespace BikeWars.Content.managers
 
         private void SpawnSwarm(double progress)
         {
-            int baseCount = (int)Math.Round(8 + 17 * progress);
+            int baseCount = (int)Math.Round(8 + 2 * progress);
             int count = RandomUtil.NextInt(baseCount - 3, baseCount + 4);
 
             float speedMultiplier = 1f + (0.5f * (float)progress); // Start fast, get faster
@@ -337,7 +337,7 @@ namespace BikeWars.Content.managers
             // Health and Damage multiplier: 1.0 to 3.0 over 15 mins
             float difficultyMultiplier = 1.0f + (1.2f * (float)progress);
             // Speed scaling: 1.0 to 1.5 over 15 mins
-            double basespeedMultiplier = 1.0 + (1.5 * progress);
+            double basespeedMultiplier = 1.0 + (0.7f * progress);
             float speedMultiplier;
             speedMultiplier = (float)RandomSpeed(basespeedMultiplier);
             // chances of each type can be changed here
@@ -347,8 +347,8 @@ namespace BikeWars.Content.managers
             double pHobo = 0.35 - 0.15 * progress; //35% -> 20%
             double pDog = 0.35 - 0.15 * progress; // 35 -> 20
             double pThief    = 0.13 + 0.02 * progress;  // 13 15
-            double pDozent   = 0.02 + 0.13 * progress;  // 2  15
-            double pPolice = 0.1 + 0.05 * progress;  // 10 -> 15
+            double pDozent   = 0.02 + 0.07 * progress;  // 2  15
+            double pPolice = 0.1 + 0.11 * progress;  // 10 -> 15
 
             double val = RandomUtil.NextDouble();
 
@@ -400,7 +400,7 @@ namespace BikeWars.Content.managers
 
         private void ApplyScaling(CharacterBase character, float difficultyMultiplier, float speedMultiplier)
         {
-            character.Attributes.MaxHealth = (int)(character.Attributes.MaxHealth * difficultyMultiplier);
+            character.Attributes.MaxHealth = (int)(character.Attributes.MaxHealth * difficultyMultiplier * 1.3f);
             character.Attributes.Health = character.Attributes.MaxHealth;
             character.Attributes.AttackDamage = (int)(character.Attributes.AttackDamage * difficultyMultiplier);
             character.Speed *= speedMultiplier;

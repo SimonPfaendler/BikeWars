@@ -18,7 +18,7 @@ public class RacingBike: Bike
         CurrentTex = TexRight;
 
         Attributes = new BikeAttributes(
-            this, 80, 80, 2, 0, 300, 1.4f, 10, 1.4f, 1.4f, 1.4f
+            this, 130, 130, 2, 0, 300, 1.4f, 10, 1.4f, 1.4f, 1.4f
         );
     }
 

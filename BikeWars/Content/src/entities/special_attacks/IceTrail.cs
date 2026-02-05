@@ -6,7 +6,7 @@ namespace BikeWars.Content.entities.items
     public class IceTrail : TrailBase
     {
         private const string SPRITE_KEY = "IceTrail";
-        private const int DAMAGE = 20;
+        private const int DAMAGE = 9;
         private const float DURATION = 3.0f;
 
         public IceTrail(Player player, Vector2 dir)

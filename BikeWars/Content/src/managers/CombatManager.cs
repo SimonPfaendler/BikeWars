@@ -70,6 +70,7 @@ public class CombatManager
 
         if (projectile.Owner is CharacterBase owner)
         {
+            damage += owner.Attributes.AttackDamage;
             if (RandomUtil.NextDouble() < owner.Attributes.CritChance)
             {
                 damage = (int)(damage * owner.Attributes.CritMultiplier);
@@ -159,7 +160,7 @@ public class CombatManager
         if (target.IsDead) return;
         if (target.IsGodMode) return;
 
-        target.TakeDamage(12, tram);
+        target.TakeDamage(35, tram);
         _audio.Sounds.Play(AudioAssets.TrainHit);
 
         if (target.Attributes.Health <= 0)

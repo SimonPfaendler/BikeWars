@@ -14,24 +14,27 @@ public class SkillTree
         // other option for example spacial skills can be added here
         WeaponGun,
         WeaponBanana,
-        WeaponBottle
+        WeaponBottle,
+        CritChance
     }
 
     // Dictionary: Welcher Skill hat welche Beschreibung?
     public static IReadOnlyDictionary<SkillId, string> All { get; } = new Dictionary<SkillId, string>
     {
-        { SkillId.MoreHp, ("Mehr Leben: +30 HP") },
+        { SkillId.MoreHp, ("Mehr Leben: +50 HP") },
 
-        { SkillId.MoreDamage, ("Mehr Schaden: +2 Schaden") },
+        { SkillId.MoreDamage, ("Mehr Schaden: +10 Schaden") },
 
         { SkillId.LongerSprintDuration, ("Laengere Sprintdauer: +0,5s Sprint dauer") },
 
         { SkillId.AutomaticFire, ("Dauerfeuer: Halte den Angriffsknopf gedrueckt!") },
 
-        { SkillId.WeaponGun, ("Handfeuerwaffe: Bum Bum KAPOWWW") },
+        { SkillId.WeaponGun, ("Pistole: UPGRADEE! KAPOWWW") },
 
-        { SkillId.WeaponBanana, ("Bananenschale: Achtung rutschig!") },
+        { SkillId.WeaponBanana, ("Bananenschale: UPGRADEE! rutschig!") },
 
-        { SkillId.WeaponBottle, ("Pfandflasche: RECYCLINNGGG!") },
+        { SkillId.WeaponBottle, ("Pfandflasche: UPGRADEE! RECYCLINNGGG!") },
+
+        { SkillId.CritChance, ("Kritischer Treffer: +5% Chance") },
     };
 }
