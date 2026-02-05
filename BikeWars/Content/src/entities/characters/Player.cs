@@ -677,13 +677,13 @@ namespace BikeWars.Entities.Characters
             {
                 if (PlayerNumber == 1)
                 {
-                    Attributes.MaxHealth += 20 * HpLevel;
-                    Attributes.Health += 20 * HpLevel;
+                    Attributes.MaxHealth += 30 * HpLevel;
+                    Attributes.Health += 30 * HpLevel;
                 }
                 else
                 {
-                    Attributes.MaxHealth += 30 * (int)(1.5 * HpLevel);
-                    Attributes.Health += 20 * (int)(1.5 * HpLevel);
+                    Attributes.MaxHealth += 50 * (int)(1.5 * HpLevel);
+                    Attributes.Health += 50 * (int)(1.5 * HpLevel);
                 }
                 HpLevel++;
             }

@@ -26,11 +26,11 @@ public class SkillTree
                 int hpGain;
                 if (player.PlayerNumber == 1)
                 {
-                    hpGain = 20 * player.HpLevel;
+                    hpGain = 30 * player.HpLevel;
                 }
                 else
                 {
-                    hpGain = 30 * (int)(1.5 * player.HpLevel);
+                    hpGain = 50 * (int)(1.5 * player.HpLevel);
                 }
 
                 return $"Mehr Leben: +{hpGain} HP";
