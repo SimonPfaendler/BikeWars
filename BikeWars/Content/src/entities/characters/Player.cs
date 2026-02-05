@@ -36,6 +36,7 @@ namespace BikeWars.Entities.Characters
         public int XpCounter { get; private set; } = 0;
         public int XpLevelUp = 10;
         public int CurrentLevel { get; private set; } = 1;
+        public int PlayerNumber { get; }
         public Vector2 AimTarget { get; private set; }
         private Vector2 _facingDirection = Vector2.UnitX; // Default to right
         private const float AimLength = 100f;
@@ -54,6 +55,11 @@ namespace BikeWars.Entities.Characters
         public float TerrainSpeedMultiplier = 1.0f;
         private const float IncreaseSpeed = 1.3f;
         private const float DecreaseSpeed = 0.75f;
+        public int HpLevel { get; private set; } = 1;
+        public int DamageLevel { get; private set; } = 1;
+        public int CritLevel { get; private set; } = 1;
+        
+
         public new bool IsGodMode { get; set; }
 
         public event Action ShotBullet;
@@ -278,8 +284,12 @@ namespace BikeWars.Entities.Characters
             {
                 if (_unlockedWeapons.TryGetValue(weapon.Type, out var attributes))
                 {
-                    upgradeWeapon(attributes);
-                } else {
+                    return;
+                } 
+                else
+                {
+                    if (weapon.Type == WeaponType.DamageCircle && player.PlayerNumber == 2)
+                    { return;}
                     WeaponAttributes wp = new WeaponAttributes();
                     _unlockedWeapons.Add(weapon.Type, wp);
                 }
@@ -288,9 +298,6 @@ namespace BikeWars.Entities.Characters
             ItemPickedUp?.Invoke(item);
         }
 
-        private void upgradeWeapon(WeaponAttributes wa)
-        {
-        }
 
         public void OnInteractObject(Player player, ObjectBase obj)
         {
@@ -345,9 +352,18 @@ namespace BikeWars.Entities.Characters
             _audio.Sounds.Play(AudioAssets.HandgunClick);
         }
 
-        public Player(Vector2 start, float radius, Point renderSize, AudioService audio, IPlayerInput input, bool isTechDemo = false, string characterPrefix = "Character1")
+        public Player(int Playernumber, Vector2 start, float radius, Point renderSize, AudioService audio,
+            IPlayerInput input, bool isTechDemo = false, string characterPrefix = "Character1")
         {
-            Attributes = new CharacterAttributes(this, 800, 0, 20, 2f, false);
+            PlayerNumber = Playernumber;
+            if (PlayerNumber == 1)
+            {
+                Attributes = new CharacterAttributes(this, 1200, 0, 25, 2f, false);
+            }
+            else
+            {
+                Attributes = new CharacterAttributes(this, 1000, 0, 20, 1.5f, true);
+            }
             Transform = new Transform(start, radius);
             LastTransform = new Transform(start, radius);
             RenderTransform = new Transform(start, renderSize);
@@ -654,25 +670,39 @@ namespace BikeWars.Entities.Characters
                 OnLevelUp?.Invoke(XpLevelUp, CurrentLevel);
             }
         }
-
-        // the Upgrades from LevelUpScreen are applied here
-        /*TODO these Upgrades are just a suggestion i can imagine, that the game crashes or has unsuspected
-        behaviour, if for example the player is currently sprinting and the Sprint Time changes*/
-        //TODO its not working properly yet
+        
         public void UpgradeSkill(SkillTree.SkillId skill)
         {
             if (skill is SkillTree.SkillId.MoreHp)
             {
-                Attributes.MaxHealth += 50;
-                Attributes.Health += 50;
+                if (PlayerNumber == 1)
+                {
+                    Attributes.MaxHealth += 20 * HpLevel;
+                    Attributes.Health += 20 * HpLevel;
+                }
+                else
+                {
+                    Attributes.MaxHealth += 30 * (int)(1.5 * HpLevel);
+                    Attributes.Health += 20 * (int)(1.5 * HpLevel);
+                }
+                HpLevel++;
             }
             else if (skill is SkillTree.SkillId.MoreDamage)
             {
-                Attributes.AttackDamage += 10;
+                if (PlayerNumber == 1)
+                {
+                    Attributes.AttackDamage += 5 * (int)(1.5 * DamageLevel);
+                }
+                else
+                {Attributes.AttackDamage += 4 * DamageLevel;}
+                DamageLevel++;
             }
             else if (skill is SkillTree.SkillId.LongerSprintDuration)
             {
-                sprint.Duration += 0.5f;
+                if (PlayerNumber == 1)
+                {sprint.Duration += 0.5f;}
+                else
+                {sprint.Duration += 0.7f;}
             }
             else if (skill is SkillTree.SkillId.AutomaticFire)
             {
@@ -719,7 +749,8 @@ namespace BikeWars.Entities.Characters
             }
             else if (skill is SkillTree.SkillId.CritChance)
             {
-                Attributes.CritChance += 0.05f;
+                Attributes.CritChance += 0.05f + 0.02f * CritLevel;
+                CritLevel += 1;
             }
         }
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using BikeWars.Entities.Characters;
 
 namespace BikeWars.Content.entities.levelup;
 // this class lists all Skills and their description
@@ -9,32 +10,66 @@ public class SkillTree
         MoreHp,
         MoreDamage,
         LongerSprintDuration,
-
         AutomaticFire,
-        // other option for example spacial skills can be added here
         WeaponGun,
         WeaponBanana,
         WeaponBottle,
-        CritChance
+        CritChance,
     }
-
-    // Dictionary: Welcher Skill hat welche Beschreibung?
-    public static IReadOnlyDictionary<SkillId, string> All { get; } = new Dictionary<SkillId, string>
+    
+    public static string GetString(SkillId skill, Player player)
     {
-        { SkillId.MoreHp, ("Mehr Leben: +50 HP") },
+        switch (skill)
+        {
+            case SkillId.MoreHp:
+            {
+                int hpGain;
+                if (player.PlayerNumber == 1)
+                {
+                    hpGain = 20 * player.HpLevel;
+                }
+                else
+                {
+                    hpGain = 30 * (int)(1.5 * player.HpLevel);
+                }
 
-        { SkillId.MoreDamage, ("Mehr Schaden: +10 Schaden") },
+                return $"Mehr Leben: +{hpGain} HP";
+            }
 
-        { SkillId.LongerSprintDuration, ("Laengere Sprintdauer: +0,5s Sprint dauer") },
+            case SkillId.MoreDamage:
+            {
+                int dmgGain = player.PlayerNumber == 1
+                    ? 5 * (int)(1.5 * player.DamageLevel)
+                    : 4 * player.DamageLevel;
 
-        { SkillId.AutomaticFire, ("Dauerfeuer: Halte den Angriffsknopf gedrueckt!") },
+                return $"Mehr Schaden: +{dmgGain} Schaden";
+            }
 
-        { SkillId.WeaponGun, ("Pistole: UPGRADEE! KAPOWWW") },
+            case SkillId.LongerSprintDuration:
+                return player.PlayerNumber == 1
+                    ? "Laengere Sprintdauer: +0,5s"
+                    : "Laengere Sprintdauer: +0,7s";
 
-        { SkillId.WeaponBanana, ("Bananenschale: UPGRADEE! rutschig!") },
+            case SkillId.AutomaticFire:
+                return "Dauerfeuer: Halte den Angriffsknopf gedrueckt!";
 
-        { SkillId.WeaponBottle, ("Pfandflasche: UPGRADEE! RECYCLINNGGG!") },
+            case SkillId.CritChance:
+                return "Kritischer Treffer: +5% Chance";
 
-        { SkillId.CritChance, ("Kritischer Treffer: +5% Chance") },
-    };
+            case SkillId.WeaponGun:
+
+                int level = player.GetWeaponLevel(Player.WeaponType.Gun) + 1;
+                return $"Handfeuerwaffe: Bum Bum KAPOWWW Lvl: {level}";
+
+            case SkillId.WeaponBanana:
+                int level1 = player.GetWeaponLevel(Player.WeaponType.BananaThrow) + 1;
+                return $"Bananenschale: Achtung rutschig! Lvl: {level1}";
+
+            case SkillId.WeaponBottle:
+                int level2 = player.GetWeaponLevel(Player.WeaponType.BottleThrow) + 1;
+                return $"Pfandflasche: RECYCLINNGGG! Lvl: {level2}";
+        }
+
+        return skill.ToString();
+    }
 }

@@ -15,6 +15,7 @@ using Microsoft.Xna.Framework.Graphics;
 // screen shown if level up is triggered if an option is selected is closes
 // not in screen manager is loaded directly in gamescreen
 namespace BikeWars.Content.screens;
+
 public class LevelUpScreen : MenuScreenBase, IScreen
 {
     public bool IsOpen { get; private set; }
@@ -24,13 +25,14 @@ public class LevelUpScreen : MenuScreenBase, IScreen
     private SkillTree.SkillId _option1;
     private SkillTree.SkillId _option2;
     private SkillTree.SkillId _option3;
+    private Player _currentPlayer;
 
     private int _selectedOption = 0;
 
     public event Action<SkillTree.SkillId> OnOptionSelected;
     public event Action Closed;
 
-    public LevelUpScreen(SpriteFont font, string message, AudioService audioService, Viewport vp): base(null, font, vp)
+    public LevelUpScreen(SpriteFont font, string message, AudioService audioService, Viewport vp) : base(null, font, vp)
     {
         _message = message;
         _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
@@ -45,6 +47,7 @@ public class LevelUpScreen : MenuScreenBase, IScreen
     public void Open(Player player)
     {
         if (player == null) return;
+        _currentPlayer = player;
 
         IsOpen = true;
         _selectedOption = 0;
@@ -68,14 +71,16 @@ public class LevelUpScreen : MenuScreenBase, IScreen
             {
                 possibleSkills.Add(SkillTree.SkillId.AutomaticFire);
             }
-            if (player.GetWeaponLevel(Player.WeaponType.Gun) > 0 && player.GetWeaponLevel(Player.WeaponType.Gun) < 5)
-                 possibleSkills.Add(SkillTree.SkillId.WeaponGun);
-        
-            if (player.GetWeaponLevel(Player.WeaponType.BananaThrow) > 0 && player.GetWeaponLevel(Player.WeaponType.BananaThrow) < 5)
-                 possibleSkills.Add(SkillTree.SkillId.WeaponBanana);
 
-            if (player.GetWeaponLevel(Player.WeaponType.BottleThrow) > 0 && player.GetWeaponLevel(Player.WeaponType.BottleThrow) < 5)
-                 possibleSkills.Add(SkillTree.SkillId.WeaponBottle);
+            if (player.GetWeaponLevel(Player.WeaponType.Gun) > 0 && player.GetWeaponLevel(Player.WeaponType.Gun) < 5)
+                possibleSkills.Add(SkillTree.SkillId.WeaponGun);
+
+            if (player.GetWeaponLevel(Player.WeaponType.BananaThrow) > 0 &&
+                player.GetWeaponLevel(Player.WeaponType.BananaThrow) < 5)
+                possibleSkills.Add(SkillTree.SkillId.WeaponBanana);
+
+            if (player.GetWeaponLevel(Player.WeaponType.BottleThrow) < 5)
+                possibleSkills.Add(SkillTree.SkillId.WeaponBottle);
             int n = possibleSkills.Count;
             while (n > 1)
             {
@@ -85,12 +90,14 @@ public class LevelUpScreen : MenuScreenBase, IScreen
                 possibleSkills[k] = possibleSkills[n];
                 possibleSkills[n] = value;
             }
+
             _option1 = possibleSkills[0 % possibleSkills.Count];
             _option2 = possibleSkills[1 % possibleSkills.Count];
             _option3 = possibleSkills[2 % possibleSkills.Count];
         }
     }
-    public void Close()  // Game runs again and LevelUpScreen is closed
+
+    public void Close() // Game runs again and LevelUpScreen is closed
     {
         IsOpen = false;
         Closed?.Invoke();
@@ -166,7 +173,7 @@ public class LevelUpScreen : MenuScreenBase, IScreen
     private void DrawOption(SpriteBatch spriteBatch, SkillTree.SkillId option, Vector2 position, bool selected)
     {
         Color color = selected ? Color.Gold : Color.White;
-        string message = SkillTree.All.ContainsKey(option) ? SkillTree.All[option] : option.ToString();
+        string message = SkillTree.GetString(option, _currentPlayer);;
         spriteBatch.DrawString(UIAssets.DefaultFont, message, position, color);
     }
 
@@ -176,14 +183,22 @@ public class LevelUpScreen : MenuScreenBase, IScreen
         get => null;
         set { }
     }
-    public override bool DrawLower  => false;
+
+    public override bool DrawLower => false;
     public override bool UpdateLower => false;
 
-    public void OnEnter() { }
-    public void OnExit()  { }
+    public void OnEnter()
+    {
+    }
+
+    public void OnExit()
+    {
+    }
+
     public void Draw(GameTime gameTime)
     {
     }
+
     public override void Dispose()
     {
         throw new NotImplementedException();

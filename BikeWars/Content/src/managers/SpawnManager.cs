@@ -26,14 +26,13 @@ namespace BikeWars.Content.managers
         private double _timeSinceLastSwarm;
         private double _timeSinceLastCircle;
         private double _timeSinceLastSlowEnemyLinear;
-        private const double SWARM_INTERVAL = 58.0;
-        private const double CIRCLE_SPAWN_INTERVAL = 67.0;
-        //private const double SLOW_ENEMY_SPAWN_INTERVAL = 53.0;
-
+        private const double SWARM_INTERVAL = 40.0;
+        private const double CIRCLE_SPAWN_INTERVAL = 40.0;
+        private const double SLOW_ENEMY_SPAWN_INTERVAL = 60.0;
         private readonly List<ICollider> _spawnQueryBuffer = new(32);
 
         private const double GAME_DURATION = 5 * 60; // 5 minutes in seconds
-        private const double START_SPAWN_INTERVAL = 2.5f; // Start with 4 seconds
+        private const double START_SPAWN_INTERVAL = 3; // Start with 4 seconds
         private const double END_SPAWN_INTERVAL = 0.2;   // End with 0.5 seconds
         private double _spawnInterval;
         private const float MIN_SPAWN_RADIUS = 450f;
@@ -44,7 +43,7 @@ namespace BikeWars.Content.managers
 
         // Tram Logic
         private double _timeSinceLastTram;
-        private const double TRAM_SPAWN_INTERVAL = 39.0;
+        private const double TRAM_SPAWN_INTERVAL = 20.0; // Every 15 seconds
 
         // raver logic
         private List<RaveGroup> _raveGroups = new List<RaveGroup>();
@@ -92,14 +91,20 @@ namespace BikeWars.Content.managers
                 _spawnInterval *= 0.7; 
             }
             double carInterval = CAR_SPAWN_START + (CAR_SPAWN_END - CAR_SPAWN_START) * progress;
+            double tramChancePerSecond = 0.05 + 0.7 * progress;
+            double spawnProbability = tramChancePerSecond * elapsed;
 
+            if (RandomUtil.NextDouble() < spawnProbability && _totalTime > 90)
+            {
+                SpawnTram();
+            }
             if (_timeSinceLastSpawn >= _spawnInterval)
             {
                 SpawnEnemy(progress);
                 _timeSinceLastSpawn = 0;
             }
 
-            if (_timeSinceLastSwarm >= SWARM_INTERVAL)
+            if (_totalTime >= 60 && _timeSinceLastSwarm >= SWARM_INTERVAL)
             {
                 SpawnSwarm(progress);
                 _timeSinceLastSwarm = 0;
@@ -132,16 +137,16 @@ namespace BikeWars.Content.managers
                 _timeSinceLastCar = 0;
             }
 
-            //if (_timeSinceLastSlowEnemyLinear >= SLOW_ENEMY_SPAWN_INTERVAL)
-            //{
-            //    SpawnSlowEnemyLiniear(150, progress);
-            //    _timeSinceLastSlowEnemyLinear = 0;
-            //}
+            if (_totalTime >= 90 && _timeSinceLastSlowEnemyLinear >= SLOW_ENEMY_SPAWN_INTERVAL)
+            {
+                SpawnSlowEnemyLiniear(12, progress);
+                _timeSinceLastSlowEnemyLinear = 0;
+            }
         }
 
         public void SpawnSlowEnemyLiniear(int count, double progress)
         {
-            count *= (int)Math.Round(progress);
+            count += 10 * (int)Math.Round(progress) * count;
             float difficultyMultiplier = 1.0f + (1.0f * (float)progress);
             float speedMultiplier = 0.5f;
 
@@ -296,8 +301,8 @@ namespace BikeWars.Content.managers
 
         private void SpawnSwarm(double progress)
         {
-            int baseCount = (int)Math.Round(8 + 2 * progress);
-            int count = RandomUtil.NextInt(baseCount - 3, baseCount + 4);
+            int baseCount = (int)Math.Round(20 + 20 * 3 * progress);
+            int count = RandomUtil.NextInt(baseCount - 10, baseCount + 10);
 
             float speedMultiplier = 1f + (0.5f * (float)progress); // Start fast, get faster
             float difficultyMultiplier = 1.0f + (1.5f * (float)progress);
@@ -335,7 +340,7 @@ namespace BikeWars.Content.managers
 
             // Difficulty scaling
             // Health and Damage multiplier: 1.0 to 3.0 over 15 mins
-            float difficultyMultiplier = 1.0f + (1.2f * (float)progress);
+            float difficultyMultiplier = 1.0f + (1.5f * (float)progress);
             // Speed scaling: 1.0 to 1.5 over 15 mins
             double basespeedMultiplier = 1.0 + (0.9f * progress);
             float speedMultiplier;
@@ -347,8 +352,8 @@ namespace BikeWars.Content.managers
             double pHobo = 0.35 - 0.15 * progress; //35% -> 20%
             double pDog = 0.35 - 0.15 * progress; // 35 -> 20
             double pThief    = 0.13 + 0.02 * progress;  // 13 15
-            double pDozent   = 0.02 + 0.07 * progress;  // 2  15
-            double pPolice = 0.1 + 0.11 * progress;  // 10 -> 15
+            double pDozent   = 0.02 + 0.13 * progress;  // 2  15
+            double pPolice = 0.1 + 0.05 * progress;  // 10 -> 15
 
             double val = RandomUtil.NextDouble();
 
@@ -503,8 +508,8 @@ namespace BikeWars.Content.managers
         private double RandomSpeed(double basespeed)
         {
             double normalRange = 0.20f;
-            double rareRange = 0.60f;
-            double rareChance = 0.50f;
+            double rareRange = 0.90f;
+            double rareChance = 0.30f;
             double varchance = RandomUtil.NextDouble();
             double factor;
             if (varchance < rareChance)
