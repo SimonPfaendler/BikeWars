@@ -15,6 +15,8 @@ public class SkillTree
         WeaponGun,
         WeaponBanana,
         WeaponBottle,
+        CritChance
+        WeaponBottle,
         WeaponCircle,
         WeaponIce,
         WeaponFire
@@ -25,7 +27,7 @@ public class SkillTree
     {
         { SkillId.MoreHp, ("Mehr Leben: +30 HP") },
 
-        { SkillId.MoreDamage, ("Mehr Schaden: +2 Schaden") },
+        { SkillId.MoreDamage, ("Mehr Schaden: +5 Schaden") },
 
         { SkillId.LongerSprintDuration, ("Laengere Sprintdauer: +0,5s Sprint dauer") },
 
@@ -36,6 +38,8 @@ public class SkillTree
         { SkillId.WeaponBanana, ("Bananenschale: Achtung rutschig!") },
 
         { SkillId.WeaponBottle, ("Pfandflasche: RECYCLINNGGG!") },
+
+        { SkillId.CritChance, ("Kritischer Treffer: +5% Chance") },
         { SkillId.WeaponCircle, ("Fahrradklingl: Flaechenschaden!! Ohne Fahrrad keine Fahrradklingel")},
         { SkillId.WeaponIce, ("Eisreifen: Hinterlaesst eisige Spur!v")}
     };

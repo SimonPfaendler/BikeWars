@@ -56,7 +56,8 @@ namespace BikeWars.Utilities
                                $"Player Velocity: {_player.CurrentSpeed * _player.TerrainSpeedMultiplier}\n" +
                                $"Player Bounds: {_player.Transform.Size}\n" +
                                $"Player Sprint Cooldown: {(int)_player.CooldownTimer()}\n" +
-                               $"Player Health: {_player.Attributes.Health}" +
+                               $"Player Health: {_player.Attributes.Health}\n" +
+                               $"Player CritChance: {_player.Attributes.CritChance}" +
                                (_player.CurrentBike != null ? $"\nBike Health: {_player.CurrentBike.Attributes.Health}" : "");
 
 

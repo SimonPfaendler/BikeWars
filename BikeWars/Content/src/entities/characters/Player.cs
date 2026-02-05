@@ -140,6 +140,24 @@ namespace BikeWars.Entities.Characters
         public WeaponType CurrentWeapon { get; private set; } = WeaponType.BookThrow;
         private Dictionary<WeaponType, WeaponAttributes> _unlockedWeapons = new Dictionary<WeaponType, WeaponAttributes>();
 
+        public WeaponAttributes? GetWeaponAttributes(WeaponType type)
+        {
+            if (_unlockedWeapons.TryGetValue(type, out var attributes))
+            {
+                return attributes;
+            }
+            return null;
+        }
+
+        public int GetWeaponLevel(WeaponType type)
+        {
+            if (_unlockedWeapons.TryGetValue(type, out var attributes))
+            {
+                return attributes.Level;
+            }
+            return 0;
+        }
+
         private float _dopingTimer = 0f;
         public bool IsDoped => _dopingTimer > 0f;
 
@@ -644,7 +662,7 @@ namespace BikeWars.Entities.Characters
             {
                 XpCounter = XpCounter - XpLevelUp;
                 CurrentLevel++;
-                XpLevelUp = 7 + (CurrentLevel * CurrentLevel * 3);
+                XpLevelUp = 7 + (CurrentLevel * CurrentLevel * 2);
                 // level up screen is triggered:
                 OnLevelUp?.Invoke(XpLevelUp, CurrentLevel);
             }
@@ -663,7 +681,7 @@ namespace BikeWars.Entities.Characters
             }
             else if (skill is SkillTree.SkillId.MoreDamage)
             {
-                Attributes.AttackDamage += 2;
+                Attributes.AttackDamage += 5;
             }
             else if (skill is SkillTree.SkillId.LongerSprintDuration)
             {
@@ -677,31 +695,44 @@ namespace BikeWars.Entities.Characters
             {
                 if (_unlockedWeapons.TryGetValue(WeaponType.Gun, out var weaponAttributes))
                 {
+                    if (weaponAttributes is GunStatics gunStats)
+                    {
+                        gunStats.LevelUp();
+                        gunStats.Upgrade();
+                    }
                     return;
                 }
-                _unlockedWeapons.Add(WeaponType.Gun, new GunStatics(2, this));
+                _unlockedWeapons.Add(WeaponType.Gun, new GunStatics(1, this));
             }
             else if (skill is SkillTree.SkillId.WeaponBanana)
             {
                 if (_unlockedWeapons.TryGetValue(WeaponType.BananaThrow, out var weaponAttributes))
                 {
+                    if (weaponAttributes is BananaStatics bananaStats)
+                    {
+                        bananaStats.LevelUp();
+                        bananaStats.Upgrade();
+                    }
                     return;
                 }
-                WeaponAttributes wp = new WeaponAttributes();
-                wp.Level = 1;
-                wp.Owner = this;
-                _unlockedWeapons.Add(WeaponType.BananaThrow, wp);
+                _unlockedWeapons.Add(WeaponType.BananaThrow, new BananaStatics(1, this));
             }
             else if (skill is SkillTree.SkillId.WeaponBottle)
             {
                 if (_unlockedWeapons.TryGetValue(WeaponType.BottleThrow, out var weaponAttributes))
                 {
+                     if (weaponAttributes is BottleStatics bottleStats)
+                    {
+                        bottleStats.LevelUp();
+                        bottleStats.Upgrade();
+                    }
                     return;
                 }
-                WeaponAttributes wp = new WeaponAttributes();
-                wp.Level = 1;
-                wp.Owner = this;
-                _unlockedWeapons.Add(WeaponType.BottleThrow, wp);
+                _unlockedWeapons.Add(WeaponType.BottleThrow, new BottleStatics(1, this));
+            }
+            else if (skill is SkillTree.SkillId.CritChance)
+            {
+                Attributes.CritChance += 0.05f;
             }
         }
 

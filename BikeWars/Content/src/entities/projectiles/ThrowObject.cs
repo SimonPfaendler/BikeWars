@@ -7,6 +7,7 @@ using BikeWars.Entities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using BikeWars.Content.components;
 
 namespace BikeWars.Content.entities.projectiles
 {
@@ -40,10 +41,20 @@ namespace BikeWars.Content.entities.projectiles
 
         public override ICollider Collider => _collider;
 
-        public ThrowObject(Vector2 start, Vector2 target, object owner, string textureKey, int damage, float speed = 100f, float arcScale = 1.2f, float lingerDuration = 0.25f)
+        public ThrowObject(Vector2 start, Vector2 target, object owner, string textureKey, int damage, float speed = 100f, float arcScale = 1.2f, float lingerDuration = 0.25f, WeaponAttributes? attributes = null)
         {
             Owner = owner;
-            weaponAttributes = new WeaponAttributes(owner, 1, 5, damage, speed, arcScale, lingerDuration);
+            if (attributes != null)
+            {
+                weaponAttributes = attributes;
+                speed = attributes.Speed > 0 ? attributes.Speed : speed;
+                arcScale = attributes.ArcScale > 0 ? attributes.ArcScale : arcScale;
+                lingerDuration = attributes.LingerDuration > 0 ? attributes.LingerDuration : lingerDuration;
+            }
+            else
+            {
+                weaponAttributes = new WeaponAttributes(owner, 1, 5, damage, speed, arcScale, lingerDuration);
+            }
             HasHit = false;
 
             TexRight = SpriteManager.GetTexture(textureKey);

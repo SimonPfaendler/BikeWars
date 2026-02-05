@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using BikeWars.Utilities;
 using BikeWars.Content.components;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
@@ -42,13 +44,49 @@ public class LevelUpScreen : MenuScreenBase, IScreen
 
     public void Open(Player player)
     {
+        if (player == null) return;
+
         IsOpen = true;
         _selectedOption = 0;
         // here different options can be listed, for example depending on which level it is or which where chosen before
+        var possibleSkills = new List<SkillTree.SkillId>
         if (player.PlayerNumber == 1)
         {LevelUpPlayer1(player);}
         else
         {
+            SkillTree.SkillId.MoreHp,
+            SkillTree.SkillId.MoreDamage,
+            SkillTree.SkillId.CritChance,
+            SkillTree.SkillId.LongerSprintDuration
+        };
+
+        if (!player.Attributes.CanAutoAttack)
+        {
+            possibleSkills.Add(SkillTree.SkillId.AutomaticFire);
+        }
+
+        // Add weapons if not max level
+        if (player.GetWeaponLevel(Player.WeaponType.Gun) < 5)
+             possibleSkills.Add(SkillTree.SkillId.WeaponGun);
+        
+        if (player.GetWeaponLevel(Player.WeaponType.BananaThrow) < 5)
+             possibleSkills.Add(SkillTree.SkillId.WeaponBanana);
+
+        if (player.GetWeaponLevel(Player.WeaponType.BottleThrow) < 5)
+             possibleSkills.Add(SkillTree.SkillId.WeaponBottle);
+        int n = possibleSkills.Count;
+        while (n > 1)
+        {
+            n--;
+            int k = RandomUtil.NextInt(0, n + 1);
+            var value = possibleSkills[k];
+            possibleSkills[k] = possibleSkills[n];
+            possibleSkills[n] = value;
+        }
+
+        _option1 = possibleSkills[0 % possibleSkills.Count];
+        _option2 = possibleSkills[1 % possibleSkills.Count];
+        _option3 = possibleSkills[2 % possibleSkills.Count];
             LevelUpPlayer2(player);
         }
             
