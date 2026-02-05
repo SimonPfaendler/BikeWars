@@ -161,7 +161,6 @@ public class GameObjectManager
     {
         if (_worldAudioManager != null && character is IWorldAudioAware wa)
             wa.SetWorldAudioManager(_worldAudioManager);
-
         Characters.Add(character);
         character.Attributes.OnDied += HandleCharacterDeath;
         character.OnTookDamage += HandleTookDamage;
@@ -343,7 +342,7 @@ public class GameObjectManager
                 c.Movement.EnemyPosition = c.Transform.Position;
             }
             c.Update(gameTime);
-            c.UpdateCollider();
+            c.UpdateCollider(c.Collider.Layer);
         }
         foreach (Tower t in Towers)
         {
@@ -577,7 +576,7 @@ public class GameObjectManager
                 ? spawnPos + Vector2.Normalize(toTarget) * Player.ThrowRange
                 : spawnPos;
         }
-        var beer = new ThrowBeer(spawnPos, target, enemy, emitLandingEvent: false);
+        ThrowBeer beer = new ThrowBeer(spawnPos, target, enemy, emitLandingEvent: false);
         AddProjectile(beer);
     }
 
@@ -784,11 +783,10 @@ public class GameObjectManager
             case "Destructible":
                 return new DestructibleObject(start, size, spawn);
             case "AchievementTrigger":
-                return new AchievementTrigger(spawn.Name, start, size, spawn); // Name or something like that
+                return new AchievementTrigger(spawn.Name, start, size); // Name or something like that
             case "chest":
             {
                 spawn.Properties.TryGetValue("item", out string? itemString);
-
                 Chest.ChestItemType? item = itemString switch
                 {
                     "Energygel" => Chest.ChestItemType.Energygel,
@@ -801,7 +799,6 @@ public class GameObjectManager
                     "Ice" => Chest.ChestItemType.Ice,
                     _ => null
                 };
-
                 return new Chest(start, size, item);
             }
             case "dog-bowl":

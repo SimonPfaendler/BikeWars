@@ -9,9 +9,17 @@ namespace BikeWars.Entities;
 public class AchievementTrigger : ObjectBase
 {
     public AchievementIds Id;
-    public AchievementTrigger(string id, Vector2 start, Point size, TiledObjectInfo attributes)
+    public AchievementTrigger(string id, Vector2 start, Point size)
     {
         Id = AchievementIdConverter.Convert(id);
+        Transform = new Transform(start, size);
+        // Use WALL layer so this object blocks movement like other map objects
+        Collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.TRIGGER, this);
+    }
+
+    public AchievementTrigger(AchievementIds id, Vector2 start, Point size)
+    {
+        Id = id;
         Transform = new Transform(start, size);
         // Use WALL layer so this object blocks movement like other map objects
         Collider = new BoxCollider(new Vector2(Transform.Position.X, Transform.Position.Y), Transform.Size.X, Transform.Size.Y, CollisionLayer.TRIGGER, this);

@@ -58,7 +58,7 @@ public class Dozent: CharacterBase, IWorldAudioAware
             _walkDownAnimation = SpriteManager.GetAnimation("Dozent_WalkDown");
             _walkUpAnimation = SpriteManager.GetAnimation("Dozent_WalkUp");
             _currentAnimation = _idleAnimation;
-            UpdateCollider();
+            UpdateCollider(CollisionLayer.CHARACTER);
         }
 
         public override void Update(GameTime gameTime)
@@ -129,7 +129,7 @@ public class Dozent: CharacterBase, IWorldAudioAware
                     _currentAnimation.Update(gameTime, Movement.IsMoving);
                 }
 
-                UpdateCollider();
+                UpdateCollider(CollisionLayer.CHARACTER);
             }
         }
 

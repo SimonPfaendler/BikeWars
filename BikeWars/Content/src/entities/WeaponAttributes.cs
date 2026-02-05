@@ -1,6 +1,9 @@
+using System.Text.Json.Serialization;
+
 namespace BikeWars.Entities;
 public class WeaponAttributes
 {
+    [JsonIgnore]
     public object Owner { get; set; }
     private int _level { get; set; }
     protected int _max_level { get; set;}

@@ -59,7 +59,7 @@ namespace BikeWars.Entities.Characters
             _walkDownAnimation = SpriteManager.GetAnimation("Dog_WalkDown");
             _walkUpAnimation = SpriteManager.GetAnimation("Dog_WalkUp");
             _currentAnimation = _idleAnimation;
-            UpdateCollider();
+            UpdateCollider(CollisionLayer.CHARACTER);
         }
 
         public override void Update(GameTime gameTime)
@@ -131,7 +131,7 @@ namespace BikeWars.Entities.Characters
                 _currentAnimation.Update(gameTime, Movement.IsMoving);
             }
 
-            UpdateCollider();
+            UpdateCollider(CollisionLayer.CHARACTER);
         }
 
         public override void Draw(SpriteBatch spriteBatch)

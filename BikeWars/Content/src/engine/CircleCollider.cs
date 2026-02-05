@@ -1,3 +1,4 @@
+using System;
 using BikeWars.Content.components;
 using BikeWars.Content.engine.interfaces;
 using Microsoft.Xna.Framework;
@@ -13,6 +14,8 @@ public class CircleCollider : ColliderBase
         Position = pos;
         Layer = layer;
         Owner = owner;
+
+        Update();
     }
 
     public Circle CollisionShape

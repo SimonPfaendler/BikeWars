@@ -12,7 +12,7 @@ namespace BikeWars.Content.entities.npcharacters
     public class Car
     {
         private readonly CollisionManager _collision;
-        private readonly Random _rng;
+        public Random _rng;
 
         public Transform Transform { get; private set; }
         public BoxCollider Collider { get; private set; }
@@ -39,6 +39,9 @@ namespace BikeWars.Content.entities.npcharacters
         private readonly List<ICollider> _nearbyCars = new(32);
         private readonly BoxCollider _checkBox = new BoxCollider(Vector2.Zero, 32, 32, CollisionLayer.CAR, null);
 
+        public string SideKey;
+        public string UpKey;
+
         private readonly Rectangle _srcSide;
         private readonly Rectangle _srcUp;
 
@@ -49,6 +52,9 @@ namespace BikeWars.Content.entities.npcharacters
         {
             _collision = collision;
             _rng = rng;
+
+            SideKey = sideKey;
+            UpKey = upKey;
 
             _srcSide = SpriteFrameDictionary.GetFrames(sideKey)[0];
             _srcUp   = SpriteFrameDictionary.GetFrames(upKey)[0];
