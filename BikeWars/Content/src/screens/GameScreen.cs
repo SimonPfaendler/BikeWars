@@ -54,7 +54,7 @@ namespace BikeWars.Content.screens
         protected StatisticsManager _statisticsManager {get; set;}
         public StatisticsManager StatisticsManager => _statisticsManager;
 
-        protected AchievementsManager _achievementsManager {get; set;}
+        public AchievementsManager _achievementsManager {get; set;}
 
         protected readonly AudioService _audioService;
         public AudioService AudioService => _audioService;
@@ -97,7 +97,7 @@ namespace BikeWars.Content.screens
         private float _offscreenAccum = 0f;
         private const float OFFSCREEN_CHECK_INTERVAL = 0.25f;
 
-        protected GameTimer _gameTimer;
+        public GameTimer _gameTimer;
         private const float GAME_TIME_LIMIT = 300f;
         private SpriteFont _timerFont;
         private Vector2 _timerPosition;

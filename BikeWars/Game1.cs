@@ -234,7 +234,7 @@ public class Game1 : Game
                         ConfirmationDialogScreen confirmDialog = new ConfirmationDialogScreen(
                             UIAssets.DefaultFont,
                             "Bist Du Dir sicher?",
-                            screen,
+                            ButtonAction.None,
                             _audioService,
                             GraphicsDevice.Viewport
                         );
@@ -343,12 +343,39 @@ public class Game1 : Game
                         break;
                 }
                 break;
-            case ConfirmationDialogScreen:
+            case ConfirmationDialogScreen csd:
                 switch ((ButtonAction)id)
                 {
                     case ButtonAction.ConfirmYes:
-                        ScreenManager.RemoveScreen(screen);
-                        Exit();
+                        switch (csd.PreviousButtonAction)
+                        {
+                            case ButtonAction.Exit:
+                                ScreenManager.RemoveScreen(screen);
+                                Exit();
+                                break;
+                            case ButtonAction.LoadGame:
+                                foreach (IScreen s in ScreenManager.Screens)
+                                {
+                                    if (s is GameScreen gs)
+                                    {
+                                        ScreenManager.RemoveScreen(screen);
+                                        gs.HandleLoadGame();
+                                        break;
+                                    }
+                                }
+                                break;
+                            case ButtonAction.SaveGame:
+                                foreach (IScreen s in ScreenManager.Screens)
+                                {
+                                    if (s is GameScreen gs)
+                                    {
+                                        ScreenManager.RemoveScreen(screen);
+                                        SaveLoad.SaveGame(gs._gameTimer, gs.GameObjectManager, gs.StatisticsManager, gs._achievementsManager, gs.GameMode);
+                                        break;
+                                    }
+                                }
+                                break;
+                        }
                         break;
                     case ButtonAction.ConfirmNo:
                         ScreenManager.RemoveScreen(screen);
@@ -394,11 +421,29 @@ public class Game1 : Game
                         break;
 
                     case ButtonAction.SaveGame:
-                        // TODO: Save game logic
+                        ConfirmationDialogScreen cd = new ConfirmationDialogScreen(
+                            UIAssets.DefaultFont,
+                            "Bist Du Dir sicher?",
+                            ButtonAction.SaveGame,
+                            _audioService,
+                            GraphicsDevice.Viewport
+                        );
+                        cd.LoadContent(Content, GraphicsDevice);
+                        cd.BtnClicked += OnBtnClicked;
+                        ScreenManager.AddScreen(cd);
                         break;
 
                     case ButtonAction.LoadGame:
-                        // TODO: Load game logic
+                        ConfirmationDialogScreen confirmDialog = new ConfirmationDialogScreen(
+                            UIAssets.DefaultFont,
+                            "Bist Du Dir sicher?",
+                            ButtonAction.LoadGame,
+                            _audioService,
+                            GraphicsDevice.Viewport
+                        );
+                        confirmDialog.LoadContent(Content, GraphicsDevice);
+                        confirmDialog.BtnClicked += OnBtnClicked;
+                        ScreenManager.AddScreen(confirmDialog);
                         break;
 
                     case ButtonAction.MainMenu:
@@ -415,16 +460,16 @@ public class Game1 : Game
                         break;
 
                     case ButtonAction.Exit:
-                        ConfirmationDialogScreen confirmDialog = new ConfirmationDialogScreen(
+                        ConfirmationDialogScreen cd2 = new ConfirmationDialogScreen(
                             UIAssets.DefaultFont,
                             "Bist Du Dir sicher?",
-                            screen,
+                            ButtonAction.Exit,
                             _audioService,
                             GraphicsDevice.Viewport
                         );
-                        confirmDialog.LoadContent(Content, GraphicsDevice);
-                        confirmDialog.BtnClicked += OnBtnClicked;
-                        ScreenManager.AddScreen(confirmDialog);
+                        cd2.LoadContent(Content, GraphicsDevice);
+                        cd2.BtnClicked += OnBtnClicked;
+                        ScreenManager.AddScreen(cd2);
                         break;
                 }
                 break;
@@ -441,7 +486,7 @@ public class Game1 : Game
                         ConfirmationDialogScreen confirmDialog = new ConfirmationDialogScreen(
                             UIAssets.DefaultFont,
                             "Bist Du Dir sicher?",
-                            screen,
+                            ButtonAction.None,
                             _audioService,
                             GraphicsDevice.Viewport
                         );
@@ -464,7 +509,7 @@ public class Game1 : Game
                         ConfirmationDialogScreen confirmDialog = new ConfirmationDialogScreen(
                             UIAssets.DefaultFont,
                             "Bist Du Dir sicher?",
-                            screen,
+                            ButtonAction.None,
                             _audioService,
                             GraphicsDevice.Viewport
                         );

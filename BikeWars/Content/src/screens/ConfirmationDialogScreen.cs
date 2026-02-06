@@ -14,13 +14,16 @@ namespace BikeWars.Content.screens
         private readonly AudioService _audioService;
         public float MusicVolume => 0.5f;
 
+        public ButtonAction PreviousButtonAction; // Use this if you want to know for which button it was actually used for
+
         public event Action Exit;
 
-        public ConfirmationDialogScreen(SpriteFont font, string message, IScreen previousScreen, AudioService audioService, Viewport vp)
+        public ConfirmationDialogScreen(SpriteFont font, string message, ButtonAction previous, AudioService audioService, Viewport vp)
             : base(null, font, vp)
         {
             _message = message;
-            _audioService = audioService ?? throw new System.ArgumentNullException(nameof(audioService));
+            _audioService = audioService ?? throw new ArgumentNullException(nameof(audioService));
+            PreviousButtonAction = previous;
         }
 
         public override void LoadContent(ContentManager content, GraphicsDevice gd)

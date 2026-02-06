@@ -8,6 +8,7 @@ using System.Linq;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
 using Microsoft.Xna.Framework.Content;
+using BikeWars.Content.components;
 
 namespace BikeWars.Content.screens
 {
@@ -30,7 +31,7 @@ namespace BikeWars.Content.screens
             _confirmDialog = new ConfirmationDialogScreen(
                 _font,
                 "Bist Du Dir sicher?",
-                this,
+                ButtonAction.None,
                 _audioService,
                 vp
             );
