@@ -150,13 +150,30 @@ public class LevelUpScreen : MenuScreenBase, IScreen
 
         Rectangle box = new Rectangle(boxX, boxY, boxW, boxH);
         sb.Draw(RenderPrimitives.Pixel, box, Color.DarkGray);
-
+        if (_currentPlayer.PlayerNumber == 1)
+        {string Player = "Player 1";
+            Vector2 PlayerSize = UIAssets.DefaultFont.MeasureString(Player);
+            Vector2 PlayerPos = new Vector2(
+                boxX + (boxW - PlayerSize.X) / 2,
+                boxY + 45
+            );
+            sb.DrawString(UIAssets.DefaultFont, Player, PlayerPos, Color.Red);
+        }
+        else
+        {string Player2 = "Player 2";
+            Vector2 Player2Size = UIAssets.DefaultFont.MeasureString(Player2);
+            Vector2 Player2Pos = new Vector2(
+                boxX + (boxW - Player2Size.X) / 2,
+                boxY + 45
+            );
+            sb.DrawString(UIAssets.DefaultFont, Player2, Player2Pos, Color.Red);
+        }
         // Header
         string title = "!!LEVEL UP!!";
         Vector2 titleSize = UIAssets.DefaultFont.MeasureString(title);
         Vector2 titlePos = new Vector2(
             boxX + (boxW - titleSize.X) / 2,
-            boxY + 30
+            boxY + 25
         );
         sb.DrawString(UIAssets.DefaultFont, title, titlePos, Color.DarkRed);
 
