@@ -21,6 +21,7 @@ namespace BikeWars.Entities.Characters
         private SpriteAnimation _currentAnimation;
         protected override string WalkingSound => AudioAssets.Walking;
         private readonly float _baseSpeed = 100f;
+        private const float RacingBikePriorityRange = 800f;
 
         private readonly PathFinding _pathFinding;
         private readonly CollisionManager _collisionManager;
@@ -72,14 +73,18 @@ namespace BikeWars.Entities.Characters
             if (Movement is EnemyMovement em)
             {
                 em.EnemyPosition = Transform.Position;
-                Player? target = _collisionManager.GameObjectManager.GetTargetPlayer(Transform.Position);
                 if (_isEscaping)
                 {
                     em.PlayerPosition = _escapeTarget;
                 }
-                else if (target != null)
+                else
                 {
-                    em.PlayerPosition = target.Transform.Position;
+                    var gom = _collisionManager.GameObjectManager;
+                    Player? target = GetRacingBikeTargetInRange(RacingBikePriorityRange)
+                        ?? gom.GetTargetPlayer(Transform.Position);
+
+                    if (target != null)
+                        em.PlayerPosition = target.Transform.Position;
                 }
             }
             Movement.HandleMovement(gameTime);
@@ -215,6 +220,35 @@ namespace BikeWars.Entities.Characters
                 return true;
 
             return false;
+        }
+
+        private Player? GetRacingBikeTargetInRange(float range)
+        {
+            var gom = _collisionManager.GameObjectManager;
+            float rangeSq = range * range;
+            Player? best = null;
+            float bestDistSq = rangeSq;
+
+            Check(gom.Player1);
+            Check(gom.Player2);
+
+            return best;
+
+            void Check(Player p)
+            {
+                if (p == null || p.IsDead || p.movement == null || !p.movement.OwnsBike)
+                    return;
+
+                if (p.CurrentBike is not RacingBike)
+                    return;
+
+                float distSq = Vector2.DistanceSquared(Transform.Position, p.Transform.Position);
+                if (distSq > bestDistSq)
+                    return;
+
+                bestDistSq = distSq;
+                best = p;
+            }
         }
 
         private bool TryStealBike(Player player)
