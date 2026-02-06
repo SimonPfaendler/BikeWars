@@ -234,7 +234,7 @@ public class Game1 : Game
                         ConfirmationDialogScreen confirmDialog = new ConfirmationDialogScreen(
                             UIAssets.DefaultFont,
                             "Bist Du Dir sicher?",
-                            ButtonAction.None,
+                            ButtonAction.Exit,
                             _audioService,
                             GraphicsDevice.Viewport
                         );
@@ -486,7 +486,7 @@ public class Game1 : Game
                         ConfirmationDialogScreen confirmDialog = new ConfirmationDialogScreen(
                             UIAssets.DefaultFont,
                             "Bist Du Dir sicher?",
-                            ButtonAction.None,
+                            ButtonAction.Exit,
                             _audioService,
                             GraphicsDevice.Viewport
                         );
@@ -509,7 +509,7 @@ public class Game1 : Game
                         ConfirmationDialogScreen confirmDialog = new ConfirmationDialogScreen(
                             UIAssets.DefaultFont,
                             "Bist Du Dir sicher?",
-                            ButtonAction.None,
+                            ButtonAction.Exit,
                             _audioService,
                             GraphicsDevice.Viewport
                         );
