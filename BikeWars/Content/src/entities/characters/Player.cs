@@ -61,6 +61,19 @@ namespace BikeWars.Entities.Characters
         
 
         public new bool IsGodMode { get; set; }
+        
+        // how long enemies should dodge after bell
+        private const float BELL_EFFECT_DURATION = 4.0f;
+        
+        // how long after the bell ends until it can be used again
+        private const float BELL_COOLDOWN_DURATION = 30.0f;
+
+        private float _bellEffectTimer = 0f;
+        private float _bellCooldownTimer = 0f;
+        
+        // bell states
+        public float BellCooldownRemaining => _bellCooldownTimer;
+        public bool BellReady => _bellEffectTimer <= 0f && _bellCooldownTimer <= 0f;
 
         public event Action ShotBullet;
         public event Action<ItemBase> ItemPickedUp;
@@ -200,10 +213,19 @@ namespace BikeWars.Entities.Characters
                     return true;
 
                 case WeaponType.DamageCircle:
-                    Attributes.AttackCooldown = 3.0f;
+                {
+                    if (!TryStartBell())
+                        return false;
+
+                    // spawn the bell (GameObjectManager listens to this)
                     DamageCircle?.Invoke();
+
+                    // bell uses its own AttackCooldown system
+                    Attributes.AttackCooldown = 0f;
+
                     _audio.Sounds.Play(AudioAssets.DamageCircle);
                     return true;
+                }
 
                 case WeaponType.BookThrow:
                     if (!_isThrowTargetInRange) return false;
@@ -461,7 +483,46 @@ namespace BikeWars.Entities.Characters
             HandleSwitchMovement();
             UpdateHitFlash(gameTime);
             UpdateCollider(CollisionLayer.PLAYER);
+            
+            UpdateBellCooldown(gameTime);
         }
+        
+        // bell cooldown
+        private void UpdateBellCooldown(GameTime gameTime)
+        {
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            // active bell effect (enemies dodge)
+            if (_bellEffectTimer > 0f)
+            {
+                _bellEffectTimer -= dt;
+
+                // when effect ends → start cooldown
+                if (_bellEffectTimer <= 0f)
+                {
+                    _bellEffectTimer = 0f;
+                    _bellCooldownTimer = BELL_COOLDOWN_DURATION;
+                }
+            }
+            // cooldown phase
+            else if (_bellCooldownTimer > 0f)
+            {
+                _bellCooldownTimer -= dt;
+                if (_bellCooldownTimer < 0f)
+                    _bellCooldownTimer = 0f;
+            }
+        }
+        
+        // try to start the bell
+        private bool TryStartBell()
+        {
+            if (!BellReady)
+                return false;
+
+            _bellEffectTimer = BELL_EFFECT_DURATION;
+            return true;
+        }
+
 
         public override bool IsCharacterMoving()
         {

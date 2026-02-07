@@ -46,6 +46,9 @@ public class EnemyMovement : MovementBase
    private Point _pendingStartGrid;
    private Point _pendingTargetGrid;
    private bool _hasPendingRepath;
+   
+   // Bell avoidance behavior
+   private float _bellFearTimer = 0f;
 
    // sets up the enemy movement system and stores pathfinding + grid helpers.
    public EnemyMovement(bool canMove, bool isMoving, PathFinding pathFinding,
@@ -75,7 +78,13 @@ public class EnemyMovement : MovementBase
         _hasPendingRepath = false;
         IsRepathQueued = false;
     }
-
+    
+    // bell logic
+    public void TriggerBellFear(float duration)
+    {
+        _bellFearTimer = MathF.Max(_bellFearTimer, duration);
+    }
+    
    // runs every frame: updates path, chooses direction, and moves the enemy.
    // A* doesn't run every frame
    public override void HandleMovement(GameTime gameTime)
@@ -86,13 +95,49 @@ public class EnemyMovement : MovementBase
        // Count down the pathfinding timer using the time passed since last frame.
        float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
        _repathTimer -= dt;
+       
+       // update bell fear timer
+       if (_bellFearTimer > 0f)
+       {
+           _bellFearTimer -= dt;
+           if (_bellFearTimer < 0f)
+               _bellFearTimer = 0f;
+       }
+       
+       // makes the enemies run away
+       if (_bellFearTimer > 0f)
+       {
+           Vector2 fleeDir = EnemyPosition - PlayerPosition;
 
+           if (fleeDir.LengthSquared() > 0.0001f)
+           {
+               fleeDir.Normalize();
+               Direction = fleeDir;
+               Update(gameTime);
+               return; // skip normal chase logic
+           }
+       }
 
        if (_repathTimer < 0f) _repathTimer = 0f;
 
        var enemyGrid= _gridMapper.WorldToGrid(EnemyPosition);
        var playerGridRaw = _gridMapper.WorldToGrid(PlayerPosition);
        var playerGrid = OffsetTargetGrid(playerGridRaw);
+       
+       // While bell fear is active, move directly away from the player
+       // skip normal chase/pathfinding logic.
+       if (_bellFearTimer > 0f)
+       {
+           Vector2 fleeDir = EnemyPosition - PlayerPosition;
+
+           if (fleeDir.LengthSquared() > 0.0001f)
+           {
+               fleeDir.Normalize();
+               Direction = fleeDir;
+               Update(gameTime);
+               return; // IMPORTANT: skip normal chase logic
+           }
+       }
 
        // fallback if the offset goes outside the map or onto a blocked tile
        if (!_pathFinding.IsInsideGrid(playerGrid.X, playerGrid.Y) ||

@@ -444,6 +444,7 @@ public class GameObjectManager
         }
 
         DogBowl.UpdateBowl(gameTime);
+        BellFearSystem.Update(gameTime);
         HandleRevival();
     }
 
@@ -505,7 +506,7 @@ public class GameObjectManager
 
     private void OnPlayerDamageCircle(Player player)
     {
-        Vector2 direction = player.GazeDirection;
+        // Vector2 direction = player.GazeDirection;
         DamageCircle dc = new DamageCircle(
             player.Transform,
             owner: player,
@@ -516,6 +517,26 @@ public class GameObjectManager
 
         // Shake screen on cast
         OnScreenShakeRequested?.Invoke(7f, 2.0f);
+        
+        TriggerBellFearForEnemies(5.0f);
+    }
+    
+    // Triggers the bell fear effect on all enemies (except KamikazeOpa)
+    // and forces a repath so they react immediately.
+    public void TriggerBellFearForEnemies(float seconds)
+    {
+        foreach (var ch in Characters)
+        {
+            // skip grandpas
+            if (ch is KamikazeOpa)
+                continue;
+
+            if (ch.Movement is EnemyMovement em)
+            {
+                em.TriggerBellFear(seconds);
+                em.ForceRepath(); // makes them react instantly after fear ends
+            }
+        }
     }
 
     private void OnPlayerThrowBook(Player player, Vector2 target)

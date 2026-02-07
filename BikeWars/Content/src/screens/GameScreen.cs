@@ -577,7 +577,7 @@ namespace BikeWars.Content.screens
                     _musicianCooldownTimer = 0f;
                 }
             }
-
+            
             bool playerNearMusicians = false;
             foreach (var obj in _gameObjectManager.Objects)
             {
@@ -1444,7 +1444,32 @@ namespace BikeWars.Content.screens
             Rectangle backgroundRect = destRect;
             backgroundRect.Inflate(10, 10);
             spriteBatch.Draw(RenderPrimitives.Pixel, backgroundRect, Color.Black * 0.5f);
-            spriteBatch.Draw(icon, destRect, Color.White);
+            
+            Color iconColor = Color.White;
+            
+            // Check if Bell is on cooldown if yes make bell icon red
+            if (player.CurrentWeapon == Player.WeaponType.DamageCircle && player.BellCooldownRemaining > 0)
+            {
+                iconColor = Color.Red;
+            }
+            
+            spriteBatch.Draw(icon, destRect, iconColor);
+            
+            // calculates cooldown countdown
+            if (player.CurrentWeapon == Player.WeaponType.DamageCircle && player.BellCooldownRemaining > 0)
+            {
+                int timeLeft = (int)Math.Ceiling(player.BellCooldownRemaining);
+                string text = $"{timeLeft}";
+                Vector2 size = UIAssets.DefaultFont.MeasureString(text);
+                
+                // center countdown on text
+                Vector2 textPos = new Vector2(
+                    destRect.Center.X - size.X / 2f,
+                    destRect.Center.Y - size.Y / 2f
+                );
+                
+                spriteBatch.DrawString(UIAssets.DefaultFont, text, textPos, Color.White);
+            }
         }
         public void OnActivated() {
         }
