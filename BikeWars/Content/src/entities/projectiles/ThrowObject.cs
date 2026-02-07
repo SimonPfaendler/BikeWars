@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.interfaces;

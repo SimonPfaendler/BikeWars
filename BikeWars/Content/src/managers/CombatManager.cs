@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using BikeWars.Content.entities.interfaces;
 using BikeWars.Entities.Characters;

@@ -49,7 +49,7 @@ namespace BikeWars.Content.managers
         private List<RaveGroup> _raveGroups = new List<RaveGroup>();
 
         // car logic
-        private readonly Random _rng = new Random();
+        // car logic
         private double _timeSinceLastCar;
         private const double CAR_SPAWN_START = 1.5;
         private const double CAR_SPAWN_END   = 0.7;
@@ -224,7 +224,7 @@ namespace BikeWars.Content.managers
             // Try up to 100 times to find a road tile where the car can safely spawn
             for (int tries = 0; tries < 100; tries++)
             {
-                spawnPos = _collisionManager.GetRandomRoadWorldCenter(_rng);
+                spawnPos = _collisionManager.GetRandomRoadWorldCenter(Random.Shared);
                 if (spawnPos == Vector2.Zero) return;
 
                 spawnTile = _collisionManager.WorldToGrid(spawnPos);
@@ -277,13 +277,13 @@ namespace BikeWars.Content.managers
 
             // if the chosen dir isn't actually valid here, fall back
             if (!validDirs.Contains(dir))
-                dir = validDirs[_rng.Next(validDirs.Count)];
+                dir = validDirs[RandomUtil.NextInt(0, validDirs.Count)];
 
-            int type = _rng.Next(1, 5);
+            int type = RandomUtil.NextInt(1, 5);
             string sideKey = $"Car{type}_Side";
             string upKey   = $"Car{type}_Up";
 
-            var car = new Car(spawnPos, dir, _collisionManager, _rng, sideKey, upKey);
+            var car = new Car(spawnPos, dir, _collisionManager, Random.Shared, sideKey, upKey);
             _gameObjectManager.AddCar(car);
         }
 
