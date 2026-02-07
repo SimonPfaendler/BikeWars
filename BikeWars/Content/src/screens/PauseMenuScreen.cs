@@ -13,7 +13,7 @@ namespace BikeWars.Content.screens
         private readonly AudioService _audioService;
         public string DesiredMusic => AudioAssets.GameMusic;
         public float MusicVolume => 0.5f;
-        public event Action<GraphicsCommand> GraphicsRequested;
+        // public event Action<GraphicsCommand> GraphicsRequested;
 
         public PauseMenuScreen(SpriteFont font, AudioService audioService, Viewport vp)
             :base(null, font, vp)

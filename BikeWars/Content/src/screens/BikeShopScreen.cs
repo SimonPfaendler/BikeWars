@@ -32,7 +32,7 @@ public class BikeShopScreen : IScreen
     private readonly ShopOption _option5 = ShopOption.Close;
 
     public Viewport ViewPort {get;set;}
-    public event Action<int, IScreen> BtnClicked;
+    public event Action<int, IScreen> BtnClicked { add { } remove { } }
     public event Action<Bike> Repair;
     public event Action<Vector2> SpawnFrelo;
 

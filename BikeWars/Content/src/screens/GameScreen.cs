@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,19 +32,19 @@ namespace BikeWars.Content.screens
     {
         private LevelUpScreen _levelUpScreen;
         private BikeShopScreen _bikeShopScreen;
-        private Camera2D camera;
+        private Camera2D? camera;
         private Rectangle worldBounds;
         protected Overlay _overlay;
         private TiledMapRenderer _tiledMapRenderer;
-        private Debugger _debugger;
+        private Debugger? _debugger;
         private bool _isAlive = true; // If the Screen is still alive. Necessary for the switch
         private Action<float, float> _onScreenShake;
-        private Action<int, int> _onPlayerLevelUp;
+        // private Action<int, int> _onPlayerLevelUp;
         private Action _onBikeShopClose;
         private Action<BikeShop> _onBikeShopOpen;
         private Action<BikeShop> _onBikeShopOpen2;
         public Viewport ViewPort {get; set;}
-        public event Action<int, IScreen> BtnClicked;
+        public event Action<int, IScreen> BtnClicked { add { } remove { } }
         public event Action PauseBtnPressed;
         public event Action<Statistic> GameOver;
         public event Action<Statistic> GameWon;
@@ -64,8 +65,8 @@ namespace BikeWars.Content.screens
         public string DesiredMusic => AudioAssets.GameMusic;
         public float MusicVolume => 1f;
 
-        private HUD _hud;
-        private HUD _hudP2;
+        private HUD? _hud;
+        private HUD? _hudP2;
         private Texture2D hudTexture;
 
         private CollisionManager _collisionManager;
@@ -112,7 +113,7 @@ namespace BikeWars.Content.screens
         protected RepathScheduler RepathScheduler => _repathScheduler;
 
         private bool _musicOverrideActive = false;
-        private Musicians _activeMusicianOverride = null;
+        private Musicians? _activeMusicianOverride = null;
         private float _musicOverrideDelayTimer = 0f;
         private bool _waitingForMetal = false;
         private const float MUSICIAN_COOLDOWN_SECONDS = 30f;
@@ -127,7 +128,7 @@ namespace BikeWars.Content.screens
         private const float MUSICIAN_DAMAGE_CIRCLE_INTERVAL = 3f;
         private Musicians? _activeMusiciansForAOE = null;
 
-        public event Action Exit;
+        // public event Action Exit;
 
         private Dictionary<Achievement, float> _showAchievementTimes;
         public void TriggerHitStop(float duration)
@@ -216,17 +217,20 @@ namespace BikeWars.Content.screens
             _gameObjectManager.OnCharacterDied += _statisticsManager.HandleCharacterDied;
             _gameObjectManager.OnCharacterDied += _achievementsManager.OnPlayerDied;
             _gameObjectManager.OnTookDamage += _statisticsManager.HandleTookDamage;
-            _gameObjectManager.Player1.OnTookDamage += _statisticsManager.HandleTookDamage;
-            _gameObjectManager.Player1.OnTookDamage += _achievementsManager.OnDiedByTram;
-            _gameObjectManager.Player1.OnLevelUp += _statisticsManager.HandleLevel;
-            _gameObjectManager.Player1.OnMoreXP += _statisticsManager.HandleExperience;
-            _gameObjectManager.Player1.ShotBullet += _statisticsManager.HandleShotFired;
-            _gameObjectManager.Player1.ThrowBeer += _statisticsManager.HandleThrowing;
-            _gameObjectManager.Player1.ThrowBanana += _statisticsManager.HandleThrowing;
-            _gameObjectManager.Player1.ThrowBook += _statisticsManager.HandleThrowing;
-            _gameObjectManager.Player1.ThrowBottle += _statisticsManager.HandleThrowing;
-            _gameObjectManager.Player1.FoundBike += () => _statisticsManager.HandleFoundBike(_gameTimer.TimePassed());
-            _gameObjectManager.Player1.OnEneryBarPickedUp += _achievementsManager.OnEnergyBarPickedUp;
+            if (_gameObjectManager.Player1 != null)
+            {
+                _gameObjectManager.Player1.OnTookDamage += _statisticsManager.HandleTookDamage;
+                _gameObjectManager.Player1.OnTookDamage += _achievementsManager.OnDiedByTram;
+                _gameObjectManager.Player1.OnLevelUp += _statisticsManager.HandleLevel;
+                _gameObjectManager.Player1.OnMoreXP += _statisticsManager.HandleExperience;
+                _gameObjectManager.Player1.ShotBullet += _statisticsManager.HandleShotFired;
+                _gameObjectManager.Player1.ThrowBeer += _statisticsManager.HandleThrowing;
+                _gameObjectManager.Player1.ThrowBanana += _statisticsManager.HandleThrowing;
+                _gameObjectManager.Player1.ThrowBook += _statisticsManager.HandleThrowing;
+                _gameObjectManager.Player1.ThrowBottle += _statisticsManager.HandleThrowing;
+                _gameObjectManager.Player1.FoundBike += () => _statisticsManager.HandleFoundBike(_gameTimer.TimePassed());
+                _gameObjectManager.Player1.OnEneryBarPickedUp += _achievementsManager.OnEnergyBarPickedUp;
+            }
 
             if (_gameObjectManager.Player2 != null)
             {
@@ -273,11 +277,14 @@ namespace BikeWars.Content.screens
             _collisionManager.OnProjectileHit += _combatManager.HandleProjectileHit;
             _collisionManager.OnAOEHit += _combatManager.HandleAOEHit;
             _collisionManager.OnCharacterCollision += _combatManager.HandleCharacterCollision;
-            _collisionManager.OnItemPickup += _gameObjectManager.Player1.OnPickUpItem;
-            _collisionManager.OnTowerInteraction += _gameObjectManager.Player1.OnInteractTower;
-            _collisionManager.OnObjectInteraction += _gameObjectManager.Player1.OnInteractObject;
+            if (_gameObjectManager.Player1 != null)
+            {
+                _collisionManager.OnItemPickup += _gameObjectManager.Player1.OnPickUpItem;
+                _collisionManager.OnTowerInteraction += _gameObjectManager.Player1.OnInteractTower;
+                _collisionManager.OnObjectInteraction += _gameObjectManager.Player1.OnInteractObject;
+                _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
+            }
             _collisionManager.OnObjectInteraction += OnObjectInteraction;
-            _gameObjectManager.Player1.ItemPickedUp += _collisionManager.OnRemoveItem;
             _collisionManager.OnTramHit += _combatManager.HandleTramHit;
             _collisionManager.OnBaechleHit += _combatManager.HandleBaechleHit;
             _collisionManager.OnProjectileHitDestructible += _combatManager.HandleprojecticleHitDestructible;
@@ -374,9 +381,12 @@ namespace BikeWars.Content.screens
             _bikeShopScreen.Repair += OnHandleRepair;
             _bikeShopScreen.SpawnFrelo += OnSpawnFrelo;
             _bikeShopScreen.SpawnRacingBike += OnSpawnRacingBike;
-            _gameObjectManager.Player1.OnBikeShopOpen += _onBikeShopOpen;
-            _gameObjectManager.Player1.Dismounted += _gameObjectManager.AddItem;
-            _gameObjectManager.Player1.ChestItemSpawn += _gameObjectManager.AddItem;
+            if (_gameObjectManager.Player1 != null)
+            {
+                _gameObjectManager.Player1.OnBikeShopOpen += _onBikeShopOpen;
+                _gameObjectManager.Player1.Dismounted += _gameObjectManager.AddItem;
+                _gameObjectManager.Player1.ChestItemSpawn += _gameObjectManager.AddItem;
+            }
 
             // the Option selected gets upgraded
             _levelUpScreen.OnOptionSelected += skillId =>
@@ -802,11 +812,18 @@ namespace BikeWars.Content.screens
                         _gameObjectManager.AddProjectile(b);
                         break;
                     case SaveLoad.TYPES.THROWBEER:
+                    {
                         // ThrowBeer tb = new ThrowBeer(p.Basic.Position.ToVector2(), p.Basic.Size.ToPoint(), _gameObjectManager.Player1, p.WeaponAttributes); // TODO player doesn't make sense here
-                        ThrowBeer tb = new ThrowBeer(p.Basic.Position.ToVector2(), _gameObjectManager.Player1.Transform.Position, _gameObjectManager.Player1); // TODO player doesn't make sense here
-                        tb.HasHit = p.HasHit;
-                        _gameObjectManager.AddProjectile(tb);
+                        if (_gameObjectManager.Player1 != null)
+                        {
+                            ThrowBeer tb = new ThrowBeer(p.Basic.Position.ToVector2(),
+                                _gameObjectManager.Player1.Transform.Position,
+                                _gameObjectManager.Player1); // TODO player doesn't make sense here
+                            tb.HasHit = p.HasHit;
+                            _gameObjectManager.AddProjectile(tb);
+                        }
                         break;
+                    }
                     case SaveLoad.TYPES.THROWBOTTLE:
                         ThrowBottle tbot = new ThrowBottle(p.Basic.Position.ToVector2(), p.Target.ToVector2()); // TODO player doesn't make sense here
                         tbot.HasHit = p.HasHit;
@@ -933,6 +950,8 @@ namespace BikeWars.Content.screens
                         _gameObjectManager.AddObject(new DogBowl(pos, size, full: o.IsFull ?? false));
                         break;
                     case SaveLoad.TYPES.DESTRUCTIBLE:
+                        if (o.Health == null || o.SpriteKey == null)
+                            break;
                         DestructibleObject dobj = new DestructibleObject(pos, size, o.Health.Value, o.SpriteKey);
                         _gameObjectManager.AddObject(dobj);
                         _gameObjectManager.AddStatic(dobj.Collider);
@@ -998,8 +1017,11 @@ namespace BikeWars.Content.screens
                 }
                 else
                 {
-                    _gameObjectManager.Player1.Transform.Position =
-                        new Vector2(worldBounds.Width / 2, worldBounds.Height / 2);
+                    if (_gameObjectManager.Player1 != null)
+                    {
+                        _gameObjectManager.Player1.Transform.Position =
+                            new Vector2(worldBounds.Width / 2, worldBounds.Height / 2);
+                    }
                     ResetGameTimer();
                     Console.WriteLine("Reset counter and player position.");
                 }
@@ -1043,9 +1065,11 @@ namespace BikeWars.Content.screens
 
         public virtual void Draw(GameTime gameTime, SpriteBatch sb)
         {
-            _tiledMapRenderer.Draw(camera.GetTransform());
-
-            sb.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.GetTransform());
+            if (camera != null)
+            {
+                _tiledMapRenderer.Draw(camera.GetTransform());
+                sb.Begin(samplerState: SamplerState.PointClamp, transformMatrix: camera.GetTransform());
+            }
 
             _gameObjectManager.Draw(sb);
             if (_isTechDemo && _showStaticHitboxes)
@@ -1076,7 +1100,7 @@ namespace BikeWars.Content.screens
             sb.End();
             sb.Begin();
 
-            _debugger.Draw(sb, ViewPort);
+            _debugger?.Draw(sb, ViewPort);
             DrawTimer(sb, gameTime);
 
             var player1 = _gameObjectManager.Player1;
@@ -1084,12 +1108,12 @@ namespace BikeWars.Content.screens
             if (player1 != null)
             {
                 player1.Inventory.Draw(sb, RenderPrimitives.Pixel, player1.SelectedInventoryIndex, true, 1);
-                _hud.Draw(sb, _gameObjectManager.Player1);
+                _hud?.Draw(sb, _gameObjectManager.Player1);
             }
 
             if (player2 != null)
             {
-                _hudP2.Draw(sb, _gameObjectManager.Player2);
+                _hudP2?.Draw(sb, _gameObjectManager.Player2);
                 player2.Inventory.Draw(sb, RenderPrimitives.Pixel, player2.SelectedInventoryIndex, true, 2);
             }
 
@@ -1132,6 +1156,11 @@ namespace BikeWars.Content.screens
         {
             int viewW = ViewPort.Width;
             int viewH = ViewPort.Height;
+            
+            if (camera == null)
+            {
+                return Rectangle.Empty;
+            }
 
             // world half extents depend on zoom (analog zur Camera2D.ClampToWorld)
             float halfW = (viewW / 2f) / camera.Zoom;
@@ -1286,10 +1315,15 @@ namespace BikeWars.Content.screens
                 _collisionManager.OnProjectileHit -= _combatManager.HandleProjectileHit;
                 _collisionManager.OnAOEHit -= _combatManager.HandleAOEHit;
                 _collisionManager.OnCharacterCollision -= _combatManager.HandleCharacterCollision;
-                if (_gameObjectManager.Player1 != null)
+                var gom = _gameObjectManager;
+                if (gom == null)
+                    return;
+                
+                var p1 = gom.Player1;
+                if (p1 != null)
                 {
-                    _collisionManager.OnItemPickup -= _gameObjectManager.Player1.OnPickUpItem;
-                    _gameObjectManager.Player1.ItemPickedUp -= _collisionManager.OnRemoveItem;
+                    _collisionManager.OnItemPickup -= p1.OnPickUpItem;
+                    p1.ItemPickedUp -= _collisionManager.OnRemoveItem;
                 }
                 _collisionManager.OnTramHit -= _combatManager.HandleTramHit;
 
@@ -1300,13 +1334,21 @@ namespace BikeWars.Content.screens
             {
                 _combatManager.OnHitStopRequested -= TriggerHitStop;
                 _combatManager.OnScreenShakeRequested -= _onScreenShake;
-                _gameObjectManager.OnScreenShakeRequested -= _onScreenShake;
+                if (_gameObjectManager != null)
+                {
+                    _gameObjectManager.OnScreenShakeRequested -= _onScreenShake;
+                }
             }
 
-            if (_gameObjectManager.Player1 != null)
+            var gm = _gameObjectManager;
+            if (gm != null)
             {
-                _gameObjectManager.Player1.OnLevelUp -= _onPlayerLevelUp;
-                _gameObjectManager.Player1.OnBikeShopOpen -= _onBikeShopOpen;
+                var p1 = gm.Player1;
+                if (p1 != null)
+                {
+                    // p1.OnLevelUp -= _onPlayerLevelUp;
+                    p1.OnBikeShopOpen -= _onBikeShopOpen;
+                }
             }
             _bikeShopScreen.Closed -= _onBikeShopClose;
 
@@ -1324,8 +1366,15 @@ namespace BikeWars.Content.screens
             // Manager cleanup
             _spawnManager?.Dispose();
 
-            _collisionManager.Unload();
-            _gameObjectManager.Unload();
+            if (_collisionManager != null)
+            {
+                _collisionManager.Unload();
+            }
+            
+            if(_gameObjectManager != null)
+            {
+                _gameObjectManager.Unload();
+            }
 
             Console.WriteLine("GameScreen unloaded cleanly");
         }
@@ -1372,7 +1421,7 @@ namespace BikeWars.Content.screens
         {
             // draw the icon of the current attack used by the player
             if (player == null) return;
-            Texture2D icon = null;
+            Texture2D? icon = null;
 
             switch (player.CurrentWeapon)
             {
@@ -1417,7 +1466,6 @@ namespace BikeWars.Content.screens
             }
 
             int targetSize = 80;
-            int margin = 20;
 
             int screenWidth = ViewPort.Width;
             int screenHeight = ViewPort.Height;

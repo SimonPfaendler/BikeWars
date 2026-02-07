@@ -16,7 +16,7 @@ namespace BikeWars.Content.screens
 
         public ButtonAction PreviousButtonAction; // Use this if you want to know for which button it was actually used for
 
-        public event Action Exit;
+        // public event Action Exit;
 
         public ConfirmationDialogScreen(SpriteFont font, string message, ButtonAction previous, AudioService audioService, Viewport vp)
             : base(null, font, vp)

@@ -57,7 +57,7 @@ public class Game1 : Game
         MainMenuScreen mainMenu = new MainMenuScreen(background, UIAssets.DefaultFont, _audioService, GraphicsDevice.Viewport);
         mainMenu.LoadContent(Content, GraphicsDevice);
         mainMenu.BtnClicked += OnBtnClicked;
-        mainMenu.GraphicsRequested += OnGraphicsRequested;
+        // mainMenu.GraphicsRequested += OnGraphicsRequested;
         ScreenManager.AddScreen(mainMenu);
     }
 
@@ -75,7 +75,7 @@ public class Game1 : Game
         background = SpriteManager.GetTexture("Startbildschirm");
         StartScreen startScreen = new StartScreen(background, UIAssets.DefaultFont, _audioService, GraphicsDevice.Viewport);
         startScreen.LoadContent(Content, GraphicsDevice);
-        startScreen.GraphicsRequested += OnGraphicsRequested;
+        // startScreen.GraphicsRequested += OnGraphicsRequested;
         startScreen.BtnClicked += OnBtnClicked;
         ScreenManager.AddScreen(startScreen);
         ScreenManager.SetAudio(_audioService);

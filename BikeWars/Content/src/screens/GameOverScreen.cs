@@ -21,7 +21,7 @@ namespace BikeWars.Content.screens
         private int _currentFrameIndex = 0;
         private bool _isAnimationLoaded = false;
 
-        public event Action Exit;
+        // public event Action Exit;
 
         private ConfirmationDialogScreen _confirmDialog {get;set;}
 
@@ -35,7 +35,7 @@ namespace BikeWars.Content.screens
                 _audioService,
                 vp
             );
-            _confirmDialog.Exit += () => Exit();
+            // _confirmDialog.Exit += () => Exit();
         }
 
         public override void LoadContent(ContentManager content, GraphicsDevice gd)

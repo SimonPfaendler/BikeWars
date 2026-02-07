@@ -13,7 +13,7 @@ public class StartScreen : MenuScreenBase, IScreen
     private readonly AudioService _audioService;
     public string DesiredMusic => AudioAssets.MenuMusic;
     public float MusicVolume => 1f;
-    public event Action<GraphicsCommand> GraphicsRequested;
+    // public event Action<GraphicsCommand> GraphicsRequested;
     public StartScreen(Texture2D background, SpriteFont font, AudioService audioService, Viewport vp)
         : base(background, font, vp)
     {

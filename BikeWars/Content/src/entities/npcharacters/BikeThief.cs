@@ -30,7 +30,7 @@ namespace BikeWars.Entities.Characters
         private float _talkTimer = 0f;
         private const float TALK_INTERVAL = 7.5f;
 
-        private Bike _stolenBike;
+        private Bike? _stolenBike;
         private bool _isEscaping;
         private Vector2 _escapeTarget;
         private const float KnockOffForce = 180f;
@@ -235,7 +235,7 @@ namespace BikeWars.Entities.Characters
 
             return best;
 
-            void Check(Player p)
+            void Check(Player? p)
             {
                 if (p == null || p.IsDead || p.movement == null || !p.movement.OwnsBike)
                     return;

@@ -29,7 +29,7 @@ namespace BikeWars.Entities.Characters
     {
         public Inventory Inventory { get; private set; }
         public PlayerMovement movement { get; set; }
-        public Bike CurrentBike => movement?.CrtBike;
+        public Bike? CurrentBike => movement?.CrtBike;
         private IPlayerInput _input;
         public bool IsActionPressed(GameAction action) => _input.IsPressed(action);
         private CooldownWithDuration sprint { get; }
@@ -104,7 +104,7 @@ namespace BikeWars.Entities.Characters
 
         private new readonly AudioService _audio;
         private new WorldAudioManager _worldAudioManager;
-        private string _currentMovementSound = null;
+        private string? _currentMovementSound = null;
         public event Action<int, int> OnLevelUp;
         public event Action<BikeShop> OnBikeShopOpen;
         public event Action<int> OnMoreXP;

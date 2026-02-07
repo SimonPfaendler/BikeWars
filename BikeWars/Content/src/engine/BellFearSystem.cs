@@ -8,9 +8,9 @@ namespace BikeWars.Content.engine
     {
         private struct Pulse
         {
-            public Vector2 Center;
+            // public Vector2 Center;
             public float TimeLeft;
-            public float Radius;
+            // public float Radius;
         }
 
         private static readonly List<Pulse> _pulses = new();
