@@ -15,7 +15,7 @@ public class PlayerMovement
     private Bike _bike {get; set;}
     public Bike CrtBike {get => _bike; set => _bike = value;}
 
-    public event Action<Bike> OnDismounted;
+    //public event Action<Bike> OnDismounted;
 
     private bool owns_bike {get; set;}
     public bool OwnsBike {

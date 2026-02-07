@@ -1,3 +1,4 @@
+#nullable enable
 using Microsoft.Xna.Framework;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;

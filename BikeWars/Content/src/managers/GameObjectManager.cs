@@ -136,7 +136,7 @@ public class GameObjectManager
     {
         Towers.Add(tower);
         tower.Attributes.OnDied += HandleTowerDeath;
-        tower.OnTookDamage += HandleTowerTookDamage;
+        //tower.OnTookDamage += HandleTowerTookDamage;
         if (tower is TowerAlly ta)
         {
             ta.OnShoot += OnTowerShotBullet;

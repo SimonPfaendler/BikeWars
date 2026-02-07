@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Linq;
 using BikeWars.Content.engine;
@@ -48,7 +49,7 @@ namespace BikeWars.Content.managers
         // raver logic
         private List<RaveGroup> _raveGroups = new List<RaveGroup>();
 
-        // car logic
+
         // car logic
         private double _timeSinceLastCar;
         private const double CAR_SPAWN_START = 1.5;
@@ -511,11 +512,8 @@ namespace BikeWars.Content.managers
             double rareRange = 0.90f;
             double rareChance = 0.30f;
             double varchance = RandomUtil.NextDouble();
-            double factor;
-            if (varchance < rareChance)
-            {factor = 1f + ((float)RandomUtil.NextDouble() * 2f - 1f) * normalRange;} // bis zu =- 20%
-            else
-            {factor = 1f + ((float)RandomUtil.NextDouble() * 2f - 1f) * normalRange;} // bis zu +- 40%
+            double range = varchance < rareChance ? rareRange : normalRange;
+            double factor = 1f + ((float)RandomUtil.NextDouble() * 2f - 1f) * (float)range;
 
             return basespeed * factor;
         }

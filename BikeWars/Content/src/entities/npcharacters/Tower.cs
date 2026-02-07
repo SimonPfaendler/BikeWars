@@ -18,7 +18,7 @@ public abstract class Tower
     private TowerAttributes _attributes {get;set;}
     public TowerAttributes Attributes {get => _attributes; set => _attributes = value;}
     public bool IsDead => Attributes.Health <= 0;
-    public event Action<Tower, int> OnTookDamage;
+    //public event Action<Tower, int> OnTookDamage;
 
     public float Rotation {get; set;}
 
