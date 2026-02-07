@@ -272,7 +272,7 @@ namespace BikeWars.Entities.Characters
             }
             if (item.IsBike)
             {
-                if (_input.IsPressed(GameAction.SWITCH) && _bikeMountTime == 0f)
+                if (!((Bike)item).IsDestroyed && _input.IsPressed(GameAction.SWITCH) && _bikeMountTime == 0f)
                 {
                     Mount((Bike)item);
                     item.IsPickedUp = true;
@@ -491,10 +491,6 @@ namespace BikeWars.Entities.Characters
                 if (IsDoped) reducedDamage = 0; // Invulnerable
                 base.TakeDamage(reducedDamage, hitBy, shouldSquash);
 
-                if (bike.IsDestroyed)
-                {
-                    Dismount();
-                }
             }
             else
             {
@@ -762,7 +758,7 @@ namespace BikeWars.Entities.Characters
                 return;
             }
             _bikeMountTime = BikeMountTime;
-            movement.CurrentMovement = new WalkingMovement(movement.CurrentMovement.CanMove, movement.CurrentMovement.IsMoving, movement.WalkingSpeed, movement.SprintAcceleration);
+            movement.CurrentMovement = new WalkingMovement(true, movement.CurrentMovement.IsMoving, movement.WalkingSpeed, movement.SprintAcceleration);
             movement.OwnsBike = false;
             movement.CrtBike.Transform.Position = Transform.Position;
             movement.CrtBike.Collider.Position = Collider.Position;
@@ -873,6 +869,14 @@ namespace BikeWars.Entities.Characters
         {
             float d = (float)gameTime.ElapsedGameTime.TotalSeconds;
             movement.Update();
+
+            if (movement.OwnsBike && movement.CrtBike != null && movement.CrtBike.IsDestroyed)
+            {
+                movement.CurrentMovement.CanMove = false;
+                movement.CurrentMovement.Speed = 0f;
+                movement.CurrentMovement.Direction = Vector2.Zero;
+            }
+
             sprint.Update(gameTime);
             if (_input.IsHeld(GameAction.SPRINT) && sprint.Ready)
             {
