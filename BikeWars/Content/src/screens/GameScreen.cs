@@ -260,9 +260,9 @@ namespace BikeWars.Content.screens
             _pathFinding = new PathFinding(_collisionManager.PathGrid);
 
             // Pathfinding scheduler (limits how many enemies may repath per frame)
-            _repathScheduler = new RepathScheduler(capacity: 2000)
+            _repathScheduler = new RepathScheduler(capacity: 5000)
             {
-                UpdateMaxEnemies = 120
+                UpdateMaxEnemies = 400
             };
 
             _tiledMapRenderer = new TiledMapRenderer(gd, _collisionManager.TiledMap);

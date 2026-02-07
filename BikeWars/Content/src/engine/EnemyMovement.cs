@@ -21,7 +21,11 @@ public class EnemyMovement : MovementBase
     public IReadOnlyList<Node> CurrentPath => _currentPath;
     private const int LocalGridSize = 21; // 7x7 nodes A*
     private float _repathTimer = 0f;
-    private const float RepathInterval = 0.25f;
+    
+    private const float BaseRepathInterval = 0.4f;
+    private const float RepathJitter = 0.1f;
+    private const float MaxRepathDistance = 800f;
+    private const float FarRepathMultiplier = 3f;
 
     private static readonly Random _rng = new();
 
@@ -62,7 +66,7 @@ public class EnemyMovement : MovementBase
        _pathFinding = pathFinding;
        _gridMapper = gridMapper;
         // Stagger initial repath timers to distribute load
-        _repathTimer = (float)(_rng.NextDouble() * RepathInterval);
+        _repathTimer = NextRepathInterval();
 
         _slotAngle = (float)(_rng.NextDouble() * MathF.Tau);
         _repathScheduler = repathScheduler;
@@ -160,16 +164,23 @@ public class EnemyMovement : MovementBase
            _pendingStartGrid = enemyGrid;
            _pendingTargetGrid = playerGrid;
 
+           float distSq = Vector2.DistanceSquared(EnemyPosition, PlayerPosition);
+           float nextInterval = NextRepathInterval();
+           if (distSq > MaxRepathDistance * MaxRepathDistance)
+           {
+               // if enemy is far away, repath less often, but still allow A*
+               nextInterval *= FarRepathMultiplier;
+           }
+
            if (_repathScheduler != null && _repathScheduler.Request(this))
            {
                _hasPendingRepath = true;
-               _repathTimer = RepathInterval;
+               _repathTimer = nextInterval;
            }
            else
            {
-               // scheduler full or already queued
-               // try again soon (small delay so you don't spam)
-               _repathTimer = 0.1f;
+               // scheduler full, try again later 
+               _repathTimer = (_currentPath.Count == 0) ? 0.3f : nextInterval;
            }
        }
 
@@ -274,9 +285,30 @@ public class EnemyMovement : MovementBase
    {
        if (_currentPath == null || _currentPath.Count == 0)
            return Vector2.Zero;
+       
+       if (_pathIndex < 0)
+           _pathIndex = 0;
 
-       if (_pathIndex < 0 || _pathIndex >= _currentPath.Count)
+       if (_pathIndex >= _currentPath.Count)
            return Vector2.Zero;
+
+       // Skip nodes we've already passed (can happen when FPS is low and we move far in one frame).
+       while (_pathIndex < _currentPath.Count - 1)
+       {
+           Vector2 currentPos = _gridMapper.GridToWorldCenter(_currentPath[_pathIndex]);
+           Vector2 nextPos = _gridMapper.GridToWorldCenter(_currentPath[_pathIndex + 1]);
+
+           float currentDistSq = Vector2.DistanceSquared(EnemyPosition, currentPos);
+           float nextDistSq = Vector2.DistanceSquared(EnemyPosition, nextPos);
+
+           if (nextDistSq <= currentDistSq)
+           {
+               _pathIndex++;
+               continue;
+           }
+
+           break;
+       }
 
        Node targetNode = _currentPath[_pathIndex];
        Vector2 targetPos = _gridMapper.GridToWorldCenter(targetNode);
@@ -284,18 +316,16 @@ public class EnemyMovement : MovementBase
        Vector2 toTarget = targetPos - EnemyPosition;
 
        // If we’re close enough to this node, go to the next
-       if (toTarget.LengthSquared() < NodeReachDistance * NodeReachDistance)
+       while (_pathIndex < _currentPath.Count - 1 &&
+              toTarget.LengthSquared() < NodeReachDistance * NodeReachDistance)
        {
            _pathIndex++;
-           if (_pathIndex >= _currentPath.Count)
-               return Vector2.Zero;
-
            targetNode = _currentPath[_pathIndex];
            targetPos = _gridMapper.GridToWorldCenter(targetNode);
            toTarget = targetPos - EnemyPosition;
        }
 
-       if (toTarget == Vector2.Zero)
+       if (toTarget.LengthSquared() < 0.0001f)
            return Vector2.Zero;
 
        toTarget.Normalize();
@@ -369,6 +399,12 @@ public class EnemyMovement : MovementBase
        RecalculatePath(_pendingStartGrid, _pendingTargetGrid);
        _hasPendingRepath = false;
    }
+   
+   private static float NextRepathInterval()
+   {
+       return BaseRepathInterval + ((float)_rng.NextDouble() * 2f - 1f) * RepathJitter;
+   }
+
 
    private Vector2 FallbackStepOnGrid(Point enemyGrid, Point targetGrid)
    {
