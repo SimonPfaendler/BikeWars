@@ -542,16 +542,11 @@ public class CollisionManager
     }
 
     public void Insertions(List<ItemBase> items, HashSet<Player> players, List<ProjectileBase> projectiles,
-        List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters, List<Tram> trams, List<Car> cars, List<ObjectBase> objects, List<Tower> towers)
+        List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters, List<Tram> trams, List<Car> cars)
     {
         foreach (ItemBase c in items)
         {
             AddDynamic(c.Collider);
-        }
-
-        foreach (ObjectBase o in objects)
-        {
-            AddDynamic(o.Collider);
         }
 
         foreach (var p in players)
@@ -584,17 +579,7 @@ public class CollisionManager
             }
         }
 
-        foreach (Tower t in towers)
-        {
-            if (t is TowerAlly ta)
-            {
-                StaticHash.Insert(ta.CollisionCollider);
-                AddDynamic(ta.Collider);
-            } else
-            {
-                StaticHash.Insert(t.Collider);
-            }
-        }
+
         foreach (var t in trams)
         {
             foreach (var col in t.Colliders)
@@ -1004,7 +989,7 @@ public class CollisionManager
     {
         allDynamics.Clear();
         DynamicHash.Clear();
-        Insertions(items, players, projectiles, aoeAttacks, characters, trams, cars, objects, towers);
+        Insertions(items, players, projectiles, aoeAttacks, characters, trams, cars);
 
         foreach (var c in allDynamics)
         {
@@ -1500,6 +1485,22 @@ public class CollisionManager
                 new Rectangle(x, y, _cellSize, _cellSize),
                 color * alpha
             );
+        }
+    }
+
+    public void RegisterStaticWorld(
+        IEnumerable<ObjectBase> objects,
+        IEnumerable<Tower> towers)
+    {
+        foreach (ObjectBase o in objects)
+            StaticHash.Insert(o.Collider);
+
+        foreach (Tower t in towers)
+        {
+            if (t is TowerAlly ta)
+                StaticHash.Insert(ta.CollisionCollider);
+            else
+                StaticHash.Insert(t.Collider);
         }
     }
 }

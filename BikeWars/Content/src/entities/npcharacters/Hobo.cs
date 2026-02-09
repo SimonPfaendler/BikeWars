@@ -41,7 +41,7 @@ namespace BikeWars.Entities.Characters
         };
 
         public Hobo(Vector2 start, float radius, AudioService audio, PathFinding pathFinding,
-            CollisionManager collisionManager, RepathScheduler repathScheduler)
+            CollisionManager collisionManager, RepathScheduler repathScheduler, ITargetProvider targetProvider): base(targetProvider)
         {
             _audio = audio;
             _pathFinding = pathFinding;
@@ -97,8 +97,30 @@ namespace BikeWars.Entities.Characters
                     em.PlayerPosition = Beer.BeerPosition;
                 }
             }
-            Movement.HandleMovement(gameTime);
-            Vector2 direction = Movement.Direction;
+            // Movement.HandleMovement(gameTime);
+            // Vector2 direction = Movement.Direction;
+            Vector2 direction;
+            float distSq = DistanceToClosestPlayerSq();
+
+            if (distSq > LOD1_DIST_SQ)
+            {
+                // LOD2 – sehr weit weg → nur selten updaten
+                if (Random.Shared.NextDouble() < 0.97)
+                    return;
+
+                direction = GetSimpleChaseDirection();
+            }
+            else if (distSq > LOD0_DIST_SQ)
+            {
+                // LOD1 – mittlere Distanz → KEIN Pathfinding
+                direction = GetSimpleChaseDirection();
+            }
+            else
+            {
+                // LOD0 – nahe am Spieler → volle Pathfinding AI
+                Movement.HandleMovement(gameTime);
+                direction = Movement.Direction;
+            }
             LastTransform = new Transform(Transform.Position, Transform.Size);
             if (Movement.IsMoving)
             {

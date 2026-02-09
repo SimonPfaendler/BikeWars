@@ -119,7 +119,7 @@ namespace BikeWars.Content.managers
                 var variant = variants[i % variants.Length];
 
                 var r = new Raver(pos, raverSize, audioService, variant.Left,
-                    variant.Right);
+                    variant.Right, gameObjectManager);
 
                 // even-indexed ravers start facing left, odd facing right
                 bool startLeft = (i % 2 == 0);

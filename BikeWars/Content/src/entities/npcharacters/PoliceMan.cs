@@ -41,7 +41,7 @@ public class PoliceMan: CharacterBase, IWorldAudioAware
         protected override string WalkingSound => AudioAssets.Walking;
 
         public PoliceMan(Vector2 start, float size, AudioService audio, PathFinding pathFinding,
-            CollisionManager collisionManager, RepathScheduler repathScheduler)
+            CollisionManager collisionManager, RepathScheduler repathScheduler, ITargetProvider targetProvider): base(targetProvider)
         {
             _audio = audio;
             _pathFinding = pathFinding;

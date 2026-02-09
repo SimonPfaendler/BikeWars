@@ -42,7 +42,7 @@ namespace BikeWars.Entities.Characters
         };
 
         public BikeThief(Vector2 start, float size, AudioService audio, PathFinding pathFinding,
-            CollisionManager collisionManager, RepathScheduler repathScheduler)
+            CollisionManager collisionManager, RepathScheduler repathScheduler, ITargetProvider targetProvider): base(targetProvider)
         {
             // Werte kannst du anpassen, wenn der BikeThief z.B. stärker/schneller sein soll
             _audio = audio;
@@ -206,7 +206,7 @@ namespace BikeWars.Entities.Characters
                 }
                 else
                 {_audio.Sounds.Play(AudioAssets.BikeThiefLaugh);}
-                    
+
             }
         }
 

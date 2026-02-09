@@ -22,7 +22,7 @@ using System.Linq;
 using BikeWars.Content.entities.npcharacters;
 
 namespace BikeWars.Content.managers;
-public class GameObjectManager
+public class GameObjectManager: ITargetProvider
 {
     public event Action<CharacterBase>? OnCharacterDied;
     public event Action<Tower>? OnTowerDied;
@@ -517,10 +517,10 @@ public class GameObjectManager
 
         // Shake screen on cast
         OnScreenShakeRequested?.Invoke(7f, 2.0f);
-        
+
         TriggerBellFearForEnemies(5.0f);
     }
-    
+
     // Triggers the bell fear effect on all enemies (except KamikazeOpa)
     // and forces a repath so they react immediately.
     public void TriggerBellFearForEnemies(float seconds)

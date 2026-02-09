@@ -39,7 +39,7 @@ public class Dozent: CharacterBase, IWorldAudioAware
 
 
         public Dozent(Vector2 start, float size, AudioService audio, PathFinding pathFinding,
-            CollisionManager collisionManager, RepathScheduler repathScheduler)
+            CollisionManager collisionManager, RepathScheduler repathScheduler, ITargetProvider targetProvider): base(targetProvider)
         {
             _audio = audio;
             _pathFinding = pathFinding;

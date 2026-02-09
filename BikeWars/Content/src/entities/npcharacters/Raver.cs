@@ -20,7 +20,7 @@ namespace BikeWars.Entities.Characters
 
         //constructor
         public Raver(Vector2 start, float size, AudioService audio, string leftAnimKey,
-            string rightAnimKey)
+            string rightAnimKey, ITargetProvider targetProvider): base(targetProvider)
         {
             _audio = audio;
             Attributes = new CharacterAttributes(this, maxHealth: 35, health: 35, attackDamage: 2, attackCoolDown: 0f, canAutoAttack: false);
