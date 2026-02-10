@@ -12,8 +12,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Entities;
 using BikeWars.Content.entities.npcharacters;
-using BikeWars.Content.entities.items;
-
 
 namespace BikeWars.Content.managers;
 
@@ -609,9 +607,7 @@ public class CollisionManager
 
     private void HandleCharacterWithStatic(ICollider b, ICollider c)
     {
-        // Ignore SPAWNENEMIES layer for characters
-        if (b.Layer == CollisionLayer.SPAWNENEMIES) return;
-        if (c.Layer != CollisionLayer.CHARACTER && c.Layer != CollisionLayer.PLAYER) return;
+        if ((b.Layer != CollisionLayer.WALL && b.Layer != CollisionLayer.TOWER) || (c.Layer != CollisionLayer.CHARACTER && c.Layer != CollisionLayer.PLAYER)) return;
         Vector2 penetration = GetPenetrationVector(c, b);
         if (penetration.LengthSquared() < 0.0001f)
             return;
@@ -706,7 +702,12 @@ public class CollisionManager
     {
         foreach (var b in statics)
         {
+            if (b.Layer == CollisionLayer.SPAWNENEMIES) continue;
             HandleCharacterWithStatic(b, c);
+            HandleInteractionsTower(c, b);
+            HandleInteractions(c, b);
+            HandleTrigger(c, b);
+            HandleTowers(b, c);
             HandleProjectileWithStatic(b, c);
             HandleProjectileWithTower(b, c);
             HandleAOEWithStatic(b, c);
@@ -737,11 +738,7 @@ public class CollisionManager
         foreach (var d in dynamics)
         {
             PickingUpItem(c, d);
-            HandleInteractions(c, d);
-            HandleTrigger(c, d);
-            HandleInteractionsTower(c, d);
             HandleCharacters(c, d);
-            HandleTowers(c, d);
             HandleTramCollision(c, d);
             HandleCarCollision(c, d);
         }
@@ -902,32 +899,7 @@ public class CollisionManager
     private void HandleTowers(ICollider c, ICollider d)
     {
         if (c.Layer != CollisionLayer.TOWER) return;
-
         HandleProjectileWithTower(c, d);
-        // AOE damage handling
-        if (d.Layer != CollisionLayer.AOE) return;
-
-        AreaOfEffectBase aoe = (AreaOfEffectBase)d.Owner;
-        if (aoe.Owner == c.Owner) return; // prevent hitting yourself
-
-        if (c.Intersects(d))
-        {
-            CharacterBase ch = (CharacterBase)c.Owner;
-
-            // Only apply damage if enough time has passed (once per DamageInterval)
-            if (aoe.CanDamage(ch))
-            {
-                // Call proper AOE damage event
-                OnAOEHit?.Invoke(ch, aoe);
-            }
-
-            if (ch.IsDead)
-            {
-                _toRemoveColliders.Add(ch.Collider);
-            }
-        }
-
-        return; // don't run projectile logic
     }
 
     private void HandleTerrain(ICollider c, List<ICollider> statics)
@@ -976,7 +948,7 @@ public class CollisionManager
     }
     private void HandleInteractionsTower(ICollider c, ICollider d)
     {
-        if (c.Layer == CollisionLayer.PLAYER && d.Layer == CollisionLayer.INTERACT && c.Intersects(d))
+        if (c.Layer == CollisionLayer.PLAYER && d.Layer == CollisionLayer.TOWER && c.Intersects(d))
         {
             if (c.Owner is Player p && d.Owner is TowerAlly ta)
             {
@@ -1493,7 +1465,9 @@ public class CollisionManager
         IEnumerable<Tower> towers)
     {
         foreach (ObjectBase o in objects)
+        {
             StaticHash.Insert(o.Collider);
+        }
 
         foreach (Tower t in towers)
         {

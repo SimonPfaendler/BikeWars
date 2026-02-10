@@ -251,14 +251,15 @@ namespace BikeWars.Content.screens
             var players = new HashSet<Player>();
             if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);
             if (_gameObjectManager.Player2 != null) players.Add(_gameObjectManager.Player2);
-            _collisionManager.RegisterStaticWorld(_gameObjectManager.Objects, _gameObjectManager.Towers);
-            _collisionManager.Insertions(_gameObjectManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(),_gameObjectManager.Cars);
+
             GameEvents.OnResumeTimer += ResumeTimer;
             HandleLoadNonInGameData();
             _gameTimer.OnTimerFinished += OnGameTimerFinished;
 
             // Tiled Map
             _collisionManager.LoadContent(content);
+            _collisionManager.RegisterStaticWorld(_gameObjectManager.Objects, _gameObjectManager.Towers);
+            _collisionManager.Insertions(_gameObjectManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(),_gameObjectManager.Cars);
 
             // pathfinding object
             _pathFinding = new PathFinding(_collisionManager.PathGrid);
@@ -983,10 +984,6 @@ namespace BikeWars.Content.screens
             if (_gameObjectManager.Player2 != null) players.Add(_gameObjectManager.Player2);
             _collisionManager.RegisterStaticWorld(_gameObjectManager.Objects, _gameObjectManager.Towers);
             _collisionManager.Insertions(_gameObjectManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(),_gameObjectManager.Cars);
-            // foreach (var s in _gameObjectManager.Statics)
-            // {
-            //     _collisionManager.StaticHash.Insert(s);
-            // }
             Console.WriteLine("Game loaded.");
         }
         private void HandleSaveLoadInput()

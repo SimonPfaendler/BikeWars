@@ -18,7 +18,6 @@ public abstract class Tower
     private TowerAttributes _attributes {get;set;}
     public TowerAttributes Attributes {get => _attributes; set => _attributes = value;}
     public bool IsDead => Attributes.Health <= 0;
-    //public event Action<Tower, int> OnTookDamage;
 
     public float Rotation {get; set;}
 
@@ -27,8 +26,6 @@ public abstract class Tower
     protected Texture2D _texture;
     protected AudioService _audio;
 
-
-    //private readonly PathFinding _pathFinding;
     // 1x1 Texture to represent the enemy
     public static Texture2D pixel;
 

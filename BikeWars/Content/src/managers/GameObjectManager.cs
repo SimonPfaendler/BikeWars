@@ -251,7 +251,16 @@ public class GameObjectManager: ITargetProvider
             Statics.Add(obj.CollisionCollider);
     }
 
-    public void RemoveObject(ObjectBase obj) => _objects.Remove(obj);
+    public void RemoveObject(ObjectBase obj)
+    {
+        _objects.Remove(obj);
+
+        if (obj.CollisionCollider != null)
+            Statics.Remove(obj.CollisionCollider);
+
+        if (obj.Collider != null)
+            Statics.Remove(obj.Collider);
+    }
 
     public void AddStatic(BoxCollider stat)
     {
@@ -760,14 +769,6 @@ public class GameObjectManager: ITargetProvider
                 continue;
             }
             AddObject(created);
-            switch (created) {
-                case BikeShop bs: // It works but Bikeshop shouldn't be a item.
-                    AddStatic(bs.CollisionCollider);
-                    break;
-                case DestructibleObject:
-                    AddStatic(created.Collider);
-                    break;
-            }
         }
     }
     private Tower? CreateTowerFromTiled(TiledObjectInfo spawn)
