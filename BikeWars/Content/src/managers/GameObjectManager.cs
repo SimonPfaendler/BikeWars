@@ -235,10 +235,6 @@ public class GameObjectManager: ITargetProvider
         return null;
     }
 
-    private void HandleTowerTookDamage(Tower t, int amount)
-    {
-        OnTowerTookDamage?.Invoke(t, amount);
-    }
     public void AddItem(ItemBase item)
     {
         Items.Add(item);
@@ -769,6 +765,11 @@ public class GameObjectManager: ITargetProvider
                 continue;
             }
             AddObject(created);
+            switch (created) {
+                case BikeShop bs: // It works but Bikeshop shouldn't be a item.
+                    AddStatic(bs.CollisionCollider);
+                    break;
+            }
         }
     }
     private Tower? CreateTowerFromTiled(TiledObjectInfo spawn)
