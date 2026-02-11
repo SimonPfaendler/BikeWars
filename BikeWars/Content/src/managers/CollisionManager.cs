@@ -496,8 +496,8 @@ public class CollisionManager
         float dx = box.Center().X - circle.Center().X;
         float dy = box.Center().Y - circle.Center().Y;
 
-        float px = (circle.Radius /2f + box.Width / 2f) - Math.Abs(dx);
-        float py = (circle.Radius /2f+ box.Height / 2f) - Math.Abs(dy);
+        float px = (circle.Radius + box.Width / 2f) - Math.Abs(dx);
+        float py = (circle.Radius + box.Height / 2f) - Math.Abs(dy);
 
         if (px <= 0 || py <= 0)
             return Vector2.Zero;
@@ -799,7 +799,7 @@ public class CollisionManager
         Vector2 penetration = GetPenetrationVector(c, d);
         if (penetration.LengthSquared() < 0.0001f)
             return;
-        Vector2 separation = penetration * 0.25f;
+        Vector2 separation = penetration * 0.5f;
 
         const float SLOP = 0.01f;
         if (penetration.LengthSquared() < SLOP * SLOP)
@@ -979,6 +979,13 @@ public class CollisionManager
             HandleTerrain(c, _nearbyStatics);
             HandleStatics(c, _nearbyStatics);
             HandleDynamics(c, _nearbyDynamics);
+            
+            if (c.Layer == CollisionLayer.CHARACTER || c.Layer == CollisionLayer.PLAYER)
+            {
+                _nearbyStatics.Clear();
+                StaticHash.QueryNearby(c.Position, 2, _nearbyStatics);
+                HandleStatics(c, _nearbyStatics);
+            }
         }
 
         _removeProjectiles.Clear();
