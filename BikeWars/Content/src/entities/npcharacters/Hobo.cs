@@ -97,9 +97,6 @@ namespace BikeWars.Entities.Characters
                     em.PlayerPosition = Beer.BeerPosition;
                 }
             }
-            // Movement.HandleMovement(gameTime);
-            // Vector2 direction = Movement.Direction;
-            Vector2 direction;
             float distSq = DistanceToClosestPlayerSq();
             if (Movement is null)
             {
@@ -108,29 +105,16 @@ namespace BikeWars.Entities.Characters
 
             if (distSq > LOD1_DIST_SQ)
             {
-                // LOD2 – sehr weit weg → nur selten updaten
+                // LOD2 - very far away: update less often, but keep pathing when updated.
                 if (Random.Shared.NextDouble() < 0.50)
                     return;
+            }
 
-                direction = GetSimpleChaseDirection();
-            }
-            else if (distSq > LOD0_DIST_SQ)
-            {
-                // LOD1 – mittlere Distanz → KEIN Pathfinding
-                direction = GetSimpleChaseDirection();
-            }
-            else
-            {
-                // LOD0 – nahe am Spieler → volle Pathfinding AI
-                Movement.HandleMovement(gameTime);
-                direction = Movement.Direction;
-            }
-            if (distSq > LOD0_DIST_SQ)
-            {
-                // In LOD1/2 we skip pathfinding; still update movement state.
-                Movement.Direction = direction;
-                Movement.Update(gameTime);
-            }
+            // Always use pathfinding movement when we run an update.
+            // EnemyMovement already adapts repath frequency for distant targets.
+            Movement.HandleMovement(gameTime);
+            Vector2 direction = Movement.Direction;
+
             LastTransform = new Transform(Transform.Position, Transform.Size);
             if (Movement.IsMoving)
             {

@@ -19,7 +19,7 @@ public class EnemyMovement : MovementBase
     private List<Node> _currentPath = new();
     private int _pathIndex = 0;
     public IReadOnlyList<Node> CurrentPath => _currentPath;
-    private const int LocalGridSize = 21; // 7x7 nodes A*
+    private const int LocalGridSize = 21; // 21x21 local search window
     private float _repathTimer = 0f;
     
     private const float BaseRepathInterval = 0.4f;
@@ -35,8 +35,11 @@ public class EnemyMovement : MovementBase
 
    // enemies avoid each other
    private const float AvoidRadius = 60f;
-   private const float AvoidStrength = 5.0f;
-   private const float AvoidMax = 6f;
+   private const float AvoidStrength = 2.0f;
+   private const float AvoidMax = 2.0f;
+   private const float AvoidBlendWeight = 0.45f;
+   private const float StuckTimeout = 0.6f;
+   private const float StuckMinProgress = 6f;
    private readonly float _slotAngle;
 
    public Vector2 PlayerPosition {get; set;}
@@ -50,6 +53,9 @@ public class EnemyMovement : MovementBase
    private Point _pendingStartGrid;
    private Point _pendingTargetGrid;
    private bool _hasPendingRepath;
+   private float _stuckTimer = 0f;
+   private Vector2 _lastProgressPosition = Vector2.Zero;
+   private bool _hasProgressSample = false;
    
    // Bell avoidance behavior
    private float _bellFearTimer = 0f;
@@ -81,6 +87,8 @@ public class EnemyMovement : MovementBase
 
         _hasPendingRepath = false;
         IsRepathQueued = false;
+        _stuckTimer = 0f;
+        _hasProgressSample = false;
     }
     
     // bell logic
@@ -201,10 +209,16 @@ public class EnemyMovement : MovementBase
            }
        }
 
+       if (IsStuck(dt, pathDir))
+       {
+           // If we're not making progress for a short time, force a fresh route.
+           ForceRepath();
+           pathDir = FallbackStepOnGrid(enemyGrid, playerGrid);
+       }
+
        Vector2 avoidDir = ComputeAvoidance();
 
-       // commented for debug, bypasses all the avoidance algo
-       Vector2 combinedPath = pathDir + avoidDir;
+       Vector2 combinedPath = CombinePathAndAvoidance(pathDir, avoidDir);
 
        if (combinedPath.LengthSquared() < 0.0001f)
            combinedPath = pathDir;
@@ -235,7 +249,7 @@ public class EnemyMovement : MovementBase
            );
 
 
-           _pathIndex = 0;
+           _pathIndex = _currentPath.Count > 1 ? 1 : 0;
            return;
        }
 
@@ -268,6 +282,18 @@ public class EnemyMovement : MovementBase
        );
 
        var localPath = localFinder.FindPath(startLocal.X, startLocal.Y, targetLocal.X, targetLocal.Y);
+
+       if (localPath.Count == 0)
+       {
+           // Local window can miss valid detours around bigger buildings.
+           _currentPath = _pathFinding.FindPath(
+               enemyGrid.X, enemyGrid.Y,
+               playerGrid.X, playerGrid.Y
+           );
+           _pathIndex = _currentPath.Count > 1 ? 1 : 0;
+           return;
+       }
+
        _currentPath.Clear();
 
        foreach (var node in localPath)
@@ -277,7 +303,7 @@ public class EnemyMovement : MovementBase
            _currentPath.Add(_pathFinding.GetNode(globalX, globalY));
        }
 
-       _pathIndex = 0;
+       _pathIndex = _currentPath.Count > 1 ? 1 : 0;
    }
 
    // returns the direction toward the next node in the path, or moves to next node.
@@ -389,6 +415,58 @@ public class EnemyMovement : MovementBase
        }
 
        return avoid;
+   }
+
+   private bool IsStuck(float dt, Vector2 pathDir)
+   {
+       if (pathDir == Vector2.Zero || _currentPath.Count == 0)
+       {
+           _stuckTimer = 0f;
+           _hasProgressSample = false;
+           return false;
+       }
+
+       if (!_hasProgressSample)
+       {
+           _lastProgressPosition = EnemyPosition;
+           _hasProgressSample = true;
+           _stuckTimer = 0f;
+           return false;
+       }
+
+       float movedSq = Vector2.DistanceSquared(EnemyPosition, _lastProgressPosition);
+       if (movedSq >= StuckMinProgress * StuckMinProgress)
+       {
+           _lastProgressPosition = EnemyPosition;
+           _stuckTimer = 0f;
+           return false;
+       }
+
+       _stuckTimer += dt;
+       if (_stuckTimer < StuckTimeout)
+           return false;
+
+       _lastProgressPosition = EnemyPosition;
+       _stuckTimer = 0f;
+       return true;
+   }
+
+   private static Vector2 CombinePathAndAvoidance(Vector2 pathDir, Vector2 avoidDir)
+   {
+       if (pathDir == Vector2.Zero)
+           return avoidDir;
+
+       if (avoidDir == Vector2.Zero)
+           return pathDir;
+
+       float alongPath = Vector2.Dot(avoidDir, pathDir);
+       if (alongPath < 0f)
+       {
+           // Don't let avoidance cancel forward motion and cause backtracking at walls.
+           avoidDir -= pathDir * alongPath;
+       }
+
+       return pathDir + avoidDir * AvoidBlendWeight;
    }
 
    public void DoRepathNow()
