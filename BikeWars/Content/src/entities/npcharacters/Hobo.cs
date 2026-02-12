@@ -125,6 +125,12 @@ namespace BikeWars.Entities.Characters
                 Movement.HandleMovement(gameTime);
                 direction = Movement.Direction;
             }
+            if (distSq > LOD0_DIST_SQ)
+            {
+                // In LOD1/2 we skip pathfinding; still update movement state.
+                Movement.Direction = direction;
+                Movement.Update(gameTime);
+            }
             LastTransform = new Transform(Transform.Position, Transform.Size);
             if (Movement.IsMoving)
             {
