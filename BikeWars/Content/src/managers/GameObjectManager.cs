@@ -141,6 +141,7 @@ public class GameObjectManager: ITargetProvider
         {
             ta.OnShoot += OnTowerShotBullet;
             Statics.Add(ta.CollisionCollider);
+            Statics.Add(ta.Collider);
             return;
         }
         Statics.Add(tower.Collider);
@@ -152,6 +153,7 @@ public class GameObjectManager: ITargetProvider
         if (tower is TowerAlly ta)
         {
             Statics.Remove(ta.CollisionCollider);
+            Statics.Remove(ta.Collider);
             return;
         }
         Statics.Remove(tower.Collider);

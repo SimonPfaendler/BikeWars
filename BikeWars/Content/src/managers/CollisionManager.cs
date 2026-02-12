@@ -948,7 +948,7 @@ public class CollisionManager
     }
     private void HandleInteractionsTower(ICollider c, ICollider d)
     {
-        if (c.Layer == CollisionLayer.PLAYER && d.Layer == CollisionLayer.TOWER && c.Intersects(d))
+        if (c.Layer == CollisionLayer.PLAYER && d.Layer == CollisionLayer.INTERACT && c.Intersects(d))
         {
             if (c.Owner is Player p && d.Owner is TowerAlly ta)
             {
@@ -1479,9 +1479,14 @@ public class CollisionManager
         foreach (Tower t in towers)
         {
             if (t is TowerAlly ta)
+            {
                 StaticHash.Insert(ta.CollisionCollider);
+                StaticHash.Insert(ta.Collider);
+            }
             else
+            {
                 StaticHash.Insert(t.Collider);
+            }
         }
     }
 }

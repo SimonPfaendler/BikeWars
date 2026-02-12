@@ -109,7 +109,7 @@ namespace BikeWars.Entities.Characters
             if (distSq > LOD1_DIST_SQ)
             {
                 // LOD2 – sehr weit weg → nur selten updaten
-                if (Random.Shared.NextDouble() < 0.97)
+                if (Random.Shared.NextDouble() < 0.50)
                     return;
 
                 direction = GetSimpleChaseDirection();
