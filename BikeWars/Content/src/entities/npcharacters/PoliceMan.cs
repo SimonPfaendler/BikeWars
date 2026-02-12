@@ -89,6 +89,10 @@ public class PoliceMan: CharacterBase, IWorldAudioAware
                      em.PlayerPosition = target.Transform.Position;
                 }
             }
+            if (Movement is null)
+            {
+                return;
+            }
             Movement.HandleMovement(gameTime);
             HandleSound(Movement.IsMoving);
             LastTransform = new Transform(Transform.Position, Transform.Size);
@@ -143,6 +147,10 @@ public class PoliceMan: CharacterBase, IWorldAudioAware
 
         public void Immobalize(bool value)
         {
+            if (Movement is null)
+            {
+                return;
+            }
             Movement.CanMove = !value;
         }
         public override void Attack(ICombat target)

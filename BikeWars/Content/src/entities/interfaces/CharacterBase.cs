@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
@@ -36,7 +38,7 @@ public abstract class CharacterBase : ICharacter, ICombat
 
     public bool _XpDropped { get; set; } = false; // for making sure each enemy only drops XP once
 
-    public EnemyMovement Movement { get; protected set; }
+    public EnemyMovement? Movement { get; protected set; }
     protected AudioService _audio;
     protected WorldAudioManager _worldAudioManager;
 

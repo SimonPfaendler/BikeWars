@@ -88,6 +88,11 @@ namespace BikeWars.Entities.Characters
                         em.PlayerPosition = target.Transform.Position;
                 }
             }
+
+            if (Movement is null)
+            {
+                return;
+            }
             Movement.HandleMovement(gameTime);
 
             if (_isEscaping && Vector2.DistanceSquared(Transform.Position, _escapeTarget) < 25f * 25f)

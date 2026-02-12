@@ -1,3 +1,5 @@
+# nullable enable
+
 using BikeWars.Entities.Characters;
 using Microsoft.Xna.Framework;
 

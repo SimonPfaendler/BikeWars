@@ -78,7 +78,10 @@ namespace BikeWars.Entities.Characters
 
                 PlayTalkWithWorldAudio();
             }
-
+            if (Movement is null)
+            {
+                return;
+            }
             Movement.HandleMovement(gameTime);
             HandleSound(Movement.IsMoving);
 

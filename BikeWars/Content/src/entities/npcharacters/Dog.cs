@@ -94,6 +94,10 @@ namespace BikeWars.Entities.Characters
                     em.PlayerPosition = DogBowl.BowlPosition;
                 }
             }
+            if (Movement is null)
+            {
+                return;
+            }
             Movement.HandleMovement(gameTime);
             HandleSound(Movement.IsMoving);
 

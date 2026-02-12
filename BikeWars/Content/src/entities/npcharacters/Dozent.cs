@@ -87,7 +87,10 @@ public class Dozent: CharacterBase, IWorldAudioAware
 
                 PlayTalkWithWorldAudio();
             }
-
+            if (Movement is null)
+            {
+                return;
+            }
             Movement.HandleMovement(gameTime);
             HandleSound(Movement.IsMoving);
             LastTransform = new Transform(Transform.Position, Transform.Size);

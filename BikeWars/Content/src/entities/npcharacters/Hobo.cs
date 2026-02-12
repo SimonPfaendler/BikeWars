@@ -101,6 +101,10 @@ namespace BikeWars.Entities.Characters
             // Vector2 direction = Movement.Direction;
             Vector2 direction;
             float distSq = DistanceToClosestPlayerSq();
+            if (Movement is null)
+            {
+                return;
+            }
 
             if (distSq > LOD1_DIST_SQ)
             {
@@ -197,6 +201,10 @@ namespace BikeWars.Entities.Characters
 
         public void Immobalize(bool value)
         {
+            if (Movement is null)
+            {
+                return;
+            }
             Movement.CanMove = !value;
         }
         public override void Attack(ICombat target)
