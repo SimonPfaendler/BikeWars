@@ -34,6 +34,8 @@ public class PathFinding
     public readonly int _height;
     private int _searchId;
 
+    private readonly Node[] _neighbourBuffer = new Node[8];
+
     public PathFinding(Node[,] grid)
     {
         _grid = grid;
@@ -87,10 +89,9 @@ public class PathFinding
         return true;
     }
 
-    // gets the neighbours of a node
-    public List<Node> GetNeighbours(Node node)
+    public int GetNeighbours(Node node)
     {
-        var neighbours = new List<Node>();
+        int count = 0;
 
         for (int dx = -1; dx <= 1; dx++)
         {
@@ -98,13 +99,13 @@ public class PathFinding
             {
                 if (IsValidNeighbour(node, dx, dy, out int nx, out int ny))
                 {
-                    neighbours.Add(_grid[nx, ny]);
+                    _neighbourBuffer[count++] = _grid[nx, ny];
                 }
             }
         }
-        return neighbours;
-    }
 
+        return count;
+    }
     private static void CalculateCosts(Node currentNode, Node neighbour, Node targetNode)
     {
         int movementCost;
@@ -190,7 +191,10 @@ public class PathFinding
 
         Node startNode = _grid[startX, startY];
         Node targetNode = _grid[endX, endY];
-        
+
+        if (!startNode.Walkable || !targetNode.Walkable)
+            return new List<Node>();
+
         _searchId++;
         PrepareNodeForSearch(startNode);
         PrepareNodeForSearch(targetNode);
@@ -223,8 +227,10 @@ public class PathFinding
 
             currentNode.ClosedId = _searchId;
 
-            foreach (Node neighbour in GetNeighbours(currentNode))
+            int neighbourCount = GetNeighbours(currentNode);
+            for (int i = 0; i < neighbourCount; i++)
             {
+                Node neighbour = _neighbourBuffer[i];
                 if (neighbour.ClosedId == _searchId)
                     continue;
 

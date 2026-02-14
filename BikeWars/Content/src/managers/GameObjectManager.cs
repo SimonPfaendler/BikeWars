@@ -22,12 +22,12 @@ using System.Linq;
 using BikeWars.Content.entities.npcharacters;
 
 namespace BikeWars.Content.managers;
-public class GameObjectManager
+public class GameObjectManager: ITargetProvider
 {
     public event Action<CharacterBase>? OnCharacterDied;
     public event Action<Tower>? OnTowerDied;
     public event Action<CharacterBase, int, object>? OnTookDamage;
-    public event Action<Tower, int>? OnTowerTookDamage;
+    // public event Action<Tower, int>? OnTowerTookDamage;
     private Player? _player1 {get; set;}
     public Player? Player1{get => _player1; set => _player1 = value;}
     private Player? _player2 {get; set;}
@@ -141,6 +141,7 @@ public class GameObjectManager
         {
             ta.OnShoot += OnTowerShotBullet;
             Statics.Add(ta.CollisionCollider);
+            Statics.Add(ta.Collider);
             return;
         }
         Statics.Add(tower.Collider);
@@ -152,6 +153,7 @@ public class GameObjectManager
         if (tower is TowerAlly ta)
         {
             Statics.Remove(ta.CollisionCollider);
+            Statics.Remove(ta.Collider);
             return;
         }
         Statics.Remove(tower.Collider);
@@ -235,10 +237,6 @@ public class GameObjectManager
         return null;
     }
 
-    private void HandleTowerTookDamage(Tower t, int amount)
-    {
-        OnTowerTookDamage?.Invoke(t, amount);
-    }
     public void AddItem(ItemBase item)
     {
         Items.Add(item);
@@ -251,7 +249,16 @@ public class GameObjectManager
             Statics.Add(obj.CollisionCollider);
     }
 
-    public void RemoveObject(ObjectBase obj) => _objects.Remove(obj);
+    public void RemoveObject(ObjectBase obj)
+    {
+        _objects.Remove(obj);
+
+        if (obj.CollisionCollider != null)
+            Statics.Remove(obj.CollisionCollider);
+
+        if (obj.Collider != null)
+            Statics.Remove(obj.Collider);
+    }
 
     public void AddStatic(BoxCollider stat)
     {
@@ -517,10 +524,10 @@ public class GameObjectManager
 
         // Shake screen on cast
         OnScreenShakeRequested?.Invoke(7f, 2.0f);
-        
+
         TriggerBellFearForEnemies(5.0f);
     }
-    
+
     // Triggers the bell fear effect on all enemies (except KamikazeOpa)
     // and forces a repath so they react immediately.
     public void TriggerBellFearForEnemies(float seconds)
@@ -763,9 +770,6 @@ public class GameObjectManager
             switch (created) {
                 case BikeShop bs: // It works but Bikeshop shouldn't be a item.
                     AddStatic(bs.CollisionCollider);
-                    break;
-                case DestructibleObject:
-                    AddStatic(created.Collider);
                     break;
             }
         }

@@ -97,7 +97,7 @@ public class CombatManager
 
         _audio.Sounds.Play(AudioAssets.BulletHit);
 
-        OnHitStopRequested?.Invoke(0.075f); // Pause for 0.075 sec
+        //OnHitStopRequested?.Invoke(0.075f); // Pause for 0.075 sec
 
         if (target.Attributes.Health <= 0)
         {

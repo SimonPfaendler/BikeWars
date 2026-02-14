@@ -89,7 +89,7 @@ namespace BikeWars.Content.managers
             _spawnInterval = START_SPAWN_INTERVAL + (END_SPAWN_INTERVAL - START_SPAWN_INTERVAL) * progress;
             if (playerCount == 2)
             {
-                _spawnInterval *= 0.7; 
+                _spawnInterval *= 0.7;
             }
             double carInterval = CAR_SPAWN_START + (CAR_SPAWN_END - CAR_SPAWN_START) * progress;
             double tramChancePerSecond = 0.05 + 0.7 * progress;
@@ -185,7 +185,7 @@ namespace BikeWars.Content.managers
 
                 if (!IsValidSpawnPosition(pos)) continue;
 
-                CharacterBase enemy = new Hobo(pos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler);
+                CharacterBase enemy = new Hobo(pos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler, _gameObjectManager);
 
                 ApplyScaling(enemy, difficultyMultiplier, speedMultiplier);
                 _gameObjectManager.AddCharacter(enemy);
@@ -325,7 +325,7 @@ namespace BikeWars.Content.managers
 
                 //  var hobo = new Hobo(spawnPos, new Point(24, 24), _audioService, _pathFinding,
                  var hobo = new Hobo(spawnPos, 12, _audioService, _pathFinding,
-                     _collisionManager, _repathScheduler);
+                     _collisionManager, _repathScheduler, _gameObjectManager);
                  ApplyScaling(hobo, difficultyMultiplier, speedMultiplier); // Apply extra speed
                  _gameObjectManager.AddCharacter(hobo);
              }
@@ -367,38 +367,38 @@ namespace BikeWars.Content.managers
 
             if (val < spawnHobo)
             {
-                var hobo = new Hobo(spawnPos, 12, _audioService, _pathFinding, _collisionManager, _repathScheduler);
+                var hobo = new Hobo(spawnPos, 12, _audioService, _pathFinding, _collisionManager, _repathScheduler, _gameObjectManager);
                 ApplyScaling(hobo, difficultyMultiplier, speedMultiplier);
                 _gameObjectManager.AddCharacter(hobo);
             }
             else if (val < spawnDog)
             {
-                var dog = new Dog(spawnPos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler);
+                var dog = new Dog(spawnPos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler, _gameObjectManager);
                 ApplyScaling(dog, difficultyMultiplier, speedMultiplier);
                 dog.SetWorldAudioManager(_worldAudioManager);
                 _gameObjectManager.AddCharacter(dog);
             }
             else if (val < spawnThief)
             {
-                var thief = new BikeThief(spawnPos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler);
+                var thief = new BikeThief(spawnPos, 15, _audioService, _pathFinding, _collisionManager, _repathScheduler, _gameObjectManager);
                 ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
                 _gameObjectManager.AddCharacter(thief);
             }
             else if (val < spawnPolice)
             {
-                var police = new PoliceMan(spawnPos, 20, _audioService, _pathFinding, _collisionManager, _repathScheduler);
+                var police = new PoliceMan(spawnPos, 20, _audioService, _pathFinding, _collisionManager, _repathScheduler, _gameObjectManager);
                 ApplyScaling(police, difficultyMultiplier, speedMultiplier);
                 _gameObjectManager.AddCharacter(police);
             }
             else if (val < spawnDozent)
             {
-                var thief = new Dozent(spawnPos, 25, _audioService, _pathFinding, _collisionManager, _repathScheduler);
+                var thief = new Dozent(spawnPos, 25, _audioService, _pathFinding, _collisionManager, _repathScheduler, _gameObjectManager);
                 ApplyScaling(thief, difficultyMultiplier, speedMultiplier);
                 _gameObjectManager.AddCharacter(thief);
             }
             else
             {
-                var kamikaze = new KamikazeOpa(spawnPos, 15, _audioService, _pathFinding, _collisionManager, _gameObjectManager, _repathScheduler);
+                var kamikaze = new KamikazeOpa(spawnPos, 15, _audioService, _pathFinding, _collisionManager, _gameObjectManager, _repathScheduler, _gameObjectManager);
                 ApplyScaling(kamikaze, difficultyMultiplier, speedMultiplier);
                 _gameObjectManager.AddCharacter(kamikaze);
             }

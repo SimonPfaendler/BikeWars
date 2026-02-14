@@ -41,7 +41,7 @@ namespace BikeWars.Entities.Characters
         };
 
         public Dog(Vector2 start, float size, AudioService audio, PathFinding pathFinding,
-            CollisionManager collisionManager, RepathScheduler repathScheduler)
+            CollisionManager collisionManager, RepathScheduler repathScheduler, ITargetProvider targetProvider):base(targetProvider)
         {
             _audio = audio;
             _pathFinding = pathFinding;
@@ -93,6 +93,10 @@ namespace BikeWars.Entities.Characters
                 {
                     em.PlayerPosition = DogBowl.BowlPosition;
                 }
+            }
+            if (Movement is null)
+            {
+                return;
             }
             Movement.HandleMovement(gameTime);
             HandleSound(Movement.IsMoving);

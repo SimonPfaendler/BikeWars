@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using BikeWars.Content.engine.interfaces;
 using BikeWars.Content.engine;
 using BikeWars.Content.engine.Audio;
@@ -9,6 +11,8 @@ using BikeWars.Entities.Characters;
 namespace BikeWars.Content.entities.interfaces;
 public abstract class CharacterBase : ICharacter, ICombat
 {
+    protected const float LOD0_DIST_SQ = 700f * 700f;   // volle Pathfinding AI
+    protected const float LOD1_DIST_SQ = 1500f * 1500f; // simple movement
     private Transform _transform { get; set; }
     public Transform Transform { get => _transform;  set => _transform = value; }
     private Transform _lastTransform { get; set; }
@@ -34,7 +38,7 @@ public abstract class CharacterBase : ICharacter, ICombat
 
     public bool _XpDropped { get; set; } = false; // for making sure each enemy only drops XP once
 
-    public EnemyMovement Movement { get; protected set; }
+    public EnemyMovement? Movement { get; protected set; }
     protected AudioService _audio;
     protected WorldAudioManager _worldAudioManager;
 
@@ -44,6 +48,12 @@ public abstract class CharacterBase : ICharacter, ICombat
 
     protected Vector2 _knockbackVelocity;
     private const float KnockbackDecay = 10f; // Velocity decay per second
+    protected readonly ITargetProvider _targetProvider;
+
+    protected CharacterBase(ITargetProvider targetProvider)
+    {
+        _targetProvider = targetProvider;
+    }
 
     public void ApplyKnockback(Vector2 direction, float force)
     {
@@ -265,5 +275,30 @@ public abstract class CharacterBase : ICharacter, ICombat
             _audio.Sounds.ResumeLoop(WalkingSound);
         else
             _audio.Sounds.PauseLoop(WalkingSound);
+    }
+
+
+
+    protected float DistanceToClosestPlayerSq()
+    {
+        Player? target = _targetProvider.GetTargetPlayer(Transform.Position);
+        if (target == null) return float.MaxValue;
+
+        return Vector2.DistanceSquared(
+            Transform.Position,
+            target.Transform.Position);
+    }
+
+    protected Vector2 GetSimpleChaseDirection()
+    {
+        Player? target = _targetProvider.GetTargetPlayer(Transform.Position);
+        if (target == null) return Vector2.Zero;
+
+        Vector2 dir = target.Transform.Position - Transform.Position;
+
+        if (dir != Vector2.Zero)
+            dir.Normalize();
+
+        return dir;
     }
 }

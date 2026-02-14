@@ -35,7 +35,7 @@ namespace BikeWars.Content.managers
         public Player Player2 { get; private set; }
         public Camera2D Camera { get; private set; }
 
-        public PlayerManager(Viewport viewport, GameMode mode, Rectangle worldBounds, AudioService audioService, bool isTechDemo)
+        public PlayerManager(Viewport viewport, GameMode mode, Rectangle worldBounds, AudioService audioService, bool isTechDemo, GameObjectManager gameObjectManager)
         {
             Camera = new Camera2D(
                 viewport.Width,
@@ -49,7 +49,7 @@ namespace BikeWars.Content.managers
 
             // Player 1 - Keyboard
             var inputP1 = new KeyboardPlayerInput(Camera);
-            Player1 = new Player(1 ,p1Start, 15, new Point(32,32), audioService, inputP1, isTechDemo);
+            Player1 = new Player(1 ,p1Start, 15, new Point(32,32), audioService, inputP1, gameObjectManager, isTechDemo);
 
             if (isTechDemo)
             {
@@ -63,7 +63,7 @@ namespace BikeWars.Content.managers
             }
             // Assign Player 2 to the second controller. Player 1 starts on Keyboard but can switch to Pad 1.
             var inputP2 = new GamepadPlayerInput(PlayerIndex.Two);
-            Player2 = new Player(2, p2Start, 12, new Point(32, 32), audioService, inputP2, isTechDemo, "Character2");
+            Player2 = new Player(2, p2Start, 12, new Point(32, 32), audioService, inputP2, gameObjectManager, isTechDemo, "Character2");
 
             if (isTechDemo)
             {

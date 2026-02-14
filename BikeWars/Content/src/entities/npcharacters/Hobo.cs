@@ -41,7 +41,7 @@ namespace BikeWars.Entities.Characters
         };
 
         public Hobo(Vector2 start, float radius, AudioService audio, PathFinding pathFinding,
-            CollisionManager collisionManager, RepathScheduler repathScheduler)
+            CollisionManager collisionManager, RepathScheduler repathScheduler, ITargetProvider targetProvider): base(targetProvider)
         {
             _audio = audio;
             _pathFinding = pathFinding;
@@ -97,8 +97,24 @@ namespace BikeWars.Entities.Characters
                     em.PlayerPosition = Beer.BeerPosition;
                 }
             }
+            float distSq = DistanceToClosestPlayerSq();
+            if (Movement is null)
+            {
+                return;
+            }
+
+            if (distSq > LOD1_DIST_SQ)
+            {
+                // LOD2 - very far away: update less often, but keep pathing when updated.
+                if (Random.Shared.NextDouble() < 0.50)
+                    return;
+            }
+
+            // Always use pathfinding movement when we run an update.
+            // EnemyMovement already adapts repath frequency for distant targets.
             Movement.HandleMovement(gameTime);
             Vector2 direction = Movement.Direction;
+
             LastTransform = new Transform(Transform.Position, Transform.Size);
             if (Movement.IsMoving)
             {
@@ -175,6 +191,10 @@ namespace BikeWars.Entities.Characters
 
         public void Immobalize(bool value)
         {
+            if (Movement is null)
+            {
+                return;
+            }
             Movement.CanMove = !value;
         }
         public override void Attack(ICombat target)

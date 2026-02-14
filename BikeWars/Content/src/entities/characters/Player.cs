@@ -59,19 +59,19 @@ namespace BikeWars.Entities.Characters
         public int HpLevel { get; private set; } = 1;
         public int DamageLevel { get; private set; } = 1;
         public int CritLevel { get; private set; } = 1;
-        
+
 
         public new bool IsGodMode { get; set; }
-        
+
         // how long enemies should dodge after bell
         private const float BELL_EFFECT_DURATION = 4.0f;
-        
+
         // how long after the bell ends until it can be used again
         private const float BELL_COOLDOWN_DURATION = 30.0f;
 
         private float _bellEffectTimer = 0f;
         private float _bellCooldownTimer = 0f;
-        
+
         // bell states
         public float BellCooldownRemaining => _bellCooldownTimer;
         public bool BellReady => _bellEffectTimer <= 0f && _bellCooldownTimer <= 0f;
@@ -308,7 +308,7 @@ namespace BikeWars.Entities.Characters
                 if (_unlockedWeapons.TryGetValue(weapon.Type, out var attributes))
                 {
                     return;
-                } 
+                }
                 else
                 {
                     if (weapon.Type == WeaponType.DamageCircle && player.PlayerNumber == 2)
@@ -376,7 +376,7 @@ namespace BikeWars.Entities.Characters
         }
 
         public Player(int Playernumber, Vector2 start, float radius, Point renderSize, AudioService audio,
-            IPlayerInput input, bool isTechDemo = false, string characterPrefix = "Character1")
+            IPlayerInput input, GameObjectManager gameObjectManager, bool isTechDemo = false, string characterPrefix = "Character1"): base(gameObjectManager)
         {
             PlayerNumber = Playernumber;
             if (PlayerNumber == 1)
@@ -484,10 +484,10 @@ namespace BikeWars.Entities.Characters
             HandleSwitchMovement();
             UpdateHitFlash(gameTime);
             UpdateCollider(CollisionLayer.PLAYER);
-            
+
             UpdateBellCooldown(gameTime);
         }
-        
+
         // bell cooldown
         private void UpdateBellCooldown(GameTime gameTime)
         {
@@ -513,7 +513,7 @@ namespace BikeWars.Entities.Characters
                     _bellCooldownTimer = 0f;
             }
         }
-        
+
         // try to start the bell
         private bool TryStartBell()
         {
@@ -728,7 +728,7 @@ namespace BikeWars.Entities.Characters
                 OnLevelUp?.Invoke(XpLevelUp, CurrentLevel);
             }
         }
-        
+
         public void UpgradeSkill(SkillTree.SkillId skill)
         {
             if (skill is SkillTree.SkillId.MoreHp)

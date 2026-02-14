@@ -35,7 +35,7 @@ namespace BikeWars.Entities.Characters
         protected override string WalkingSound => AudioAssets.Walking;
 
         public KamikazeOpa(Vector2 start, float size, AudioService audio, PathFinding pathFinding,
-            CollisionManager collisionManager, GameObjectManager gameObjectManager, RepathScheduler repathScheduler)
+            CollisionManager collisionManager, GameObjectManager gameObjectManager, RepathScheduler repathScheduler,ITargetProvider targetProvider): base(targetProvider)
         {
             _audio = audio;
             _gameObjectManager = gameObjectManager;
@@ -78,7 +78,10 @@ namespace BikeWars.Entities.Characters
 
                 PlayTalkWithWorldAudio();
             }
-
+            if (Movement is null)
+            {
+                return;
+            }
             Movement.HandleMovement(gameTime);
             HandleSound(Movement.IsMoving);
 

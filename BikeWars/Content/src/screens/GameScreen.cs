@@ -190,7 +190,7 @@ namespace BikeWars.Content.screens
         public virtual void LoadContent(ContentManager content, GraphicsDevice gd)
         {
             // Font and Debugger
-            _playerManager = new PlayerManager(ViewPort, _gameMode, worldBounds, _audioService, _isTechDemo);
+            _playerManager = new PlayerManager(ViewPort, _gameMode, worldBounds, _audioService, _isTechDemo, _gameObjectManager);
             camera = _playerManager.Camera;
             Player player = _playerManager.Player1;
             Player player2 = _playerManager.Player2;
@@ -252,13 +252,14 @@ namespace BikeWars.Content.screens
             if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);
             if (_gameObjectManager.Player2 != null) players.Add(_gameObjectManager.Player2);
 
-            _collisionManager.Insertions(_gameObjectManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(),_gameObjectManager.Cars, _gameObjectManager.Objects, _gameObjectManager.Towers);
             GameEvents.OnResumeTimer += ResumeTimer;
             HandleLoadNonInGameData();
             _gameTimer.OnTimerFinished += OnGameTimerFinished;
 
             // Tiled Map
             _collisionManager.LoadContent(content);
+            _collisionManager.RegisterStaticWorld(_gameObjectManager.Objects, _gameObjectManager.Towers);
+            _collisionManager.Insertions(_gameObjectManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(),_gameObjectManager.Cars);
 
             // pathfinding object
             _pathFinding = new PathFinding(_collisionManager.PathGrid);
@@ -587,7 +588,7 @@ namespace BikeWars.Content.screens
                     _musicianCooldownTimer = 0f;
                 }
             }
-            
+
             bool playerNearMusicians = false;
             foreach (var obj in _gameObjectManager.Objects)
             {
@@ -866,32 +867,32 @@ namespace BikeWars.Content.screens
                 {
                     case SaveLoad.TYPES.HOBO:
                         Hobo b = new Hobo(p.Position.ToVector2(), p.Radius, _audioService, _pathFinding,
-                            _collisionManager, _repathScheduler);
+                            _collisionManager, _repathScheduler, _gameObjectManager);
                         _gameObjectManager.AddCharacter(b);
                         break;
                     case SaveLoad.TYPES.BIKETHIEF:
                         BikeThief bt = new BikeThief(p.Position.ToVector2(), p.Radius, _audioService, _pathFinding,
-                            _collisionManager, _repathScheduler);
+                            _collisionManager, _repathScheduler, _gameObjectManager);
                         _gameObjectManager.AddCharacter(bt);
                         break;
                     case SaveLoad.TYPES.DOG:
                         Dog d = new Dog(p.Position.ToVector2(), p.Radius, _audioService, _pathFinding,
-                            _collisionManager, _repathScheduler);
+                            _collisionManager, _repathScheduler, _gameObjectManager);
                         _gameObjectManager.AddCharacter(d);
                         break;
                     case SaveLoad.TYPES.POLICE_MAN:
                         PoliceMan pm = new PoliceMan(p.Position.ToVector2(), p.Radius, _audioService, _pathFinding,
-                            _collisionManager, _repathScheduler);
+                            _collisionManager, _repathScheduler, _gameObjectManager);
                         _gameObjectManager.AddCharacter(pm);
                         break;
                     case SaveLoad.TYPES.DOZENT:
                         Dozent dz = new Dozent(p.Position.ToVector2(), p.Radius, _audioService, _pathFinding,
-                            _collisionManager, _repathScheduler);
+                            _collisionManager, _repathScheduler, _gameObjectManager);
                         _gameObjectManager.AddCharacter(dz);
                         break;
                     case SaveLoad.TYPES.KAMIKAZE_OPA:
                         KamikazeOpa opa = new KamikazeOpa(p.Position.ToVector2(), p.Radius, _audioService, _pathFinding,
-                            _collisionManager, _gameObjectManager, _repathScheduler);
+                            _collisionManager, _gameObjectManager, _repathScheduler, _gameObjectManager);
                         _gameObjectManager.AddCharacter(opa);
                         break;
                 }
@@ -981,11 +982,8 @@ namespace BikeWars.Content.screens
             var players = new HashSet<Player>();
             if (_gameObjectManager.Player1 != null) players.Add(_gameObjectManager.Player1);
             if (_gameObjectManager.Player2 != null) players.Add(_gameObjectManager.Player2);
-            _collisionManager.Insertions(_gameObjectManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(),_gameObjectManager.Cars, _gameObjectManager.Objects, _gameObjectManager.Towers);
-            foreach (var s in _gameObjectManager.Statics)
-            {
-                _collisionManager.StaticHash.Insert(s);
-            }
+            _collisionManager.RegisterStaticWorld(_gameObjectManager.Objects, _gameObjectManager.Towers);
+            _collisionManager.Insertions(_gameObjectManager.Items, players, _gameObjectManager.Projectiles, _gameObjectManager.AOEAttacks, _gameObjectManager.Characters, new List<Tram>(),_gameObjectManager.Cars);
             Console.WriteLine("Game loaded.");
         }
         private void HandleSaveLoadInput()
@@ -1156,7 +1154,7 @@ namespace BikeWars.Content.screens
         {
             int viewW = ViewPort.Width;
             int viewH = ViewPort.Height;
-            
+
             if (camera == null)
             {
                 return Rectangle.Empty;
@@ -1318,7 +1316,7 @@ namespace BikeWars.Content.screens
                 var gom = _gameObjectManager;
                 if (gom == null)
                     return;
-                
+
                 var p1 = gom.Player1;
                 if (p1 != null)
                 {
@@ -1370,7 +1368,7 @@ namespace BikeWars.Content.screens
             {
                 _collisionManager.Unload();
             }
-            
+
             if(_gameObjectManager != null)
             {
                 _gameObjectManager.Unload();
@@ -1492,30 +1490,30 @@ namespace BikeWars.Content.screens
             Rectangle backgroundRect = destRect;
             backgroundRect.Inflate(10, 10);
             spriteBatch.Draw(RenderPrimitives.Pixel, backgroundRect, Color.Black * 0.5f);
-            
+
             Color iconColor = Color.White;
-            
+
             // Check if Bell is on cooldown if yes make bell icon red
             if (player.CurrentWeapon == Player.WeaponType.DamageCircle && player.BellCooldownRemaining > 0)
             {
                 iconColor = Color.Red;
             }
-            
+
             spriteBatch.Draw(icon, destRect, iconColor);
-            
+
             // calculates cooldown countdown
             if (player.CurrentWeapon == Player.WeaponType.DamageCircle && player.BellCooldownRemaining > 0)
             {
                 int timeLeft = (int)Math.Ceiling(player.BellCooldownRemaining);
                 string text = $"{timeLeft}";
                 Vector2 size = UIAssets.DefaultFont.MeasureString(text);
-                
+
                 // center countdown on text
                 Vector2 textPos = new Vector2(
                     destRect.Center.X - size.X / 2f,
                     destRect.Center.Y - size.Y / 2f
                 );
-                
+
                 spriteBatch.DrawString(UIAssets.DefaultFont, text, textPos, Color.White);
             }
         }

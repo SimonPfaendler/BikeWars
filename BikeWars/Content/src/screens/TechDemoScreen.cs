@@ -403,27 +403,27 @@ namespace BikeWars.Content.screens
                 {
                     case EnemyType.Hobo:
                         enemy = new Hobo(spawnPos, 15, AudioService, PathFinding,
-                            CollisionManager, RepathScheduler);
+                            CollisionManager, RepathScheduler, GameObjectManager);
                         break;
                     case EnemyType.BikeThief:
                         enemy = new BikeThief(spawnPos, 15, AudioService, PathFinding,
-                            CollisionManager, RepathScheduler);
+                            CollisionManager, RepathScheduler, GameObjectManager);
                         break;
                     case EnemyType.Dog:
                         enemy = new Dog(spawnPos, 13, AudioService, PathFinding,
-                            CollisionManager, RepathScheduler);
+                            CollisionManager, RepathScheduler, GameObjectManager);
                         break;
                     case EnemyType.Kamikaze:
                         enemy = new KamikazeOpa(spawnPos, 13, AudioService, PathFinding,
-                            CollisionManager, GameObjectManager, RepathScheduler);
+                            CollisionManager, GameObjectManager, RepathScheduler, GameObjectManager);
                         break;
                     case EnemyType.Dozent:
                         enemy = new Dozent(spawnPos, 25, AudioService, PathFinding,
-                            CollisionManager, RepathScheduler);
+                            CollisionManager, RepathScheduler, GameObjectManager);
                         break;
                     case EnemyType.Police:
                         enemy = new PoliceMan(spawnPos, 20, AudioService, PathFinding,
-                            CollisionManager, RepathScheduler);
+                            CollisionManager, RepathScheduler, GameObjectManager);
                         break;
 
                     default:

@@ -41,7 +41,7 @@ public class PoliceMan: CharacterBase, IWorldAudioAware
         protected override string WalkingSound => AudioAssets.Walking;
 
         public PoliceMan(Vector2 start, float size, AudioService audio, PathFinding pathFinding,
-            CollisionManager collisionManager, RepathScheduler repathScheduler)
+            CollisionManager collisionManager, RepathScheduler repathScheduler, ITargetProvider targetProvider): base(targetProvider)
         {
             _audio = audio;
             _pathFinding = pathFinding;
@@ -88,6 +88,10 @@ public class PoliceMan: CharacterBase, IWorldAudioAware
                 {
                      em.PlayerPosition = target.Transform.Position;
                 }
+            }
+            if (Movement is null)
+            {
+                return;
             }
             Movement.HandleMovement(gameTime);
             HandleSound(Movement.IsMoving);
@@ -143,6 +147,10 @@ public class PoliceMan: CharacterBase, IWorldAudioAware
 
         public void Immobalize(bool value)
         {
+            if (Movement is null)
+            {
+                return;
+            }
             Movement.CanMove = !value;
         }
         public override void Attack(ICombat target)

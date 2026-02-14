@@ -12,8 +12,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using BikeWars.Entities;
 using BikeWars.Content.entities.npcharacters;
-using BikeWars.Content.entities.items;
-
 
 namespace BikeWars.Content.managers;
 
@@ -498,8 +496,8 @@ public class CollisionManager
         float dx = box.Center().X - circle.Center().X;
         float dy = box.Center().Y - circle.Center().Y;
 
-        float px = (circle.Radius /2f + box.Width / 2f) - Math.Abs(dx);
-        float py = (circle.Radius /2f+ box.Height / 2f) - Math.Abs(dy);
+        float px = (circle.Radius + box.Width / 2f) - Math.Abs(dx);
+        float py = (circle.Radius + box.Height / 2f) - Math.Abs(dy);
 
         if (px <= 0 || py <= 0)
             return Vector2.Zero;
@@ -542,16 +540,11 @@ public class CollisionManager
     }
 
     public void Insertions(List<ItemBase> items, HashSet<Player> players, List<ProjectileBase> projectiles,
-        List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters, List<Tram> trams, List<Car> cars, List<ObjectBase> objects, List<Tower> towers)
+        List<AreaOfEffectBase> aoeAttacks, List<CharacterBase> characters, List<Tram> trams, List<Car> cars)
     {
         foreach (ItemBase c in items)
         {
             AddDynamic(c.Collider);
-        }
-
-        foreach (ObjectBase o in objects)
-        {
-            AddDynamic(o.Collider);
         }
 
         foreach (var p in players)
@@ -584,17 +577,7 @@ public class CollisionManager
             }
         }
 
-        foreach (Tower t in towers)
-        {
-            if (t is TowerAlly ta)
-            {
-                StaticHash.Insert(ta.CollisionCollider);
-                AddDynamic(ta.Collider);
-            } else
-            {
-                StaticHash.Insert(t.Collider);
-            }
-        }
+
         foreach (var t in trams)
         {
             foreach (var col in t.Colliders)
@@ -624,9 +607,7 @@ public class CollisionManager
 
     private void HandleCharacterWithStatic(ICollider b, ICollider c)
     {
-        // Ignore SPAWNENEMIES layer for characters
-        if (b.Layer == CollisionLayer.SPAWNENEMIES) return;
-        if (c.Layer != CollisionLayer.CHARACTER && c.Layer != CollisionLayer.PLAYER) return;
+        if ((b.Layer != CollisionLayer.WALL && b.Layer != CollisionLayer.TOWER) || (c.Layer != CollisionLayer.CHARACTER && c.Layer != CollisionLayer.PLAYER)) return;
         Vector2 penetration = GetPenetrationVector(c, b);
         if (penetration.LengthSquared() < 0.0001f)
             return;
@@ -721,7 +702,12 @@ public class CollisionManager
     {
         foreach (var b in statics)
         {
+            if (b.Layer == CollisionLayer.SPAWNENEMIES) continue;
             HandleCharacterWithStatic(b, c);
+            HandleInteractionsTower(c, b);
+            HandleInteractions(c, b);
+            HandleTrigger(c, b);
+            HandleTowers(b, c);
             HandleProjectileWithStatic(b, c);
             HandleProjectileWithTower(b, c);
             HandleAOEWithStatic(b, c);
@@ -752,11 +738,7 @@ public class CollisionManager
         foreach (var d in dynamics)
         {
             PickingUpItem(c, d);
-            HandleInteractions(c, d);
-            HandleTrigger(c, d);
-            HandleInteractionsTower(c, d);
             HandleCharacters(c, d);
-            HandleTowers(c, d);
             HandleTramCollision(c, d);
             HandleCarCollision(c, d);
         }
@@ -817,7 +799,7 @@ public class CollisionManager
         Vector2 penetration = GetPenetrationVector(c, d);
         if (penetration.LengthSquared() < 0.0001f)
             return;
-        Vector2 separation = penetration * 0.25f;
+        Vector2 separation = penetration * 0.5f;
 
         const float SLOP = 0.01f;
         if (penetration.LengthSquared() < SLOP * SLOP)
@@ -917,32 +899,7 @@ public class CollisionManager
     private void HandleTowers(ICollider c, ICollider d)
     {
         if (c.Layer != CollisionLayer.TOWER) return;
-
         HandleProjectileWithTower(c, d);
-        // AOE damage handling
-        if (d.Layer != CollisionLayer.AOE) return;
-
-        AreaOfEffectBase aoe = (AreaOfEffectBase)d.Owner;
-        if (aoe.Owner == c.Owner) return; // prevent hitting yourself
-
-        if (c.Intersects(d))
-        {
-            CharacterBase ch = (CharacterBase)c.Owner;
-
-            // Only apply damage if enough time has passed (once per DamageInterval)
-            if (aoe.CanDamage(ch))
-            {
-                // Call proper AOE damage event
-                OnAOEHit?.Invoke(ch, aoe);
-            }
-
-            if (ch.IsDead)
-            {
-                _toRemoveColliders.Add(ch.Collider);
-            }
-        }
-
-        return; // don't run projectile logic
     }
 
     private void HandleTerrain(ICollider c, List<ICollider> statics)
@@ -1004,7 +961,7 @@ public class CollisionManager
     {
         allDynamics.Clear();
         DynamicHash.Clear();
-        Insertions(items, players, projectiles, aoeAttacks, characters, trams, cars, objects, towers);
+        Insertions(items, players, projectiles, aoeAttacks, characters, trams, cars);
 
         foreach (var c in allDynamics)
         {
@@ -1022,6 +979,13 @@ public class CollisionManager
             HandleTerrain(c, _nearbyStatics);
             HandleStatics(c, _nearbyStatics);
             HandleDynamics(c, _nearbyDynamics);
+            
+            if (c.Layer == CollisionLayer.CHARACTER || c.Layer == CollisionLayer.PLAYER)
+            {
+                _nearbyStatics.Clear();
+                StaticHash.QueryNearby(c.Position, 2, _nearbyStatics);
+                HandleStatics(c, _nearbyStatics);
+            }
         }
 
         _removeProjectiles.Clear();
@@ -1500,6 +1464,29 @@ public class CollisionManager
                 new Rectangle(x, y, _cellSize, _cellSize),
                 color * alpha
             );
+        }
+    }
+
+    public void RegisterStaticWorld(
+        IEnumerable<ObjectBase> objects,
+        IEnumerable<Tower> towers)
+    {
+        foreach (ObjectBase o in objects)
+        {
+            StaticHash.Insert(o.Collider);
+        }
+
+        foreach (Tower t in towers)
+        {
+            if (t is TowerAlly ta)
+            {
+                StaticHash.Insert(ta.CollisionCollider);
+                StaticHash.Insert(ta.Collider);
+            }
+            else
+            {
+                StaticHash.Insert(t.Collider);
+            }
         }
     }
 }
