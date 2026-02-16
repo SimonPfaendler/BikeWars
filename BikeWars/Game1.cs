@@ -31,10 +31,14 @@ public class Game1 : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
         IsFixedTimeStep = false;
-
-        _graphics.PreferredBackBufferWidth = 1280;
-        _graphics.PreferredBackBufferHeight = 720;
+        
+        // start game with previously saved graphics settings (or default settings, if not existent)
+        var settings = SaveLoad.LoadSettings();
+        _graphics.PreferredBackBufferWidth = settings.ScreenWidth;
+        _graphics.PreferredBackBufferHeight = settings.ScreenHeight;
+        _graphics.IsFullScreen = settings.IsFullScreen;
         _graphics.HardwareModeSwitch = false; // Use borderless full screen for smoother transitions
+        _graphics.ApplyChanges();
     }
 
     public void SetResolution(int width, int height, bool fullscreen)
@@ -71,6 +75,13 @@ public class Game1 : Game
 
         _audioService = new AudioService(Content);
         _audioService.LoadContent();
+        
+        var settings = SaveLoad.LoadSettings();
+        _audioService.Music.MasterVolume = settings.MusicVolume;
+        _audioService.Sounds.MasterVolume = settings.SfxVolume;
+        
+        InputSettings.Player1Control = (ControlType)settings.Player1ControlType;
+        InputSettings.Player2Control = (ControlType)settings.Player2ControlType;
 
         background = SpriteManager.GetTexture("Startbildschirm");
         StartScreen startScreen = new StartScreen(background, UIAssets.DefaultFont, _audioService, GraphicsDevice.Viewport);
@@ -315,6 +326,15 @@ public class Game1 : Game
                         OnGraphicsRequested(new GraphicsCommand(0, 0, true));
                         break;
                     case ButtonAction.Back:
+                        SaveLoad.SaveSettings(
+                            _audioService.Music.MasterVolume,
+                            _audioService.Sounds.MasterVolume,
+                            _graphics.PreferredBackBufferWidth,
+                            _graphics.PreferredBackBufferHeight,
+                            _graphics.IsFullScreen,
+                            (int)InputSettings.Player1Control,
+                            (int)InputSettings.Player2Control
+                        );
                         ScreenManager.RemoveScreen(screen);
                         break;
                 }
@@ -323,6 +343,15 @@ public class Game1 : Game
                 switch ((ButtonAction)id)
                 {
                     case ButtonAction.Back:
+                        SaveLoad.SaveSettings(
+                            _audioService.Music.MasterVolume,
+                            _audioService.Sounds.MasterVolume,
+                            _graphics.PreferredBackBufferWidth,
+                            _graphics.PreferredBackBufferHeight,
+                            _graphics.IsFullScreen,
+                            (int)InputSettings.Player1Control,
+                            (int)InputSettings.Player2Control
+                        );
                         ScreenManager.RemoveScreen(screen);
                         break;
                 }
@@ -523,6 +552,15 @@ public class Game1 : Game
                 switch ((ButtonAction)id)
                 {
                     case ButtonAction.Back:
+                        SaveLoad.SaveSettings(
+                            _audioService.Music.MasterVolume,
+                            _audioService.Sounds.MasterVolume,
+                            _graphics.PreferredBackBufferWidth,
+                            _graphics.PreferredBackBufferHeight,
+                            _graphics.IsFullScreen,
+                            (int)InputSettings.Player1Control,
+                            (int)InputSettings.Player2Control
+                        );
                         ScreenManager.RemoveScreen(screen);
                         break;
 

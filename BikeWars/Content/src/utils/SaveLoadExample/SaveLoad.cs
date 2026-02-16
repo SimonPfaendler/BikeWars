@@ -608,4 +608,62 @@ public static class SaveLoad
         int secs = (int)(seconds % 60);
         return $"{minutes:00}:{secs:00}";
     }
+    
+    // Settings made persistent by the following classes/functions
+    
+    public class SettingsData
+    {
+        // includes all settings that should be made persistent
+        
+        // Sound
+        public float MusicVolume { get; set; } = 1.0f;
+        public float SfxVolume { get; set; } = 1.0f;
+        
+        // Graphics
+        public int ScreenWidth { get; set; } = 1280;
+        public int ScreenHeight { get; set; } = 720;
+        public bool IsFullScreen { get; set; } = false;
+        
+        // Control-Settings
+        public int Player1ControlType { get; set; } = 0; 
+        public int Player2ControlType { get; set; } = 1;
+    }
+    
+    // path where the settings.json file is stored
+    private static readonly string SETTINGS_PATH = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.Personal),
+        "Settings.json");
+    
+    public static void SaveSettings(float music, float sfx, int width, int height, bool isFullScreen, int p1Control, int p2Control)
+    {
+        try
+        {
+            var settings = new SettingsData 
+            { 
+                MusicVolume = music, 
+                SfxVolume = sfx,
+                ScreenWidth = width,
+                ScreenHeight = height,
+                IsFullScreen = isFullScreen,
+                Player1ControlType = p1Control,
+                Player2ControlType = p2Control
+            };
+            string json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(SETTINGS_PATH, json);
+        }
+        catch (Exception ex) { Console.WriteLine("Settings save failed: " + ex.Message); }
+    }
+    
+    public static SettingsData LoadSettings()
+    {
+        // Load with standard values, if file doesn't exist
+        if (!File.Exists(SETTINGS_PATH)) return new SettingsData();
+        try
+        {
+            string json = File.ReadAllText(SETTINGS_PATH);
+            return JsonSerializer.Deserialize<SettingsData>(json) ?? new SettingsData();
+        }
+        catch { return new SettingsData(); }
+    }
+    
 }
