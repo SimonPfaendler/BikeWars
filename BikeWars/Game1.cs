@@ -79,6 +79,9 @@ public class Game1 : Game
         var settings = SaveLoad.LoadSettings();
         _audioService.Music.MasterVolume = settings.MusicVolume;
         _audioService.Sounds.MasterVolume = settings.SfxVolume;
+        
+        InputSettings.Player1Control = (ControlType)settings.Player1ControlType;
+        InputSettings.Player2Control = (ControlType)settings.Player2ControlType;
 
         background = SpriteManager.GetTexture("Startbildschirm");
         StartScreen startScreen = new StartScreen(background, UIAssets.DefaultFont, _audioService, GraphicsDevice.Viewport);
@@ -328,7 +331,9 @@ public class Game1 : Game
                             _audioService.Sounds.MasterVolume,
                             _graphics.PreferredBackBufferWidth,
                             _graphics.PreferredBackBufferHeight,
-                            _graphics.IsFullScreen
+                            _graphics.IsFullScreen,
+                            (int)InputSettings.Player1Control,
+                            (int)InputSettings.Player2Control
                         );
                         ScreenManager.RemoveScreen(screen);
                         break;
@@ -343,7 +348,9 @@ public class Game1 : Game
                             _audioService.Sounds.MasterVolume,
                             _graphics.PreferredBackBufferWidth,
                             _graphics.PreferredBackBufferHeight,
-                            _graphics.IsFullScreen
+                            _graphics.IsFullScreen,
+                            (int)InputSettings.Player1Control,
+                            (int)InputSettings.Player2Control
                         );
                         ScreenManager.RemoveScreen(screen);
                         break;
@@ -545,6 +552,15 @@ public class Game1 : Game
                 switch ((ButtonAction)id)
                 {
                     case ButtonAction.Back:
+                        SaveLoad.SaveSettings(
+                            _audioService.Music.MasterVolume,
+                            _audioService.Sounds.MasterVolume,
+                            _graphics.PreferredBackBufferWidth,
+                            _graphics.PreferredBackBufferHeight,
+                            _graphics.IsFullScreen,
+                            (int)InputSettings.Player1Control,
+                            (int)InputSettings.Player2Control
+                        );
                         ScreenManager.RemoveScreen(screen);
                         break;
 

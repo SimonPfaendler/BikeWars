@@ -623,6 +623,10 @@ public static class SaveLoad
         public int ScreenWidth { get; set; } = 1280;
         public int ScreenHeight { get; set; } = 720;
         public bool IsFullScreen { get; set; } = false;
+        
+        // Control-Settings
+        public int Player1ControlType { get; set; } = 0; 
+        public int Player2ControlType { get; set; } = 1;
     }
     
     // path where the settings.json file is stored
@@ -630,7 +634,7 @@ public static class SaveLoad
         Environment.GetFolderPath(Environment.SpecialFolder.Personal),
         "Settings.json");
     
-    public static void SaveSettings(float music, float sfx, int width, int height, bool isFullScreen)
+    public static void SaveSettings(float music, float sfx, int width, int height, bool isFullScreen, int p1Control, int p2Control)
     {
         try
         {
@@ -640,7 +644,9 @@ public static class SaveLoad
                 SfxVolume = sfx,
                 ScreenWidth = width,
                 ScreenHeight = height,
-                IsFullScreen = isFullScreen
+                IsFullScreen = isFullScreen,
+                Player1ControlType = p1Control,
+                Player2ControlType = p2Control
             };
             string json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(SETTINGS_PATH, json);
