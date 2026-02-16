@@ -614,8 +614,15 @@ public static class SaveLoad
     public class SettingsData
     {
         // includes all settings that should be made persistent
+        
+        // Sound
         public float MusicVolume { get; set; } = 1.0f;
         public float SfxVolume { get; set; } = 1.0f;
+        
+        // Graphics
+        public int ScreenWidth { get; set; } = 1280;
+        public int ScreenHeight { get; set; } = 720;
+        public bool IsFullScreen { get; set; } = false;
     }
     
     // path where the settings.json file is stored
@@ -623,11 +630,18 @@ public static class SaveLoad
         Environment.GetFolderPath(Environment.SpecialFolder.Personal),
         "Settings.json");
     
-    public static void SaveSettings(float music, float sfx)
+    public static void SaveSettings(float music, float sfx, int width, int height, bool isFullScreen)
     {
         try
         {
-            var settings = new SettingsData { MusicVolume = music, SfxVolume = sfx };
+            var settings = new SettingsData 
+            { 
+                MusicVolume = music, 
+                SfxVolume = sfx,
+                ScreenWidth = width,
+                ScreenHeight = height,
+                IsFullScreen = isFullScreen
+            };
             string json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(SETTINGS_PATH, json);
         }

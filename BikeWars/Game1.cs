@@ -31,10 +31,14 @@ public class Game1 : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
         IsFixedTimeStep = false;
-
-        _graphics.PreferredBackBufferWidth = 1280;
-        _graphics.PreferredBackBufferHeight = 720;
+        
+        // start game with previously saved graphics settings (or default settings, if not existent)
+        var settings = SaveLoad.LoadSettings();
+        _graphics.PreferredBackBufferWidth = settings.ScreenWidth;
+        _graphics.PreferredBackBufferHeight = settings.ScreenHeight;
+        _graphics.IsFullScreen = settings.IsFullScreen;
         _graphics.HardwareModeSwitch = false; // Use borderless full screen for smoother transitions
+        _graphics.ApplyChanges();
     }
 
     public void SetResolution(int width, int height, bool fullscreen)
@@ -319,6 +323,13 @@ public class Game1 : Game
                         OnGraphicsRequested(new GraphicsCommand(0, 0, true));
                         break;
                     case ButtonAction.Back:
+                        SaveLoad.SaveSettings(
+                            _audioService.Music.MasterVolume,
+                            _audioService.Sounds.MasterVolume,
+                            _graphics.PreferredBackBufferWidth,
+                            _graphics.PreferredBackBufferHeight,
+                            _graphics.IsFullScreen
+                        );
                         ScreenManager.RemoveScreen(screen);
                         break;
                 }
@@ -327,7 +338,13 @@ public class Game1 : Game
                 switch ((ButtonAction)id)
                 {
                     case ButtonAction.Back:
-                        SaveLoad.SaveSettings(_audioService.Music.MasterVolume, _audioService.Sounds.MasterVolume);
+                        SaveLoad.SaveSettings(
+                            _audioService.Music.MasterVolume,
+                            _audioService.Sounds.MasterVolume,
+                            _graphics.PreferredBackBufferWidth,
+                            _graphics.PreferredBackBufferHeight,
+                            _graphics.IsFullScreen
+                        );
                         ScreenManager.RemoveScreen(screen);
                         break;
                 }
