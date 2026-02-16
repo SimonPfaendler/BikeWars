@@ -71,6 +71,10 @@ public class Game1 : Game
 
         _audioService = new AudioService(Content);
         _audioService.LoadContent();
+        
+        var settings = SaveLoad.LoadSettings();
+        _audioService.Music.MasterVolume = settings.MusicVolume;
+        _audioService.Sounds.MasterVolume = settings.SfxVolume;
 
         background = SpriteManager.GetTexture("Startbildschirm");
         StartScreen startScreen = new StartScreen(background, UIAssets.DefaultFont, _audioService, GraphicsDevice.Viewport);
@@ -323,6 +327,7 @@ public class Game1 : Game
                 switch ((ButtonAction)id)
                 {
                     case ButtonAction.Back:
+                        SaveLoad.SaveSettings(_audioService.Music.MasterVolume, _audioService.Sounds.MasterVolume);
                         ScreenManager.RemoveScreen(screen);
                         break;
                 }

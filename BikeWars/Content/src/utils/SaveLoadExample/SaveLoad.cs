@@ -608,4 +608,42 @@ public static class SaveLoad
         int secs = (int)(seconds % 60);
         return $"{minutes:00}:{secs:00}";
     }
+    
+    // Settings made persistent by the following classes/functions
+    
+    public class SettingsData
+    {
+        // includes all settings that should be made persistent
+        public float MusicVolume { get; set; } = 1.0f;
+        public float SfxVolume { get; set; } = 1.0f;
+    }
+    
+    // path where the settings.json file is stored
+    private static readonly string SETTINGS_PATH = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.Personal),
+        "Settings.json");
+    
+    public static void SaveSettings(float music, float sfx)
+    {
+        try
+        {
+            var settings = new SettingsData { MusicVolume = music, SfxVolume = sfx };
+            string json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(SETTINGS_PATH, json);
+        }
+        catch (Exception ex) { Console.WriteLine("Settings save failed: " + ex.Message); }
+    }
+    
+    public static SettingsData LoadSettings()
+    {
+        // Load with standard values, if file doesn't exist
+        if (!File.Exists(SETTINGS_PATH)) return new SettingsData();
+        try
+        {
+            string json = File.ReadAllText(SETTINGS_PATH);
+            return JsonSerializer.Deserialize<SettingsData>(json) ?? new SettingsData();
+        }
+        catch { return new SettingsData(); }
+    }
+    
 }
