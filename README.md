@@ -5,7 +5,7 @@
 
 <div align="center">
 
-  <video src="https://github.com/user-attachments/assets/6d6ea56c-393c-499c-95c3-b4fb973c09a3" width="700" autoplay loop muted playsinline></video>
+  <video src="https://github.com/user-attachments/assets/fc0a797c-4380-422a-a92c-3d6ca25e3be5" width="700" autoplay loop muted playsinline></video>
 
   <br><br>
 
