@@ -1,31 +1,40 @@
-# sopra01
+# BikeWars
 
-* [Sopra Wiki](https://sopranium.de) 
-* Mailingliste sopra01@informatik.uni-freiburg.de
+**BikeWars** is an action-packed, "Vampire Survivors-like" rogue-lite top-down game developed in C# with the MonoGame framework. Face off against waves of enemies, manage chaotic combat, and try to survive as long as you can whether you're on a bike or on foot!
 
-## Gruppe
+This project was built as a software traineeship project by a student group using Scrum and Agile development methodologies.
 
-Simon Genovese, Fabian Gauß, Simon Pfändler, Veronica Woinaroski, Johannes Leppert, Daniel Bürgel, Jannik Friedrich, ...
+## Features
+- **Rogue-lite Action:** Survive against endless waves of enemies (like Police Officers and Cars). Collect XP to activate the in-game Level-Up system.
+- **Weapon Arsenal:** Fight back using a variety of projectiles like Bananas, Bottles, and Guns—each with dynamic weapon statistics.
+- **Dynamic Movement:** Switch seamlessly between walking and riding a bike, complete with full 360-degree gaze direction and varied movement logic.
+- **Game Modes:** 
+  - **Singleplayer:** Survive on your own.
+  - **Local Multiplayer:** Team up with a friend in 2-player co-op! The game continues until both players are taken down.
+- **Custom Physics:** Includes custom `TerrainCollider` and `SpatialHash` engine functionalities to handle efficient collision detection and environment boundaries.
 
-Gruppentreffen:Am 11.11.25 findet Das meeting um 9.45 im TF-Pool Statt, sonst **Montags von 09:00 - 11:00 Uhr.** **Raum: SR 02-017, Geb: 052**  
-Der Raum wurde bis 12:00 Uhr reserviert.
+## Technology Stack
+- **Language:** C# (.NET 8.0)
+- **Engine Framework:** [MonoGame](https://www.monogame.net/) (DesktopGL)
+- **Additional Libraries:** MonoGame.Extended (v5.2.0)
+- **Architecture:** Custom Game Engine approach (Managers for GameObjects, Collisions, Spawning, Combat, etc.)
 
-* Product Owner: Fabian Gauß
-* Architektur: NAME_HIER
-* Qualitätssicherung: NAME_HIER
+## How to Run (Locally)
+1. Ensure you have the [.NET 8.0 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) installed on your machine.
+2. Clone the repository.
+3. Once pulled, open your terminal (or command prompt) in the project root containing `BikeWars.csproj`.
+4. Restore dependencies and run the game:
+   ```bash
+   dotnet restore
+   dotnet run
+   ```
+*(Note: If you're building the project for the first time, dotnet tools for MonoGame content compilation might be restored automatically).*
 
-## Definition of Done
+## Development & Methodology
+This game was built from scratch inside an academic software traineeship program. We focused heavily on clean code and robust architecture, including:
+- **Agile/Scrum Workflow:** Sprints, backlog management, and continuous feature integration.
+- **Code Quality Tools:** SonarQube was utilized to continuously enforce code standards and reduce technical debt.
+- **Collaborative Engineering:** Handled complex merges, such as unifying the collision logic and decoupling game mode states for multiplayer integration.
 
-* Das Item ist in Gitea geschlossen.
-* Im Item sind die geschätzte und die tatsächliche Arbeitszeit eingetragen.
-* Alle für das Item relevanten Dateien sind im aktuellen Stand des remote release Branch integriert.
-* Der Tutor hat die Fertigstellung des Items im Sprint Review anhand des aktuellen Standes des remote release Branch bestätigt.
-
-## Hinweise
-
-* Laden Sie keine kompilierten Binärdateien hoch (z.B.: `*.exe`, `*.bin`). Ausname hier sind _nur_ die Archive für die Abgaben.
-* Laden Sie keine benutzerspezifischen Dateien hoch (Zum Beispiel `*.suo`, `*.user`)
-* Geben Sie jedem Commit eine aussagekräftige Nachricht. Verweisen Sie wenn möglich auf den Issue und sagen Sie was Sie geändert haben.
-* Laden Sie keine Änderungen am Programm hoch, die nicht kompillieren (falls es nötig ist kaputten Code zu teilen, benutze einen `wip/<somename>`-branch)
-* Ändern sie bei Dateinamen und Ordnern niemals nur die Groß/Kleinschreibug, da dies Git+Windows völlig verwirrt.
-
+## Contributors
+- Developed by the **sopra01** agile student group.
