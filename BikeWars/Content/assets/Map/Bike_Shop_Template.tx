@@ -1,11 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<template>
- <object name="Bike_Shop1" width="161" height="146">
-  <properties>
-   <property name="interactable" type="bool" value="true"/>
-   <property name="max_hp" type="int" value="1000"/>
-   <property name="sprite" value="bike_shop"/>
-   <property name="type" value="Bike_Shop"/>
-  </properties>
- </object>
-</template>
+version https://git-lfs.github.com/spec/v1
+oid sha256:4392a277a6f09d71124e1ea62d5157cf1dd27689172b4ba30efb05cac81e2901
+size 373
