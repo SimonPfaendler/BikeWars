@@ -3,8 +3,13 @@
 **BikeWars** is an action-packed, "Vampire Survivors-like" rogue-lite top-down game developed in C# with the MonoGame framework. Face off against waves of enemies, manage chaotic combat, and try to survive as long as you can whether you're on a bike or on foot!
 
 
+<div align="center">
 
-https://github.com/user-attachments/assets/6d6ea56c-393c-499c-95c3-b4fb973c09a3
+  <video src="https://github.com/user-attachments/assets/6d6ea56c-393c-499c-95c3-b4fb973c09a3" width="700" autoplay loop muted playsinline></video>
+
+  <br><br>
+
+</div>
 
 This project was built as a software traineeship project by a student group using Scrum and Agile development methodologies.
 
